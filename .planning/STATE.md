@@ -3,10 +3,10 @@ gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 status: planning
-last_updated: "2026-09-25T10:37:26.843Z"
+last_updated: "2026-09-25T11:05:29.000Z"
 last_activity: 2026-09-25
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -15,23 +15,25 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-09-25 (v1.13 milestone closed and archived)
+**Last updated:** 2026-09-25 (v1.14 roadmap created: Phases 22–28, 25/25 requirements mapped)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md`
+See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Between milestones — v1.13 Web Hardening (Console/Edge) shipped 2026-09-25. Next: `/gsd-new-milestone` (v1.14, next phase = 22).
+- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 22 CI & SAST Baseline (ready to plan; verify-first).
 - **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
-- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. Phase 21 touches BOTH console images (legacy + Vue) directly since the CSP and CSRF findings are console-frontend concerns, not backend-only; coordinate submodule pointer bump as part of Phase 21 deploy.
+- **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-09-25 — Milestone v1.14 started
+Phase: 22 of 22–28 (CI & SAST Baseline)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-09-25 — v1.14 roadmap created (7 phases, 25/25 requirements mapped)
+
+Progress: [░░░░░░░░░░] 0% (0/7 phases)
 
 ## Milestones
 
@@ -41,6 +43,19 @@ Last activity: 2026-09-25 — Milestone v1.14 started
 - ✅ **v1.11 — Backlog Drawdown** (shipped 2026-06-06) — Phases 15–17, 4/4 requirements Verified; audit `tech_debt`; see `.planning/MILESTONES.md` + `.planning/milestones/v1.11-ROADMAP.md`
 - ✅ **v1.12 — Inbox Drawdown** (shipped 2026-06-29) — Phases 18–20, 4/4 requirements Verified; see `.planning/MILESTONES.md`
 - ✅ **v1.13 — Web Hardening (Console/Edge)** (shipped + archived 2026-09-25) — Phase 21, 2/2 requirements Verified (3 operator overrides); see `.planning/MILESTONES.md` + `.planning/milestones/v1.13-ROADMAP.md`
+- 🚧 **v1.14 — Backlog & Hardening Sweep** (roadmap 2026-09-25) — Phases 22–28, 25 requirements; see `.planning/ROADMAP.md`
+
+## v1.14 Phase Map
+
+| Phase | Name | Requirements | Deploy surface | Research at planning |
+|-------|------|--------------|----------------|----------------------|
+| 22 | CI & SAST Baseline | CI-01..03 | CI only (+ live Vue bundle check) | no (verify-first) |
+| 23 | Build-Pipeline Sink Hardening | SEC-EXEC-01/02, SEC-PATH-01/02 | backend image | no (spec-first) |
+| 24 | Secrets Sweep | SEC-CFG-02 | backend image + swarm secrets | no |
+| 25 | Session-Bound CSRF + Console Edge Headers | SEC-CSRF-02..06, SEC-CSP-03/04 | backend + both consoles + gluster | **yes** |
+| 26 | Vue Console Log Paging | LOG-01..04 | backend + Vue submodule | **yes** |
+| 27 | InfluxDB 2 Upgrade | OPS-INFLUX-01..03 | backend + InfluxDB storage (irreversible) | **yes** |
+| 28 | Swarmpit Upgrade & Trim | OPS-SWARM-01..03 | swarm ops only, own window | **yes** |
 
 ## Since the last state update (2026-07-06 → 2026-09-19)
 
@@ -90,25 +105,25 @@ entry-point commits — none of this is reflected in a phase SUMMARY, so this li
 
 ## Open Operational Items
 
-Carried from the 2026-09-19 sessions, none of them blocking:
+Carried from the 2026-09-19 sessions, none of them blocking. Rows now scheduled in v1.14 name their phase.
 
 | Item | State |
 |------|-------|
 | PR #555 | ✅ MERGED 2026-09-19T21:34:24Z (`thinx-staging` -> `main`). Docker Hub publish triggered. |
 | Aikido | Auth fixed by the operator, never exercised against a real scan. |
 | Aikido branch-protection finding | Recommendation stands: accept-risk the *review* requirement (solo maintainer — GitHub forbids self-approval, so requiring approvals hard-blocks every merge) and enforce status checks, signed commits (already 100% `G`) and no force-push/deletion instead. Same reason CODEOWNERS must not be paired with "Require review from Code Owners" yet. |
-| Private registry flakiness | `docker login registry.thinx.cloud:5000` timed out in two consecutive pipelines on 2026-09-19, both times while another job was pushing an image to it. Both passed on rerun. Worth a retry wrapper on the login step or more I/O headroom on `micro`. |
-| CodeQL workflow staleness | Still triggers on the deleted `master` branch, so only the weekly schedule fires; `github/codeql-action/*@v1` was retired in Jan 2023 and `actions/checkout@v2` is two majors behind. |
+| Private registry flakiness | `docker login registry.thinx.cloud:5000` timed out in two consecutive pipelines on 2026-09-19, both times while another job was pushing an image to it. Both passed on rerun. **→ v1.14 Phase 22 (CI-02).** Retry wrapper exists (`be376db9`); one raw login remains at `.circleci/config.yml:~767`. |
+| CodeQL workflow staleness | Still triggers on the deleted `master` branch, so only the weekly schedule fires; `github/codeql-action/*@v1` was retired in Jan 2023 and `actions/checkout@v2` is two majors behind. **→ v1.14 Phase 22 (CI-01).** |
 | `couchdb` / `console-build-env` images | Not refreshed — nothing has been pushed to them. |
 | `Dockerfile.test` secrets as ENV | Deliberate. That image is never published. |
 | Aikido triage | Not possible on this plan: Code Quality is not in the free tier, so the issue feed (`400 — only available for paying customers`), the dashboard list and `aikido_ignore_issue` are all unavailable — the ignore call accepts an id and changes nothing, verified by re-scanning. What does work is the autofix bot (it produced #556), the two commit checks, and the on-demand local scan via `aikido_scan_paths`, which is fresher than the platform's ~3-day sweep. Verified noise therefore lives in `scripts/aikido-known-false-positives.json` and is filtered by `scripts/aikido-filter.js`. |
-| `lib/thinx/git.js:71` / `:153` | Deliberately NOT in the false-positive list. The `execSync(<string>)` sink is unchanged — the contract is a shell script string because of the `ssh-agent sh -c` wrapper — and the mitigation (`a1e7fbe3`) is at the callers, which now allowlist and `shell-escape` every value. Leave it visible in scan output until the sink itself takes argv, or suppress it deliberately as accepted-risk. |
-| `lib/thinx/builder.js` path traversals | Aikido flags `readFileSync`/`lstatSync` on paths inside the build directory the builder created (lines ~428, 449, 682, 731, 1197). Today's work removed the two `require(variable)` sinks and put the platform name behind an allowlist; these are untouched and are the reasonable next task. |
+| `lib/thinx/git.js:71` / `:153` | Deliberately NOT in the false-positive list. The `execSync(<string>)` sink is unchanged — the contract is a shell script string because of the `ssh-agent sh -c` wrapper — and the mitigation (`a1e7fbe3`) is at the callers, which now allowlist and `shell-escape` every value. **→ v1.14 Phase 23 (SEC-EXEC-01)** moves the sink to argv. |
+| `lib/thinx/builder.js` path traversals | Aikido flags `readFileSync`/`lstatSync` on paths inside the build directory the builder created (lines ~428, 449, 682, 731, 1197). **→ v1.14 Phase 23 (SEC-PATH-01/02).** |
 | Snyk `snyk-monitor-console-classic` | Green as of 2026-09-19 (the missing `dockerhub` context was the original cause; the later failure was the registry timeout above). |
 
 ## Deferred Items
 
-Items acknowledged and deferred at prior milestone closes and carried forward:
+Items acknowledged and deferred at prior milestone closes and carried forward. Rows now scheduled in v1.14 name their phase.
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -123,24 +138,27 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 | future_req | uuid #194 | `deferred-dev-only` (transitive `uuid@8` in nyc/jest-junit; 8→11 bump risks dev toolchain). Revisit if tools bump their pin or alert escalates to runtime scope. |
 | out_of_scope | CONSOLE-LEGACY-JSON-PARSE | Reclassified to `services/console` submodule scope at v1.11 start. Frontend double-parse at `src/login.js:173` + `password.js:87`; no parent-repo code angle. |
 | out_of_scope (v1.12) | GH-03 (console UI for GitHub token) | Vue Profile screen to enter/replace/clear GitHub token — owned by `services/console/.planning/`. Out of scope for Phase 19. |
-| out_of_scope (v1.12) | SEC-CFG-02 (full readSecret sweep) | ~20 remaining sensitive env vars beyond core Redis/CouchDB. Phase 20 proved the pattern with core creds first; full sweep deferred. |
+| scheduled_v1.14 | SEC-CFG-02 (full readSecret sweep) | **→ Phase 24.** Inventory is 9 credentials in `lib/` (not ~20) plus a new `CSRF_SECRET`; env fallback kept (user decision). Env removal is SEC-CFG-03 (future). |
 | deferred_v1.13 | SEC-CSP-02 (`unsafe-eval` removal) | Blocked on AngularJS console retirement — `$parse` requires `unsafe-eval` unless CSP mode. Revisit once console fully migrated to Vue. |
 | verification_gap (ack v1.13) | 15/15-VERIFICATION.md (archived v1.11) | human_needed — formally acknowledged via `audit-open acknowledge` at v1.13 close (2026-09-25); already accepted at v1.11 close |
 | context_questions (ack v1.13) | 05, 06, 07, 08, 09, 10, 11 / *-CONTEXT.md (archived v1.9) | 2–3 planner questions each, all answered by the phase plans; acknowledged at v1.13 close (2026-09-25) |
-| deferred_v1.13 | WR-06 CSRF token not session-bound | Double-submit cookie on `.thinx.cloud` gives no same-site protection; session-mutation routes unguarded. Architectural follow-up (HMAC(secret, random‖session_id), rotate on login). See `21-REVIEW-FIX.md`. |
-| deferred_v1.13 | WR-04 `POST /api/v2/user` without CSRF | Documented public registration endpoint for non-browser clients; decide whether it must stay open. |
-| deferred_v1.13 | Console CSP source-of-truth retirement | Image `default.conf` files diverge from the gluster bind-mounted production file; Vue `connect-src` lacks `app.thinx.cloud` (latent cold-session lockout if the mount is dropped). Edge runbook CSP snapshots stale. |
-| deferred_v1.13 | Classic register / forgot / reset-confirm under enforcement | Verifier's one behaviour-unverified item — spot-check in a browser. |
+| scheduled_v1.14 | WR-06 CSRF token not session-bound | **→ Phase 25 (SEC-CSRF-02/03).** Double-submit cookie on `.thinx.cloud` gives no same-site protection; session-mutation routes unguarded (→ SEC-CSRF-05). See `21-REVIEW-FIX.md`. |
+| scheduled_v1.14 | WR-04 `POST /api/v2/user` without CSRF | **→ Phase 25 (SEC-CSRF-04).** Decided 2026-09-25: no machine-client exemption; registrants must prime the token. |
+| scheduled_v1.14 | Console CSP source-of-truth | **→ Phase 25 (SEC-CSP-03/04).** Gluster file is canonical (decision 2026-09-25); images and runbook snapshots mirror it, incl. the Vue `connect-src` `app.thinx.cloud` fix. Retiring the bind mount stays future (SEC-CSP-05). |
+| scheduled_v1.14 | Classic register / forgot / reset-confirm under enforcement | **→ Phase 25 (SEC-CSRF-06).** |
 
 ## Accumulated Context
 
 ### Decisions
 
-- 2026-07-04 — v1.13 ROADMAP shape: 1 phase (21), granularity coarse. SEC-CSP-01 (CSP scheme-wildcard removal) and SEC-CSRF-01 (login-form anti-CSRF token) combined into a single Phase 21 rather than split, because both changes touch the identical three deploy surfaces (nginx edge, legacy console image, Vue console image), share the same "keep both consoles + edge mutually consistent" verification concern, and ship through the same console-submodule deploy pipeline. Splitting would duplicate the two-console-consistency check and the HawkScan-rescan verification for no delivery-boundary benefit.
-- 2026-07-04 — Phase numbering: v1.13 continues from v1.12's last phase (Phase 20). Phase 21 = v1.13 work. No `--reset-phase-numbers`; linear monorepo history preserves cross-milestone traceability.
-- 2026-07-04 — `unsafe-eval` removal explicitly deferred as SEC-CSP-02 (not folded into Phase 21) — AngularJS's `$parse` requires `unsafe-eval` unless run in CSP-safe mode; removing it now would break the legacy console outright. Tracked as a future requirement, blocked on the console leaving AngularJS.
-- 2026-07-04 — API-side CSRF for token-authenticated routes explicitly out of scope — those routes use `X-Access-Token`/JWT (not ambient cookies) and aren't CSRF-prone; only the cookie-session login forms need the synchronizer token.
-- 2026-06-29 — v1.12 shipped 4/4 requirements across Phases 18–20 (SEC-PII-03, GH-01, GH-02, SEC-CFG-01); console submodule bumped for GitHub-token UI + 11 nightshift/chore branches.
+Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
+
+- 2026-09-25 — v1.14 roadmap shape: 7 phases (22–28) under `granularity: coarse`. Boundaries follow deploy surfaces and risk windows (CI only / backend image / swarm secrets / backend + consoles + gluster / backend + Vue submodule / InfluxDB storage / Swarmpit). Phase 24 (single requirement) is kept separate as a production secret migration with its own verification; it is the fold candidate if fewer phases are wanted.
+- 2026-09-25 — v1.14 ordering: CodeQL baseline (22) before sink fixes (23); sinks before the secrets sweep (24) so `/run/secrets` grows only after symlink containment; secrets before CSRF (25) so `CSRF_SECRET` exists and the HMAC key is never random; log paging (26) after CSRF so regressions stay distinguishable; InfluxDB 2 (27) after all other code deploys; Swarmpit (28) last in its own window.
+- 2026-09-25 — InfluxDB scope changed after research: `thinx_influxdb` is upgraded 1.8 → InfluxDB 2 (irreversible; verified backup first), and 90-day retention becomes bucket retention. CI keeps `dhi.io/influxdb:2`; research's `influxdb:1.8` CI switch is dropped. Phase 27 re-homes or drops the `swarmpit/influxdb.conf` bind mount, which decouples it from the Swarmpit trim.
+- 2026-09-25 — Swarmpit scope changed after research: upgrade to 1.10 first (OPS-SWARM-01), then drop stats/`swarmpit_influxdb` (02), then `swarmpit_agent` (03), each gated by a push-to-redeploy test. `swarmpit_db` stays couchdb 2.3.0.
+- 2026-09-25 — SEC-CFG-02 keeps the env-var fallback (user decision); env removal is SEC-CFG-03.
+- 2026-07-04 — Phase numbering continues across milestones (no `--reset-phase-numbers`); v1.14 starts at 22.
 - [Phase 21]: issueCsrfToken never re-invokes ensureXsrfCookie/crypto.randomBytes -- it only reads the cookie the global middleware already set, so the priming GET never emits a second Set-Cookie
 - [Phase 21]: verifyCsrfToken wired onto exactly the 7 reconciled protected routes (adds the Vue v2 password reset/set routes the original D-02 list omitted); X-Access-Token/JWT routes and /api/v2/user left untouched
 - [Phase 21]: Console CSRF wiring uses two shared seams (classic $.ajaxSetup, Vue composeHeaders()) rather than per-call-site edits — Prevents future whack-a-mole regressions found across 4 plan-check passes
@@ -148,21 +166,21 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Todos
 
+- None open for v1.14 yet. The v1.13-era notes below (2026-09-21) are kept for reference: each is either resolved or now a v1.14 requirement (Vue `connect-src` gap and stale runbook snapshots → SEC-CSP-04; `WEB_HOSTNAME` for `:vue` → CI-03; gluster bind-mount source of truth → SEC-CSP-03, retirement → SEC-CSP-05 future).
+
+<details>
+<summary>v1.13-era notes (2026-09-21), reference only</summary>
+
 - ~~Reconcile Phase 21 with reality before closing it~~ **DONE 2026-09-21.** Findings recorded in a `## RECONCILIATION WITH DEPLOYED REALITY` block at the top of both `21-04-PLAN.md` and `21-05-PLAN.md`. Summary: 21-04 Task 1 already satisfied (csrf.js on `origin/thinx-staging` + `origin/main`, HEAD==origin 0/0, submodule `acb62d82` 0/0, PR #555 merged 2026-09-19T21:34:24Z, and `app.thinx.cloud` live-mints `XSRF-TOKEN; Domain=.thinx.cloud; Secure; SameSite=Lax`). Enforcement confirmed still fail-open (`POST /api/login` sans token -> `invalid_credentials`, not `csrf_token_invalid`). Both plans' dead `$HOME/.claude/get-shit-done/...` execution-context paths repointed to `~/.claude/gsd-core/...`.
-- **NEW (2026-09-21) — Vue console CSP does not match its own image config.** `console.thinx.cloud` serves a CSP byte-identical (modulo order) to the CLASSIC `services/console/src/default.conf`, not to `services/console/vue/default.conf`; both console hosts return one identical CSP header. So 21-03's edit to `vue/default.conf` has no observable production effect. Determine what actually emits that header (edge nginx vs image) in 21-04 Task 2 step 0.
-- **NEW (2026-09-21) — latent cold-session lockout.** `services/console/vue/default.conf` `connect-src` omits `https://app.thinx.cloud` and `wss://app.thinx.cloud`. If that file ever takes effect, the Vue console's cross-origin `GET /api/v2/csrf-token` prime is CSP-blocked — the exact lockout 21-05's must_haves forbid. Masked today only because the live classic CSP lists both hosts. Fix before flipping enforcement if `vue/default.conf` is (or becomes) authoritative.
-- **NEW (2026-09-21, swarm-verified) — TOPOLOGY HAS DRIFTED; 21-04 Task 2 step 0 is a live BLOCKER.** Actual placement now: `thinx_api` on **core**, `thinx_console` on **micro**, `thinx_vue` on **core**. Both the plans and this file's "Production today" line assert the opposite for api/console (api on micro, classic console on core). Per 21-04 Task 2 step 0's own instruction ("If the live mapping has drifted from this, STOP and treat it as a blocker — do not guess"), verification cannot be signed off until this is reconciled. All three services were observed mid-reschedule (`Preparing`) at 14:3x and settled to `Running`; all three hostnames return HTTP 200 and `app.thinx.cloud` still mints `XSRF-TOKEN`. `docker service ls` on the leader returns an *unstable subset* across consecutive polls — query services by name, not by listing.
-- **RESOLVED (2026-09-21) — the console CSP override is a swarm BIND MOUNT, not a build bug.** (This supersedes an earlier, incorrect note in this file claiming the `:vue` image did not contain `vue/default.conf`. It does.) Both `thinx_vue` and `thinx_console` mount the SAME host file over the image's config, read-only:
-  `/mnt/gluster/deployment/swarm/console/default.conf` -> `/etc/nginx/conf.d/default.conf`.
-  Proof: a throwaway container from the deployed `:vue` image has `default.conf` = 95 lines, `Permissions-Policy`=1, `Strict-Transport`=0, `cloudfront`=0 — an exact fingerprint match for HEAD's `services/console/vue/default.conf`. The RUNNING container has 103 lines, `Permissions-Policy`=0, `Strict-Transport`=1, `cloudfront`=1 — an exact match for the gluster file (4634 bytes, mtime **Sep 19 20:16**, i.e. the 2026-09-19 inline-script session). CI, `vue/Dockerfile:94` and the build context are all correct and were never at fault.
-  **Consequence for Phase 21: 21-03's edits to BOTH `src/default.conf` and `vue/default.conf` are INERT in production.** SEC-CSP-01's live effect was achieved by hand-editing the gluster file on 2026-09-19, not by the image changes. The production CSP source of truth is that gluster file, which lives in its own git repo on the swarm (`/mnt/glusterfs/deployment/swarm`) — NOT in this repo and NOT in the console submodule.
-  Because one file serves both consoles, the two console hosts necessarily return an identical CSP; there is no per-console policy today.
-- **Downgraded (2026-09-21) — the Vue `connect-src` gap is latent, not active.** `vue/default.conf` omitting `https://app.thinx.cloud`/`wss://app.thinx.cloud` cannot bite while the bind mount is in place (the gluster file lists both). It becomes a live cold-session lockout only if the mount is removed so the image config takes effect. Still worth fixing, but it is not a 21-05 blocker.
-- **NEW (2026-09-21) — `WEB_HOSTNAME` is wrong for the `:vue` build.** The deployed image carries `ARG WEB_HOSTNAME=rtm.thinx.cloud` / `ENV NGINX_HOST=rtm.thinx.cloud`. Both CI jobs pass `--build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}`, and `WEB_HOSTNAME` is a single project-level var shared with the CLASSIC build, where `rtm.thinx.cloud` is correct. Two distinct effects: (a) `__NGINX_HOST__` substitution — inert, overridden by the mount; (b) `VUE_APP_CONSOLE_HOSTNAME`, which IS baked into the Vue bundle and read by `vue/src/mixins/hostnames.js:4`. Impact of (b) is limited to the three "THiNX Console" footer links (`Layout.vue:12`, `Login.vue:91`, `PasswordReset.vue:96`) pointing at the classic console instead of itself — cosmetic, no auth/security effect. Fix needs a SEPARATE var (e.g. `VUE_WEB_HOSTNAME`) or a per-job override; changing the shared `WEB_HOSTNAME` would break the classic image.
-- **NEW (2026-09-21) — runbook snapshots stale.** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:29` still record 21-03's CSP (`'unsafe-inline'` in `default-src`, no `app.thinx.cloud`, no split `script-src`/`style-src`, no `script-src-attr`). Refresh against the live header during 21-05.
-- Authenticated in-browser verification of the CSP build has never run against the deployed instance — the pre-deploy Playwright suites (`src/test/csp/browser.cjs`, `app-browser.cjs`) cover it with fixtures only. That is the one real gap in 21-04.
-- Before closing Phase 21: confirm the Crisp widget (`wss://client.relay.crisp.chat`) and any other explicit-host dependents are enumerated and pinned in the new CSP — a missed host will silently break a console feature post-deploy.
-- Coordinate `services/console` submodule pointer bump as part of Phase 21's deploy (both console images change).
+- **Vue console CSP does not match its own image config (2026-09-21).** `console.thinx.cloud` serves a CSP byte-identical (modulo order) to the CLASSIC `services/console/src/default.conf`, not to `services/console/vue/default.conf`; both console hosts return one identical CSP header. Explained by the gluster bind mount below.
+- **Latent cold-session lockout (2026-09-21).** `services/console/vue/default.conf` `connect-src` omits `https://app.thinx.cloud` and `wss://app.thinx.cloud`. If that file ever takes effect, the Vue console's cross-origin `GET /api/v2/csrf-token` prime is CSP-blocked. Masked today only because the live gluster CSP lists both hosts. **→ SEC-CSP-04.**
+- **Topology drift (2026-09-21, swarm-verified).** Actual placement: `thinx_api` on **core**, `thinx_console` on **micro**, `thinx_vue` on **core**. `docker service ls` on the leader returns an *unstable subset* across consecutive polls — query services by name, not by listing.
+- **RESOLVED (2026-09-21) — the console CSP override is a swarm BIND MOUNT, not a build bug.** Both `thinx_vue` and `thinx_console` mount the SAME host file over the image's config, read-only: `/mnt/gluster/deployment/swarm/console/default.conf` -> `/etc/nginx/conf.d/default.conf`. Proof: a throwaway container from the deployed `:vue` image has `default.conf` = 95 lines, `Permissions-Policy`=1, `Strict-Transport`=0, `cloudfront`=0 — an exact fingerprint match for HEAD's `services/console/vue/default.conf`. The RUNNING container has 103 lines, `Permissions-Policy`=0, `Strict-Transport`=1, `cloudfront`=1 — an exact match for the gluster file (4634 bytes, mtime **Sep 19 20:16**). The gluster file lives in its own git repo on the swarm (`/mnt/glusterfs/deployment/swarm`) — NOT in this repo and NOT in the console submodule. Because one file serves both consoles, the two console hosts necessarily return an identical CSP. **→ SEC-CSP-03.**
+- **`WEB_HOSTNAME` is wrong for the `:vue` build (2026-09-21).** The deployed image carries `ARG WEB_HOSTNAME=rtm.thinx.cloud`. Both CI jobs pass `--build-arg VUE_APP_CONSOLE_HOSTNAME=${WEB_HOSTNAME}`, a single project-level var shared with the CLASSIC build. `VUE_APP_CONSOLE_HOSTNAME` is baked into the Vue bundle and read by `vue/src/mixins/hostnames.js:4`; impact is limited to the three "THiNX Console" links (`Layout.vue:12`, `Login.vue:91`, `PasswordReset.vue:96`) pointing at the classic console. Fix needs a SEPARATE var (`VUE_WEB_HOSTNAME`, wired in `3f2f6da4`). **→ CI-03 (verify).**
+- **Runbook snapshots stale (2026-09-21).** `.planning/runbooks/swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx:29` still record 21-03's CSP. **→ SEC-CSP-04.**
+- Authenticated in-browser verification of the CSP build has never run against the deployed instance — the pre-deploy Playwright suites (`src/test/csp/browser.cjs`, `app-browser.cjs`) cover it with fixtures only.
+
+</details>
 
 ### Blockers
 
@@ -170,7 +188,11 @@ None
 
 ### Open Questions
 
-- None.
+Decided at plan time, not blocking the roadmap:
+
+- Phase 25: WR-06 pre-auth binding. Research recommends option (a): the priming GET creates a short-TTL Redis pre-session and the token binds to `sessionID`. The requirement text (SEC-CSRF-02) already assumes this.
+- Phase 27: `influx.js` against InfluxDB 2 through the v1-compat API with a DBRP mapping, or through a v2 client. Also: does Swarmpit write to the `swarmpit` database inside `thinx_influxdb`?
+- Phase 28: Docker Engine version on `micro`/`core` (Engine 29.0–29.2 rejects Swarmpit 1.9's API 1.30 default); where the Swarmpit stack file lives on `micro`.
 
 ### Quick Tasks Completed
 
@@ -184,19 +206,20 @@ None
 
 ## Cross-Project Touchpoints
 
-- **`services/console/.planning/`** — Vue console GSD workspace (sibling project). Phase 21 directly touches this submodule's Vue console image (`services/console/vue/default.conf` CSP + login-form CSRF token wiring) — coordinate with the console GSD project rather than treating it as fully external for this phase.
+- **`services/console/.planning/`** — Vue console GSD workspace (sibling project). v1.14 touches the console submodule in Phase 22 (verify `VUE_WEB_HOSTNAME` in the live bundle), Phase 25 (classic + Vue image `default.conf` mirror the gluster headers) and Phase 26 (Vue audit/build paging UI + pointer bump). Coordinate with the console GSD project rather than treating it as fully external.
+- **Gluster swarm repo** (`/mnt/glusterfs/deployment/swarm`, not in this repo) — canonical console `default.conf` (Phase 25), `thinx.yml` stack secrets (Phase 24), `thinx_influxdb` config mount (Phase 27), Swarmpit stack (Phase 28).
 - **`AGENTS.md`** (parent root) — ssh details, deploy flow, dependency locks (chai-http v4 hold). Consult before any phase touches deploy config or `package.json`.
-- **`.planning/runbooks/swarm-configs/`** — Phase 21 edits `rtm.thinx.cloud-server.pre.nginx` and `.post.nginx` (line 28 CSP header); the runbook snapshot trail pattern from v1.9/v1.10 applies here too.
+- **`.planning/runbooks/swarm-configs/`** — snapshot trail for edge/stack configs; Phase 25 refreshes the console header snapshots, Phase 28 adds Swarmpit stack snapshots before each trim step.
 
 ## Session Continuity
 
 **Resume file:** None
 
-**Last session:** 2026-09-25T09:12:20.264Z
+**Last session:** 2026-09-25T11:05:29.000Z
 
-**Stopped at:** Milestone v1.13 completed and archived (2026-09-25)
+**Stopped at:** v1.14 roadmap created (Phases 22–28; 25/25 requirements mapped), pending approval
 
-**Next action:** `/gsd-new-milestone` to define v1.14. Candidate scope is listed under "Next Milestone" in `.planning/PROJECT.md`.
+**Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -205,7 +228,8 @@ None
 *v1.11 Backlog Drawdown shipped and archived: 2026-06-06 (4/4 v1.11 requirements Verified across 3 phases [15–17])*
 *v1.12 Inbox Drawdown shipped 2026-06-29 (4/4 v1.12 requirements Verified across 3 phases [18–20])*
 *v1.13 Web Hardening (Console/Edge) shipped and archived: 2026-09-25 (2/2 v1.13 requirements Verified in 1 phase [21]; 3 operator overrides)*
+*v1.14 Backlog & Hardening Sweep roadmap created: 2026-09-25 (25 requirements across 7 phases [22–28])*
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Review `.planning/ROADMAP.md` (v1.14 section), then start Phase 22 with `/gsd:discuss-phase 22`

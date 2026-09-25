@@ -81,11 +81,37 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| CI-01 | Phase 22 | Pending |
+| CI-02 | Phase 22 | Pending |
+| CI-03 | Phase 22 | Pending |
+| SEC-EXEC-01 | Phase 23 | Pending |
+| SEC-EXEC-02 | Phase 23 | Pending |
+| SEC-PATH-01 | Phase 23 | Pending |
+| SEC-PATH-02 | Phase 23 | Pending |
+| SEC-CFG-02 | Phase 24 | Pending |
+| SEC-CSRF-02 | Phase 25 | Pending |
+| SEC-CSRF-03 | Phase 25 | Pending |
+| SEC-CSRF-04 | Phase 25 | Pending |
+| SEC-CSRF-05 | Phase 25 | Pending |
+| SEC-CSRF-06 | Phase 25 | Pending |
+| SEC-CSP-03 | Phase 25 | Pending |
+| SEC-CSP-04 | Phase 25 | Pending |
+| LOG-01 | Phase 26 | Pending |
+| LOG-02 | Phase 26 | Pending |
+| LOG-03 | Phase 26 | Pending |
+| LOG-04 | Phase 26 | Pending |
+| OPS-INFLUX-01 | Phase 27 | Pending |
+| OPS-INFLUX-02 | Phase 27 | Pending |
+| OPS-INFLUX-03 | Phase 27 | Pending |
+| OPS-SWARM-01 | Phase 28 | Pending |
+| OPS-SWARM-02 | Phase 28 | Pending |
+| OPS-SWARM-03 | Phase 28 | Pending |
 
 **Coverage:**
 - v1.14 requirements: 25 total
-- Mapped to phases: 0 (pending roadmap)
+- Mapped to phases: 25 (Phases 22–28)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-25*
-*Last updated: 2026-09-25 after initial definition*
+*Last updated: 2026-09-25 after roadmap creation (traceability mapped to Phases 22–28)*
