@@ -9,12 +9,20 @@ This runbook covers the last step of Phase 21: flipping the anti-CSRF double-sub
 findings are closed. It also records how to roll back either half: the CSRF enforce flag, and the
 console CSP that lives in the gluster-mounted nginx config.
 
-**Status (2026-09-25): written, not executed.** Enforcement is OFF, and the pre-flip gate below is
-**NOT yet satisfied**.
+**Status: executed 2026-09-25 09:02Z. Enforcement is ON** (Option A, `CSRF_ENFORCE=true` on
+`thinx_api`, persisted in the swarm repo's `thinx.yml`, commit `bc6d04a`). A missing or mismatched
+token now gets `403 csrf_token_invalid`; it is no longer only logged. The pre-flip gate was
+**not fully satisfied**: the operator flipped early, and the 08:35:09Z `session/token` warning is
+still unexplained (most likely cause: 21-REVIEW CR-01, concurrent cold primes in the Vue console).
+See the Execution Annex for the record, and **Rollback** to turn enforcement off.
 
 ---
 
-## Live state (verified read-only 2026-09-25 ~08:40Z)
+## Live state before the flip (verified read-only 2026-09-25 ~08:40Z)
+
+> Pre-flip snapshot, kept for the record. Since 09:02Z `CSRF_ENFORCE=true` is set on `thinx_api`
+> and in `thinx.yml` (`bc6d04a`), and the image is `api:swarm@sha256:3852e8d2…` (Execution Annex).
+> Re-verify placement and image before acting on any row.
 
 | Item | Live value |
 |---|---|
@@ -25,7 +33,7 @@ console CSP that lives in the gluster-mounted nginx config.
 | `thinx_api` config mount | `/mnt/gluster/thinx/conf` (host) → `/mnt/data/conf` (container). The app logs `Configuration loaded from: /mnt/data/conf/config.json`. Host and container md5 match. |
 | `config.json` | `/mnt/gluster/thinx/conf/config.json`, 1253 bytes, mode 0666, mtime 2023-11-08, **not under git**. `debug` = `{"device": false, "deployment": true}`, with **no `csrf_enforce` key**. |
 | `config.override.json` | absent. If it ever exists it **replaces** `config.json` entirely (`lib/thinx/globals.js` `load()`). |
-| `CSRF_ENFORCE` env | **not set** on `thinx_api` (`docker service inspect`) and not in `thinx.yml`. |
+| `CSRF_ENFORCE` env | **not set** on `thinx_api` (`docker service inspect`) and not in `thinx.yml`. *(Pre-flip. Now `true` in both since 2026-09-25 09:02Z.)* |
 | Stack file | `/mnt/gluster/deployment/swarm/thinx.yml`, service `api`, `environment:` list. The swarm repo has **uncommitted** edits to `thinx.yml`, `console/default.conf`, `traefik.yml` and `swarmpit.yml`. |
 | Console CSP source of truth | `/mnt/gluster/deployment/swarm/console/default.conf`, bind-mounted read-only into **both** `thinx_console` and `thinx_vue` (md5 `f4e9fde7…`, mtime 2026-09-24T15:07:50Z). It includes `https://cdn.rollbar.com` in `script-src` and `default-src`, and its backup is `default.conf.bak-20260924`. Repo copy: `swarm-configs/console-default.conf.prod`. Both hosts' live CSP header matches it byte for byte. See `console-csp-source-of-truth.md`. |
 | nginx snapshots | `swarm-configs/rtm.thinx.cloud-server.{pre,post}.nginx` were refreshed 2026-09-25 from `nginx -T` in the live `thinx_vue` container. Their body equals the gluster file. |
@@ -54,8 +62,8 @@ return false; // fail-open default
   Lines logged before 2026-09-25 (21-REVIEW WR-01) have no reason code.
 - Protected routes (8): `POST /api/login`, `/api/v2/login`, `/api/v2/session/token`,
   `/api/v2/password/reset`, `/api/v2/password/set`, `/api/user/create`,
-  `/api/user/password/set`, `/api/user/password/reset`. The "7" in the `csrf.js` header comment is
-  stale because `session/token` was added later.
+  `/api/user/password/set`, `/api/user/password/reset`. `POST /api/v2/user` (account create, v2) is
+  **not** protected; see 21-REVIEW-FIX WR-04 for why.
 - **`/api/v2/session/token` is the risky one.** The Vue console calls it on page reload to restore a
   session. If a browser's `XSRF-TOKEN` cookie and header disagree there, enforce mode costs that user
   a forced logout on reload. That is exactly the unexplained warning the pre-flip gate is about.
@@ -128,8 +136,11 @@ Carried over from 21-04-SUMMARY, "Open item carried into 21-05".
 | 2026-09-25T08:35:09Z | 1× `POST /api/v2/session/token` warning on the user's reload and login. **Unexplained.** An identical reload at 08:37:36Z logged none. |
 | 2026-09-25 ~08:41Z | Query of the current task's logs (task started ~17h earlier) shows only the two lines above. |
 
-**Gate: NOT yet satisfied.** It needs about one day of log watch with no new `session/token`
-warnings (earliest ~2026-09-26T08:36Z), plus the cold incognito login test on both consoles.
+**Gate: not satisfied at flip time; flipped early by operator decision** (2026-09-25 09:02Z, after
+about 25 minutes of clean logs instead of the planned day). The plan had called for about one day of
+log watch with no new `session/token` warnings (earliest ~2026-09-26T08:36Z), plus the cold incognito
+login test on both consoles. Since the flip, a mismatch is a 403, not a warning; enforce-mode
+rejections are logged as `CSRF token rejected reason=…` once the 21-REVIEW WR-01 change is deployed.
 
 ---
 
@@ -403,4 +414,5 @@ check that a cold console login tolerates that 404 (Vue `OAuthReturn.vue` awaits
 
 ---
 
-*Runbook written: 2026-09-25 (Phase 21 / Plan 21-05 Task 1, pre-flip). Flip not yet executed.*
+*Runbook written: 2026-09-25 (Phase 21 / Plan 21-05 Task 1, pre-flip). Flip executed 2026-09-25
+09:02Z (Option A, `thinx.yml` `bc6d04a`); enforcement ON. Status wording corrected per 21-REVIEW WR-09.*
