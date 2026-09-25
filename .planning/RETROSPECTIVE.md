@@ -190,6 +190,42 @@
 
 ---
 
+## Milestone: v1.13 — Web Hardening (Console/Edge)
+
+**Shipped:** 2026-09-25
+**Phases:** 1 (21) | **Plans:** 5 | **Tasks:** 12
+
+### What Was Built
+- **SEC-CSRF-01:** double-submit CSRF middleware (`lib/middleware/csrf.js`) on the 7 cookie-session login/account POSTs; classic and Vue console wiring through two shared seams; enforcement live in production since 2026-09-25 09:02Z.
+- **SEC-CSP-01:** `https:`/`wss:` scheme wildcard replaced by pinned hosts in both console configs, the edge runbook snapshots and the live gluster-mounted CSP.
+
+### What Worked
+- **Fail-open first, enforce second.** Shipping the middleware in fail-open mode (21-04) meant two browser-found defects were fixed with nobody locked out; the flip (21-05) was a one-flag change with a written rollback.
+- **Shared seams over call-site edits.** Four plan-check passes kept finding missed console call sites. Wiring the header into `$.ajaxSetup` and `composeHeaders()` ended that, and no call site regressed after the flip.
+- **Checking the running container, not the image.** Comparing a throwaway container from the deployed image with the running one proved the CSP came from a gluster bind mount. That settled a two-day "why doesn't the Vue CSP match its config" puzzle.
+- **Code review after verification still found real issues.** It turned up 9 warnings; 7 were fixed, including a cookie-domain derivation throw and tokens minted for preflight/webhook traffic.
+
+### What Was Inefficient
+- **About 12 weeks of wall-clock for a one-phase milestone.** 21-03 landed on 2026-07-05, then ~123 commits of unplanned work (Aikido, registry, DHI images, swarm outages) went in before 21-04/21-05 resumed in September. STATE.md needed a manual reconciliation pass (2026-09-19/21) before the plans could be trusted again.
+- **Acceptance criteria tied to one tool.** SC1/SC2 required a HawkScan rescan, and StackHawk was removed mid-milestone. Closing them took operator overrides and substitute evidence.
+- **Planned against the image, not production.** 21-03 edited image configs that production never reads. The success criterion "three CSP sources byte-for-byte equal" was written before anyone checked where production gets its CSP.
+- **Stale ROADMAP detail blocked the archive CLI.** Phases 18–20 still said `Plans: TBD` long after v1.12 shipped, which forced a `--force` at close. The v1.12 roadmap archive was also never written.
+
+### Patterns Established
+- **Rollout-flag pattern for breaking security controls:** ship fail-open behind an env/config flag, verify live, flip, and keep a rollback runbook.
+- **Verify the effective config path in production** (`docker exec` / bind mounts) before planning config edits against image sources.
+- **Tool-agnostic acceptance criteria:** state the observable property ("no scheme wildcard in the served CSP header") and name the scanner only as one way to check it.
+
+### Key Lessons
+- A milestone that stalls mid-phase needs a reconciliation step before resuming. The plan's assumptions (topology, which config is authoritative, what was already deployed) had all drifted.
+- Double-submit CSRF across sibling subdomains is weaker than it looks (WR-06). Pick the token model with the cookie scope in mind.
+
+### Cost Observations
+- Model mix: orchestration on opus; planning/review/verify subagents per plan (balanced profile).
+- Notable: four plan-check passes on 21-02 were costly but each found real missed call sites, and together they led to the shared-seam redesign.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -199,6 +235,8 @@
 | v1.0 | 4 | 8 | First milestone using GSD on this project; established codebase-map-before-REQUIREMENTS pattern and rung-by-rung operational-phase ladder |
 | v1.9 | 7 | 23 | Established per-phase VERIFICATION.md as the milestone gate (closes v1.0's process-debt gap); codified sequential single-branch execution for same-file sweeps; introduced operator-runbook closures + DETECT-only OPS probes; mid-phase scope amendment via single-commit document sync |
 | v1.10 | 3 | 5 | First milestone-level audit (`v1.10-MILESTONE-AUDIT.md`, ✅ passed) — closes the v1.0/v1.9 "no milestone audit" revisit flag; codified discrepancy-branch closure (verify + persist annex when fix already live); helper-first sequencing so OPS phases consume their own code deps; quick-task-as-milestone-addition for in-cycle non-requirement commits |
+| v1.11 | 3 | 6 | Closed at `tech_debt` with runtime phases deliberately undeployed; semantics spec encoding the replaced dependency contract |
+| v1.13 | 1 | 5 | Fail-open to enforce rollout flag for breaking security controls; operator overrides for criteria whose tool disappeared; first formal `audit-open acknowledge` pass (8 legacy items) |
 
 ### Cumulative Quality
 
@@ -207,6 +245,7 @@
 | v1.0 | 3 (`ZZ-RouterPasswordResetSpec.js`, `ZZ-OwnerLogRedactionSpec.js`, `UtilSpec.js` extensions) | 4 (`0a0e6b32`, `3a461b3d`, `81b22f1f`, `4d3fb789`) | tech_debt (no blockers; intentionally-deferred + 1 artifact gap) |
 | v1.9 | 7+ (`02-OwnerSpec.js` × 5 behavior-locking, `ZZ-RouterAdminReactivateSpec.js`, `ZZ-CookieAttributeSpec.js`, `ZZ-WebSocketLifecycleSpec.js`, `ZZ-CertProbeSpec.js`, `ZZ-AuditTTLSpec.js`, `ZZ-RouterPasswordResetSpec.js` extensions) | base image bumped to `1.9.3054`; production deploy deferred to operator push (CI green-gate on `thinx-staging`) | per-phase VERIFICATION.md PASS for all 7 phases (no separate milestone audit; carries the same revisit flag as v1.0's gap) |
 | v1.10 | 2+ (`ZZ-WebSocketHandshakeRtmSpec.js`, `ZZ-AuditTTLEvictionSpec.js`, redactor Slack-receipt unit spec) | device check-in fix + no_team Slack catch DEPLOYED & live (`sha256:2bf95549`); influx fix `9b6d931c` CI-green (pipeline 5266), operator force-rollout pending | **first milestone-level audit** — `v1.10-MILESTONE-AUDIT.md` ✅ passed (requirements 5/5, phases 3/3, integration 2/2, flows 2/2); closes the v1.0/v1.9 revisit flag |
+| v1.13 | CSRF middleware specs (fail-open/enforce paths) | classic + Vue console images; `thinx_api` with `CSRF_ENFORCE` on (2026-09-25 09:02Z) | no milestone audit; Phase 21 VERIFICATION `passed` 19/19 with 3 overrides |
 
 ### Recurring Backlog Themes
 
@@ -216,8 +255,10 @@
 - v1.9 → carried forward to v1.10: **fs-finder removal sweep** (deferred from Phase 5 REFACTOR-05 scope amendment), **SEC-WS-01 operator-side edge fix** (runbook authored, swarm-host execution outstanding), **SEC-PII-02 production execution** (script + audit TTL shipped; ~658k-doc sweep deferred to operator window), TEST-CHAI-01 (still locked per AGENTS.md), OPS-02 / OPS-03 (pure swarm-side, still deferred), CONSOLE-LEGACY-JSON-PARSE (sibling-project scope)
 - **Survived all three milestones (v1.0 → v1.9 → v1.10):** TEST-CHAI-01, OPS-02 / OPS-03, CONSOLE-LEGACY-JSON-PARSE — these have crossed the threshold from "deferred" into "structurally orthogonal to this codebase's lifecycle". v1.10 did NOT make the deliberate keep/drop call (the milestone was OPS-execution-scoped, not backlog-grooming); they auto-carried a 4th time. **v1.11 planning must force the keep/drop decision** — they are now overdue for it.
 - **v1.10 → carried forward to v1.11:** fs-finder removal sweep (now unblocked — the ops loop v1.10 closed was its stated gate), fresh Dependabot triage (5 alerts), the four structurally-orthogonal items above, and the influx-fix prod deploy (`9b6d931c`, CI-green, operator force-rollout pending).
+- **v1.13 → carried forward:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS), WR-06 (session-bound CSRF), WR-04 (`POST /api/v2/user`), console CSP source-of-truth retirement, SEC-CFG-02. TEST-CHAI-01 / OPS-02 / OPS-03 have now been carried through **six** milestones without a keep/drop call. Make that call in v1.14 or move them to Out of Scope.
 
 ---
 *Retrospective initialized: 2026-05-27 (v1.0 milestone close)*
 *v1.9 milestone section appended: 2026-06-04*
 *v1.10 milestone section appended: 2026-06-05*
+*v1.13 milestone section appended: 2026-09-25*
