@@ -95,6 +95,10 @@ status: complete
 
 **The Vue console "THiNX Console" links are proven to resolve to https://console.thinx.cloud. The proof runs from the CircleCI job that built the live bundle through to the rendered href. The dead `VUE_APP_CONSOLE_HOSTNAME` env is gone from repo `docker-swarm.yml` on thinx-staging. The gluster and live removal (D-13) was approved. A tool-permission denial blocked the first attempt, and it was applied on re-dispatch at 2026-09-25 13:08Z with the image unchanged. rtm.thinx.cloud serves normally.**
 
+## Correction (22-04 gap closure)
+
+This summary claimed too early that all three "THiNX Console" links resolve to the Vue console host, and the `requirements-completed: [CI-03]` frontmatter and the "CI-03 is marked complete" decision were premature for the same reason. Nobody ever confirmed the logged-in Layout footer check (coverage D2, human_judgment). In fact that link rendered with no href, because Layout.vue did not declare the hostnames mixin. The defect predates phase 22, and 22-VERIFICATION found it. It was fixed in console commit a5b0246 and deployed as buildHash 9bf5cf9, and the user approved the logged-in check on 2026-09-25. See 22-04-SUMMARY for details.
+
 ## Performance
 
 - **Duration:** about 13 min
