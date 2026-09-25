@@ -9,9 +9,9 @@
 
 ### CI & SAST
 
-- [x] **CI-01**: CodeQL analysis runs on push to `main` and `thinx-staging` and on PRs to `main`, using `github/codeql-action@v4` + `actions/checkout@v7` (`javascript-typescript`, `build-mode: none`); the check is non-required and GitHub default setup stays off
-- [x] **CI-02**: Every CircleCI login to `registry.thinx.cloud:5000` goes through the retrying `registry-login` command (including the test job at `.circleci/config.yml:~767`); no login passes the password on the command line
-- [x] **CI-03**: The Vue console footer links point at the Vue console host in the live bundle (`VUE_WEB_HOSTNAME` verified end to end); the dead runtime `VUE_APP_CONSOLE_HOSTNAME` env is removed from `docker-swarm.yml`
+- [ ] **CI-01**: CodeQL analysis runs on push to `main` and `thinx-staging` and on PRs to `main`, using `github/codeql-action@v4` + `actions/checkout@v7` (`javascript-typescript`, `build-mode: none`); the check is non-required and GitHub default setup stays off
+- [ ] **CI-02**: Every CircleCI login to `registry.thinx.cloud:5000` goes through the retrying `registry-login` command (including the test job at `.circleci/config.yml:~767`); no login passes the password on the command line
+- [ ] **CI-03**: The Vue console footer links point at the Vue console host in the live bundle (`VUE_WEB_HOSTNAME` verified end to end); the dead runtime `VUE_APP_CONSOLE_HOSTNAME` env is removed from `docker-swarm.yml`
 
 ### Build Pipeline Sinks
 
@@ -81,9 +81,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CI-01 | Phase 22 | Complete |
-| CI-02 | Phase 22 | Complete |
-| CI-03 | Phase 22 | Complete |
+| CI-01 | Phase 22 | Gaps Found |
+| CI-02 | Phase 22 | Gaps Found |
+| CI-03 | Phase 22 | Gaps Found |
 | SEC-EXEC-01 | Phase 23 | Pending |
 | SEC-EXEC-02 | Phase 23 | Pending |
 | SEC-PATH-01 | Phase 23 | Pending |
