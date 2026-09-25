@@ -95,7 +95,12 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
   2. `.circleci/config.yml` has no direct `docker login registry.thinx.cloud:5000`. Every login, including the test job at `~767`, goes through the retrying `registry-login` command, and none passes the password as a command-line argument.
   3. In the live Vue bundle, the "THiNX Console" links (layout, login, password reset) point at the Vue console host. `VUE_WEB_HOSTNAME` is traced from the CircleCI project variable through the build arg into the served bundle.
   4. `docker-swarm.yml` no longer sets the dead runtime `VUE_APP_CONSOLE_HOSTNAME` environment variable.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CodeQL workflow rewrite proven on a thinx-staging push (tracer), raw test-job registry login removed (CI-02), CodeQL security-extended baseline recorded (D-07)
+- [ ] 22-02-PLAN.md — Vue console link host traced from the CircleCI var to the rendered href; dead `VUE_APP_CONSOLE_HOSTNAME` removed from repo, gluster and the live `thinx_console` service (gated)
+- [ ] 22-03-PLAN.md — PR thinx-staging → main opened (gated), PR CodeQL run and non-required status proven, evidence recorded (no merge)
 **Notes**: Verify-first. CI-02 (`be376db9`) and CI-03 (`3f2f6da4`) are probably discrepancy branches, so the phase opens by checking current state before writing code. The research-era option to switch CI compose to `influxdb:1.8` is dropped: CI stays on `dhi.io/influxdb:2`, which matches the Phase 27 target.
 
 ### Phase 23: Build-Pipeline Sink Hardening
