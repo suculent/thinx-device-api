@@ -124,8 +124,8 @@ For Phase 23: none of the three builder.js alerts is on the sinks Phase 23 targe
 |---|---|---|---|---|
 | Push to `thinx-staging` (22-01 Task 1, workflow rewrite) | `1c7aded0dd440ab7de482ee06e8f3266580b9b7f` | https://github.com/suculent/thinx-device-api/actions/runs/36135544646 | `1839292115` | success; `results_count` 148, `rules_count` 103, CodeQL 2.27.1, created 2026-09-25T12:33:57Z |
 | Push to `thinx-staging` (22-01 Task 2, CI-02) | `89c5cf93f0d82098a70f5b7a69a63b1760479b45` | https://github.com/suculent/thinx-device-api/actions/runs/36136099330 | `1839321938` | success; `results_count` 148, `rules_count` 103, CodeQL 2.27.1, created 2026-09-25T12:39:38Z. The `results_count` matches Task 1, as expected, because CI-02 changed no JavaScript |
-| Pull request to `main` | — | — | — | pending — filled by 22-03 |
-| Push to `main` | — | — | — | pending — trigger present in YAML; recorded when the user merges |
+| Pull request to `main` (22-03 Task 2, PR #569 https://github.com/suculent/thinx-device-api/pull/569, ref `refs/pull/569/merge`) | head `9ccf9f18b346c5306fba29c9d445c5afb5b833ca` (analysed merge commit `a133868b7fbc46bf5caada6a5b8dab7fc6605194`) | https://github.com/suculent/thinx-device-api/actions/runs/36139870033 | `1839520597` | success; event `pull_request`; `results_count` 2, `rules_count` 103, CodeQL 2.27.1, created 2026-09-25T13:16:48Z. The `results_count` is not comparable with the 148 above: the PR analysis reports results scoped to the PR, not the full-ref baseline. PR left OPEN; check not required (protection=0, rulesets=0) |
+| Push to `main` | — | — | — | trigger present in YAML (push: branches [main, thinx-staging]); run recorded when the user merges PR #569 |
 
 GitHub CodeQL default setup read `not-configured` before the first push and again after both analyses.
 
