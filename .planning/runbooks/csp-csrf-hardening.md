@@ -45,8 +45,13 @@ return false; // fail-open default
   `true` too.
 - `config.json` is `require()`d once at startup, so both switches need a task restart to take effect.
   Editing the file alone does nothing until `thinx_api` restarts.
-- Fail-open logs `⚠️ [warning] CSRF token missing/mismatched for <METHOD> <URL> (fail-open, not enforced)`.
-  Enforced mode returns `403 {"success":false,"response":"csrf_token_invalid"}`.
+- Fail-open logs `⚠️ [warning] CSRF token missing/mismatched reason=<code> xsrf_cookies=<n> for <METHOD> <route> (fail-open, not enforced)`.
+  Enforced mode returns `403 {"success":false,"response":"csrf_token_invalid"}` and logs one line per
+  rejection: `⚠️ [warning] CSRF token rejected reason=<code> xsrf_cookies=<n> for <METHOD> <route> (enforced, 403)`.
+  `<code>` is `no_cookie`, `no_header`, `length_mismatch` or `value_mismatch`; `xsrf_cookies` counts
+  the `XSRF-TOKEN` pairs in the raw `Cookie` header and adds `duplicate_cookie=true` when it is above 1
+  (cookie-parser keeps the first). The route has its query string stripped; token values are never logged.
+  Lines logged before 2026-09-25 (21-REVIEW WR-01) have no reason code.
 - Protected routes (8): `POST /api/login`, `/api/v2/login`, `/api/v2/session/token`,
   `/api/v2/password/reset`, `/api/v2/password/set`, `/api/user/create`,
   `/api/user/password/set`, `/api/user/password/reset`. The "7" in the `csrf.js` header comment is

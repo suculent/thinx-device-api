@@ -12,7 +12,9 @@
  * (4) forged header, enforce -> 403; (5) ensureXsrfCookie mints a fresh
  * cookie only when none present; (6) issueCsrfToken echoes the
  * already-minted token WITHOUT a second Set-Cookie / second randomBytes
- * call (no-double-generation).
+ * call (no-double-generation); (7) fail-open log carries a reason code and
+ * duplicate-cookie count, never token values; (8) enforce mode logs one
+ * reason-coded line per rejection.
  */
 
 // Force the lightweight bundled config path (spec/mnt/data/conf/config.json)
@@ -167,6 +169,74 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
             expect(body.csrf_token).to.equal(mintedToken);
             done();
         });
+    });
+
+    // Runs verifyCsrfToken and returns every console.log line it emitted.
+    function captureLogs(req, res) {
+        const originalLog = console.log;
+        const lines = [];
+        let nextCalled = false;
+        console.log = function (msg) {
+            lines.push(String(msg));
+        };
+        try {
+            csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        } finally {
+            console.log = originalLog;
+        }
+        return { lines: lines, nextCalled: nextCalled };
+    }
+
+    it("7. fail-open log carries a reason code and the duplicate-cookie count, never the token values (WR-01)", function () {
+        const cases = [
+            { cookies: {}, headers: { 'x-xsrf-token': 'hdrtoken123' }, reason: 'no_cookie' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: {}, reason: 'no_header' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: { 'x-xsrf-token': 'short' }, reason: 'length_mismatch' },
+            { cookies: { 'XSRF-TOKEN': 'cookietoken1' }, headers: { 'x-xsrf-token': 'cookietoken2' }, reason: 'value_mismatch' }
+        ];
+        cases.forEach(function (c) {
+            const req = { cookies: c.cookies, headers: c.headers, method: 'POST', originalUrl: '/api/login?x=secret' };
+            const out = captureLogs(req, mockRes());
+            expect(out.nextCalled).to.equal(true);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF token missing/mismatched");
+            expect(out.lines[0]).to.contain("reason=" + c.reason);
+            expect(out.lines[0]).to.contain("POST /api/login");
+            expect(out.lines[0]).to.not.contain("secret");
+            expect(out.lines[0]).to.not.match(/cookietoken|hdrtoken|short/);
+        });
+
+        const dupReq = {
+            cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+            headers: { 'x-xsrf-token': 'cookietoken2', cookie: 'XSRF-TOKEN=cookietoken1; x-thx-core=s; XSRF-TOKEN=cookietoken2' },
+            method: 'POST',
+            originalUrl: '/api/v2/session/token'
+        };
+        const dup = captureLogs(dupReq, mockRes());
+        expect(dup.lines[0]).to.contain("xsrf_cookies=2");
+        expect(dup.lines[0]).to.contain("duplicate_cookie=true");
+        expect(dup.lines[0]).to.not.contain("cookietoken");
+    });
+
+    it("8. enforce mode logs exactly one reason-coded line per rejection (WR-01)", function () {
+        process.env.CSRF_ENFORCE = 'true';
+        const req = {
+            cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+            headers: { 'x-xsrf-token': 'cookietoken2', cookie: 'XSRF-TOKEN=cookietoken1' },
+            method: 'POST',
+            originalUrl: '/api/v2/session/token'
+        };
+        const res = mockRes();
+        const out = captureLogs(req, res);
+        expect(out.nextCalled).to.equal(false);
+        expect(res._status).to.equal(403);
+        expect(out.lines.length).to.equal(1);
+        expect(out.lines[0]).to.contain("CSRF token rejected");
+        expect(out.lines[0]).to.contain("reason=value_mismatch");
+        expect(out.lines[0]).to.contain("xsrf_cookies=1");
+        expect(out.lines[0]).to.not.contain("duplicate_cookie");
+        expect(out.lines[0]).to.contain("POST /api/v2/session/token");
+        expect(out.lines[0]).to.not.contain("cookietoken");
     });
 
 });
