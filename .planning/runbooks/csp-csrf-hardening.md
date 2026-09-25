@@ -367,17 +367,17 @@ check that a cold console login tolerates that 404 (Vue `OAuthReturn.vue` awaits
 
 | Field | Value |
 |---|---|
-| Gate cleared (UTC) | |
-| Cold-login test (both consoles), evidence | |
-| Log window checked (`--since` … → …) and warning count | |
-| Switch used (A env / B config.json) | |
-| Flip executed (UTC) / operator | |
-| `thinx.yml` persisted? (A only) | |
-| Post-flip curl: header-less → | |
-| Post-flip curl: primed → | |
-| Browser checks (cold login ×2, Vue reset, Vue OAuth, classic OAuth, Vue reload) | |
-| HawkScan scan ID / 10055-4 NEW / 20012 NEW | |
-| Rolled back? (when, why) | |
+| Gate cleared (UTC) | **Not fully cleared.** The operator chose to flip early on 2026-09-25, with about 25 minutes of clean logs, not the planned day. The 08:35:09Z `session/token` warning is still unexplained. |
+| Cold-login test (both consoles), evidence | Partial. A cold Vue load in an isolated browser context (08:49Z) fetched a token, then sent `POST /session/token` with a matching cookie and header, and logged no warning. The cold login submit and the rtm cold test did not run, because the chrome-devtools browser hung. |
+| Log window checked (`--since` … → …) and warning count | `--since 2026-09-25T08:36:00` → 09:01Z: 0 warnings, including three real logins (08:54, 08:56, 08:58). |
+| Switch used (A env / B config.json) | A (`CSRF_ENFORCE=true`) |
+| Flip executed (UTC) / operator | 2026-09-25 09:02:03 → converged 09:02:24Z. Run by Claude on the operator's instruction. Same image, `api:swarm@sha256:3852e8d2…`. |
+| `thinx.yml` persisted? (A only) | Yes. Swarm repo commit `bc6d04a`, one line only. The file had other uncommitted edits, which were left in place; the pre-edit copy is `/root/thinx.yml.bak-20260925`. |
+| Post-flip curl: header-less → | `csrf_token_invalid`, HTTP 403 |
+| Post-flip curl: primed → | `invalid_credentials`; primed `session/token` via the console proxy → `no_session`, HTTP 401 |
+| Browser checks (cold login ×2, Vue reset, Vue OAuth, classic OAuth, Vue reload) | Vue reload of a warm session: `session/token` → 200, and the other 16 API calls returned no 403s. **Still to do:** cold login ×2, Vue password reset, Vue OAuth, classic OAuth. |
+| HawkScan scan ID / 10055-4 NEW / 20012 NEW | Not run yet (21-05 Task 2) |
+| Rolled back? (when, why) | No |
 
 ---
 
