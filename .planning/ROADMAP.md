@@ -60,7 +60,7 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
 
 ### v1.13 — Web Hardening (Console/Edge) (Phase 21)
 
-- [ ] **Phase 21: CSP Wildcard Removal + Anti-CSRF Token** — SEC-CSP-01 + SEC-CSRF-01; drop the `https:` scheme-wildcard from CSP `default-src`/`connect-src` across all three CSP sources (nginx edge, legacy console, Vue console), and add a synchronizer anti-CSRF token to both console login forms validated server-side by the API
+- [x] **Phase 21: CSP Wildcard Removal + Anti-CSRF Token** — SEC-CSP-01 + SEC-CSRF-01; drop the `https:` scheme-wildcard from CSP `default-src`/`connect-src` across all three CSP sources (nginx edge, legacy console, Vue console), and add a synchronizer anti-CSRF token to both console login forms validated server-side by the API (completed 2026-09-25)
 
 ## Phase Details
 
@@ -147,7 +147,7 @@ See `.planning/milestones/v1.12-ROADMAP.md`. 4/4 v1.12 requirements (SEC-PII-03,
 | 18. Complete GDPR Purge | v1.12 | 4/4 | Complete | 2026-06-29 |
 | 19. Per-user GitHub Token Backend | v1.12 | — | Complete | 2026-06-29 |
 | 20. Docker Secrets Helper | v1.12 | — | Complete | 2026-06-29 |
-| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | In Progress|  |
+| 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete    | 2026-09-25 |
 
 ---
 *v1.11 Backlog Drawdown shipped 2026-06-06 (4/4 requirements across Phases 15–17; audit tech_debt — Phases 15/16 await push/CI/deploy follow-on).*

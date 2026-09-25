@@ -3,15 +3,15 @@ gsd_state_version: "1.0"
 milestone: v1.13
 milestone_name: Web Hardening (Console/Edge) (Phase 21)
 current_phase: 21
-current_phase_name: CSP Wildcard Removal + Anti-CSRF Token
-status: executing
-stopped_at: Completed 21-05-PLAN.md
-last_updated: "2026-09-25T09:12:20.298Z"
+status: completed
+stopped_at: Phase 21 complete — all phases complete
+last_updated: "2026-09-25T10:25:35.043Z"
 last_activity: 2026-09-25
-state_head: bb0ce4a70646f798c4d14b5c5ab383b442f9c782
+last_activity_desc: Phase 21 complete
+state_head: 47284faf3f41ac84bc5c29cd6457c9e2a5fa9353
 progress:
   total_phases: 4
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 5
   completed_plans: 5
   percent: 100
@@ -32,16 +32,16 @@ See: `.planning/PROJECT.md`
 
 ## Current Position
 
-Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
-Plan: 5 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
-Status: 21-01..21-03 complete. Production now enforces `script-src` **without** `'unsafe-inline'`
+Phase: 21
+Plan: Not started
+Status: All phases complete
         (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
         external assets — further than 21-03 scoped. 21-04 and 21-05 ARE written (corrected
         2026-09-21 — the earlier "still unwritten" note was wrong); what they lack is execution.
         Reconciled against live state 2026-09-21: 21-04 Task 1 (push both repos, bump submodule,
         CI green) is already satisfied and must not be re-run; 21-04 Task 2 (authenticated
         in-browser verification) is the only real gap; CSRF enforcement is confirmed still OFF.
-Last activity: 2026-09-25
+Last activity: 2026-09-25 — Phase 21 complete
 
 ## Milestones
 
@@ -198,7 +198,7 @@ None
 
 **Last session:** 2026-09-25T09:12:20.264Z
 
-**Stopped at:** Completed 21-05-PLAN.md
+**Stopped at:** Phase 21 complete — all phases complete
 operator-only checkpoint.
 
 **Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles

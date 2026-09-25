@@ -250,10 +250,15 @@ window; a warm browser hides the lockout.
   before `/login` and `/login` must carry a non-empty `X-XSRF-TOKEN`;
 - a reload of a logged-in Vue session must keep the session (`POST /api/v2/session/token` → 200).
 
-Then watch for real users being rejected. Enforce mode writes **no** log line: `csrf.js` logs only
-in fail-open mode, and the 403 goes straight back to the client. So the server has no rejection
-counter. Rely on the browser checks above, on user reports, and on Rollbar for about a day. If you
-need a count, enable access logging at the edge first.
+Then watch for real users being rejected. Since `d2b6f512` (21-REVIEW WR-01), enforce mode logs one line per
+rejection, with a reason code and the route but never token values:
+
+```
+⚠️ [warning] CSRF token rejected reason=<no_cookie|no_header|length_mismatch|value_mismatch> xsrf_cookies=<n> [duplicate_cookie=true] for <METHOD> <route> (enforced, 403)
+```
+
+Count rejections with `docker service logs thinx_api --since <ts> --no-trunc 2>/dev/null | grep -c 'CSRF token rejected'`.
+Also watch user reports and Rollbar: the consoles send a Rollbar warning when a rejection survives the one retry.
 
 **Any failure: roll back immediately. Do not leave production in a broken enforce state.**
 
