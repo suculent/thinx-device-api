@@ -14,7 +14,9 @@
  * already-minted token WITHOUT a second Set-Cookie / second randomBytes
  * call (no-double-generation); (7) fail-open log carries a reason code and
  * duplicate-cookie count, never token values; (8) enforce mode logs one
- * reason-coded line per rejection.
+ * reason-coded line per rejection; (9) cookie Domain derivation never
+ * throws and keeps ".thinx.cloud" for the production api_url; (10) the minted
+ * cookie carries that domain and path "/".
  */
 
 // Force the lightweight bundled config path (spec/mnt/data/conf/config.json)
@@ -25,6 +27,8 @@ if (typeof (process.env.ENVIRONMENT) === "undefined") {
 
 var expect = require('chai').expect;
 
+const cookie = require("cookie");
+const CookiePolicy = require("../../lib/middleware/cookie-policy");
 const csrfFactory = require("../../lib/middleware/csrf");
 const csrf = csrfFactory({}); // no app.* members are used by this middleware
 
@@ -237,6 +241,61 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
         expect(out.lines[0]).to.not.contain("duplicate_cookie");
         expect(out.lines[0]).to.contain("POST /api/v2/session/token");
         expect(out.lines[0]).to.not.contain("cookietoken");
+    });
+
+    it("9. cookieDomain() parses the api_url hostname and never throws (WR-02)", function () {
+        const cases = [
+            ["https://rtm.thinx.cloud", ".thinx.cloud"],   // production
+            ["https://app.thinx.cloud", ".thinx.cloud"],   // spec config
+            ["https://app.thinx.cloud/", ".thinx.cloud"],  // trailing slash used to yield ".thinx.cloud/"
+            ["https://app.thinx.cloud:7443", ".thinx.cloud"], // port used to yield ".thinx.cloud:7443"
+            ["https://app.thinx.cloud/api/v2", ".thinx.cloud"],
+            ["app.thinx.cloud", ".thinx.cloud"],
+            ["https://api.eu.thinx.cloud", ".eu.thinx.cloud"],
+            ["https://thinx.cloud", undefined],            // two labels used to yield ".cloud"
+            ["http://localhost:7443", undefined],
+            ["http://127.0.0.1:7443", undefined],
+            ["http://[::1]:7443", undefined],
+            ["<enter-your-api-fqdn>", undefined],
+            ["", undefined],
+            [undefined, undefined],
+            [null, undefined]
+        ];
+        cases.forEach(function (c) {
+            const domain = CookiePolicy.cookieDomain(c[0]);
+            expect(domain, String(c[0])).to.equal(c[1]);
+            // whatever comes out must be accepted by the cookie serializer Express uses
+            expect(function () { cookie.serialize("XSRF-TOKEN", "v", { domain: domain, path: "/" }); }, String(c[0])).to.not.throw();
+        });
+    });
+
+    it("10. ensureXsrfCookie sets domain .thinx.cloud and path / for the bundled api_url (WR-02)", function (done) {
+        const req = { cookies: {} };
+        const res = mockRes();
+        csrf.ensureXsrfCookie(req, res, function next() {
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+            expect(res._cookieCalls[0].options.path).to.equal("/");
+            expect(res._cookieCalls[0].options.secure).to.equal(false);
+            done();
+        });
+    });
+
+    it("10b. ensureXsrfCookie still calls next() when res.cookie throws (WR-02)", function (done) {
+        const req = { cookies: {} };
+        const res = mockRes();
+        res.cookie = function () { throw new TypeError("option domain is invalid"); };
+        const originalLog = console.log;
+        console.log = function () { };
+        try {
+            csrf.ensureXsrfCookie(req, res, function next() {
+                console.log = originalLog;
+                expect(res.locals.xsrfToken).to.equal(undefined);
+                done();
+            });
+        } finally {
+            console.log = originalLog;
+        }
     });
 
 });
