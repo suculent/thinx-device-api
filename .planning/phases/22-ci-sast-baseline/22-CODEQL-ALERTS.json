@@ -1,0 +1,1325 @@
+[
+  {
+    "number": 182,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "docs/socket_test.js",
+    "start_line": 10,
+    "state": "open"
+  },
+  {
+    "number": 183,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/middleware/cors.js",
+    "start_line": 42,
+    "state": "open"
+  },
+  {
+    "number": 184,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/middleware/cors.js",
+    "start_line": 42,
+    "state": "open"
+  },
+  {
+    "number": 165,
+    "rule_id": "js/cors-misconfiguration-for-credentials",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/middleware/cors.js",
+    "start_line": 47,
+    "state": "open"
+  },
+  {
+    "number": 188,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/middleware/csrf.js",
+    "start_line": 131,
+    "state": "open"
+  },
+  {
+    "number": 189,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/middleware/csrf.js",
+    "start_line": 135,
+    "state": "open"
+  },
+  {
+    "number": 185,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.apikey.js",
+    "start_line": 27,
+    "state": "open"
+  },
+  {
+    "number": 186,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.apikey.js",
+    "start_line": 32,
+    "state": "open"
+  },
+  {
+    "number": 187,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.apikey.js",
+    "start_line": 37,
+    "state": "open"
+  },
+  {
+    "number": 156,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.apikey.js",
+    "start_line": 38,
+    "state": "open"
+  },
+  {
+    "number": 190,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.auth.js",
+    "start_line": 52,
+    "state": "open"
+  },
+  {
+    "number": 281,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.auth.js",
+    "start_line": 285,
+    "state": "open"
+  },
+  {
+    "number": 172,
+    "rule_id": "js/session-fixation",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/router.auth.js",
+    "start_line": 350,
+    "state": "open"
+  },
+  {
+    "number": 173,
+    "rule_id": "js/session-fixation",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/router.auth.js",
+    "start_line": 369,
+    "state": "open"
+  },
+  {
+    "number": 191,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.deviceapi.js",
+    "start_line": 21,
+    "state": "open"
+  },
+  {
+    "number": 192,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.deviceapi.js",
+    "start_line": 70,
+    "state": "open"
+  },
+  {
+    "number": 193,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.deviceapi.js",
+    "start_line": 83,
+    "state": "open"
+  },
+  {
+    "number": 194,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.deviceapi.js",
+    "start_line": 86,
+    "state": "open"
+  },
+  {
+    "number": 195,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.gdpr.js",
+    "start_line": 103,
+    "state": "open"
+  },
+  {
+    "number": 197,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.google.js",
+    "start_line": 324,
+    "state": "open"
+  },
+  {
+    "number": 196,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.js",
+    "start_line": 27,
+    "state": "open"
+  },
+  {
+    "number": 141,
+    "rule_id": "js/polynomial-redos",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 83,
+    "state": "open"
+  },
+  {
+    "number": 282,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 85,
+    "state": "open"
+  },
+  {
+    "number": 283,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 85,
+    "state": "open"
+  },
+  {
+    "number": 284,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 85,
+    "state": "open"
+  },
+  {
+    "number": 285,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 175,
+    "state": "open"
+  },
+  {
+    "number": 286,
+    "rule_id": "js/user-controlled-bypass",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/router.js",
+    "start_line": 175,
+    "state": "open"
+  },
+  {
+    "number": 198,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.slack.js",
+    "start_line": 24,
+    "state": "open"
+  },
+  {
+    "number": 199,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.slack.js",
+    "start_line": 25,
+    "state": "open"
+  },
+  {
+    "number": 200,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.slack.js",
+    "start_line": 80,
+    "state": "open"
+  },
+  {
+    "number": 201,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/router.source.js",
+    "start_line": 32,
+    "state": "open"
+  },
+  {
+    "number": 163,
+    "rule_id": "js/insufficient-password-hash",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/aes.js",
+    "start_line": 33,
+    "state": "open"
+  },
+  {
+    "number": 168,
+    "rule_id": "js/weak-cryptographic-algorithm",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/aes.js",
+    "start_line": 33,
+    "state": "open"
+  },
+  {
+    "number": 175,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/apienv.js",
+    "start_line": 21,
+    "state": "open"
+  },
+  {
+    "number": 157,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/apikey.js",
+    "start_line": 127,
+    "state": "open"
+  },
+  {
+    "number": 203,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/apikey.js",
+    "start_line": 127,
+    "state": "open"
+  },
+  {
+    "number": 204,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/apikey.js",
+    "start_line": 155,
+    "state": "open"
+  },
+  {
+    "number": 205,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/apikey.js",
+    "start_line": 176,
+    "state": "open"
+  },
+  {
+    "number": 202,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/audit.js",
+    "start_line": 38,
+    "state": "open"
+  },
+  {
+    "number": 148,
+    "rule_id": "js/incomplete-sanitization",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/builder.js",
+    "start_line": 323,
+    "state": "open"
+  },
+  {
+    "number": 151,
+    "rule_id": "js/incomplete-sanitization",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/builder.js",
+    "start_line": 1049,
+    "state": "open"
+  },
+  {
+    "number": 223,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/builder.js",
+    "start_line": 1103,
+    "state": "open"
+  },
+  {
+    "number": 206,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 181,
+    "state": "open"
+  },
+  {
+    "number": 176,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 188,
+    "state": "open"
+  },
+  {
+    "number": 207,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 190,
+    "state": "open"
+  },
+  {
+    "number": 208,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 248,
+    "state": "open"
+  },
+  {
+    "number": 209,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 285,
+    "state": "open"
+  },
+  {
+    "number": 210,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 293,
+    "state": "open"
+  },
+  {
+    "number": 211,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/deployment.js",
+    "start_line": 379,
+    "state": "open"
+  },
+  {
+    "number": 219,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 45,
+    "state": "open"
+  },
+  {
+    "number": 220,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 453,
+    "state": "open"
+  },
+  {
+    "number": 177,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/device.js",
+    "start_line": 456,
+    "state": "open"
+  },
+  {
+    "number": 224,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 657,
+    "state": "open"
+  },
+  {
+    "number": 225,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 661,
+    "state": "open"
+  },
+  {
+    "number": 227,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 808,
+    "state": "open"
+  },
+  {
+    "number": 228,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 868,
+    "state": "open"
+  },
+  {
+    "number": 178,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/device.js",
+    "start_line": 1024,
+    "state": "open"
+  },
+  {
+    "number": 229,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 1185,
+    "state": "open"
+  },
+  {
+    "number": 230,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 1235,
+    "state": "open"
+  },
+  {
+    "number": 231,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 1241,
+    "state": "open"
+  },
+  {
+    "number": 232,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 1403,
+    "state": "open"
+  },
+  {
+    "number": 233,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/device.js",
+    "start_line": 1431,
+    "state": "open"
+  },
+  {
+    "number": 212,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 89,
+    "state": "open"
+  },
+  {
+    "number": 213,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 123,
+    "state": "open"
+  },
+  {
+    "number": 214,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 128,
+    "state": "open"
+  },
+  {
+    "number": 215,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 130,
+    "state": "open"
+  },
+  {
+    "number": 149,
+    "rule_id": "js/incomplete-sanitization",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/devices.js",
+    "start_line": 261,
+    "state": "open"
+  },
+  {
+    "number": 216,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 367,
+    "state": "open"
+  },
+  {
+    "number": 217,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 515,
+    "state": "open"
+  },
+  {
+    "number": 218,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/devices.js",
+    "start_line": 581,
+    "state": "open"
+  },
+  {
+    "number": 150,
+    "rule_id": "js/incomplete-sanitization",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/devices.js",
+    "start_line": 606,
+    "state": "open"
+  },
+  {
+    "number": 221,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/github.js",
+    "start_line": 35,
+    "state": "open"
+  },
+  {
+    "number": 222,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/github.js",
+    "start_line": 92,
+    "state": "open"
+  },
+  {
+    "number": 158,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/influx.js",
+    "start_line": 28,
+    "state": "open"
+  },
+  {
+    "number": 226,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/influx.js",
+    "start_line": 28,
+    "state": "open"
+  },
+  {
+    "number": 240,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/messenger.js",
+    "start_line": 708,
+    "state": "open"
+  },
+  {
+    "number": 242,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/messenger.js",
+    "start_line": 880,
+    "state": "open"
+  },
+  {
+    "number": 159,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/messenger.js",
+    "start_line": 922,
+    "state": "open"
+  },
+  {
+    "number": 234,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 130,
+    "state": "open"
+  },
+  {
+    "number": 144,
+    "rule_id": "js/path-injection",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 210,
+    "state": "open"
+  },
+  {
+    "number": 145,
+    "rule_id": "js/path-injection",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 216,
+    "state": "open"
+  },
+  {
+    "number": 235,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 217,
+    "state": "open"
+  },
+  {
+    "number": 146,
+    "rule_id": "js/path-injection",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 218,
+    "state": "open"
+  },
+  {
+    "number": 147,
+    "rule_id": "js/path-injection",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 219,
+    "state": "open"
+  },
+  {
+    "number": 236,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 221,
+    "state": "open"
+  },
+  {
+    "number": 237,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 232,
+    "state": "open"
+  },
+  {
+    "number": 238,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/notifier.js",
+    "start_line": 235,
+    "state": "open"
+  },
+  {
+    "number": 143,
+    "rule_id": "js/polynomial-redos",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/oauth_return.js",
+    "start_line": 42,
+    "state": "open"
+  },
+  {
+    "number": 239,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/oauth_return.js",
+    "start_line": 53,
+    "state": "open"
+  },
+  {
+    "number": 169,
+    "rule_id": "js/clear-text-cookie",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/oauth_return.js",
+    "start_line": 56,
+    "state": "open"
+  },
+  {
+    "number": 142,
+    "rule_id": "js/polynomial-redos",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/origins.js",
+    "start_line": 22,
+    "state": "open"
+  },
+  {
+    "number": 246,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 240,
+    "state": "open"
+  },
+  {
+    "number": 287,
+    "rule_id": "js/http-to-file-access",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 273,
+    "state": "open"
+  },
+  {
+    "number": 251,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 442,
+    "state": "open"
+  },
+  {
+    "number": 252,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 506,
+    "state": "open"
+  },
+  {
+    "number": 164,
+    "rule_id": "js/tainted-format-string",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/owner.js",
+    "start_line": 544,
+    "state": "open"
+  },
+  {
+    "number": 253,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 544,
+    "state": "open"
+  },
+  {
+    "number": 254,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 572,
+    "state": "open"
+  },
+  {
+    "number": 255,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 572,
+    "state": "open"
+  },
+  {
+    "number": 256,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 691,
+    "state": "open"
+  },
+  {
+    "number": 257,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 697,
+    "state": "open"
+  },
+  {
+    "number": 258,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 876,
+    "state": "open"
+  },
+  {
+    "number": 259,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 892,
+    "state": "open"
+  },
+  {
+    "number": 263,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 913,
+    "state": "open"
+  },
+  {
+    "number": 268,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/owner.js",
+    "start_line": 1074,
+    "state": "open"
+  },
+  {
+    "number": 243,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/queue.js",
+    "start_line": 376,
+    "state": "open"
+  },
+  {
+    "number": 241,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/repository.js",
+    "start_line": 37,
+    "state": "open"
+  },
+  {
+    "number": 244,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/repository.js",
+    "start_line": 139,
+    "state": "open"
+  },
+  {
+    "number": 245,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/repository.js",
+    "start_line": 143,
+    "state": "open"
+  },
+  {
+    "number": 248,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/rsakey.js",
+    "start_line": 55,
+    "state": "open"
+  },
+  {
+    "number": 247,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sanitka.js",
+    "start_line": 54,
+    "state": "open"
+  },
+  {
+    "number": 160,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/sanitka.js",
+    "start_line": 99,
+    "state": "open"
+  },
+  {
+    "number": 161,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/sanitka.js",
+    "start_line": 99,
+    "state": "open"
+  },
+  {
+    "number": 249,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sanitka.js",
+    "start_line": 99,
+    "state": "open"
+  },
+  {
+    "number": 250,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sanitka.js",
+    "start_line": 99,
+    "state": "open"
+  },
+  {
+    "number": 260,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 251,
+    "state": "open"
+  },
+  {
+    "number": 261,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 251,
+    "state": "open"
+  },
+  {
+    "number": 262,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 304,
+    "state": "open"
+  },
+  {
+    "number": 264,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 392,
+    "state": "open"
+  },
+  {
+    "number": 265,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 397,
+    "state": "open"
+  },
+  {
+    "number": 166,
+    "rule_id": "js/prototype-polluting-assignment",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 400,
+    "state": "open"
+  },
+  {
+    "number": 266,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 409,
+    "state": "open"
+  },
+  {
+    "number": 267,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 415,
+    "state": "open"
+  },
+  {
+    "number": 167,
+    "rule_id": "js/prototype-polluting-assignment",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/sources.js",
+    "start_line": 420,
+    "state": "open"
+  },
+  {
+    "number": 179,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 86,
+    "state": "open"
+  },
+  {
+    "number": 270,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 104,
+    "state": "open"
+  },
+  {
+    "number": 271,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 379,
+    "state": "open"
+  },
+  {
+    "number": 272,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 403,
+    "state": "open"
+  },
+  {
+    "number": 273,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 409,
+    "state": "open"
+  },
+  {
+    "number": 274,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 473,
+    "state": "open"
+  },
+  {
+    "number": 275,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 496,
+    "state": "open"
+  },
+  {
+    "number": 276,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 580,
+    "state": "open"
+  },
+  {
+    "number": 277,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/transfer.js",
+    "start_line": 616,
+    "state": "open"
+  },
+  {
+    "number": 152,
+    "rule_id": "js/stack-trace-exposure",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/util.js",
+    "start_line": 24,
+    "state": "open"
+  },
+  {
+    "number": 153,
+    "rule_id": "js/stack-trace-exposure",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/util.js",
+    "start_line": 39,
+    "state": "open"
+  },
+  {
+    "number": 162,
+    "rule_id": "js/clear-text-logging",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "lib/thinx/util.js",
+    "start_line": 51,
+    "state": "open"
+  },
+  {
+    "number": 269,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/util.js",
+    "start_line": 51,
+    "state": "open"
+  },
+  {
+    "number": 154,
+    "rule_id": "js/stack-trace-exposure",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "lib/thinx/util.js",
+    "start_line": 54,
+    "state": "open"
+  },
+  {
+    "number": 174,
+    "rule_id": "js/file-system-race",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "scripts/normalize-commit-msg.js",
+    "start_line": 129,
+    "state": "open"
+  },
+  {
+    "number": 155,
+    "rule_id": "js/missing-token-validation",
+    "severity": "error",
+    "security_severity_level": "high",
+    "path": "thinx-core.js",
+    "start_line": 343,
+    "state": "open"
+  },
+  {
+    "number": 170,
+    "rule_id": "js/clear-text-cookie",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "thinx-core.js",
+    "start_line": 343,
+    "state": "open"
+  },
+  {
+    "number": 171,
+    "rule_id": "js/clear-text-cookie",
+    "severity": "warning",
+    "security_severity_level": "medium",
+    "path": "thinx-core.js",
+    "start_line": 453,
+    "state": "open"
+  },
+  {
+    "number": 278,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "thinx-core.js",
+    "start_line": 659,
+    "state": "open"
+  },
+  {
+    "number": 279,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "thinx-core.js",
+    "start_line": 673,
+    "state": "open"
+  },
+  {
+    "number": 180,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "thinx-core.js",
+    "start_line": 674,
+    "state": "open"
+  },
+  {
+    "number": 280,
+    "rule_id": "js/log-injection",
+    "severity": "error",
+    "security_severity_level": "medium",
+    "path": "thinx-core.js",
+    "start_line": 676,
+    "state": "open"
+  },
+  {
+    "number": 181,
+    "rule_id": "js/remote-property-injection",
+    "severity": "warning",
+    "security_severity_level": "high",
+    "path": "thinx-core.js",
+    "start_line": 677,
+    "state": "open"
+  }
+]
