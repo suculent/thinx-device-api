@@ -764,7 +764,6 @@ jobs:
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          docker login --username $DOCKER_LOGIN --password $DOCKER_PASSWORD https://registry.thinx.cloud:5000
           # couchdb is dhi.io/couchdb:3, which rejects anonymous pulls. DOCKER_LOGIN
           # here holds the private-registry account, so use the Docker Hub pair
           # that already authenticates this job's thinxcloud/base image.
