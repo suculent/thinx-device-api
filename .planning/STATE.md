@@ -3,19 +3,19 @@ gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 current_phase: 22
-current_phase_name: ci-sast-baseline
+current_phase_name: CI & SAST Baseline
 status: executing
-stopped_at: Completed 22-03-PLAN.md
-last_updated: "2026-09-25T13:58:45.307Z"
+stopped_at: Completed 22-04-PLAN.md
+last_updated: "2026-09-25T14:32:45.757Z"
 last_activity: 2026-09-25
-last_activity_desc: Phase 22 execution started
-state_head: ce4d5c4dfdc4841307417543cd8017cca74c84e7
+last_activity_desc: Completed 22-04-PLAN.md (CI-03 gap closure)
+state_head: "0bd2633ab97b8e24495313f054991574df06263f"
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 86
 ---
 
 # STATE — THiNX Device API
@@ -33,12 +33,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
 
 ## Current Position
 
-Phase: 22 (ci-sast-baseline) — READY TO EXECUTE
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-09-25 — Phase 22 execution started
+Phase: 22 (CI & SAST Baseline) — EXECUTING
+Plan: 4 of 4 (22-04 complete)
+Status: All 4 plans complete — awaiting phase 22 re-verification
+Last activity: 2026-09-25 — Completed 22-04 (CI-03 gap closed, logged-in check approved)
 
-Progress: [████████░░] 75% (0/7 phases)
+Progress: [█████████░] 86% (0/7 phases)
 
 ## Milestones
 
@@ -172,6 +172,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 22]: [Phase 22]: CodeQL security-extended does not flag git.js execSync or builder readFileSync/lstatSync sinks; Phase 23 sink before/after must come from Aikido (baseline 147 open alerts at 89c5cf93)
 - [Phase 22]: 22-02: D-13 gluster+live removal of VUE_APP_CONSOLE_HOSTNAME approved (proceed); first attempt denied by the auto-mode permission classifier, applied on re-dispatch 2026-09-25 13:08Z (gluster line 290 removed with backup, one --env-rm on thinx_console, image unchanged)
 - [Phase 22]: 22-03: Release PR #569 thinx-staging -> main opened after user 'open-pr' gate; left OPEN, CodeQL PR analysis 1839520597 green and non-required; main-push run pending user merge
+- [Phase 22]: 22-04: Layout.vue got the per-component hostnames mixin (2 lines, template unchanged); a global Vue.mixin or populating the prototype was rejected
+- [Phase 22]: 22-04: logged-in /app footer check approved 2026-09-25; CI-03 Complete; CI-01/CI-02 left for the phase re-verification
+- [Phase 22]: 22-04: console submodule main (a0e86707) trails thinx-staging by a5b02467; syncing it is the user's call
 
 ### Todos
 
@@ -224,9 +227,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-25T13:19:12.516Z
+**Last session:** 2026-09-25T14:32:45.715Z
 
-**Stopped at:** Completed 22-03-PLAN.md
+**Stopped at:** Completed 22-04-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
 
@@ -250,3 +253,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 22 P01 | 10 min | 3 tasks | 4 files |
 | Phase 22 P02 | 13 min | 3 tasks | 1 files |
 | Phase 22 P03 | 4min | 2 tasks | 1 files |
+| Phase 22 P04 | 19min | 3 tasks | 6 files |

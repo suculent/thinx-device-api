@@ -98,7 +98,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
   3. In the live Vue bundle, the "THiNX Console" links (layout, login, password reset) point at the Vue console host. `VUE_WEB_HOSTNAME` is traced from the CircleCI project variable through the build arg into the served bundle.
   4. `docker-swarm.yml` no longer sets the dead runtime `VUE_APP_CONSOLE_HOSTNAME` environment variable.
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -115,7 +115,7 @@ Plans:
 
 **Wave 4** *(gap closure, blocked on Wave 3 completion)*
 
-- [ ] 22-04-PLAN.md — Layout footer gets the hostnames mixin (the one broken CI-03 link) with a plain-node footer test, shipped submodule → parent pointer → thinx-staging, proven in the served bundle and a logged-in check; CI-03 marked complete only after approval
+- [x] 22-04-PLAN.md — Layout footer gets the hostnames mixin (the one broken CI-03 link) with a plain-node footer test, shipped submodule → parent pointer → thinx-staging, proven in the served bundle and a logged-in check; CI-03 marked complete only after approval
 
 **Notes**: Verify-first. CI-02 (`be376db9`) and CI-03 (`3f2f6da4`) are probably discrepancy branches, so the phase opens by checking current state before writing code. The research-era option to switch CI compose to `influxdb:1.8` is dropped: CI stays on `dhi.io/influxdb:2`, which matches the Phase 27 target.
 
@@ -228,7 +228,7 @@ Plans:
 | 15–17. Backlog Drawdown | v1.11 | 6/6 | Complete | 2026-06-06 |
 | 18–20. Inbox Drawdown | v1.12 | — | Complete | 2026-06-29 |
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
-| 22. CI & SAST Baseline | v1.14 | 3/3 | In Progress|  |
+| 22. CI & SAST Baseline | v1.14 | 4/4 | In Progress|  |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 0/TBD | Not started | - |
 | 24. Secrets Sweep | v1.14 | 0/TBD | Not started | - |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
