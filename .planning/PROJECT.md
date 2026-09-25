@@ -29,17 +29,27 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Next Milestone
+## Current Milestone: v1.14 Backlog & Hardening Sweep
 
-**Not yet started.** Run `/gsd-new-milestone` to define v1.14 (fresh REQUIREMENTS.md; next phase number is 22).
+**Goal:** Close the v1.13 security follow-ups and the open ops/code findings, and ship three long-standing backlog features (log paging, InfluxDB retention, Swarmpit trim). Phases start at 22.
 
-**Standing candidates:**
-- **CSRF hardening follow-ups (from the Phase 21 review)** — WR-06: session-bound HMAC token instead of a plain double-submit cookie on `.thinx.cloud`, and guard the session-mutation routes; WR-04: decide whether `POST /api/v2/user` must stay open to machine clients. Also spot-check the classic register / forgot-password / reset-confirm flows under enforcement.
-- **Console CSP source-of-truth retirement** — align both image `default.conf` files with the gluster file, then drop the bind mount (`console-csp-source-of-truth.md`). Fix the Vue `connect-src` gap (`app.thinx.cloud`) first, or removing the mount locks out cold Vue sessions. Refresh the stale `rtm.thinx.cloud-server.{pre,post}.nginx` snapshots.
-- **SEC-CSP-02** — `unsafe-eval` removal, blocked on AngularJS console retirement.
-- **SEC-CFG-02** — full `readSecret()` sweep over the ~20 remaining sensitive env vars.
-- **Long-deferred keep/drop calls** — TEST-CHAI-01, OPS-02, OPS-03 (5× deferred), `uuid #194` (deferred-dev-only).
-- **Aikido follow-ups** — `lib/thinx/builder.js` path-traversal findings; `lib/thinx/git.js` `execSync` sink still takes a shell string.
+**Target features:**
+- **WR-06** — session-bound CSRF token (HMAC(secret, random‖session_id)), rotated on login
+- **WR-04** — `POST /api/v2/user` requires the CSRF token, no machine-client exemption (decision 2026-09-25: non-browser clients must prime the token)
+- **Console CSP source of truth** — the gluster bind-mounted `default.conf` is canonical (decision 2026-09-25); image `default.conf` files and the runbook snapshots mirror it, including the Vue `connect-src` `app.thinx.cloud` fix; spot-check classic register / forgot / reset-confirm under enforcement
+- **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
+- **builder.js path traversal** — fix Aikido-flagged `readFileSync`/`lstatSync` sinks in `lib/thinx/builder.js`
+- **git.js argv** — `lib/thinx/git.js` `execSync` sink takes argv, not a shell string
+- **CodeQL workflow** — trigger on `main`, current action majors
+- **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step
+- **Vue hostname var** — separate Vue console hostname build var so footer links point at itself
+- **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
+- **InfluxDB retention** — finite retention on the `stats` DB (default `autogen` is infinite)
+- **Swarmpit trim** — disable stats, drop `swarmpit_influxdb` / `swarmpit_agent` where possible; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
+
+**Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
+
+**Scope note:** log paging and the Vue hostname var touch `services/console` (Vue). As in v1.13, this milestone coordinates the console submodule pointer bump rather than treating that work as fully external.
 
 ## Validated Requirements (Historical)
 
@@ -199,4 +209,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-25 after v1.13 milestone (Web Hardening (Console/Edge) shipped; next phase = 22)*
+*Last updated: 2026-09-25 at v1.14 milestone start (Backlog & Hardening Sweep; first phase = 22)*

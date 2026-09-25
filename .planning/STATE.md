@@ -1,20 +1,16 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.13
-milestone_name: Web Hardening (Console/Edge) (Phase 21)
-status: Awaiting next milestone
-stopped_at: Phase 21 complete — all phases complete
-last_updated: "2026-09-25T10:28:20.585Z"
+milestone: v1.14
+milestone_name: Backlog & Hardening Sweep
+status: planning
+last_updated: "2026-09-25T10:37:26.843Z"
 last_activity: 2026-09-25
-last_activity_desc: Milestone v1.13 completed and archived
-state_head: 7e36d71a235ea325c5d2d5fa21e3758523d544ba
 progress:
-  total_phases: 4
-  completed_phases: 12
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
-current_phase: 21
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE — THiNX Device API
@@ -32,10 +28,10 @@ See: `.planning/PROJECT.md`
 
 ## Current Position
 
-Phase: Milestone v1.13 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-25 — Milestone v1.13 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-25 — Milestone v1.14 started
 
 ## Milestones
 
