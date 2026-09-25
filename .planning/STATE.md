@@ -5,16 +5,16 @@ milestone_name: Web Hardening (Console/Edge) (Phase 21)
 current_phase: 21
 current_phase_name: CSP Wildcard Removal + Anti-CSRF Token
 status: executing
-stopped_at: "Phase 21 reconciled 2026-09-21; blocked on 21-04 Task 2 operator checkpoint"
-last_updated: "2026-09-21T14:25:00.000Z"
-last_activity: 2026-09-21
-state_head: 9909d0e4fca7482c084a695f8a1941997ec31bb7
+stopped_at: Completed 21-04-PLAN.md
+last_updated: "2026-09-25T08:39:45.316Z"
+last_activity: 2026-09-25
+state_head: 3e5670273ea037493518deab08f0a44fff525981
 progress:
   total_phases: 4
   completed_phases: 11
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # STATE — THiNX Device API
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md`
 ## Current Position
 
 Phase: 21 (CSP Wildcard Removal + Anti-CSRF Token) — in progress
-Plan: 4 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
+Plan: 5 of 5 in the GSD flow; SEC-CSP-01 has since been carried past its plan by out-of-plan work
 Status: 21-01..21-03 complete. Production now enforces `script-src` **without** `'unsafe-inline'`
         (plus `script-src-attr 'none'`) after the classic console's inline scripts were migrated to
         external assets — further than 21-03 scoped. 21-04 and 21-05 ARE written (corrected
@@ -41,7 +41,7 @@ Status: 21-01..21-03 complete. Production now enforces `script-src` **without** 
         Reconciled against live state 2026-09-21: 21-04 Task 1 (push both repos, bump submodule,
         CI green) is already satisfied and must not be re-run; 21-04 Task 2 (authenticated
         in-browser verification) is the only real gap; CSRF enforcement is confirmed still OFF.
-Last activity: 2026-09-19
+Last activity: 2026-09-25
 
 ## Milestones
 
@@ -170,7 +170,9 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ### Blockers
 
-- None.
+-
+
+- 21-05 pre-flip gate: an unexplained CSRF mismatch on POST /api/v2/session/token (2026-09-25T08:35:09Z; 9 more on a replaced thinx_api task). Before enforcing, run a cold incognito login on both consoles and watch thinx_api for ~1 day for new session/token warnings. See 21-04-SUMMARY.md.
 
 ### Open Questions
 
@@ -194,9 +196,11 @@ Items acknowledged and deferred at prior milestone closes and carried forward:
 
 ## Session Continuity
 
-**Last session:** 2026-09-21T14:07:57.908Z
+**Resume file:** None
 
-**Stopped at:** Phase 21 reconciled against deployed reality (2026-09-21); execution blocked on an
+**Last session:** 2026-09-25T08:39:38.470Z
+
+**Stopped at:** Completed 21-04-PLAN.md
 operator-only checkpoint.
 
 **Next action:** Execute 21-04 Task 2 — the authenticated in-browser verification of both consoles
