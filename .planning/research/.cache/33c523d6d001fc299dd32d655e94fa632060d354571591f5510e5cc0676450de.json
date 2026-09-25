@@ -1,0 +1,1 @@
+{"content":"OWASP CSRF cheat sheet: most secure double-submit variant is the signed double-submit cookie with HMAC bound to session-specific data (session id); signing without session binding still allows cookie injection.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-09-25T10:45:15.931Z","ttl":86400000,"kind":"web"}

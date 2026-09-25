@@ -1,0 +1,1 @@
+{"content":"CouchDB pagination recipe: do not use skip for deep paging; request limit+1 rows, use the extra row's key as next startkey and its id as startkey_docid (only needed when keys can repeat); skip only 0/1. Insert-stable, O(page) cost.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-09-25T10:43:31.688Z","ttl":86400000,"kind":"web"}
