@@ -5,7 +5,7 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 22
 current_phase_name: ci-sast-baseline
 status: executing
-stopped_at: Completed 22-02-PLAN.md (Task 3 D-13 server-side blocked by permission)
+stopped_at: Completed 22-02-PLAN.md (Task 3 D-13 server-side applied on re-dispatch)
 last_updated: "2026-09-25T12:59:07.294Z"
 last_activity: 2026-09-25
 last_activity_desc: Phase 22 execution started
@@ -170,7 +170,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 21]: SEC-CSP-01: pinned CSP host allowlist across console images + runbook snapshots, replacing the https:/wss: scheme wildcard — unsafe-inline/unsafe-eval left unchanged per source; SEC-CSP-02 deferred
 - [Phase 22]: [Phase 22]: CI-02 took the delete path — D-01 pre-check found no private-registry pull on the CircleCI test path
 - [Phase 22]: [Phase 22]: CodeQL security-extended does not flag git.js execSync or builder readFileSync/lstatSync sinks; Phase 23 sink before/after must come from Aikido (baseline 147 open alerts at 89c5cf93)
-- [Phase 22]: 22-02: D-13 gluster+live removal of VUE_APP_CONSOLE_HOSTNAME approved (proceed) but not applied - auto-mode permission denied the gluster edit; live env-rm skipped to keep gluster/live consistent; operator item
+- [Phase 22]: 22-02: D-13 gluster+live removal of VUE_APP_CONSOLE_HOSTNAME approved (proceed); first attempt denied by the auto-mode permission classifier, applied on re-dispatch 2026-09-25 13:08Z (gluster line 290 removed with backup, one --env-rm on thinx_console, image unchanged)
 
 ### Todos
 
@@ -192,7 +192,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
 ### Blockers
 
-- 22-02 D-13 open: remove VUE_APP_CONSOLE_HOSTNAME from gluster thinx.yml (line 290, console:) with backup, then docker service update --no-resolve-image --detach=false --env-rm VUE_APP_CONSOLE_HOSTNAME thinx_console (commands in 22-02-SUMMARY)
+- None.
 
 ### Open Questions
 
@@ -225,7 +225,7 @@ Decided at plan time, not blocking the roadmap:
 
 **Last session:** 2026-09-25T12:59:07.260Z
 
-**Stopped at:** Completed 22-02-PLAN.md (Task 3 D-13 server-side blocked by permission)
+**Stopped at:** Completed 22-02-PLAN.md (Task 3 D-13 server-side applied on re-dispatch)
 
 **Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
 
