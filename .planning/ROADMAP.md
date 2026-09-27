@@ -132,7 +132,22 @@ Plans:
   4. A `device.owner` or `device.udid` containing `../` or other path characters cannot move `BUILD_PATH` outside the owner's build root.
   5. Firmware repositories are cloned with `core.symlinks=false`. A rescan (CodeQL from Phase 22 plus the local Aikido scan) no longer flags the `git.js` `execSync` sink or the builder `readFileSync`/`lstatSync` sinks; any remaining hit is recorded as an app-owned false positive with a reason.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+**Wave 1**
+- [ ] 23-01-PLAN.md — git.js private-fetch contract: one argv clone/pull routine for every caller, constant GIT_SSH_COMMAND + per-attempt askpass, core.symlinks=false, persistent learned known_hosts, Redis last-good key (wave 1)
+- [ ] 23-02-PLAN.md — worker (submodule): argv jobs spawned without a shell from a constant program, legacy cmd kept with a warning (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 23-03-PLAN.md — safepath containment for every repo-controlled read/write (thinx.yml, credential write-back), strict owner/udid and contained BUILD_PATH (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 23-04-PLAN.md — API job carries argv plus byte-identical legacy cmd, shell-escape removed, worker pointer bump (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 23-05-PLAN.md — ordered push and rollout, SAST delta doc, D-14 private-repo production proof (wave 4, checkpoint)
+
 **Notes**: git.js goes first on the same branch because it redefines the `prefetchPrivate` contract that builder.js calls; builder.js follows (the Phase 7 single-branch lesson). Lock current behaviour with specs (a `file://` bare repo, injection strings, a missing git binary) before refactoring. `GIT_KEY_PASSPHRASE` comes from `readSecret()`, which works on the env fallback before Phase 24 provisions the secret.
 
 ### Phase 24: Secrets Sweep
