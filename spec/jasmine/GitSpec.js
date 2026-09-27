@@ -262,7 +262,7 @@ describe("Git", function () {
                 expect(success).to.equal(true);
                 expect(added.length).to.equal(1);
                 expect(added[0].is_private).to.equal(false);
-                expect(added[0].platform).to.equal("platformio");
+                expect(added[0].platform).to.equal("platformio:esp8266"); // thinx.yml key + arch
                 done();
             });
         }, 20000);
