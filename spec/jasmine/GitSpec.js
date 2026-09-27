@@ -279,6 +279,206 @@ describe("Git", function () {
         }, 20000);
     });
 
+    describe("known_hosts policy (D-07, D-08)", function () {
+
+        function learnedDir() {
+            return path.join(tmpdir(root, "learned"), "ssh_known_hosts");
+        }
+
+        function expectFallback(git, reason) {
+            const logged = [];
+            spyOn(console, "log").and.callFake((...a) => logged.push(a.join(" ")));
+            const r = git.knownHostsFiles();
+            expect(r.persistent).to.equal(false);
+            expect(r.learned).to.equal(seeded);
+            expect(r.seeded).to.equal(seeded);
+            expect(r.reason).to.equal(reason);
+            expect(logged.some((l) => l.indexOf("learned known_hosts unusable") !== -1)).to.equal(true);
+        }
+
+        it("creates the learned dir at 0700 and file at 0600 and uses them", function () {
+            const dir = learnedDir();
+            const git = newGit(undefined, { learnedKnownHostsDir: dir });
+            const r = git.knownHostsFiles();
+            expect(r.persistent).to.equal(true);
+            expect(r.learned).to.equal(path.join(dir, "known_hosts"));
+            expect(r.seeded).to.equal(seeded);
+            expect(fs.statSync(dir).mode & 0o777).to.equal(0o700);
+            expect(fs.statSync(r.learned).mode & 0o777).to.equal(0o600);
+        });
+
+        it("falls back to the seeded file when the dir is group/world-writable", function () {
+            const dir = learnedDir();
+            fs.mkdirSync(dir);
+            fs.chmodSync(dir, 0o777);
+            expectFallback(newGit(undefined, { learnedKnownHostsDir: dir }), "dir_writable_by_others");
+            expect(fs.statSync(dir).mode & 0o777).to.equal(0o777); // never repaired
+        });
+
+        it("falls back to the seeded file when known_hosts is group/world-writable", function () {
+            const dir = learnedDir();
+            fs.mkdirSync(dir, { mode: 0o700 });
+            fs.writeFileSync(path.join(dir, "known_hosts"), "");
+            fs.chmodSync(path.join(dir, "known_hosts"), 0o666);
+            expectFallback(newGit(undefined, { learnedKnownHostsDir: dir }), "file_writable_by_others");
+        });
+
+        it("falls back to the seeded file when the dir is a symlink", function () {
+            const real = tmpdir(root, "realdir");
+            fs.chmodSync(real, 0o700);
+            const dir = learnedDir();
+            fs.symlinkSync(real, dir);
+            expectFallback(newGit(undefined, { learnedKnownHostsDir: dir }), "dir_symlink");
+        });
+
+        it("falls back to the seeded file when known_hosts is a symlink", function () {
+            const dir = learnedDir();
+            fs.mkdirSync(dir, { mode: 0o700 });
+            fs.chmodSync(dir, 0o700);
+            const target = path.join(root, "planted_known_hosts-" + path.basename(path.dirname(dir)));
+            fs.writeFileSync(target, "", { mode: 0o600 });
+            fs.symlinkSync(target, path.join(dir, "known_hosts"));
+            expectFallback(newGit(undefined, { learnedKnownHostsDir: dir }), "file_symlink");
+        });
+
+        it("keeps GIT_SSH_COMMAND identical across keys and never relaxes host checking", function () {
+            const git = newGit();
+            const a = git.sshEnv("/keys/k1", "/tmp/a1");
+            const b = git.sshEnv("/keys/k2", "/tmp/a2");
+            expect(a.GIT_SSH_COMMAND).to.equal(Git.SSH_COMMAND);
+            expect(b.GIT_SSH_COMMAND).to.equal(Git.SSH_COMMAND);
+            expect(Git.SSH_COMMAND).to.not.match(/StrictHostKeyChecking=(no|off)/);
+            expect(Git.SSH_COMMAND).to.not.include("/dev/null");
+            expect(Git.SSH_COMMAND).to.include("StrictHostKeyChecking=accept-new");
+        });
+
+        it("points the learned option at the persistent file and the seeded option at the seed", function () {
+            const dir = learnedDir();
+            const git = newGit(undefined, { learnedKnownHostsDir: dir });
+            const env = git.sshEnv("/keys/k1", "/tmp/a1");
+            expect(env.THINX_GIT_LEARNED_KNOWN_HOSTS).to.equal(path.join(dir, "known_hosts"));
+            expect(env.THINX_GIT_SEEDED_KNOWN_HOSTS).to.equal(seeded);
+        });
+    });
+
+    describe("askpass and passphrase (T-23-02)", function () {
+
+        const secrets = require("../../lib/thinx/secrets.js");
+        const PASS = "spec-pass-XYZ";
+        let saved;
+
+        beforeEach(() => {
+            saved = process.env.GIT_KEY_PASSPHRASE;
+            process.env.GIT_KEY_PASSPHRASE = PASS;
+            secrets._resetCacheForTests();
+        });
+
+        afterEach(() => {
+            if (typeof (saved) === "undefined") delete process.env.GIT_KEY_PASSPHRASE;
+            else process.env.GIT_KEY_PASSPHRASE = saved;
+            secrets._resetCacheForTests();
+        });
+
+        it("keeps the passphrase out of the helper file and supplies it from env", function () {
+            const git = newGit();
+            const askpass = git.create_askfile();
+            try {
+                expect(fs.readFileSync(askpass, "utf8")).to.not.include(PASS);
+                expect(fs.statSync(askpass).mode & 0o777).to.equal(0o700);
+                const out = exec.execFileSync(askpass, [], { env: git.sshEnv(path.join(keysDir, "k1"), askpass), encoding: "utf8" });
+                expect(out).to.equal(PASS + "\n");
+            } finally {
+                git.delete_askfile(askpass);
+            }
+            expect(fs.existsSync(path.dirname(askpass))).to.equal(false);
+        });
+
+        it("never hands the passphrase to an HTTP remote answering 401", async function () {
+            const log = path.join(root, "auth-headers.log");
+            fs.writeFileSync(log, "");
+            // A separate process: fetch runs git through execFileSync, which
+            // would block a server living on this process's event loop.
+            const server = exec.spawn(process.execPath, ["-e",
+                "const http=require('http'),fs=require('fs');const out=process.argv[1];" +
+                "const s=http.createServer((q,r)=>{fs.appendFileSync(out,JSON.stringify(q.headers.authorization||null)+'\\n');" +
+                "r.writeHead(401,{'WWW-Authenticate':'Basic realm=\"x\"'});r.end();});" +
+                "s.listen(0,'127.0.0.1',()=>process.stdout.write(s.address().port+'\\n'));", log], { stdio: ["ignore", "pipe", "inherit"] });
+            try {
+                const port = await new Promise((resolve) => server.stdout.once("data", (d) => resolve(parseInt(String(d), 10))));
+                const git = newGit(undefined, { gitTimeoutMs: 20000 });
+                git.keyNamesForOwner = () => ["k1"];
+                const ok = await git.fetch(OWNER, "http://127.0.0.1:" + port + "/r.git", "main", tmpdir(root, "build"));
+                expect(ok).to.equal(false);
+                const lines = fs.readFileSync(log, "utf8").split("\n").filter((l) => l.length > 0);
+                expect(lines.length).to.be.at.least(1); // git did reach the remote
+                for (const line of lines) {
+                    const header = JSON.parse(line);
+                    if (header === null) continue;
+                    const decoded = Buffer.from(header.replace(/^Basic\s+/i, ""), "base64").toString("utf8");
+                    expect(decoded).to.not.include(PASS);
+                    expect(header).to.not.include(PASS);
+                }
+            } finally {
+                server.kill();
+            }
+        }, 30000);
+
+        it("resolves false for an ssh remote that cannot be reached with the key (D-06)", async function () {
+            const git = newGit(undefined, { gitTimeoutMs: 20000 });
+            git.keyNamesForOwner = () => ["k1"];
+            const ok = await git.fetch(OWNER, "ssh://git@127.0.0.1:9/nope.git", "main", tmpdir(root, "build"));
+            expect(ok).to.equal(false);
+        }, 30000);
+    });
+
+    describe("last-good key memory (D-09)", function () {
+
+        function redisReturning(value) {
+            return { get(k, cb) { cb(null, value); }, set() { } };
+        }
+
+        it("tries the remembered key first", async function () {
+            const git = newGit(redisReturning("k2"));
+            expect(await git.orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k2", "k1", "k3"]);
+        });
+
+        it("ignores a remembered value that is not one of the owner's own keys", async function () {
+            expect(await newGit(redisReturning("../k2")).orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k1", "k2", "k3"]);
+            expect(await newGit(redisReturning("k4")).orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k1", "k2", "k3"]);
+        });
+
+        it("keeps the original order on a Redis error", async function () {
+            const git = newGit({ get(k, cb) { cb(new Error("down")); }, set() { } });
+            expect(await git.orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k1", "k2", "k3"]);
+        });
+
+        it("keeps the original order when Redis never answers", async function () {
+            const git = newGit({ get() { }, set() { } }, { redisTimeoutMs: 50 });
+            const started = Date.now();
+            expect(await git.orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k1", "k2", "k3"]);
+            expect(Date.now() - started).to.be.below(1000);
+        });
+
+        it("keeps the original order without Redis", async function () {
+            expect(await newGit().orderKeys(OWNER, ["k1", "k2", "k3"])).to.deep.equal(["k1", "k2", "k3"]);
+        });
+
+        it("remembers only the key filename of the successful attempt, for 30 days", async function () {
+            const sets = [];
+            const git = newGit({
+                get(k, cb) { cb(null, null); },
+                set(...a) { sets.push(a); const cb = a[a.length - 1]; if (typeof cb === "function") cb(null, "OK"); }
+            });
+            git.keyNamesForOwner = () => ["k1", "k2"];
+            spyOn(git, "cloneRepository").and.callFake((b, u, br, env) => ({ ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null }));
+            const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(ok).to.equal(true);
+            expect(sets.length).to.equal(1);
+            expect(sets[0].slice(0, 4)).to.deep.equal(["gitkey:" + OWNER, "k2", "EX", 2592000]);
+            expect(typeof sets[0][4]).to.equal("function");
+        });
+    });
+
     describe("Builder prefetch", function () {
 
         const Builder = require("../../lib/thinx/builder");
