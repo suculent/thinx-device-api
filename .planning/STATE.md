@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 23
 current_phase_name: Build-Pipeline Sink Hardening
 status: executing
-stopped_at: Completed 23-02-PLAN.md
-last_updated: "2026-09-27T11:33:15.395Z"
+stopped_at: Completed 23-03-PLAN.md
+last_updated: "2026-09-27T11:46:56.941Z"
 last_activity: 2026-09-27
 last_activity_desc: Phase 23 execution started
-state_head: ad2438af1b83e7bf83732cfe3d37c425362680b8
+state_head: a588733773bc0eb8e859966b262f70e20109090e
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 9
-  completed_plans: 6
-  percent: 67
+  completed_plans: 7
+  percent: 78
 ---
 
 # STATE — THiNX Device API
@@ -34,11 +34,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
 ## Current Position
 
 Phase: 23 (Build-Pipeline Sink Hardening) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-09-27 — Phase 23 execution started
 
-Progress: [███████░░░] 67% (1/7 v1.14 phases; Phase 22 4/4 plans)
+Progress: [████████░░] 78% (1/7 v1.14 phases; Phase 22 4/4 plans)
 
 ## Milestones
 
@@ -181,6 +181,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 23]: 23-01: Redis gitkey:<owner> holds only the key filename (EX 30d) and is honoured only when === one of the owner's own key names
 - [Phase 23]: 23-02: worker spawns argv jobs as spawn(BUILDER_PROGRAM, argv, {shell:false}); the job never names the program; any job carrying argv is validated as argv and refused with Invalid argv, never retried on the cmd shell path
 - [Phase 23]: 23-02: worker logs redact the job secret and the --env JSON; production worker logs written before this change contain WORKER_SECRET, so rotate it after the new worker deploys
+- [Phase 23]: 23-03: all builder repo-file reads/writes go through lib/thinx/safepath.js (realpath + path.relative + lstat no-symlink + O_NOFOLLOW); refusals use refuseBuild -> unsafe_repository_file
+- [Phase 23]: 23-03: BUILD_PATH = buildPathFor(owner, udid, build_id) with Sanitka.strictOwner (exactly 64 [a-z0-9]) + Sanitka.udid, never stripped; invalid -> invalid_device before mkdirp and no remote job
 
 ### Todos
 
@@ -239,9 +241,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-27T11:33:05.538Z
+**Last session:** 2026-09-27T11:46:56.861Z
 
-**Stopped at:** Completed 23-02-PLAN.md
+**Stopped at:** Completed 23-03-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
 
@@ -271,3 +273,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 22 P04 | 19min | 3 tasks | 6 files |
 | Phase 23 P01 | 16 min | 3 tasks | 6 files |
 | Phase 23 P02 | 7min | 2 tasks | 2 files |
+| Phase 23 P03 | 10 min | 3 tasks | 8 files |
