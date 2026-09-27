@@ -279,21 +279,21 @@ describe("Builder repository-file guards", function () {
 
         it("emits no job and notifies invalid_device for a ../ owner", function () {
             const { builder, calls } = remoteBuilder();
-            builder.runRemoteShell(worker, "./builder --owner=x", "../bad", envi.build_id, envi.udid, {}, envi.sid);
+            builder.runRemoteShell(worker, ["--owner=x"], "../bad", envi.build_id, envi.udid, {}, envi.sid);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
 
         it("emits no job for a udid carrying path characters", function () {
             const { builder, calls } = remoteBuilder();
-            builder.runRemoteShell(worker, "./builder", envi.oid, envi.build_id, "../../../../etc/passwd".padEnd(36, "a"), {}, envi.sid);
+            builder.runRemoteShell(worker, ["--dry-run"], envi.oid, envi.build_id, "../../../../etc/passwd".padEnd(36, "a"), {}, envi.sid);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
 
         it("emits the job with the contained BUILD_PATH for a valid device", function () {
             const { builder, calls } = remoteBuilder();
-            builder.runRemoteShell(worker, "./builder", envi.oid, envi.build_id, envi.udid, {}, envi.sid);
+            builder.runRemoteShell(worker, ["--dry-run"], envi.oid, envi.build_id, envi.udid, {}, envi.sid);
             expect(calls.emit.length).to.equal(1);
             expect(calls.emit[0][0]).to.equal("job");
             expect(calls.emit[0][1].path).to.equal(builder.buildPathFor(envi.oid, envi.udid, envi.build_id));
