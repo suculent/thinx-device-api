@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 23
 current_phase_name: Build-Pipeline Sink Hardening
 status: executing
-stopped_at: Phase 23 context gathered
-last_updated: "2026-09-27T02:51:28.820Z"
-last_activity: 2026-09-25
-last_activity_desc: Phase 22 complete, transitioned to Phase 23
-state_head: 297ee3577544104e619a9c27631f12704a66ced8
+stopped_at: Completed 23-01-PLAN.md
+last_updated: "2026-09-27T11:23:35.090Z"
+last_activity: 2026-09-27
+last_activity_desc: Phase 23 execution started
+state_head: bf7674d3d67ab5d1e59c02a9cba0fa1634ff839e
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 9
-  completed_plans: 4
-  percent: 44
+  completed_plans: 5
+  percent: 56
 ---
 
 # STATE — THiNX Device API
@@ -33,12 +33,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
 
 ## Current Position
 
-Phase: 23 (Build-Pipeline Sink Hardening) — READY TO EXECUTE
-Plan: Not started
+Phase: 23 (Build-Pipeline Sink Hardening) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-09-25 — Phase 22 complete, transitioned to Phase 23
+Last activity: 2026-09-27 — Phase 23 execution started
 
-Progress: [████░░░░░░] 44% (1/7 v1.14 phases; Phase 22 4/4 plans)
+Progress: [██████░░░░] 56% (1/7 v1.14 phases; Phase 22 4/4 plans)
 
 ## Milestones
 
@@ -175,6 +175,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 22]: 22-04: Layout.vue got the per-component hostnames mixin (2 lines, template unchanged); a global Vue.mixin or populating the prototype was rejected
 - [Phase 22]: 22-04: logged-in /app footer check approved 2026-09-25; CI-03 Complete; CI-01/CI-02 left for the phase re-verification
 - [Phase 22]: 22-04: console submodule main (a0e86707) trails thinx-staging by a5b02467; syncing it is the user's call
+- [Phase 23]: 23-01: GIT_SSH_COMMAND is one constant (accept-new, IdentitiesOnly, publickey-only, seeded file as GlobalKnownHostsFile, learned file as UserKnownHostsFile); per-attempt values reach it only via env
+- [Phase 23]: 23-01: GIT_ASKPASS=false + GIT_TERMINAL_PROMPT=0 on every git run and PasswordAuthentication=no on ssh, so the forced askpass never answers a remote credential/password prompt
+- [Phase 23]: 23-01: learned known_hosts at <data_root>/ssh_known_hosts used only if not symlink, not group/world-writable, owned by process uid; never repaired, falls back to seeded file
+- [Phase 23]: 23-01: Redis gitkey:<owner> holds only the key filename (EX 30d) and is honoured only when === one of the owner's own key names
 
 ### Todos
 
@@ -231,11 +235,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/23-build-pipeline-sink-hardening/23-CONTEXT.md
+**Resume file:** None
 
-**Last session:** 2026-09-26T23:08:00.422Z
+**Last session:** 2026-09-27T11:23:35.042Z
 
-**Stopped at:** Phase 23 context gathered
+**Stopped at:** Completed 23-01-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
 
@@ -263,3 +267,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 22 P02 | 13 min | 3 tasks | 1 files |
 | Phase 22 P03 | 4min | 2 tasks | 1 files |
 | Phase 22 P04 | 19min | 3 tasks | 6 files |
+| Phase 23 P01 | 16 min | 3 tasks | 6 files |

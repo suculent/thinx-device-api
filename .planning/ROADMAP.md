@@ -132,11 +132,11 @@ Plans:
   4. A `device.owner` or `device.udid` containing `../` or other path characters cannot move `BUILD_PATH` outside the owner's build root.
   5. Firmware repositories are cloned with `core.symlinks=false`. A rescan (CodeQL from Phase 22 plus the local Aikido scan) no longer flags the `git.js` `execSync` sink or the builder `readFileSync`/`lstatSync` sinks; any remaining hit is recorded as an app-owned false positive with a reason.
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 23-01-PLAN.md — git.js private-fetch contract: one argv clone/pull routine for every caller, constant GIT_SSH_COMMAND + per-attempt askpass, core.symlinks=false, persistent learned known_hosts, Redis last-good key (wave 1)
+- [x] 23-01-PLAN.md — git.js private-fetch contract: one argv clone/pull routine for every caller, constant GIT_SSH_COMMAND + per-attempt askpass, core.symlinks=false, persistent learned known_hosts, Redis last-good key (wave 1)
 - [ ] 23-02-PLAN.md — worker (submodule): argv jobs spawned without a shell from a constant program, legacy cmd kept with a warning (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -244,7 +244,7 @@ Plans:
 | 18–20. Inbox Drawdown | v1.12 | — | Complete | 2026-06-29 |
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
-| 23. Build-Pipeline Sink Hardening | v1.14 | 0/TBD | Not started | - |
+| 23. Build-Pipeline Sink Hardening | v1.14 | 1/5 | In Progress|  |
 | 24. Secrets Sweep | v1.14 | 0/TBD | Not started | - |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
