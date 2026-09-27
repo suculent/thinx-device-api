@@ -217,6 +217,89 @@ describe("Builder repository-file guards", function () {
         });
     });
 
+    describe("buildPathFor (D-12)", function () {
+
+        const envi = require("../_envi.json");
+        const Globals = require("../../lib/thinx/globals.js");
+        const safepath = require("../../lib/thinx/safepath");
+        const app_config = Globals.app_config();
+        const buildRoot = app_config.data_root + app_config.build_root;
+
+        it("returns the contained BUILD_PATH for a valid owner/udid/build_id", function () {
+            const p = newBuilder().buildPathFor(envi.oid, envi.udid, envi.build_id);
+            expect(p).to.equal(path.resolve(buildRoot, envi.oid, envi.udid, envi.build_id));
+            expect(safepath.isInside(buildRoot, p)).to.equal(true);
+        });
+
+        const BAD = {
+            "owner ../ + 61 hex": ["../" + envi.oid.slice(0, 61), envi.udid, envi.build_id],
+            "owner with 63 chars": [envi.oid.slice(0, 63), envi.udid, envi.build_id],
+            "udid ../../../../etc/passwd padded to 36": [envi.oid, "../../../../etc/passwd".padEnd(36, "a"), envi.build_id],
+            "udid null": [envi.oid, null, envi.build_id],
+            "owner empty": ["", envi.udid, envi.build_id],
+            "owner undefined": [undefined, envi.udid, envi.build_id],
+            "build_id not a uuid": [envi.oid, envi.udid, "../" + envi.build_id.slice(3)],
+            "build_id null": [envi.oid, envi.udid, null]
+        };
+
+        for (const [name, args] of Object.entries(BAD)) {
+            it("returns null for " + name, function () {
+                expect(newBuilder().buildPathFor(...args)).to.equal(null);
+            });
+        }
+
+        it("gives two builds of the same device two different paths", function () {
+            const builder = newBuilder();
+            const a = builder.buildPathFor(envi.oid, envi.udid, "11111111-2222-3333-4444-555555555555");
+            const b = builder.buildPathFor(envi.oid, envi.udid, "66666666-7777-8888-9999-000000000000");
+            expect(a).to.be.a("string");
+            expect(b).to.be.a("string");
+            expect(a).to.not.equal(b);
+        });
+
+        it("never rewrites an input (one uppercase letter is refused, not lowercased)", function () {
+            const upper = "A" + envi.oid.slice(1);
+            expect(newBuilder().buildPathFor(upper, envi.udid, envi.build_id)).to.equal(null);
+        });
+    });
+
+    describe("runRemoteShell (D-12)", function () {
+
+        const envi = require("../_envi.json");
+
+        function remoteBuilder() {
+            const builder = newBuilder();
+            const calls = { emit: [], notify: [] };
+            builder.io = { emit: (...a) => calls.emit.push(a) };
+            builder.notify = (...a) => calls.notify.push(a);
+            return { builder, calls };
+        }
+
+        const worker = { socket: { on() { } } };
+
+        it("emits no job and notifies invalid_device for a ../ owner", function () {
+            const { builder, calls } = remoteBuilder();
+            builder.runRemoteShell(worker, "./builder --owner=x", "../bad", envi.build_id, envi.udid, {}, envi.sid);
+            expect(calls.emit).to.deep.equal([]);
+            expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
+        });
+
+        it("emits no job for a udid carrying path characters", function () {
+            const { builder, calls } = remoteBuilder();
+            builder.runRemoteShell(worker, "./builder", envi.oid, envi.build_id, "../../../../etc/passwd".padEnd(36, "a"), {}, envi.sid);
+            expect(calls.emit).to.deep.equal([]);
+            expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
+        });
+
+        it("emits the job with the contained BUILD_PATH for a valid device", function () {
+            const { builder, calls } = remoteBuilder();
+            builder.runRemoteShell(worker, "./builder", envi.oid, envi.build_id, envi.udid, {}, envi.sid);
+            expect(calls.emit.length).to.equal(1);
+            expect(calls.emit[0][0]).to.equal("job");
+            expect(calls.emit[0][1].path).to.equal(builder.buildPathFor(envi.oid, envi.udid, envi.build_id));
+        });
+    });
+
     describe("refuseBuild", function () {
 
         it("notifies, cleans up and calls back (false, unsafe_repository_file)", function () {
