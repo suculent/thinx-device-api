@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 23
 current_phase_name: Build-Pipeline Sink Hardening
 status: executing
-stopped_at: Completed 23-01-PLAN.md
-last_updated: "2026-09-27T11:23:35.090Z"
+stopped_at: Completed 23-02-PLAN.md
+last_updated: "2026-09-27T11:33:15.395Z"
 last_activity: 2026-09-27
 last_activity_desc: Phase 23 execution started
-state_head: bf7674d3d67ab5d1e59c02a9cba0fa1634ff839e
+state_head: ad2438af1b83e7bf83732cfe3d37c425362680b8
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 9
-  completed_plans: 5
-  percent: 56
+  completed_plans: 6
+  percent: 67
 ---
 
 # STATE — THiNX Device API
@@ -34,11 +34,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
 ## Current Position
 
 Phase: 23 (Build-Pipeline Sink Hardening) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-27 — Phase 23 execution started
 
-Progress: [██████░░░░] 56% (1/7 v1.14 phases; Phase 22 4/4 plans)
+Progress: [███████░░░] 67% (1/7 v1.14 phases; Phase 22 4/4 plans)
 
 ## Milestones
 
@@ -179,6 +179,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 23]: 23-01: GIT_ASKPASS=false + GIT_TERMINAL_PROMPT=0 on every git run and PasswordAuthentication=no on ssh, so the forced askpass never answers a remote credential/password prompt
 - [Phase 23]: 23-01: learned known_hosts at <data_root>/ssh_known_hosts used only if not symlink, not group/world-writable, owned by process uid; never repaired, falls back to seeded file
 - [Phase 23]: 23-01: Redis gitkey:<owner> holds only the key filename (EX 30d) and is honoured only when === one of the owner's own key names
+- [Phase 23]: 23-02: worker spawns argv jobs as spawn(BUILDER_PROGRAM, argv, {shell:false}); the job never names the program; any job carrying argv is validated as argv and refused with Invalid argv, never retried on the cmd shell path
+- [Phase 23]: 23-02: worker logs redact the job secret and the --env JSON; production worker logs written before this change contain WORKER_SECRET, so rotate it after the new worker deploys
 
 ### Todos
 
@@ -237,9 +239,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-27T11:23:35.042Z
+**Last session:** 2026-09-27T11:33:05.538Z
 
-**Stopped at:** Completed 23-01-PLAN.md
+**Stopped at:** Completed 23-02-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
 
@@ -268,3 +270,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 22 P03 | 4min | 2 tasks | 1 files |
 | Phase 22 P04 | 19min | 3 tasks | 6 files |
 | Phase 23 P01 | 16 min | 3 tasks | 6 files |
+| Phase 23 P02 | 7min | 2 tasks | 2 files |
