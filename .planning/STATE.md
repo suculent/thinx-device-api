@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 23
 current_phase_name: Build-Pipeline Sink Hardening
 status: executing
-stopped_at: Completed 23-03-PLAN.md
-last_updated: "2026-09-27T11:46:56.941Z"
+stopped_at: Completed 23-04-PLAN.md
+last_updated: "2026-09-27T11:55:03.868Z"
 last_activity: 2026-09-27
 last_activity_desc: Phase 23 execution started
-state_head: a588733773bc0eb8e859966b262f70e20109090e
+state_head: 9ead0d177f0e22ab952b574a62425e79caad97f8
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # STATE — THiNX Device API
@@ -34,11 +34,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
 ## Current Position
 
 Phase: 23 (Build-Pipeline Sink Hardening) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-09-27 — Phase 23 execution started
 
-Progress: [████████░░] 78% (1/7 v1.14 phases; Phase 22 4/4 plans)
+Progress: [█████████░] 89% (1/7 v1.14 phases; Phase 22 4/4 plans)
 
 ## Milestones
 
@@ -183,6 +183,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 23]: 23-02: worker logs redact the job secret and the --env JSON; production worker logs written before this change contain WORKER_SECRET, so rotate it after the new worker deploys
 - [Phase 23]: 23-03: all builder repo-file reads/writes go through lib/thinx/safepath.js (realpath + path.relative + lstat no-symlink + O_NOFOLLOW); refusals use refuseBuild -> unsafe_repository_file
 - [Phase 23]: 23-03: BUILD_PATH = buildPathFor(owner, udid, build_id) with Sanitka.strictOwner (exactly 64 [a-z0-9]) + Sanitka.udid, never stripped; invalid -> invalid_device before mkdirp and no remote job
+- [Phase 23]: 23-04: remote jobs carry argv (arguments only) plus a legacy cmd byte-identical to shell-escape 0.2.0 via builder.legacyShellCommand; runRemoteShell refuses non --flag args with invalid_build_arguments after the invalid_device identity check
+- [Phase 23]: 23-04: shell-escape removed (package.json + deletion-only lockfile); parent services/worker gitlink committed at 79611f6, unpushed - 23-05 must push worker main before the parent
 
 ### Todos
 
@@ -241,9 +243,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-27T11:46:56.861Z
+**Last session:** 2026-09-27T11:55:03.792Z
 
-**Stopped at:** Completed 23-03-PLAN.md
+**Stopped at:** Completed 23-04-PLAN.md
 
 **Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
 
@@ -274,3 +276,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 23 P01 | 16 min | 3 tasks | 6 files |
 | Phase 23 P02 | 7min | 2 tasks | 2 files |
 | Phase 23 P03 | 10 min | 3 tasks | 8 files |
+| Phase 23 P04 | 5min | 2 tasks | 7 files |
