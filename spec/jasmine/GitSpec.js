@@ -188,6 +188,97 @@ describe("Git", function () {
         });
     });
 
+    describe("symlink checkout (SEC-PATH-02, D-13)", function () {
+
+        let checkout;
+
+        beforeAll(() => {
+            const git = newGit();
+            const result = git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
+            expect(result.ok).to.equal(true);
+            checkout = result.repoPath;
+        });
+
+        it("checks a symlink entry out as a plain file holding the link text", function () {
+            const linked = path.join(checkout, "linked");
+            expect(fs.lstatSync(linked).isSymbolicLink()).to.equal(false);
+            expect(fs.readFileSync(linked, "utf8")).to.equal("../outside.txt");
+        });
+
+        it("persists core.symlinks=false in the checkout", function () {
+            const value = exec.execFileSync("git", ["-C", checkout, "config", "core.symlinks"], { encoding: "utf8" }).trim();
+            expect(value).to.equal("false");
+        });
+
+        it("symlinkEntries() names the mode-120000 index entries", function () {
+            const git = newGit();
+            expect(git.symlinkEntries(checkout)).to.deep.equal(["linked"]);
+        });
+
+        it("symlinkEntries() returns [] for a directory that is not a repository", function () {
+            const git = newGit();
+            expect(git.symlinkEntries(tmpdir(root, "plain"))).to.deep.equal([]);
+        });
+
+        it("builder.symlinkWarning() formats one build-log line", function () {
+            const Builder = require("../../lib/thinx/builder");
+            const builder = new Builder({ get() { }, set() { } });
+            const two = builder.symlinkWarning(["a", "b"]);
+            expect(two).to.be.a("string");
+            expect(two).to.include("core.symlinks=false");
+            expect(two).to.include("a, b");
+            expect(two.indexOf("\n")).to.equal(-1);
+
+            const names = [];
+            for (let i = 1; i <= 25; i++) names.push("f" + i);
+            const many = builder.symlinkWarning(names);
+            expect(many).to.include("f20");
+            expect(many).to.not.include("f21");
+            expect(many).to.include("and 5 more");
+
+            expect(builder.symlinkWarning([])).to.equal(null);
+        });
+    });
+
+    describe("Sources.add prefetch", function () {
+
+        const Sources = require("../../lib/thinx/sources");
+
+        function newSources(tempPath, added) {
+            const sources = new Sources();
+            sources.getTempPath = () => tempPath;
+            sources.validateURL = (source) => source.url; // Sanitka.url() refuses file://
+            sources.addSourceToOwner = (owner, source, temp, callback) => {
+                added.push(source);
+                callback(true, source.source_id);
+            };
+            return sources;
+        }
+
+        it("adds a public repository as is_private=false with its inferred platform", function (done) {
+            const added = [];
+            const sources = newSources(tmpdir(root, "source"), added);
+            sources.add({ owner: OWNER, url: repoUrl, branch: "main", alias: "spec" }, (success) => {
+                expect(success).to.equal(true);
+                expect(added.length).to.equal(1);
+                expect(added[0].is_private).to.equal(false);
+                expect(added[0].platform).to.equal("platformio");
+                done();
+            });
+        }, 20000);
+
+        it("reports 'Git fetch failed.' when neither the public nor the keyed attempt works", function (done) {
+            const added = [];
+            const sources = newSources(tmpdir(root, "source"), added);
+            sources.add({ owner: OWNER, url: "file://" + path.join(root, "missing.git"), branch: "main", alias: "spec" }, (success, reason) => {
+                expect(success).to.equal(false);
+                expect(reason).to.equal("Git fetch failed.");
+                expect(added.length).to.equal(0);
+                done();
+            });
+        }, 20000);
+    });
+
     describe("Builder prefetch", function () {
 
         const Builder = require("../../lib/thinx/builder");
