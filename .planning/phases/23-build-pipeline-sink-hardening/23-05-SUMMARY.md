@@ -202,3 +202,24 @@ The three observations the user reported from the D-14 run were investigated rea
 ---
 *Phase: 23-build-pipeline-sink-hardening*
 *Completed: 2026-09-28*
+
+## Post-review production re-proof (2026-09-28)
+
+After the phase-23 code-review fix passes 1–5 and commit `6d83f819` (the 35-minute prep
+reservation), the stack was redeployed. Push order: the worker commit went to the worker
+repo's `thinx-staging` first (no publish), then parent `thinx-staging` at `23466187`, then
+worker `main` at `d6ca153`. The API rolled out before the worker.
+
+- **API:** `thinx_api` at `registry…/thinx/api:swarm@sha256:752bff9f…`. CircleCI 15447 `test`
+  and 15448 `api-registry` green. 0 restarts. The container carries `runGit`, `loggableStatus`
+  and the 35-min reservation, and no `shell-escape`.
+- **Worker:** `thinx_worker` at `thinxcloud/worker:latest@sha256:3abe50a2…`. Worker CircleCI
+  448 `test` and 449 `build and publish` green. 0 restarts. The API registered the new worker.
+- **Private build (D-14 re-proof):** device **Fridge**, operator logged in with the suculent
+  GitHub account, build `17d30770-bb80-11f1-b777-2975311bbbc4`. **Approved by the user.**
+  The prod API log has 109 lines for the build and none of `git_fetch_failed`,
+  `unsafe_repository_file`, `invalid_device`, `worker_busy`, `chmod_failed`, stale-reservation
+  reclaim, `TypeError` or unhandled rejection. The worker log has 0 `legacy cmd-only` lines and
+  no `--env` / Wi-Fi values.
+- **Known, tracked:** trailing `Current service status … 0/1` lines come from the pre-existing
+  builder polling bug (worker todo, Part 1).
