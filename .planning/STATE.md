@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 24
 current_phase_name: Secrets Sweep
 status: executing
-stopped_at: Phase 23 complete, ready to plan Phase 24
-last_updated: "2026-09-28T23:24:49.140Z"
+stopped_at: Completed 24-01-PLAN.md
+last_updated: "2026-09-28T23:35:24.736Z"
 last_activity: 2026-09-29
-last_activity_desc: Phase 23 complete, transitioned to Phase 24
-state_head: 5b365820bc4f64bfe32442de41703cfbacbc5024
+last_activity_desc: Phase 24 execution started
+state_head: 46671fd03441133965249d78d7c72464e9868b03
 progress:
   total_phases: 7
   completed_phases: 8
   total_plans: 15
-  completed_plans: 9
-  percent: 60
+  completed_plans: 10
+  percent: 67
 ---
 
 # STATE — THiNX Device API
@@ -34,12 +34,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 
 ## Current Position
 
-Phase: 24 (Secrets Sweep) — READY TO EXECUTE
-Plan: Not started
+Phase: 24 (Secrets Sweep) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-09-29 — Phase 23 complete, transitioned to Phase 24
+Last activity: 2026-09-29 — Phase 24 execution started
 
-Progress: [██████░░░░] 60% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [███████░░░] 67% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -186,6 +186,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 23]: 23-03: BUILD_PATH = buildPathFor(owner, udid, build_id) with Sanitka.strictOwner (exactly 64 [a-z0-9]) + Sanitka.udid, never stripped; invalid -> invalid_device before mkdirp and no remote job
 - [Phase 23]: 23-04: remote jobs carry argv (arguments only) plus a legacy cmd byte-identical to shell-escape 0.2.0 via builder.legacyShellCommand; runRemoteShell refuses non --flag args with invalid_build_arguments after the invalid_device identity check
 - [Phase 23]: 23-04: shell-escape removed (package.json + deletion-only lockfile); parent services/worker gitlink committed at 79611f6, unpushed - 23-05 must push worker main before the parent
+- [Phase 24]: SecretsSweepSpec freshRequire evicts modules first loaded during a fresh require, so instances built under a swapped secret never reach later suites
+- [Phase 24]: router.slack returns the profile-help redirect early when SLACK_CLIENT_SECRET is absent; SLACK_CLIENT_ID stays a plain env read
 
 ### Todos
 
@@ -255,9 +257,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29
+**Last session:** 2026-09-28T23:35:24.677Z
 
-**Stopped at:** Phase 24 context gathered (24-CONTEXT.md, 12 decisions); ready to plan Phase 24
+**Stopped at:** Completed 24-01-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
@@ -290,3 +292,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 23 P02 | 7min | 2 tasks | 2 files |
 | Phase 23 P03 | 10 min | 3 tasks | 8 files |
 | Phase 23 P04 | 5min | 2 tasks | 7 files |
+| Phase 24 P01 | 7 min | 2 tasks | 7 files |

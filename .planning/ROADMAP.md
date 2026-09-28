@@ -162,11 +162,11 @@ Plans:
   3. A `CSRF_SECRET` swarm secret exists and `thinx_api` can read it at `/run/secrets/CSRF_SECRET`.
   4. `docker-swarm.yml` mirrors the live stack's secrets and service references, and its stale api image reference is corrected.
 
-**Plans**: 6 plans
+**Plans**: 1/6 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 24-01-PLAN.md — lib sweep A: Mailgun (tracer, owner/transfer) and the Slack bot token, OAuth client secret and webhook through readSecret, with the SecretsSweepSpec harness (wave 1)
+- [x] 24-01-PLAN.md — lib sweep A: Mailgun (tracer, owner/transfer) and the Slack bot token, OAuth client secret and webhook through readSecret, with the SecretsSweepSpec harness (wave 1)
 - [ ] 24-02-PLAN.md — worker and transformer (submodules): local readSecret + rollbarServerToken(), WORKER_SECRET file-wins in validateJob, one Rollbar init, dead inits removed (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -263,7 +263,7 @@ Plans:
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
-| 24. Secrets Sweep | v1.14 | 0/TBD | Not started | - |
+| 24. Secrets Sweep | v1.14 | 1/6 | In Progress|  |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
