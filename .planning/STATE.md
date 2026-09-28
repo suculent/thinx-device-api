@@ -188,7 +188,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
 ### Todos
 
-- [2026-09-28] [worker] Fix worker builder service polling completion detection — [todo file](.planning/todos/pending/2026-09-28-fix-worker-builder-service-polling-completion-detection.md)
+- [2026-09-28] [worker] Fix worker builder service polling completion detection; remove legacy cmd shell path — [todo file](.planning/todos/pending/2026-09-28-fix-worker-builder-service-polling-completion-detection.md)
 
 The v1.13-era notes below (2026-09-21) are kept for reference: each is either resolved or now a v1.14 requirement (Vue `connect-src` gap and stale runbook snapshots → SEC-CSP-04; `WEB_HOSTNAME` for `:vue` → CI-03; gluster bind-mount source of truth → SEC-CSP-03, retirement → SEC-CSP-05 future).
 

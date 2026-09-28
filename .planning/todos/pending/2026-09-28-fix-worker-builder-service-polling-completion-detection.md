@@ -1,10 +1,14 @@
 ---
 created: 2026-09-28T18:44:25.279Z
-title: Fix worker builder service polling completion detection
+title: Fix worker builder service polling completion detection; remove legacy cmd shell path
 area: worker
 severity: major
 files:
   - services/worker/builder:110-160
+  - services/worker/class.js:61-129,216-260
+  - services/worker/test.js
+  - lib/thinx/builder.js:222,275
+  - spec/jasmine/BuilderRemoteJobSpec.js
 ---
 
 ## Problem
@@ -57,3 +61,38 @@ The bug predates phase 23. `builder` was last changed in `f5d7c05`, and phase 23
   parent's gitlink. Push worker `main` before the parent `thinx-staging`, because parent CI does a
   recursive submodule update. Confirm in production with one real build: the log shows
   `Build completed.`, the `thinx_build-*` service is removed, and the worker picks up the next job.
+
+## Part 2 — Remove the legacy `cmd` shell path (added 2026-09-28)
+
+**Why now:** the user confirmed on 2026-09-28 that no other API or worker deployments exist. The
+D-01/D-03 reason for keeping `cmd` (deploy the API and worker in either order) no longer applies.
+Production already runs argv end-to-end: build 43c748d0 went through `runArgv`, and 0
+`legacy cmd-only job` lines were logged in 24 h. Recorded in `23-SECURITY.md` under T-23-11 and
+T-23-31.
+
+**Worker (`services/worker/class.js`):**
+- Remove the legacy branch: the `job.cmd` validation at ~L61-65, the `legacy cmd-only job`
+  warning and `runShell` call at ~L128-129, and `runShell` itself at ~L216-260, including
+  `exec.spawn(command, { shell: true })` at L255.
+- Refuse a job without an argv array: `failJob` with a clear reason such as
+  `missing_argv`, logging no payload.
+- Keep the shared build handlers (`attachBuildHandlers`) and the running-guard release logic that
+  `runArgv` still uses. Update the comments that mention `runShell`.
+- `services/worker/test.js`: replace the `cmd`-based cases (L33, L137-145, …) with argv
+  equivalents, and add "cmd-only job is refused".
+
+**API (`lib/thinx/builder.js`):**
+- Stop sending `cmd` in the remote job (~L275) and delete `legacyShellCommand` (~L222).
+- `spec/jasmine/BuilderRemoteJobSpec.js`: drop the golden `cmd` specs and assert that the job has
+  no `cmd` field.
+- Verify with `git grep -n "legacyShellCommand\|shell: *true" lib services/worker/class.js`,
+  which should return nothing.
+
+**Deploy order changes.** A new API that sends argv only needs the argv-capable worker, and that
+worker is already live (79611f6). Still push worker `main` first, then the parent `thinx-staging`.
+Remove the matching accepted-residual row from `23-SAST-DELTA.md` and scripts'
+`aikido-known-false-positives.json` if there is one. Re-run `aikido_scan_paths` on
+`services/worker/class.js`: the shell-injection finding should be gone.
+
+**Also consider in the same change window:** rotate `WORKER_SECRET` (logs from before 23-02
+contain it).
