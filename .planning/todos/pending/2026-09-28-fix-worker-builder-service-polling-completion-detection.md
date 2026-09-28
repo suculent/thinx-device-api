@@ -119,6 +119,10 @@ with Parts 1–2:
   `Builder.releaseWorker`). Unify them.
 - **IN-20:** the 60-min dispatched bound assumes a builder time limit that the direct
   `docker run` paths do not have.
+- **Pre-existing FIXMEs now tracked here** (the phase-23 verifier's debt-marker gate):
+  - `lib/thinx/queue.js:170`: `findNext()` relies on an external `limit` in an async
+    callback, and pruning has side effects.
+  - `lib/thinx/notifier.js:249`: an unmatched `job_status.status` is only logged.
 - **IN-21 (cosmetic, user commit `d6ca153`):** the "Entering SINK" line sits in an unreachable
   branch (`SINK=$BUILD_PATH/*` is never glob-expanded). Delete the commented-out `ls` lines.
 
