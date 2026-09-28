@@ -73,7 +73,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
 **Milestone Goal:** Close the v1.13 security follow-ups and the open ops/code findings, and ship three long-standing backlog items: Vue Console log paging, InfluxDB 2 with finite retention, and a Swarmpit upgrade and trim. Throughout, no legacy-console route breaks and push → CI → autoredeploy stays under 5 minutes.
 
 - [x] **Phase 22: CI & SAST Baseline** - CodeQL on the branches production code arrives on, retrying registry logins, Vue console hostname verified in the live bundle (verify-first) (completed 2026-09-25)
-- [ ] **Phase 23: Build-Pipeline Sink Hardening** - git and remote-builder commands run via argv; repo-controlled file access is contained and refuses symlinks
+- [x] **Phase 23: Build-Pipeline Sink Hardening** - git and remote-builder commands run via argv; repo-controlled file access is contained and refuses symlinks (completed 2026-09-29)
 - [ ] **Phase 24: Secrets Sweep** - the 9 `lib/` credentials plus a new `CSRF_SECRET` load from swarm secrets, provisioned one service at a time
 - [ ] **Phase 25: Session-Bound CSRF + Console Edge Headers** - HMAC session-bound CSRF token with login rotation, WR-04 and mutation routes covered, hardened console headers mirrored into the images
 - [ ] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept
@@ -132,7 +132,7 @@ Plans:
   4. A `device.owner` or `device.udid` containing `../` or other path characters cannot move `BUILD_PATH` outside the owner's build root.
   5. Firmware repositories are cloned with `core.symlinks=false`. A rescan (CodeQL from Phase 22 plus the local Aikido scan) no longer flags the `git.js` `execSync` sink or the builder `readFileSync`/`lstatSync` sinks; any remaining hit is recorded as an app-owned false positive with a reason.
 
-**Plans**: 5/5 plans executed
+**Plans**: 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -244,7 +244,7 @@ Plans:
 | 18–20. Inbox Drawdown | v1.12 | — | Complete | 2026-06-29 |
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
-| 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | In Progress|  |
+| 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 0/TBD | Not started | - |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
