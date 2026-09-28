@@ -162,7 +162,7 @@ Plans:
   3. A `CSRF_SECRET` swarm secret exists and `thinx_api` can read it at `/run/secrets/CSRF_SECRET`.
   4. `docker-swarm.yml` mirrors the live stack's secrets and service references, and its stale api image reference is corrected.
 
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 
 Plans:
 **Wave 1**
@@ -170,7 +170,7 @@ Plans:
 - [x] 24-02-PLAN.md — worker and transformer (submodules): local readSecret + rollbarServerToken(), WORKER_SECRET file-wins in validateJob, one Rollbar init, dead inits removed (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 24-03-PLAN.md — lib sweep B: WORKER_SECRET into the job with a worker_secret_missing refusal (tracer), GitHub/Google OAuth, Rollbar server-token chain, rsakey passphrase (wave 2)
+- [x] 24-03-PLAN.md — lib sweep B: WORKER_SECRET into the job with a worker_secret_missing refusal (tracer), GitHub/Google OAuth, Rollbar server-token chain, rsakey passphrase (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 24-04-PLAN.md — approval first, then pointer bump and ordered push, code live on env fallback, then the thinx_api secrets (7 carried over + CSRF_SECRET) with D-11 checks (wave 3, checkpoint)
@@ -263,7 +263,7 @@ Plans:
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
-| 24. Secrets Sweep | v1.14 | 2/6 | In Progress|  |
+| 24. Secrets Sweep | v1.14 | 3/6 | In Progress|  |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |

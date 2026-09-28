@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 24
 current_phase_name: Secrets Sweep
 status: executing
-stopped_at: Completed 24-02-PLAN.md
-last_updated: "2026-09-28T23:44:14.290Z"
+stopped_at: Completed 24-03-PLAN.md
+last_updated: "2026-09-28T23:56:44.510Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 24 execution started
-state_head: aafd589c61d617847ae783579542312518690ee6
+state_head: 566c8b6be357d81b3e1761682f1e35eb0a0a8ec6
 progress:
   total_phases: 7
   completed_phases: 8
   total_plans: 15
-  completed_plans: 11
-  percent: 73
+  completed_plans: 12
+  percent: 80
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 ## Current Position
 
 Phase: 24 (Secrets Sweep) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 24 execution started
 
-Progress: [███████░░░] 73% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [████████░░] 80% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -190,6 +190,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 24]: router.slack returns the profile-help redirect early when SLACK_CLIENT_SECRET is absent; SLACK_CLIENT_ID stays a plain env read
 - [Phase 24]: 24-02: worker and transformer carry a local copy of lib/thinx/secrets.js (readSecret byte-identical) plus rollbarServerToken(); keep the copies in sync
 - [Phase 24]: 24-02: the worker builds its only Rollbar client in worker.js; class.js and the transformer's trans.js no longer build one
+- [Phase 24]: runRemoteShell refuses with worker_secret_missing (release, notify, one info line) when readSecret(WORKER_SECRET) is falsy, instead of emitting secret: null
+- [Phase 24]: An empty-string GITHUB_CLIENT_SECRET or GOOGLE_OAUTH_SECRET disables that OAuth provider (readSecret truthiness); with a non-empty secret behaviour is unchanged
+- [Phase 24]: globals.js builds Rollbar at most once per process from ROLLBAR_SERVER_TOKEN, then ROLLBAR_ACCESS_TOKEN (file before env in each chain)
 
 ### Todos
 
@@ -259,9 +262,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-28T23:44:14.218Z
+**Last session:** 2026-09-28T23:56:23.344Z
 
-**Stopped at:** Completed 24-02-PLAN.md
+**Stopped at:** Completed 24-03-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
@@ -296,3 +299,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 23 P04 | 5min | 2 tasks | 7 files |
 | Phase 24 P01 | 7 min | 2 tasks | 7 files |
 | Phase 24 P02 | 7 min | 3 tasks | 10 files |
+| Phase 24 P03 | 9 min | 3 tasks | 10 files |
