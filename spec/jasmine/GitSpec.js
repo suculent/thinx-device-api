@@ -87,6 +87,18 @@ describe("Git", function () {
             expect(meta).to.deep.equal({ basename: path.basename(result.repoPath), branch: "main" });
         });
 
+        it("(a2) has applied the final modes by the time it reports ok:true", function () {
+            // CR-01: the permission walk is part of the success contract, so
+            // nothing may still be changing modes once the caller continues.
+            const git = newGit();
+            const result = git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
+            expect(result.ok).to.equal(true);
+            expect(fs.statSync(result.repoPath).mode & 0o777).to.equal(0o777);
+            expect(fs.statSync(path.join(result.repoPath, ".git", "objects")).mode & 0o777).to.equal(0o777);
+            expect(fs.statSync(path.join(result.repoPath, "thinx.yml")).mode & 0o777).to.equal(0o766);
+            expect(fs.statSync(path.join(result.repoPath, ".git", "HEAD")).mode & 0o777).to.equal(0o766);
+        });
+
         it("(b) reports ok:false for a repository that does not exist", function () {
             const git = newGit();
             const buildPath = tmpdir(root, "build");
