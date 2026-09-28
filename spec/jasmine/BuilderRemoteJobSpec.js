@@ -12,8 +12,10 @@
 // shell-escape here.
 
 const expect = require("chai").expect;
+const util = require("util");
 
 const Builder = require("../../lib/thinx/builder");
+const Notifier = require("../../lib/thinx/notifier");
 const envi = require("../_envi.json");
 
 const fakeRedis = {
@@ -197,6 +199,46 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
             const lines = logSpy.calls.allArgs().map((a) => a.join(" "));
             expect(lines.some((line) => line.includes("it's") || line.includes("a b"))).to.equal(false);
+        });
+
+        // Review iteration 2, WR-01: a worker built before that fix echoes the
+        // whole refused job as job-status, and queue.js hands every job-status
+        // to notifier.process, which logs it first thing.
+        it("notifier.process logs only identifying job-status fields (legacy worker echo)", function (done) {
+            const legacyEcho = {
+                mock: false,
+                build_id: envi.build_id,
+                source_id: envi.sid,
+                owner: envi.oid,
+                udid: envi.udid,
+                path: "/mnt/data/repos/x",
+                argv: validArgs().concat(["--env={\"WIFI_PASS\":\"hunter2\"}"]),
+                cmd: "'./builder' '--env={\"WIFI_PASS\":\"hunter2\"}'",
+                secret: "worker-secret-value",
+                status: "Failed",
+                details: "Invalid job authentication"
+            };
+            const logSpy = spyOn(console, "log");
+            new Notifier().process(legacyEcho, (result) => {
+                const lines = logSpy.calls.allArgs().map((a) => util.format(...a));
+                expect(result).to.equal(false); // no outfile: returns before any CouchDB call
+                expect(lines.some((line) => line.includes("processing status"))).to.equal(true);
+                for (const leak of ["hunter2", "--env", "worker-secret-value", "argv", "cmd", "secret", "/mnt/data/repos/x"]) {
+                    expect(lines.some((line) => line.includes(leak)), leak).to.equal(false);
+                }
+                done();
+            });
+        });
+
+        it("notifier loggableStatus keeps only scalar identifying fields", function () {
+            const notifier = new Notifier();
+            expect(notifier.loggableStatus({
+                build_id: "b", udid: "u", owner: "o", status: "Failed", state: "Failed",
+                details: "Invalid argv", secret: "s", argv: ["--env={}"], cmd: "c", env_hash: "h"
+            })).to.deep.equal({ build_id: "b", udid: "u", owner: "o", status: "Failed", state: "Failed", details: "Invalid argv" });
+            expect(notifier.loggableStatus({ owner: { nested: "secret" } })).to.deep.equal({});
+            expect(notifier.loggableStatus(undefined)).to.deep.equal({});
+            expect(notifier.loggableStatus(null)).to.deep.equal({});
         });
     });
 
