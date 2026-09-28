@@ -1,12 +1,15 @@
 ---
 phase: 23-build-pipeline-sink-hardening
-reviewed: 2026-09-28T18:59:03Z
+reviewed: 2026-09-28T19:44:26Z
 depth: standard
-files_reviewed: 17
+iteration: 3
+files_reviewed: 19
 files_reviewed_list:
   - lib/thinx/builder.js
   - lib/thinx/devices.js
   - lib/thinx/git.js
+  - lib/thinx/notifier.js
+  - lib/thinx/queue.js
   - lib/thinx/platform.js
   - lib/thinx/plugins/pine64/plugin.js
   - lib/thinx/safepath.js
@@ -22,188 +25,200 @@ files_reviewed_list:
   - spec/jasmine/SanitkaSpec.js
   - spec/jasmine/XBuilderSpec.js
 findings:
-  critical: 1
-  warning: 3
-  info: 6
-  total: 10
+  critical: 0
+  warning: 1
+  info: 14
+  total: 15
 status: issues_found
 ---
 
-# Phase 23: Code Review Report
+# Phase 23: Code Review Report (iteration 3, final)
 
-**Reviewed:** 2026-09-28T18:59:03Z
+**Reviewed:** 2026-09-28T19:44:26Z
 **Depth:** standard
-**Files Reviewed:** 17
+**Files Reviewed:** 19
 **Status:** issues_found
 
 ## Summary
 
-I reviewed the phase-23 parent diff (`2d9d85ab^..HEAD`, excluding `.planning/`) and the worker submodule diff (`f1c02c9..79611f6`). I read the listed files in full and checked the helpers they call: `chmodr` 1.2.0, `finder.js`, `buildlog.js`, `rsakey.js`, `json2h.js`, the redis legacy-mode client, and the old `git.js`/`sources.js`/`devices.js`.
+This pass re-reviews the fixes for the three iteration-2 warnings:
+- parent commits `6b1f5ead`, `a65005f3`, `01783ca8`, `3aa947c0` (`git diff f0387ebb..HEAD -- lib spec`)
+- worker commit `a2e4bfa` (`git -C services/worker diff 2f08258..HEAD`)
 
-The core hardening holds up:
-- argv-only git, with `--` before the url and a leading-`-` refusal
-- a constant `GIT_SSH_COMMAND` that is publickey only
-- `GIT_ASKPASS=false`
-- per-attempt askpass directories
-- known_hosts owner and mode checks
-- `safepath` containment with O_NOFOLLOW, including the prefix-sibling and parent-realpath cases
-- strict BUILD_PATH identity
-- the worker program constant plus the argv allowlist
+It also checks the new code for regressions. `devices.js`, `sources.js`, `platform.js`, `plugins/pine64/plugin.js`, `safepath.js`, `sanitka.js` and `package.json` have not changed since iteration 2. I rechecked them only as callers of the changed code and for the carried-forward items.
 
-I traced the injection, traversal and symlink vectors in D-01..D-13 and did not find a bypass.
+**Gates re-run:**
+- Hermetic API specs (BuilderPath, BuilderRemoteJob, Git, SafePath, Sanitka, Finder): **200 specs, 0 failures**. This matches the baseline.
+- Worker: **46/46**.
 
-The remaining problems:
-1. The known async `chmodr` regression. It is worse than "log noise": `ok: true` no longer means the checkout's permissions are final. The permission walk overlaps the build, and on Linux chmodr's file step follows symlinks.
-2. The T-23-13 log redaction is incomplete. The worker's job handler still logs the `--env` payload through `argv` and `cmd`.
-3. The two `runRemoteShell` refusal paths added in this phase skip the refusal contract (build-log state and `cleanupSecrets`). They run after the decrypted Wi-Fi credentials are already on disk.
-4. The rewritten fetch still blocks the event loop. It now has a 10-minute timeout per git call, and an attacker-chosen remote can use all of it.
+### Status of the iteration-2 findings
 
-Pre-existing items that were already triaged are not repeated here: the worker `builder` polling loop, the 0o766/0o777 build-dir modes, the empty `<build_id>/<build_id>` dir, and the legacy `cmd` shell path.
+| ID | Status | Notes |
+|---|---|---|
+| WR-01 | **Fixed** | `failJob` (`services/worker/class.js:64-74`) now builds a new object with `build_id`, `udid`, `owner`, `status: "Failed"` and `details` only. A non-object job no longer throws. `notifier.process` logs `loggableStatus(job_status)` (`notifier.js:107-121`), which keeps only scalar values of six identifying keys, so an older worker's full echo cannot leak through that line either. **The API side still correlates the build and records the failure.** `builder.runRemoteShell`'s `job-status` listener (`builder.js:319-326`) passes the payload to `processExitData`. That function takes `owner`, `build_id` and `udid` from the closure, not from the payload, and reads only `data.status`, which is still `"Failed"`. So `blog.state(build_id, owner, udid, "Failed")`, `notify` and `wsOK` behave exactly as before. The queue's handler (`queue.js:391-398`) still clears `running`, and `notifier.process` still returns early because there is no `outfile`, as it did with the old full copy. |
+| WR-02 | **Fixed** | `withCheckoutLock` (`git.js:149-164`) is correct as written. (1) **Release on throw:** `previous.then(() => task())` turns a synchronous throw into a rejection, and `tail` absorbs both outcomes, so a failed task never blocks the next one. (2) **No deadlock through the non-reentrant path:** `fetch` takes the lock once and calls `cloneHoldingLock` directly (`git.js:519-549`). None of the lock holders (`orderKeys`, `create_askfile`, `runGit`, `chmodCheckoutSync`) re-enter `cloneRepository` or `fetch`. `Sources.add` calls `fetch` from inside the continuation of its own `cloneRepository`. That continuation runs after `result` settles, and `tail` depends only on `result`, never on the caller, so the second acquisition cannot wait on itself. (3) **Map cleanup:** the `get(key) === tail` check removes only the newest tail. (4) Callers that go through the lock: `Sources.add`, `builder.prefetchPublic`/`prefetchPrivate`, `devices.prefetch_repository`. Residuals are in IN-14. |
+| WR-03 | **Fixed as specified, but it exposes a selection bug** | `runRemoteShell` now calls `worker.socket.emit('job', job)` (`builder.js:305`), and the worker guard also refuses a null socket and a socket without `emit`/`on` (`builder.js:251-264`). No broadcast path remains. The `poll` handler (`queue.js:375-389`) now passes the registered worker object and re-checks it after the `await`, which fixes the old `Cannot create property 'running' on string` throw. **But** targeted delivery depends on `worker.running` being accurate, and it is not. The main API build route never sets it, and the queue clears it at `build_started`. With two or more workers, every build now goes to the first registered worker, and that worker drops jobs it gets while it is busy. The broadcast used to hide this. Raised as **WR-01** below (reproduced). Handshake authentication was deliberately skipped, see IN-11. |
+
+### New findings
+
+- **WR-01:** targeted delivery sends every build to the first registered worker, because `worker.running` is never set on the API build route and is cleared at `build_started` on the queue route. A busy worker drops the job silently.
+- **IN-11 to IN-14:** handshake auth (recorded, deliberately skipped), `job-status`/`log` listeners piling up on a reused worker socket, the newly live `poll` path, and limits of the checkout lock.
+
+### Not re-raised (triaged)
+
+- the worker `builder` polling loop
+- the 0o766/0o777 modes
+- the empty `<build_id>/<build_id>` directory
+- the legacy `cmd` shell path
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
-
-### CR-01: `cloneRepository` returns `ok: true` while an async `chmodr` is still walking the checkout (confirmed production regression)
-
-**File:** `lib/thinx/git.js:239-244`. Consumers: `lib/thinx/sources.js:289-290`, `lib/thinx/sources.js:292-294` -> `:311` -> `:102`, `lib/thinx/builder.js:764-767`, `lib/thinx/devices.js:80`
-
-**Issue:**
-`cloneRepository` starts `chmodr(repoPath, 0o766, cb)` and returns `{ ok: true }` in the same tick. Before phase 23, the private path ran `chmod -R` synchronously inside the shell script, so the modes were final before any caller continued. Now every caller races the walk.
-
-1. **Confirmed in production (sources add).** The chain is `Sources.add` -> `git.fetch` (or the public `cloneRepository` at L289) -> `inferAndAddSource` -> `Platform.getPlatform` -> `addSourceToOwner` -> `fs.removeSync(temporary_source_path)` at `sources.js:102`. That removal deletes the tree while chmodr is still in it. Production logs `[git] chmodr failed after fetch: ENOENT .../<source_id>/eav-firmware/test/01-onboarding.suite`, and the failing entry changes between runs: `.../doc` at 18:11 and 18:14, `.../test/01-onboarding.suite` at 18:19. Those are the signs of a race (23-05-SUMMARY O3).
-2. **Build path: `ok: true` does not mean the permissions are final.** chmodr 1.2.0 sets each directory's mode only after all its children finish (`chmodr.js`: `if (-- len === 0) return fs.chmod(p, dirMode(mode), cb)`), so the checkout root is chmod'ed last. `run_build` continues straight into `getPlatform`, the header write, and then `runShell`/`runRemoteShell`. A large repository can still be mid-walk when the builder starts. Anything that depends on the opened modes (the cross-uid access the 0o766 exists for) is racy.
-3. **The walk overlaps build execution and follows links on Linux.** For non-directories chmodr calls `fs[LCHMOD]`, where `LCHMOD = fs.lchmod ? 'lchmod' : 'chmod'`. `fs.lchmod` exists only on macOS, so on the Linux API container it is plain `fs.chmod`, which **follows symlinks**. `core.symlinks=false` keeps symlinks out of the checkout. But repository-controlled build code (for example PlatformIO `extra_scripts`) runs while the root API process may still be walking the same tree. A symlink it creates in a directory that chmodr has not listed yet gets its **target** chmod'ed to 0o766 by root in the API container's namespace, for example a key under `app_config.ssh_keys`. A repository with many files widens this window.
-
-   The 23-05 summary says chmodr "walks with lstat, so it does not follow symlinks". That is true for the directory walk but not for the chmod step.
-4. Walk errors stop the whole walk (`errState`), so the rest of the tree keeps git's default modes with no retry.
-
-`GitSpec` never asserts the checkout's modes after `cloneRepository` returns, which is why this passed the plan gates.
-
-**Fix:** Make the permission change part of the success contract, synchronous, inside the existing `try`, before the success return. At that point no repository code has run yet and the checkout holds no symlinks, so following links is not a concern:
-```js
-// lib/thinx/git.js, replacing L239-243
-stage = "chmod_failed";
-chmodr.sync(repoPath, 0o766);
-return { ok: true, repoPath: repoPath, reason: null };
-```
-Add a GitSpec case that clones the fixture and checks, immediately after return, that a nested directory has mode `0o777` and a file has `0o766`. Consider the same change for `createBuildPath`'s async chmodr at `builder.js:675`, which overlaps the clone into BUILD_PATH.
-
 ## Warnings
 
-### WR-01: Worker still logs the `--env` payload (owner's custom env, may hold credentials) through the job handler; T-23-13 redaction is incomplete
+### WR-01: The job now goes only to `nextAvailableWorker()`'s pick, but that pick does not track busy workers. With two or more workers, every build goes to the first registered worker, which silently drops any job that arrives while it is building (regression exposed by the iteration-2 WR-03 fix)
 
-**File:** `services/worker/class.js:457-462`. Also `lib/thinx/builder.js:1067`, `lib/thinx/builder.js:1070`
+**File:** `lib/thinx/builder.js:305`. Selection: `lib/router.build.js:62-81`, `lib/thinx/queue.js:258-273`, `lib/thinx/queue.js:296-307`. Worker drop: `services/worker/class.js:466-470`
 
 **Issue:**
-The phase redacts `--env=` in `runArgv`'s log line (L209-210) and records T-23-13 as mitigated. But the socket `job` handler logs the whole job with only `secret` replaced:
-```js
-loggable = Object.assign({}, data, { secret: "<redacted>" });
-console.log(new Date().getTime(), `» Worker has new job:`, loggable);
+`nextAvailableWorker()` returns the first registered worker whose `running === false`. Neither build path keeps that flag true while the build runs:
+
+1. **API build route** (`router.build.js:62-81`, the main path for user-triggered builds). It calls `app.queue.nextAvailableWorker()` and hands the result straight to `app.builder.build(...)`. It **never sets `worker.running = true`**. Every concurrent API build therefore gets the same first worker.
+2. **Queue route** (`queue.js:258-273`). `runNext` sets `worker.running = true`, but its build callback sets it back to `false`. `run_build` calls that callback with `build_started` (`builder.js:1051-1054`) *before* it even calls `runRemoteShell` (`builder.js:1119`). The same callback also runs `action.delete()`, so `findNext` stops counting the build against `maxRunningBuilds`, and the next cron tick dispatches again, to the same first worker.
+
+The worker's `job` handler drops any job that arrives while it is busy: `if (this.running == true) { console.log(... passing job ...); return; }` (`class.js:467-470`). It emits no `job-status`.
+
+Before the fix, `this.io.emit` sent the job to every worker, so an idle second worker ran it. That also caused the duplicates WR-03 described. Now the job reaches only the busy worker and is lost. For that build:
+- the client already has `build_started` and the build log never reaches a terminal state
+- no BUILD_FAILED is recorded
+- the decrypted credentials written into `XBUILD_PATH` are never removed. The API calls `cleanupSecrets` only on refusal or for local builds (`builder.js:1119-1126`, `:427`, `:444`).
+
+The same silent loss happens when the chosen worker disconnects between selection and dispatch. Build preparation, including the clone, can take minutes, and the worker disconnects its socket after every build (`class.js:420-423`). A server-side `emit` on a disconnected socket is a no-op, and `runRemoteShell` still returns `true`.
+
+Reproduced with the real `Queue` socket handlers and two registered socket.io clients (scratch script):
 ```
-Every job now carries `argv` (which includes `--env={"KEY":"value",...}`) and `cmd`, the same JSON quoted for the shell (`builder.js:274-275`). `console.log` prints nested arrays and strings at the default inspect depth, so every build writes the env values to the worker log. This happens before `runArgv`'s redacted line.
+router path: same worker twice: true  first is client A: true
+after runNext build_started: w1.running = false  next pick is A again: true
+```
+With a single worker, behaviour is unchanged: the busy worker dropped the broadcast job before as well. The swarm stack's worker replica count is not in this repository. The new comment at `builder.js:300-304` ("while the queue had marked only this one as running") and the fix report's "selected and marked as running" are both wrong for the router path.
 
-The spec `runArgv logs the argv without the --env payload` calls `w.runJob` directly and bypasses the socket handler. The socket-handler spec sends no `--env`, so neither spec catches this.
-
-On the API side, L1070 was rewritten in this phase and logs `buildArgs.join(" ")` with the same `--env=` element. L1067 logs `stringVars` too (pre-existing).
-
-**Fix:**
+**Fix:** Make the busy flag real before relying on targeted delivery, and refuse a dead socket.
 ```js
-// services/worker/class.js
-const redactArgv = (argv) => Array.isArray(argv)
-    ? argv.map((a) => (typeof a === "string" && a.indexOf("--env=") === 0) ? "--env=<redacted>" : a)
-    : argv;
-if (typeof(data) === "object") {
-    loggable = Object.assign({}, data, {
-        secret: "<redacted>",
-        argv: redactArgv(data.argv),
-        cmd: (typeof data.cmd === "string") ? "<redacted>" : data.cmd
-    });
+// router.build.js, before app.builder.build(...)
+next_worker.running = true;
+const callback = function (success, response) {
+    if (success !== true) next_worker.running = false; // refused before dispatch
+    Util.responder(res, success, response);
+};
+
+// queue.js runNext: do not clear running on build_started. Clear it only on
+// failure; job-status (queue.js:395-397) and disconnect already clear it.
+(success, message) => {
+    action.delete();
+    if ((success !== true) && worker) worker.running = false;
 }
+
+// builder.js runRemoteShell guard: a disconnected socket is a refusal, so
+// run_build's D-10 contract (BUILD_FAILED, blog error, cleanupSecrets) runs.
+if (worker.socket.connected !== true) { /* notify + return false */ }
 ```
-Apply the same mapping to `builder.js:1070` and drop the value from L1067. Extend the socket-handler spec to emit a job whose `argv` and `cmd` carry `--env={"WIFI_PASS":"hunter2"}`, and assert that `hunter2` appears in no log line.
-
-### WR-02: New `runRemoteShell` refusal paths bypass the refusal contract after decrypted secrets are on disk
-
-**File:** `lib/thinx/builder.js:250-265` (also `:284-289`). Reached from `lib/thinx/builder.js:1026-1090`
-
-**Issue:**
-By the time `runRemoteShell` runs, `run_build` has already done three things:
-- written decrypted SSID/password into `XBUILD_PATH/thinx.yml` (L905)
-- written device env into `environment.json` (L925)
-- called `callback(true, { response: "build_started" })` (L1026)
-
-The two refusal paths added in this phase (`invalid_device` L252-256, `invalid_build_arguments` L260-265) and the `io === null` path only `notify` and `return`. They do not:
-- set `blog.state(..., "error")`, so the build log stays at `started`/`created` for good while the client was told the build started
-- run `cleanupSecrets`, so plaintext Wi-Fi credentials stay in a 0o766/0o777 tree on the shared volume
-
-D-10 and `refuseBuild`'s own comment require notifier, build-log state, cleanup, and no hang.
-
-There is also a gap in the D-12 check itself. `run_build` validates `device.owner`/`device.udid` (L724), but `runRemoteShell` validates `br.owner`/`br.udid` (L251), and `br.owner` is never checked with `strictOwner`. Any mismatch is found only after the secrets are written.
-
-**Fix:** Validate the identity that `runRemoteShell` will use up front, before `getLastAPIKey`/`mkdirp`:
-```js
-// run_build, right after BUILD_PATH (L724)
-if (this.buildPathFor(owner, udid, build_id) !== BUILD_PATH) {
-    blog.state(build_id, owner, udid, "error");
-    return callback(false, "invalid_device");
-}
-```
-Also make every `runRemoteShell` early return set `blog.state(build_id, owner, udid, "error")` and call `this.cleanupSecrets(xbuildPath)`. Pass `XBUILD_PATH` in, or return `false` and let `run_build` clean up.
-
-### WR-03: The rewritten fetch blocks the whole API event loop for up to 10 minutes per git call on an attacker-chosen remote
-
-**File:** `lib/thinx/git.js:50`, `lib/thinx/git.js:211-230`, `lib/thinx/git.js:381-395`. Callers: `lib/thinx/sources.js:289`, `lib/thinx/builder.js:764-767`
-
-**Issue:**
-`fetch` is `async`, but each attempt runs `execFileSync` twice (clone, then pull), each with `gitTimeoutMs: 600000`. The event loop is blocked for the whole duration: HTTP, socket.io worker heartbeats, MQTT and every other owner's requests.
-
-Any authenticated owner can add a source whose URL points at a server that trickles bytes (`Sanitka.url` allows any `http(s)://host`). That freezes the API for up to 2 × 10 minutes per key attempt, plus the public attempt: (1 + 2N) × 10 minutes for an owner with N keys.
-
-The old `execSync` also blocked, with no timeout at all. The rewrite kept the blocking design and chose a very long ceiling, and the `async` signature suggests it does not block. `timeout` also kills only `git`; its `ssh` or `git-remote-http` children can outlive it.
-
-**Fix:** Run git through the async `execFile` (promisified), with `killSignal: "SIGKILL"`, `detached: true` and a process-group kill on timeout, and `await` it inside `cloneRepository`/`fetch`. `run_build`, `Sources.add` and `devices.prefetch_repository` already consume the promise. As an interim step, lower `gitTimeoutMs` to something like 120 s and pass `-c http.lowSpeedLimit=1000 -c http.lowSpeedTime=30`.
+In `runRemoteShell`, also clear `worker.running` on every `return false`. On the worker, the busy branch should report the job instead of dropping it. Emit `{ build_id, udid, owner, status: "Failed", details: "Worker busy" }` **without** calling `failJob`, because `failJob` sets `this.running = false` and would release the build that is still running. Add a spec: register two clients, call `runRemoteShell` through the router-style selection twice, and expect the second job to go to the second client.
 
 ## Info
 
-### IN-01: Known-hosts fallback writes TOFU keys into the "pinned" seeded file; comments say otherwise
+### IN-01: Known-hosts fallback writes TOFU keys into the "pinned" seeded file; comments say otherwise (carried forward, still open)
 
-**File:** `lib/thinx/git.js:59-63`, `lib/thinx/git.js:135-144`
-**Issue:** In fallback, `learned: seeded` sets both `GlobalKnownHostsFile` and `UserKnownHostsFile` to the seeded file. OpenSSH's `accept-new` writes new host keys into the first user file, which here is the seeded file. The comments say the seeded file "is never written by ssh" and that new keys "are simply not persisted". In fact they persist in the container-local pinned file. Existing pins are not replaced, so this is not a pin bypass.
-**Fix:** Correct the comments. Alternatively, in fallback use `UserKnownHostsFile=/dev/null` with `StrictHostKeyChecking=yes` (fail closed for unknown hosts while the learned store is untrusted).
+**File:** `lib/thinx/git.js:184-188`, `lib/thinx/git.js:260-270`
+**Issue:** Unchanged. In fallback, `learned: seeded` sets `UserKnownHostsFile` to the seeded file, so `accept-new` writes new host keys into it. The comments still say the seeded file "is never written by ssh" and that new keys "are simply not persisted".
+**Fix:** Correct the comments. Alternatively, in fallback use `UserKnownHostsFile=/dev/null` with `StrictHostKeyChecking=yes`.
 
-### IN-02: `Sanitka.udid` is not a UUID validator, contrary to the D-12 wording
+### IN-02: `Sanitka.udid` is not a UUID validator, contrary to the D-12 wording (carried forward, still open)
 
-**File:** `lib/thinx/sanitka.js:97-108`, used by `lib/thinx/builder.js:201-209`, `:712`
-**Issue:** `/^([a-fA-F0-9-]{36,})$/` with length 36 accepts `"-".repeat(36)`, any mix of hex and dashes, and upper case. It is path-safe (no `.` or `/`), so containment holds, but case variants of one UUID map to different directories and odd values pass as a "UUID-shaped" identity.
-**Fix:** Add `Sanitka.strictUuid` with `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/` and use it in `buildPathFor`.
+**File:** `lib/thinx/sanitka.js:97-108`, used by `lib/thinx/builder.js:201-209`
+**Issue:** Unchanged. `"-".repeat(36)`, mixed case and any hex/dash mix still pass, so case variants of one UUID map to different directories.
+**Fix:** Add a `strictUuid` (`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/`) and use it in `buildPathFor`.
 
-### IN-03: Owners without keys get a second identical keyless clone, which can flip `is_private` on a transient failure
+### IN-03: Owners without keys get a second identical keyless clone, which can flip `is_private` (carried forward, still open)
 
-**File:** `lib/thinx/git.js:376-379`. Callers: `lib/thinx/sources.js:289-294`, `lib/thinx/builder.js:764-767`
-**Issue:** When the public attempt fails and the owner has no keys, `fetch` runs the same keyless clone again. That doubles the blocking time (see WR-03). If the retry succeeds, for example after a network blip, `Sources.add` stores `is_private=true` and `prefetchPrivate` updates the source to private, which disables future public fetches.
-**Fix:** Return `false` from `fetch` when there are no keys and the caller already made the public attempt, for example with a `{ keyless: false }` option.
+**File:** `lib/thinx/git.js:525-529`. Callers: `lib/thinx/sources.js:291-296`, `lib/thinx/builder.js:789-792`, `lib/thinx/devices.js:81-88`
+**Issue:** Unchanged. A transient public failure followed by a successful keyless retry stores `is_private=true`. `devices.prefetch_repository` sets `is_private=true` after any successful `fetch`, including a keyless one.
+**Fix:** Return `{ ok, keyed }` from `fetch`, and set `is_private` only when a key was actually used.
 
-### IN-04: `Sources.add` async continuation swallows exceptions, and a failed fetch leaves checkout residue
+### IN-04: `Sources.add` continuation swallows exceptions and leaves checkout residue on failure (carried forward, still open)
 
-**File:** `lib/thinx/sources.js:292-297`
-**Issue:** `.catch` only logs, so an exception inside `inferAndAddSource` leaves the HTTP callback uncalled and the request hangs. When all attempts fail at the pull stage, `TEMP_PATH` (`<build_root>/<owner>/<source_id>`) keeps a full clone of the private repository, because nothing removes it on `Git fetch failed.`.
-**Fix:** Call `callback(false, "Git fetch failed.")` in the `.catch`, and `fs.removeSync(TEMP_PATH)` on both failure branches.
+**File:** `lib/thinx/sources.js:291-299`
+**Issue:** Unchanged. The `.catch` only logs, so an exception in `inferAndAddSource` leaves the HTTP request without a response. On `Git fetch failed.`, `TEMP_PATH` still holds a partial or complete clone.
+**Fix:** In the `.catch`, call `callback(false, "Git fetch failed.")`, guarded against a double call. Run `fs.removeSync(TEMP_PATH)` on both failure branches.
 
-### IN-05: Source-add and device-attach fetches never use the D-09 last-good-key memory
+### IN-05: Source-add and device-attach fetches never use the D-09 last-good-key memory (carried forward, still open)
 
 **File:** `lib/thinx/sources.js:17`, `lib/thinx/devices.js:15`
-**Issue:** Both modules construct `new Git()` without redis, so `orderKeys` and `rememberKey` are no-ops. Only `builder.js:58` passes redis. D-09 describes the memory as shared across API replicas, but only builds read or write it.
-**Fix:** Inject the app redis client (both constructors already receive or can receive it). Otherwise, document the limitation.
+**Issue:** Unchanged. Both construct `new Git()` without redis.
+**Fix:** Inject the redis client (`Devices` already holds `this.redis`), or document the limitation.
 
-### IN-06: `prefetchPrivate` detects public success by `basename.json` existence instead of `prefetchPublic`'s return value
+### IN-06: `run_build` ignores `prefetchPublic`'s result and re-derives it from `basename.json` (carried forward, still open)
 
-**File:** `lib/thinx/builder.js:517`, `lib/thinx/builder.js:764`
-**Issue:** `run_build` ignores `prefetchPublic`'s boolean and re-derives success from a file inside a directory that repository content also populates. This is harmless today because `cloneRepository` empties the directory first, but the success signal is indirect.
-**Fix:** `const publicOk = !br.is_private && this.prefetchPublic(...)`, then skip `prefetchPrivate` when `publicOk`.
+**File:** `lib/thinx/builder.js:789`, `lib/thinx/builder.js:529`
+**Issue:** Unchanged. This is correct only because `cloneHoldingLock` writes `basename.json` last.
+**Fix:** `const publicOk = !br.is_private && await this.prefetchPublic(...)`, then skip `prefetchPrivate` when `publicOk`.
+
+### IN-07: `devices.attach` starts an async, link-following `chmodr` on the device path while the prefetch empties and re-clones it (carried forward, still open)
+
+**File:** `lib/thinx/devices.js:384-386`, then `lib/thinx/devices.js:398` -> `lib/thinx/git.js:344`
+**Issue:** Unchanged. The new checkout lock does not cover this `chmodr`: it runs outside `withCheckoutLock` and still competes with `emptyDirSync` and the clone. `emptyDirSync` on `deployPathForDevice` also still deletes the device's deployed build envelopes on every attach.
+**Fix:** Drop the `chmodr` (`cloneHoldingLock` already sets the modes), or use `chmodr.sync` before the prefetch. Consider prefetching into a subdirectory.
+
+### IN-08: `runGit`'s process-group kill and output cap are untested (carried forward, still open)
+
+**File:** `lib/thinx/git.js:47-53`, `lib/thinx/git.js:86-89`. Spec: `spec/jasmine/GitSpec.js` `(e2)`
+**Issue:** Unchanged. A regression that dropped `detached: true`, or broke the `ENOBUFS` path, would pass every spec. This matters more now: a `runGit` that never settles also holds the checkout lock (IN-14).
+**Fix:** Assert `process.kill(-pid, 0)` throws `ESRCH` after `(e2)`. Add a stubbed-`spawn` test for `ENOBUFS`.
+
+### IN-09: `chmodCheckoutSync` is a synchronous full-tree walk on the API event loop (carried forward, still open)
+
+**File:** `lib/thinx/git.js:121-134`, called at `lib/thinx/git.js:375`
+**Issue:** Unchanged. On a large repository, the `lstat`+`chmod` per entry (including `.git/objects`) stalls the API.
+**Fix:** Make the walk async (`fs.promises`) and `await` it, keeping the no-symlink rule, or skip `.git`.
+
+### IN-10: `build()` device matching falls through to an unmatched udid; unused masked `copy` (carried forward, still open)
+
+**File:** `lib/thinx/builder.js:1249-1266`. Dead code: `lib/thinx/builder.js:295-298`
+**Issue:** Unchanged. `udid.indexOf(db_udid)` matching, and a loop that leaves `device` set to the last row, still write `build_id` into the wrong device document when nothing matches. The `run_build` upfront check (`builder.js:750`) still blocks the cross-owner build. The fix report deliberately left `copy` alone. With the `io.emit` branch gone it is now plainly dead: it is computed and never read.
+**Fix:** Track an explicit `matched` device with exact equality, and return `device_not_found` otherwise. Delete `copy`.
+
+### IN-11: Queue socket.io server still has no handshake authentication (recorded; deliberately not enforced)
+
+**File:** `lib/thinx/queue.js:94-102`, `lib/thinx/queue.js:362-373`
+**Issue:** Any client that can reach port 4000 can `register` as a worker and send `job-status`. Since WR-03, a client that is merely connected no longer receives jobs. A **registered** one still can, through `nextAvailableWorker` and, now that `poll` works, on demand through `poll` (IN-13). Each job it receives carries `WORKER_SECRET` and the `--env` payload. The user confirmed port 4000 is reachable only inside the swarm, and enforcing auth now would break the either-order API/worker deploy (D-01).
+**Fix:** Plan it as a staged change: the worker sends `auth: { token }`, the API accepts with a warning (like the D-03 `cmd`-only pattern), and a later release enforces it.
+
+### IN-12: `runRemoteShell` adds `log` and `job-status` listeners to the worker socket for every job and never removes them (pre-existing)
+
+**File:** `lib/thinx/builder.js:315-326`
+**Issue:** Each listener captures its own `build_id`/`owner`/`udid`/`notifiers`. The worker disconnects only when a build process exits, not when `failJob` refuses a job (`class.js:64-74`). If job 1 is refused and job 2 then runs on the same socket, job 2's log lines also reach job 1's `processShellData`. A `status: OK` line then marks **build 1** as `Success` and updates `last_build` (`builder.js:393-402`). Job 2's `job-status` also runs `processExitData` for build 1. Since WR-03, every build goes to one socket (WR-01 above), so listeners pile up on that socket in particular.
+**Fix:** Filter by id (`if (data.build_id !== build_id) return;` in both handlers; the worker's `failJob`, exit and JOB-RESULT payloads all carry `build_id`). Remove both listeners when the terminal `job-status` arrives.
+
+### IN-13: The `poll` path is now live: concurrent `findNext` can dispatch one action twice, and a `findNext` rejection is unhandled
+
+**File:** `lib/thinx/queue.js:375-389`, `lib/thinx/queue.js:174-211`, `lib/thinx/queue.js:277-286`
+**Issue:** Before this fix, `poll` threw inside `runNext`, so it never built anything. Now it can.
+- **Double dispatch.** `findNext` returns the first `waiting` action, and `setStarted` flips it only later, inside `runNext`. Two workers polling at once, or a poll overlapping the cron `loop()`, both get the same action and each call `runNext`. The result is two builds for one device on two workers. The post-`await` re-check guards the worker only, not the action.
+- **Unhandled rejection.** The handler is `async` with no `try`. If `redis.keys`/`get` rejects, the result is an unhandled rejection, and the API has no `unhandledRejection` handler.
+
+This is dormant today because `services/worker` never calls `loop()`, but any registered client can send `poll` (IN-11). Separately, `loop()` checks `workerAvailable !== null`, but `nextAvailableWorker` returns `false`, so with no worker `runNext(next, false)` marks the action as an error instead of leaving it queued.
+**Fix:** Wrap the handler body in `try/catch`. Claim the action atomically before dispatch, for example by re-reading its key and checking it is still `waiting` before `setStarted`, or with `SET queue:<udid> ... XX` via `WATCH`/`MULTI`. In `loop()`, compare against `false`.
+
+### IN-14: Checkout lock limits: wedged when `runGit` never settles, unbounded wait, and reads after release
+
+**File:** `lib/thinx/git.js:149-164`, `lib/thinx/git.js:94-109`; `lib/thinx/devices.js:81-95`
+**Issue:**
+- **The lock holds as long as `runGit` does.** `runGit` settles only on `close`, and its timeout fires once. If a descendant escapes the process group and keeps the pipes open, `close` never fires. The lock for that device path is then held until the process restarts, and every later attach of that device queues behind it without a log line. Before WR-02, only that one prefetch would hang.
+- **No bound on waiters.** A burst of attaches for one device waits in line, each for up to `keys × 2 × gitTimeoutMs`.
+- **Reads after release.** As the fix report notes, `prefetch_repository`'s `updatePlatform(repo_path)` runs after the lock is released, so the next queued clone's `emptyDirSync` can empty the tree under it. `getPlatform` failing is harmless, because the stored platform is kept (`devices.js:109-114`). A partial tree can still be inferred as the wrong platform. If the later clone then fails, nobody corrects it.
+
+**Fix:** In `runGit`, after `abort` send SIGKILL and settle after a short grace period whether or not `close` has fired. For the reads, run `updatePlatform` inside the lock by adding an optional `afterClone(repoPath)` hook to `fetch`, or clone into a `mkdtemp` sibling and `rename` it into place.
 
 ---
 
-_Reviewed: 2026-09-28T18:59:03Z_
+_Reviewed: 2026-09-28T19:44:26Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
