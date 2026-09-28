@@ -212,3 +212,46 @@ docker logs --since 24h <thinx_worker container> 2>&1 | grep -ci "legacy cmd-onl
 ```
 
 The suppression-hygiene gate is the third `<automated>` block of 23-05-PLAN.md Task 2, run unchanged.
+
+## Addendum — post-review code (2026-09-28)
+
+The sections above describe `c9385574`, the code before the phase-23 code-review fix passes.
+Those passes changed `git.js`, `builder.js`, `queue.js`, `notifier.js`, `sources.js`,
+`router.build.js` and worker `class.js`. The deployed commit is `23466187` (worker `d6ca153`).
+
+**Corrections to the text above:**
+- Clone and pull now run through `runGit`, which is `spawn("git", argv, {shell:false, detached:true})`
+  in its own process group with a timeout and output cap. They no longer use `execFileSync`.
+  The local `ls-files` read still uses `execFileSync("git", argv)`. There is still no shell
+  string and no `ssh-agent sh -c`.
+
+**CodeQL.** Analysis `1854830247` at `23466187` shows 151 open alerts (from the phase-23 verifier).
+No new shell or file-read sink.
+
+| Alert | Rule | Location | Disposition |
+|---|---|---|---|
+| #297 | js/http-to-file-access | `git.js:381` | Same statement as #291 (fixed-name `basename.json` write); false positive, reason unchanged |
+| #292 | js/incomplete-sanitization | `builder.js:1366` | Same statement as #151, re-numbered; disposition unchanged |
+| #294 | js/log-injection | `queue.js` | Replaces #243 (re-numbered) |
+| #293 | js/log-injection | `notifier.js` | New: `loggableStatus` logs only whitelisted scalar fields. Log-forging risk only, no secrets. Accepted as low; the log-hygiene cleanup is tracked |
+| #295, #296 | js/log-injection | `sources.js` | New: reason codes and sanitized repo url/branch in log lines. Same class as #293 |
+
+No alert was dismissed and no suppression was added. The only dismissed alert is #118 from
+2021 (Phase 22 baseline).
+
+**Aikido (local `aikido_scan_paths`, 12 phase files).** Run on the working tree at `23466187`;
+the IaC part errored because the Checkov binary is missing. The platform's weekly auto-rescan
+will confirm it and is not blocking.
+
+| Rule | Location | Disposition |
+|---|---|---|
+| shell_injection (89) | `builder.js:550` `spawn(command, args, {shell:false})` | False positive: argv-only, fixed program |
+| shell_injection (89) | `services/worker/class.js:298` `spawn(command, {shell:true})` | Accepted residual: legacy `cmd` path (D-01/D-03). Removal is in the worker todo, Part 2 |
+| express-without-helmet (85) | `queue.js:11` | Predates phase 23. The queue's stand-alone `express()` serves socket.io on swarm-internal port 4000 and has no HTML surface. Not a sink |
+| path_traversal (1) ×2 | `git.js:129` (chmod walk) | False positive: walks the app-created checkout, skips symlinks, never follows a link |
+| path_traversal (1) | `git.js:155` (`path.resolve(buildPath)` lock key) | False positive: builds a lock key, no file access |
+| path_traversal (1) | `git.js:357/380/402/531`, `builder.js:210/661/1102/1118/1172/1528`, `safepath.js:*` | Same dispositions as the table above: app-owned paths, or the containment helper itself |
+
+**Headline, unchanged:** the `git.js` `execSync` sink is gone. The builder
+`readFileSync`/`lstatSync` sinks on repository-controlled files go through `safepath`. The
+`runGit` spawn is not flagged. Every remaining hit has a reason.
