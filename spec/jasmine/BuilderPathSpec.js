@@ -267,36 +267,39 @@ describe("Builder repository-file guards", function () {
 
         const envi = require("../_envi.json");
 
+        // The job goes to the selected worker's socket only (review
+        // iteration 2, WR-03); calls.emit records that socket, and anything
+        // sent through the socket.io server lands in calls.broadcast.
         function remoteBuilder() {
             const builder = newBuilder();
-            const calls = { emit: [], notify: [] };
-            builder.io = { emit: (...a) => calls.emit.push(a) };
+            const calls = { emit: [], broadcast: [], notify: [] };
+            builder.io = { emit: (...a) => calls.broadcast.push(a) };
             builder.notify = (...a) => calls.notify.push(a);
-            return { builder, calls };
+            const worker = { socket: { on() { }, emit: (...a) => calls.emit.push(a) } };
+            return { builder, calls, worker };
         }
 
-        const worker = { socket: { on() { } } };
-
         it("emits no job and notifies invalid_device for a ../ owner", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             builder.runRemoteShell(worker, ["--owner=x"], "../bad", envi.build_id, envi.udid, {}, envi.sid);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
 
         it("emits no job for a udid carrying path characters", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             builder.runRemoteShell(worker, ["--dry-run"], envi.oid, envi.build_id, "../../../../etc/passwd".padEnd(36, "a"), {}, envi.sid);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
 
         it("emits the job with the contained BUILD_PATH for a valid device", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             builder.runRemoteShell(worker, ["--dry-run"], envi.oid, envi.build_id, envi.udid, {}, envi.sid);
             expect(calls.emit.length).to.equal(1);
             expect(calls.emit[0][0]).to.equal("job");
             expect(calls.emit[0][1].path).to.equal(builder.buildPathFor(envi.oid, envi.udid, envi.build_id));
+            expect(calls.broadcast).to.deep.equal([]);
         });
     });
 

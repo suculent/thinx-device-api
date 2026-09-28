@@ -90,15 +90,17 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         console.log(`🚸 [chai] <<< completed BuilderRemoteJob spec`);
     });
 
+    // calls.emit records what reaches the selected worker's socket;
+    // calls.broadcast records anything sent through the socket.io server,
+    // which must stay empty (review iteration 2, WR-03).
     function remoteBuilder() {
         const builder = new Builder(fakeRedis);
-        const calls = { emit: [], notify: [] };
-        builder.io = { emit: (...a) => calls.emit.push(a) };
+        const calls = { emit: [], broadcast: [], notify: [] };
+        builder.io = { emit: (...a) => calls.broadcast.push(a) };
         builder.notify = (...a) => calls.notify.push(a);
-        return { builder, calls };
+        const worker = { socket: { on() { }, emit: (...a) => calls.emit.push(a) } };
+        return { builder, calls, worker };
     }
-
-    const worker = { socket: { on() { } } };
 
     function validArgs() {
         return [
@@ -137,12 +139,13 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
         it("emits one job with argv (a copy), the legacy cmd and the contained path", function () {
             process.env.WORKER_SECRET = "spec-worker-secret";
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             const buildArgs = validArgs();
             const emitted = builder.runRemoteShell(worker, buildArgs, envi.oid, envi.build_id, envi.udid, [], envi.sid);
 
             expect(emitted).to.equal(true);
             expect(calls.notify).to.deep.equal([]);
+            expect(calls.broadcast).to.deep.equal([]); // WR-03: never through the io server
             expect(calls.emit.length).to.equal(1);
             expect(calls.emit[0][0]).to.equal("job");
             const job = calls.emit[0][1];
@@ -159,7 +162,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         });
 
         it("argv carries builder arguments only, never the program (invariant)", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             const withDryRun = validArgs().concat(["--dry-run"]);
             builder.runRemoteShell(worker, withDryRun, envi.oid, envi.build_id, envi.udid, [], envi.sid);
             const job = calls.emit[0][1];
@@ -168,7 +171,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         });
 
         it("mutating buildArgs after the emit does not change the emitted argv", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             const buildArgs = validArgs();
             builder.runRemoteShell(worker, buildArgs, envi.oid, envi.build_id, envi.udid, [], envi.sid);
             buildArgs.push("--late=1");
@@ -177,7 +180,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
         it("sends secret null when WORKER_SECRET is not set", function () {
             delete process.env.WORKER_SECRET;
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
             expect(calls.emit[0][1].secret).to.equal(null);
         });
@@ -194,7 +197,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         });
 
         it("runRemoteShell writes no --env value to the log", function () {
-            const { builder } = remoteBuilder();
+            const { builder, worker } = remoteBuilder();
             const logSpy = spyOn(console, "log");
             builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
             const lines = logSpy.calls.allArgs().map((a) => a.join(" "));
@@ -245,30 +248,42 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
     describe("runRemoteShell refusals", function () {
 
         it("emits nothing and notifies invalid_device for an invalid owner (23-03 guard)", function () {
-            const { builder, calls } = remoteBuilder();
+            const { builder, calls, worker } = remoteBuilder();
             const emitted = builder.runRemoteShell(worker, validArgs(), "../bad", envi.build_id, envi.udid, [], envi.sid);
             expect(emitted).to.equal(false);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
 
-        // WR-02: run_build has already answered build_started and written the
-        // decrypted secrets by now; false is what makes it set the build-log
-        // state to error and run cleanupSecrets.
-        it("returns false and notifies when the io socket is missing", function () {
-            const { builder, calls } = remoteBuilder();
+        // WR-03 (iteration 2): the job no longer goes through the socket.io
+        // server, so a missing io is not a refusal any more; only the selected
+        // worker's socket matters.
+        it("sends the job to the selected worker even when io is null", function () {
+            const { builder, calls, worker } = remoteBuilder();
             builder.io = null;
             const emitted = builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
-            expect(emitted).to.equal(false);
-            expect(calls.notify.map(c => c[3])).to.deep.equal(["error_starting_build"]);
+            expect(emitted).to.equal(true);
+            expect(calls.emit.map(c => c[0])).to.deep.equal(["job"]);
+            expect(calls.notify).to.deep.equal([]);
         });
 
-        for (const [name, badWorker] of [["undefined", undefined], ["null", null], ["without a socket", {}]]) {
+        // WR-02 (iteration 1): run_build has already answered build_started and
+        // written the decrypted secrets by now; false is what makes it set the
+        // build-log state to error and run cleanupSecrets.
+        const badWorkers = [
+            ["undefined", undefined],
+            ["null", null],
+            ["without a socket", {}],
+            ["with a null socket", { socket: null }],
+            ["with a socket that cannot emit", { socket: { on() { } } }]
+        ];
+        for (const [name, badWorker] of badWorkers) {
             it("returns false and emits nothing for a worker that is " + name, function () {
                 const { builder, calls } = remoteBuilder();
                 const emitted = builder.runRemoteShell(badWorker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
                 expect(emitted).to.equal(false);
                 expect(calls.emit).to.deep.equal([]);
+                expect(calls.broadcast).to.deep.equal([]);
                 expect(calls.notify.length).to.equal(1);
             });
         }
@@ -283,12 +298,123 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
         for (const [name, args] of badArgs) {
             it("emits nothing and notifies invalid_build_arguments for " + name, function () {
-                const { builder, calls } = remoteBuilder();
+                const { builder, calls, worker } = remoteBuilder();
                 const emitted = builder.runRemoteShell(worker, args, envi.oid, envi.build_id, envi.udid, [], envi.sid);
                 expect(emitted).to.equal(false);
                 expect(calls.emit).to.deep.equal([]);
                 expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_build_arguments"]);
             });
         }
+    });
+
+    // Review iteration 2, WR-03: runRemoteShell used this.io.emit, so every
+    // socket connected to the queue server received every job (job secret and
+    // --env payload included) and every idle worker ran it. These specs use a
+    // real socket.io server on an ephemeral localhost port and the Queue's own
+    // socket handlers, so a regression to a broadcast is visible as a job
+    // arriving at the wrong client.
+    describe("job delivery to the selected worker only (WR-03)", function () {
+
+        const http = require("http");
+        const { Server } = require("socket.io");
+        const ioClient = require("socket.io-client");
+        const Queue = require("../../lib/thinx/queue");
+
+        let httpServer, ioServer, queue, port, clients, savedSecret;
+
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        function connectClient() {
+            const client = ioClient("http://127.0.0.1:" + port, { transports: ["websocket"], reconnection: false, forceNew: true });
+            client.received = [];
+            client.on("job", (job) => client.received.push(job));
+            clients.push(client);
+            return new Promise((resolve, reject) => {
+                client.once("connect", () => resolve(client));
+                client.once("connect_error", reject);
+            });
+        }
+
+        // Registers the way services/worker does on connect.
+        async function registeredClient() {
+            const client = await connectClient();
+            const assigned = new Promise((resolve) => client.once("client id", resolve));
+            client.emit("register", { status: "Hello from BuildWorker.", id: null, running: false });
+            await assigned;
+            return client;
+        }
+
+        beforeEach(async () => {
+            savedSecret = process.env.WORKER_SECRET;
+            process.env.WORKER_SECRET = "spec-worker-secret";
+            clients = [];
+            httpServer = http.createServer();
+            ioServer = new Server(httpServer);
+            await new Promise((resolve) => httpServer.listen(0, "127.0.0.1", resolve));
+            port = httpServer.address().port;
+            // The Queue's socket handlers without its constructor, which needs
+            // Redis and binds port 4000.
+            queue = Object.create(Queue.prototype);
+            queue.workers = [];
+            queue.notifier = { process() { } };
+            queue.setupIo(ioServer);
+        });
+
+        afterEach(async () => {
+            for (const client of clients) client.close();
+            await new Promise((resolve) => ioServer.close(() => resolve()));
+            if (typeof savedSecret === "undefined") {
+                delete process.env.WORKER_SECRET;
+            } else {
+                process.env.WORKER_SECRET = savedSecret;
+            }
+        });
+
+        it("sends the job to the chosen worker's socket; other connected clients receive nothing", async function () {
+            const chosen = await registeredClient();
+            const otherWorker = await registeredClient();
+            const bystander = await connectClient(); // connected, never registered
+
+            const worker = queue.nextAvailableWorker();
+            expect(worker.socket.id).to.equal(chosen.id);
+
+            const builder = new Builder(fakeRedis);
+            builder.io = ioServer; // a regression to io.emit would reach every client
+            builder.notify = () => { };
+            const delivered = new Promise((resolve) => chosen.once("job", resolve));
+            expect(builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid)).to.equal(true);
+
+            const job = await delivered;
+            expect(job.build_id).to.equal(envi.build_id);
+            await sleep(250); // leave time for any stray delivery
+            expect(chosen.received.length).to.equal(1);
+            expect(otherWorker.received).to.deep.equal([]);
+            expect(bystander.received).to.deep.equal([]);
+        }, 10000);
+
+        it("a poll hands runNext the registered worker object; busy or unregistered pollers start nothing", async function () {
+            const polling = await registeredClient();
+            const started = [];
+            let ran;
+            const firstRun = new Promise((resolve) => { ran = resolve; });
+            queue.findNext = async () => ({ action: { build_id: "spec" } });
+            queue.runNext = (action, worker) => {
+                started.push(worker);
+                worker.running = true; // what the real runNext does first
+                ran();
+            };
+
+            polling.emit("poll", "true");
+            await firstRun;
+            expect(started.length).to.equal(1);
+            expect(started[0]).to.equal(queue.workers[polling.id]);
+            expect(started[0].socket.id).to.equal(polling.id);
+
+            polling.emit("poll", "true"); // busy now
+            const stranger = await connectClient();
+            stranger.emit("poll", "true"); // never registered
+            await sleep(250);
+            expect(started.length).to.equal(1);
+        }, 10000);
     });
 });
