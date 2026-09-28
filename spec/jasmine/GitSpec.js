@@ -76,10 +76,10 @@ describe("Git", function () {
 
     describe("cloneRepository", function () {
 
-        it("(a) clones a file:// repo and writes basename.json", function () {
+        it("(a) clones a file:// repo and writes basename.json", async function () {
             const git = newGit();
             const buildPath = tmpdir(root, "build");
-            const result = git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv());
+            const result = await git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv());
             expect(result.ok).to.equal(true);
             expect(fs.statSync(result.repoPath).isDirectory()).to.equal(true);
             expect(path.dirname(result.repoPath)).to.equal(buildPath);
@@ -87,11 +87,11 @@ describe("Git", function () {
             expect(meta).to.deep.equal({ basename: path.basename(result.repoPath), branch: "main" });
         });
 
-        it("(a2) has applied the final modes by the time it reports ok:true", function () {
+        it("(a2) has applied the final modes by the time it reports ok:true", async function () {
             // CR-01: the permission walk is part of the success contract, so
             // nothing may still be changing modes once the caller continues.
             const git = newGit();
-            const result = git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
+            const result = await git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
             expect(result.ok).to.equal(true);
             expect(fs.statSync(result.repoPath).mode & 0o777).to.equal(0o777);
             expect(fs.statSync(path.join(result.repoPath, ".git", "objects")).mode & 0o777).to.equal(0o777);
@@ -99,15 +99,15 @@ describe("Git", function () {
             expect(fs.statSync(path.join(result.repoPath, ".git", "HEAD")).mode & 0o777).to.equal(0o766);
         });
 
-        it("(b) reports ok:false for a repository that does not exist", function () {
+        it("(b) reports ok:false for a repository that does not exist", async function () {
             const git = newGit();
             const buildPath = tmpdir(root, "build");
-            const result = git.cloneRepository(buildPath, "file://" + path.join(root, "nope.git"), "main", git.baseEnv());
+            const result = await git.cloneRepository(buildPath, "file://" + path.join(root, "nope.git"), "main", git.baseEnv());
             expect(result.ok).to.equal(false);
             expect(fs.existsSync(path.join(buildPath, "basename.json"))).to.equal(false);
         });
 
-        it("(c) never runs injection strings in url or branch", function () {
+        it("(c) never runs injection strings in url or branch", async function () {
             const git = newGit();
             const marker = path.join(root, "INJECTED");
             const cases = [
@@ -117,27 +117,27 @@ describe("Git", function () {
                 [repoUrl, "main`touch " + marker + "`"]
             ];
             for (const [url, branch] of cases) {
-                const result = git.cloneRepository(tmpdir(root, "build"), url, branch, git.baseEnv());
+                const result = await git.cloneRepository(tmpdir(root, "build"), url, branch, git.baseEnv());
                 expect(result.ok, url + " / " + branch).to.equal(false);
                 expect(fs.existsSync(marker), url + " / " + branch).to.equal(false);
             }
         });
 
-        it("(d) reports ok:false without throwing when git is not on PATH", function () {
+        it("(d) reports ok:false without throwing when git is not on PATH", async function () {
             const git = newGit();
             const env = Object.assign(git.baseEnv(), { PATH: tmpdir(root, "emptybin") });
-            const result = git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", env);
+            const result = await git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", env);
             expect(result.ok).to.equal(false);
         });
 
-        it("(e) rejects empty, null and undefined url/branch before spawning git", function () {
+        it("(e) rejects empty, null and undefined url/branch before spawning git", async function () {
             const git = newGit();
-            const spy = spyOn(exec, "execFileSync").and.callThrough();
+            const spy = spyOn(exec, "spawn").and.callThrough();
             const bad = ["", null, undefined];
             for (const value of bad) {
                 const buildPath = tmpdir(root, "build");
-                const r1 = git.cloneRepository(buildPath, value, "main", git.baseEnv());
-                const r2 = git.cloneRepository(buildPath, repoUrl, value, git.baseEnv());
+                const r1 = await git.cloneRepository(buildPath, value, "main", git.baseEnv());
+                const r2 = await git.cloneRepository(buildPath, repoUrl, value, git.baseEnv());
                 expect(r1.ok).to.equal(false);
                 expect(r1.reason).to.equal("invalid_input");
                 expect(r2.ok).to.equal(false);
@@ -146,6 +146,34 @@ describe("Git", function () {
             }
             expect(spy.calls.count()).to.equal(0);
         });
+
+        it("(e2) keeps the event loop running during a stalled clone and kills git at the timeout (WR-03)", async function () {
+            // A remote that accepts the connection and never answers: git (and
+            // git-remote-http) would wait forever without the timeout.
+            const net = require("net");
+            const sockets = [];
+            const server = net.createServer((socket) => sockets.push(socket));
+            await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+            try {
+                const git = newGit(undefined, { gitTimeoutMs: 1500 });
+                let ticks = 0;
+                const ticker = setInterval(() => { ticks += 1; }, 50);
+                const started = Date.now();
+                const result = await git.cloneRepository(tmpdir(root, "build"),
+                    "http://127.0.0.1:" + server.address().port + "/stall.git", "main", git.baseEnv());
+                const elapsed = Date.now() - started;
+                clearInterval(ticker);
+                expect(result.ok).to.equal(false);
+                expect(result.reason).to.equal("clone_failed");
+                expect(sockets.length).to.be.at.least(1); // git did reach the stalled remote
+                expect(elapsed).to.be.at.least(1400);
+                expect(elapsed).to.be.below(10000);
+                expect(ticks).to.be.at.least(10); // timers kept firing while git ran
+            } finally {
+                for (const socket of sockets) socket.destroy();
+                await new Promise((resolve) => server.close(resolve));
+            }
+        }, 20000);
     });
 
     describe("fetch", function () {
@@ -204,9 +232,9 @@ describe("Git", function () {
 
         let checkout;
 
-        beforeAll(() => {
+        beforeAll(async () => {
             const git = newGit();
-            const result = git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
+            const result = await git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv());
             expect(result.ok).to.equal(true);
             checkout = result.repoPath;
         });
@@ -408,8 +436,8 @@ describe("Git", function () {
         it("never hands the passphrase to an HTTP remote answering 401", async function () {
             const log = path.join(root, "auth-headers.log");
             fs.writeFileSync(log, "");
-            // A separate process: fetch runs git through execFileSync, which
-            // would block a server living on this process's event loop.
+            // A separate process, so the recorded headers are independent of
+            // this process's event loop.
             const server = exec.spawn(process.execPath, ["-e",
                 "const http=require('http'),fs=require('fs');const out=process.argv[1];" +
                 "const s=http.createServer((q,r)=>{fs.appendFileSync(out,JSON.stringify(q.headers.authorization||null)+'\\n');" +
