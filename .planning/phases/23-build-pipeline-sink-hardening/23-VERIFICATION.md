@@ -1,7 +1,7 @@
 ---
 phase: 23-build-pipeline-sink-hardening
 verified: 2026-09-28T22:05:00Z
-status: human_needed
+status: passed
 score: 5/5 roadmap success criteria verified (plan must-haves 44/44 code-level truths verified; debt-marker gate satisfied)
 covered_files:
   - .planning/phases/23-build-pipeline-sink-hardening/23-01-PLAN.md
@@ -50,9 +50,12 @@ human_verification:
   - test: "Judgment-tier prohibition (23-03): MUST NOT refuse silently. Decide whether the two early invalid_device exits in run_build (builder.js:876-890) may skip the websocket notifier."
     expected: "Both exits set build-log state 'error' and call back with the reason 'invalid_device'. That is exactly what 23-03-PLAN specifies for this exit (action text at line 294, truth at line 34) and what CONTEXT D-12 specifies ('callback(false, \"invalid_device\") before any mkdirp'), so this contradicts no must-have and no decision. The prohibition's parenthetical '(notifier + build-log state + callback reason)' is met by refuseBuild and runRemoteShell, but at these two exits only two of the three channels fire. The refusal is not silent: the HTTP caller gets the specific reason and the build log shows error. Advisory. If a notifier push is wanted, it is one this.notify(udid, build_id, notifiers, 'invalid_device', false) line per exit (notifiers is in scope)."
     why_human: "Judgment-tier prohibition. The autonomous verdict (holds in intent; the plan's own action text omits notify here) is non-authoritative, and neither production approval covered a refusal path."
+    resolution: "User chose 'Add notify now' (2026-09-29). Commit fc070578 adds this.notify(udid, build_id, notifiers, 'invalid_device', false) at both exits, with 2 specs in BuilderRemoteJobSpec that fail on the old code (247/0 hermetic). Deployed: thinx_api sha256:3beaf4f0..., 0 restarts, fix present in the container. All three channels now fire, so the prohibition is fully met."
 ---
 
 # Phase 23: Build-Pipeline Sink Hardening Verification Report
+
+> **2026-09-29, human verification resolved:** the only human item (notifier on the `invalid_device` exits) was fixed and deployed (`fc070578`). Status set to `passed`.
 
 **Phase Goal:** A hostile or careless firmware repository can no longer inject shell commands or read or write files outside its build directory, and private-repository builds keep working.
 **Verified:** 2026-09-28T22:05:00Z
