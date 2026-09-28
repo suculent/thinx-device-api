@@ -1,10 +1,11 @@
 ---
 phase: 23-build-pipeline-sink-hardening
-reviewed: 2026-09-28T19:44:26Z
+reviewed: 2026-09-28T20:14:23Z
 depth: standard
-iteration: 3
-files_reviewed: 19
+iteration: 4
+files_reviewed: 20
 files_reviewed_list:
+  - lib/router.build.js
   - lib/thinx/builder.js
   - lib/thinx/devices.js
   - lib/thinx/git.js
@@ -26,199 +27,325 @@ files_reviewed_list:
   - spec/jasmine/XBuilderSpec.js
 findings:
   critical: 0
-  warning: 1
-  info: 14
-  total: 15
+  warning: 3
+  info: 16
+  total: 19
 status: issues_found
 ---
 
-# Phase 23: Code Review Report (iteration 3, final)
+# Phase 23: Code Review Report (iteration 4, approved beyond the cap)
 
-**Reviewed:** 2026-09-28T19:44:26Z
+**Reviewed:** 2026-09-28T20:14:23Z
 **Depth:** standard
-**Files Reviewed:** 19
+**Files Reviewed:** 20
 **Status:** issues_found
 
 ## Summary
 
-This pass re-reviews the fixes for the three iteration-2 warnings:
-- parent commits `6b1f5ead`, `a65005f3`, `01783ca8`, `3aa947c0` (`git diff f0387ebb..HEAD -- lib spec`)
-- worker commit `a2e4bfa` (`git -C services/worker diff 2f08258..HEAD`)
+This pass re-reviews the fix for iteration-3 WR-01:
+- parent commits `88c20095` and `07cc256e` (`git diff c5815388..HEAD -- lib spec`)
+- worker commit `4902380` (`git -C services/worker diff a2e4bfa..HEAD`)
 
-It also checks the new code for regressions. `devices.js`, `sources.js`, `platform.js`, `plugins/pine64/plugin.js`, `safepath.js`, `sanitka.js` and `package.json` have not changed since iteration 2. I rechecked them only as callers of the changed code and for the carried-forward items.
+It also checks the new code for regressions. `devices.js`, `git.js`, `notifier.js`, `platform.js`, `plugins/pine64/plugin.js`, `safepath.js`, `sanitka.js`, `sources.js`, `package.json`, `GitSpec.js` and `XBuilderSpec.js` have not changed since iteration 3. I rechecked them only as callers of the changed code and for the carried-forward items.
 
 **Gates re-run:**
-- Hermetic API specs (BuilderPath, BuilderRemoteJob, Git, SafePath, Sanitka, Finder): **200 specs, 0 failures**. This matches the baseline.
-- Worker: **46/46**.
+- Hermetic API specs (BuilderPath, BuilderRemoteJob, Git, SafePath, Sanitka, Finder): **215 specs, 0 failures**, matching the baseline.
+- Worker: **49/49**.
 
-### Status of the iteration-2 findings
+### Status of iteration-3 WR-01: fixed
 
-| ID | Status | Notes |
-|---|---|---|
-| WR-01 | **Fixed** | `failJob` (`services/worker/class.js:64-74`) now builds a new object with `build_id`, `udid`, `owner`, `status: "Failed"` and `details` only. A non-object job no longer throws. `notifier.process` logs `loggableStatus(job_status)` (`notifier.js:107-121`), which keeps only scalar values of six identifying keys, so an older worker's full echo cannot leak through that line either. **The API side still correlates the build and records the failure.** `builder.runRemoteShell`'s `job-status` listener (`builder.js:319-326`) passes the payload to `processExitData`. That function takes `owner`, `build_id` and `udid` from the closure, not from the payload, and reads only `data.status`, which is still `"Failed"`. So `blog.state(build_id, owner, udid, "Failed")`, `notify` and `wsOK` behave exactly as before. The queue's handler (`queue.js:391-398`) still clears `running`, and `notifier.process` still returns early because there is no `outfile`, as it did with the old full copy. |
-| WR-02 | **Fixed** | `withCheckoutLock` (`git.js:149-164`) is correct as written. (1) **Release on throw:** `previous.then(() => task())` turns a synchronous throw into a rejection, and `tail` absorbs both outcomes, so a failed task never blocks the next one. (2) **No deadlock through the non-reentrant path:** `fetch` takes the lock once and calls `cloneHoldingLock` directly (`git.js:519-549`). None of the lock holders (`orderKeys`, `create_askfile`, `runGit`, `chmodCheckoutSync`) re-enter `cloneRepository` or `fetch`. `Sources.add` calls `fetch` from inside the continuation of its own `cloneRepository`. That continuation runs after `result` settles, and `tail` depends only on `result`, never on the caller, so the second acquisition cannot wait on itself. (3) **Map cleanup:** the `get(key) === tail` check removes only the newest tail. (4) Callers that go through the lock: `Sources.add`, `builder.prefetchPublic`/`prefetchPrivate`, `devices.prefetch_repository`. Residuals are in IN-14. |
-| WR-03 | **Fixed as specified, but it exposes a selection bug** | `runRemoteShell` now calls `worker.socket.emit('job', job)` (`builder.js:305`), and the worker guard also refuses a null socket and a socket without `emit`/`on` (`builder.js:251-264`). No broadcast path remains. The `poll` handler (`queue.js:375-389`) now passes the registered worker object and re-checks it after the `await`, which fixes the old `Cannot create property 'running' on string` throw. **But** targeted delivery depends on `worker.running` being accurate, and it is not. The main API build route never sets it, and the queue clears it at `build_started`. With two or more workers, every build now goes to the first registered worker, and that worker drops jobs it gets while it is busy. The broadcast used to hide this. Raised as **WR-01** below (reproduced). Handshake authentication was deliberately skipped, see IN-11. |
+The selection bug is gone.
+- The router sets `next_worker.running = true` before `build()` (`router.build.js:77`).
+- `runNext` no longer clears the flag at `build_started` (`queue.js:274`).
+- The emit sets it again (`builder.js:321`).
+- The `job-status` handler clears it only when `Queue.releasesWorker` allows (`queue.js:416-419`).
+
+The spec "with two registered workers, a second build goes to the idle worker" drives the real router and the real Queue handlers over socket.io, and it passes. A disconnected socket is now a refusal (`builder.js:264`). The worker reports `worker_busy` instead of dropping the job (`class.js:493-496`).
+
+### The questions from the brief
+
+**Can a worker be released while it is still building?** Not in practice.
+- `releasesWorker` returns true only for a failJob refusal, a failed exit or a spawn error, and the worker sends each of those only when it is idle or about to disconnect.
+- The only mid-build `job-status` a worker used to send came from the stderr `fatal:` branch. That branch is gone in both `a2e4bfa` and `4902380` (`class.js:388-409`).
+- The one contrived path runs through `buildGuards`'s non-terminal `callback(false)`; see IN-15.
+
+**Can a worker get stuck busy forever?** Yes. This is the main new risk; see WR-01. The fix report says these paths "throw an uncaught exception, which restarts the process". That is false in production. The API installs Rollbar with `handleUncaughtExceptions` and `handleUnhandledRejections` but without `exitOnUncaughtException` (`globals.js:153-159`), and compose/swarm always pass `ROLLBAR_ACCESS_TOKEN`. Rollbar 2.26.5 then logs the error and the process keeps running. I reproduced a permanent wedge with a scratch script that uses the real router.
+
+**`dispatchRemoteBuild` / `failRemoteBuild` once-only and `onRefused`:** correct.
+- `refuse` is idempotent (`builder.js:422-427`).
+- `runRemoteShell` either returns false before it attaches any listener, or returns true and can then call `onRefused` at most once, because `detach()` runs first (`builder.js:356-361`).
+- A `worker_busy` refusal cleans only the refused build's `XBUILD_PATH`, because the path is per build_id. The end-to-end spec asserts this.
+
+**`job-status` scoping and listener removal:**
+- **Correct for every payload the worker sends.** Every one carries a string `build_id`:
+  - `reportRefusal` (`class.js:73-79`);
+  - spawn error (`class.js:416-421`);
+  - exit (`class.js:431-436`);
+  - JOB-RESULT. The `jo` payload includes `build_id` (`services/worker/builder:1414-1428`), and so does the parse-failure fallback (`class.js:326-331`).
+- **Listener removal.** `detach` uses `socket.off`, which exists on the socket.io 4 server `Socket` (an EventEmitter). The listeners are removed on a refusal or a non-result status and kept on JOB-RESULT.
+- **Remaining gap.** `log` payloads still carry no `build_id` (IN-12 residual).
+
+**The worker's `worker_busy` refusal:** correct.
+- The empty-payload check runs first.
+- `refuseBusyJob` does not touch `this.running`.
+- The payload is the five identifying keys only.
+
+**The deliberate choice: JOB-RESULT does not release.** Sound. The worker keeps its own `this.running` until `exit` (`class.js:428`), and `exit` always disconnects (`class.js:439-442`), so the API flag mirrors the worker's flag exactly. Releasing at JOB-RESULT would reopen the gap during `notifier.js` and `cat $LOG_PATH`. **But the choice couples release to the post-build disconnect, which is itself a bug (WR-03).** Whoever fixes WR-03 by dropping `socket.disconnect()` must add an idle signal on a clean exit. Otherwise a successful build never releases its worker.
+
+**D-01, either deploy order:**
+- **New API with the deployed worker `a2e4bfa`: compatible.**
+  - `a2e4bfa`'s payloads carry `build_id`, so the new scoping attributes them.
+  - It still drops a busy job silently. With the flag now accurate, a job can reach a busy worker only in the few milliseconds between a failed-exit `job-status` and the disconnect packet that follows it. A build selected in that gap is refused at dispatch by the `connected` check, not lost (IN-16).
+- **New worker with the current API (`c5815388`): works, with the caveat the fix report already gives.**
+  - The unscoped listeners mean `worker_busy` for B also runs `processExitData(A, "Failed")`. The build log recovers when the `status: OK` line streams (`builder:1381`, and again from `cat $LOG_PATH`).
+  - One effect the report leaves out: `notify(..., "Failed")` also goes to the owner's **messenger**, and a sent Slack/e-mail notification cannot be taken back.
+  - The old API also never cleans B's secrets on that refusal.
+  - Deploying the API first, as the report advises, avoids all of this.
 
 ### New findings
-
-- **WR-01:** targeted delivery sends every build to the first registered worker, because `worker.running` is never set on the API build route and is cleared at `build_started` on the queue route. A busy worker drops the job silently.
-- **IN-11 to IN-14:** handshake auth (recorded, deliberately skipped), `job-status`/`log` listeners piling up on a reused worker socket, the newly live `poll` path, and limits of the checkout lock.
+- **WR-01:** the busy flag wedges permanently when a build fails between selection and dispatch without calling back (reproduced).
+- **WR-02:** the builds the router now sends to the queue because the worker is busy are then discarded by `loop()`.
+- **WR-03 (pre-existing):** the worker never reconnects after a build. The release model now depends on that disconnect, and with one replica the API has no worker after the first build (verified).
+- **IN-15:** `buildGuards` calls back `false` without returning, which breaks the "a false callback is terminal" rule that both release sites now rely on.
+- **IN-16:** a `worker_busy` refusal, or a worker that disconnects before dispatch, fails the user's build instead of queueing it again.
 
 ### Not re-raised (triaged)
-
-- the worker `builder` polling loop
+- the builder polling loop
 - the 0o766/0o777 modes
 - the empty `<build_id>/<build_id>` directory
-- the legacy `cmd` shell path
+- the legacy `cmd` path
+- handshake auth (IN-11 stays info only)
 
 ## Narrative Findings (AI reviewer)
 
 ## Warnings
 
-### WR-01: The job now goes only to `nextAvailableWorker()`'s pick, but that pick does not track busy workers. With two or more workers, every build goes to the first registered worker, which silently drops any job that arrives while it is building (regression exposed by the iteration-2 WR-03 fix)
+### WR-01: A build that dies between selection and dispatch leaves its worker marked busy forever. With one replica, every later build is queued and then discarded until the API or worker restarts (regression from the WR-01 fix)
 
-**File:** `lib/thinx/builder.js:305`. Selection: `lib/router.build.js:62-81`, `lib/thinx/queue.js:258-273`, `lib/thinx/queue.js:296-307`. Worker drop: `services/worker/class.js:466-470`
+**File:** `lib/router.build.js:77-81`, `lib/thinx/queue.js:258`, `lib/thinx/queue.js:274`. Trigger sites: `lib/thinx/builder.js:1319-1337`, `:1424`, `:962-964`, `:1184`, `:861`. Premise: `lib/thinx/globals.js:153-159`
 
 **Issue:**
-`nextAvailableWorker()` returns the first registered worker whose `running === false`. Neither build path keeps that flag true while the build runs:
+The router now sets `running = true` at selection and clears it only if `build()` calls back with `success !== true`. After dispatch, a `job-status` or the disconnect releases it. Neither happens when the build never calls back, or throws after `build_started` and before `runRemoteShell`. The worker is then idle and connected, it never disconnects, because it disconnects only after running a build, and it never re-registers. `nextAvailableWorker()` returns `false` from then on, so every build goes to `queue.add`, and WR-02 then discards it.
 
-1. **API build route** (`router.build.js:62-81`, the main path for user-triggered builds). It calls `app.queue.nextAvailableWorker()` and hands the result straight to `app.builder.build(...)`. It **never sets `worker.running = true`**. Every concurrent API build therefore gets the same first worker.
-2. **Queue route** (`queue.js:258-273`). `runNext` sets `worker.running = true`, but its build callback sets it back to `false`. `run_build` calls that callback with `build_started` (`builder.js:1051-1054`) *before* it even calls `runRemoteShell` (`builder.js:1119`). The same callback also runs `action.delete()`, so `findNext` stops counting the build against `maxRunningBuilds`, and the next cron tick dispatches again, to the same first worker.
+The fix report accepts this residual on the grounds that uncaught exceptions restart the process. They do not.
+- `globals.js:153-159` creates Rollbar with `handleUncaughtExceptions: true, handleUnhandledRejections: true` and no `exitOnUncaughtException`.
+- `node_modules/rollbar/src/server/rollbar.js:645-674` then logs the error and does not exit.
+- `docker-compose.yml`/`docker-swarm.yml` always set `ROLLBAR_ACCESS_TOKEN`. Even an empty `${ROLLBAR_ACCESS_TOKEN}` passes the `!== undefined && !== null` check.
 
-The worker's `job` handler drops any job that arrives while it is busy: `if (this.running == true) { console.log(... passing job ...); return; }` (`class.js:467-470`). It emits no `job-status`.
+Reachable triggers in the current code:
+- `build()`: a `devicelib.view` error other than `missing` falls through with no callback (`builder.js:1319-1337`), for example a CouchDB timeout or a restart. The "No DB shards" branch calls `that.list(...)`, but `Builder` has no `list` method, so it throws a `TypeError` inside `setTimeout`.
+- `Object.keys(doc.repos)` throws for an owner document without `repos` (`builder.js:1424`).
+- `platform.split(":")` throws when `device.platform` is undefined (`builder.js:962-964`).
+- `formatMacForDevSec(device.mac)` throws on an undefined `mac` (`builder.js:564-566`, called at `:1184`). This happens **after** `build_started`, so the client is also told that the build started, and the decrypted secrets stay in `XBUILD_PATH`.
+- Any throw inside the `async` `getLastAPIKey` callback (`builder.js:861`), such as `mkdirp.sync` or `readdirSync`, becomes an unhandled rejection. Rollbar swallows that too.
 
-Before the fix, `this.io.emit` sent the job to every worker, so an idle second worker ran it. That also caused the duplicates WR-03 described. Now the job reaches only the busy worker and is lost. For that build:
-- the client already has `build_started` and the build log never reaches a terminal state
-- no BUILD_FAILED is recorded
-- the decrypted credentials written into `XBUILD_PATH` are never removed. The API calls `cleanupSecrets` only on refusal or for local builds (`builder.js:1119-1126`, `:427`, `:444`).
+Before this fix the router path never set the flag, so these faults hung only one HTTP request. Now one fault disables remote builds.
 
-The same silent loss happens when the chosen worker disconnects between selection and dispatch. Build preparation, including the clone, can take minutes, and the worker disconnects its socket after every build (`class.js:420-423`). A server-side `emit` on a disconnected socket is a no-op, and `runRemoteShell` still returns `true`.
-
-Reproduced with the real `Queue` socket handlers and two registered socket.io clients (scratch script):
+Reproduced with the real `router.build.js`, a registry shaped like `Queue.workers`, and a builder stub that throws after `build_started`, the way `formatMacForDevSec(undefined)` would, under a Rollbar-style `uncaughtException` handler:
 ```
-router path: same worker twice: true  first is client A: true
-after runNext build_started: w1.running = false  next pick is A again: true
+swallowed like Rollbar: Cannot read properties of undefined (reading 'replace')
+worker idle on its side, API flag running = true
+No swarm workers found.
+queued (would be setError'd by loop())
 ```
-With a single worker, behaviour is unchanged: the busy worker dropped the broadcast job before as well. The swarm stack's worker replica count is not in this repository. The new comment at `builder.js:300-304` ("while the queue had marked only this one as running") and the fix report's "selected and marked as running" are both wrong for the router path.
 
-**Fix:** Make the busy flag real before relying on targeted delivery, and refuse a dead socket.
+**Severity:** kept at WARNING and not BLOCKER only because WR-03 already removes the single production worker after each build, and a worker restart clears this wedge: the disconnect deletes the registry entry. Once WR-03 is fixed, this becomes the dominant availability hazard and should be treated as a blocker.
+
+**Fix:** Give the pre-dispatch reservation a lease, so that a lost build cannot hold the worker:
 ```js
-// router.build.js, before app.builder.build(...)
+// router.build.js and queue.runNext, at selection
 next_worker.running = true;
-const callback = function (success, response) {
-    if (success !== true) next_worker.running = false; // refused before dispatch
-    Util.responder(res, success, response);
-};
+next_worker.reserved_at = Date.now();
+next_worker.dispatched = null;
 
-// queue.js runNext: do not clear running on build_started. Clear it only on
-// failure; job-status (queue.js:395-397) and disconnect already clear it.
-(success, message) => {
-    action.delete();
-    if ((success !== true) && worker) worker.running = false;
+// builder.runRemoteShell, at the emit
+worker.running = true;
+worker.dispatched = build_id;
+
+// queue.nextAvailableWorker
+const PREP_LEASE_MS = 15 * 60 * 1000; // longer than the slowest clone + prep
+for (const id in this.workers) {
+    const w = this.workers[id];
+    if (w.connected !== true) continue;
+    if ((w.running === true) && (w.dispatched == null) &&
+        (typeof w.reserved_at === "number") && (Date.now() - w.reserved_at > PREP_LEASE_MS)) {
+        console.log("[queue] reclaiming worker whose build never dispatched", id);
+        w.running = false;
+    }
+    if (w.running === false) return w;
 }
-
-// builder.js runRemoteShell guard: a disconnected socket is a refusal, so
-// run_build's D-10 contract (BUILD_FAILED, blog error, cleanupSecrets) runs.
-if (worker.socket.connected !== true) { /* notify + return false */ }
 ```
-In `runRemoteShell`, also clear `worker.running` on every `return false`. On the worker, the busy branch should report the job instead of dropping it. Emit `{ build_id, udid, owner, status: "Failed", details: "Worker busy" }` **without** calling `failJob`, because `failJob` sets `this.running = false` and would release the build that is still running. Add a spec: register two clients, call `runRemoteShell` through the router-style selection twice, and expect the second job to go to the second client.
+Also close the trigger sites: call `callback(false, ...)` on every `devicelib.view` error, remove the `that.list` call, and guard `device.platform`/`device.mac`. Put `run_build`'s async body in a `try/catch` that calls `callback(false, "build_exception")` before `build_started`. After `build_started`, it should call `releaseWorker` + `failRemoteBuild` instead.
+
+### WR-02: The builds the router now queues because the worker is busy are marked `error` by `loop()` and never run
+
+**File:** `lib/thinx/queue.js:298-307`, `lib/thinx/queue.js:213-231`, `lib/thinx/queue_action.js:52-56`, `lib/router.build.js:62-68`
+
+**Issue:**
+Before this fix the router's `nextAvailableWorker()` never returned `false` while a worker was registered, because the flag was never set. The queue fallback at `router.build.js:63-68` ran only when there was no worker at all. Now **every build requested while the single worker is busy** takes that path. The client gets `{ success: true, response: "queued" }`.
+
+At the next cron tick (`*/5 * * * *`), `loop()` does the following:
+1. `findNext()` returns the waiting action.
+2. `nextAvailableWorker()` returns `false`, because the worker is still busy or, after WR-03, gone.
+3. `workerAvailable !== null` is true, so `runNext(next, false)` runs.
+4. `actionWorkerValid` calls `action.setError()`. This replaces the stored action with `{ udid, status: "error", build_id: <new uuid> }`, and the source and owner are lost.
+5. The next tick prunes it.
+
+Nothing notifies the owner, and nothing writes a build-log entry. The fix meant to end silent build loss, and this path still loses builds silently; only the reply changed from "build_started" to "queued". This was a dormant sub-item of IN-13 in iteration 3. The WR-01 fix makes it the normal overflow path.
+
+**Fix:**
+```js
+async loop() {
+    const next = await this.findNext();
+    if (!next) return;
+    const worker = this.nextAvailableWorker();
+    if (worker === false) return; // leave it waiting for a later tick
+    this.runNext(next, worker);
+}
+```
+Optionally trigger `loop()` when a worker registers (the `workerReady` event), so a queued build does not wait up to 5 minutes. Give a `waiting` action a TTL, so it cannot wait forever when no worker ever comes back.
+
+### WR-03: The worker disconnects after every build and never reconnects, so with one replica the API has no worker after the first build. The WR-01 release model now depends on this disconnect (pre-existing, verified)
+
+**File:** `services/worker/class.js:439-442`, `services/worker/class.js:453-472`, `services/worker/worker.js:48-57`
+
+**Issue:**
+`attachBuildHandlers`' `exit` handler calls `socket.disconnect(true)`. In socket.io-client 4.8.3 a client-side `disconnect()` destroys the manager (`skipReconnect = true`), and nothing in `class.js` or `worker.js` calls `connect()` again. The `connect_error` retry covers only failed handshakes.
+
+I verified this with the worker's own `node_modules`: after the client disconnects, the connection count stays at 1 and `client.connected` is still `false` 8 s later. The worker process keeps running while disconnected. The Dockerfile has no `HEALTHCHECK`, and the swarm service has no restart trigger other than a crash or a new image. With the single `thinx_worker` replica:
+1. Build 1 runs.
+2. The API deletes the entry on disconnect.
+3. Every later build is "queued" and then discarded (WR-02) until the worker container restarts.
+
+The fix report lists this as a residual risk. It matters more now: the "JOB-RESULT does not release" choice is correct *only because* of this disconnect. A clean exit sends no `job-status` (`class.js:430-437` emits only on `code > 0`). If someone fixes the reconnect by deleting the `disconnect`, every successful build leaves the API flag set forever.
+
+**Fix:** Keep the release-on-disconnect semantics and reconnect, which creates a new session, a new `register` and a new registry entry with `running: false`:
+```js
+shell.on("exit", (code) => {
+    this.running = false;
+    if (code > 0) socket.emit('job-status', { udid, build_id, state: "Failed", reason: dstring });
+    if (typeof socket.disconnect === "function") {
+        socket.disconnect();
+        setTimeout(() => socket.connect(), 1000); // re-register as idle
+    }
+    ...
+});
+```
+The alternative is to stop disconnecting and always emit a terminal `job-status` on exit (for example `{ build_id, udid, owner, state: code === 0 ? "Exited" : "Failed", code }`), which `Queue.releasesWorker` treats as releasing. Either way, add a worker test that runs a mock build to `exit` and asserts that the worker is registered again and receives a second job.
 
 ## Info
 
 ### IN-01: Known-hosts fallback writes TOFU keys into the "pinned" seeded file; comments say otherwise (carried forward, still open)
 
 **File:** `lib/thinx/git.js:184-188`, `lib/thinx/git.js:260-270`
-**Issue:** Unchanged. In fallback, `learned: seeded` sets `UserKnownHostsFile` to the seeded file, so `accept-new` writes new host keys into it. The comments still say the seeded file "is never written by ssh" and that new keys "are simply not persisted".
+**Issue:** Unchanged. In fallback, `learned: seeded` sets `UserKnownHostsFile` to the seeded file, so `accept-new` writes new host keys into it. The comments still say the seeded file "is never written by ssh".
 **Fix:** Correct the comments. Alternatively, in fallback use `UserKnownHostsFile=/dev/null` with `StrictHostKeyChecking=yes`.
 
 ### IN-02: `Sanitka.udid` is not a UUID validator, contrary to the D-12 wording (carried forward, still open)
 
 **File:** `lib/thinx/sanitka.js:97-108`, used by `lib/thinx/builder.js:201-209`
-**Issue:** Unchanged. `"-".repeat(36)`, mixed case and any hex/dash mix still pass, so case variants of one UUID map to different directories.
+**Issue:** Unchanged. `"-".repeat(36)`, mixed case and any hex/dash mix still pass.
 **Fix:** Add a `strictUuid` (`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/`) and use it in `buildPathFor`.
 
 ### IN-03: Owners without keys get a second identical keyless clone, which can flip `is_private` (carried forward, still open)
 
-**File:** `lib/thinx/git.js:525-529`. Callers: `lib/thinx/sources.js:291-296`, `lib/thinx/builder.js:789-792`, `lib/thinx/devices.js:81-88`
-**Issue:** Unchanged. A transient public failure followed by a successful keyless retry stores `is_private=true`. `devices.prefetch_repository` sets `is_private=true` after any successful `fetch`, including a keyless one.
+**File:** `lib/thinx/git.js:525-529`. Callers: `lib/thinx/sources.js:291-296`, `lib/thinx/builder.js:893-896`, `lib/thinx/devices.js:81-88`
+**Issue:** Unchanged.
 **Fix:** Return `{ ok, keyed }` from `fetch`, and set `is_private` only when a key was actually used.
 
 ### IN-04: `Sources.add` continuation swallows exceptions and leaves checkout residue on failure (carried forward, still open)
 
 **File:** `lib/thinx/sources.js:291-299`
-**Issue:** Unchanged. The `.catch` only logs, so an exception in `inferAndAddSource` leaves the HTTP request without a response. On `Git fetch failed.`, `TEMP_PATH` still holds a partial or complete clone.
+**Issue:** Unchanged.
 **Fix:** In the `.catch`, call `callback(false, "Git fetch failed.")`, guarded against a double call. Run `fs.removeSync(TEMP_PATH)` on both failure branches.
 
 ### IN-05: Source-add and device-attach fetches never use the D-09 last-good-key memory (carried forward, still open)
 
 **File:** `lib/thinx/sources.js:17`, `lib/thinx/devices.js:15`
 **Issue:** Unchanged. Both construct `new Git()` without redis.
-**Fix:** Inject the redis client (`Devices` already holds `this.redis`), or document the limitation.
+**Fix:** Inject the redis client, or document the limitation.
 
 ### IN-06: `run_build` ignores `prefetchPublic`'s result and re-derives it from `basename.json` (carried forward, still open)
 
-**File:** `lib/thinx/builder.js:789`, `lib/thinx/builder.js:529`
-**Issue:** Unchanged. This is correct only because `cloneHoldingLock` writes `basename.json` last.
+**File:** `lib/thinx/builder.js:893`, `lib/thinx/builder.js:634`
+**Issue:** Unchanged.
 **Fix:** `const publicOk = !br.is_private && await this.prefetchPublic(...)`, then skip `prefetchPrivate` when `publicOk`.
 
 ### IN-07: `devices.attach` starts an async, link-following `chmodr` on the device path while the prefetch empties and re-clones it (carried forward, still open)
 
 **File:** `lib/thinx/devices.js:384-386`, then `lib/thinx/devices.js:398` -> `lib/thinx/git.js:344`
-**Issue:** Unchanged. The new checkout lock does not cover this `chmodr`: it runs outside `withCheckoutLock` and still competes with `emptyDirSync` and the clone. `emptyDirSync` on `deployPathForDevice` also still deletes the device's deployed build envelopes on every attach.
-**Fix:** Drop the `chmodr` (`cloneHoldingLock` already sets the modes), or use `chmodr.sync` before the prefetch. Consider prefetching into a subdirectory.
+**Issue:** Unchanged.
+**Fix:** Drop the `chmodr`, or use `chmodr.sync` before the prefetch.
 
 ### IN-08: `runGit`'s process-group kill and output cap are untested (carried forward, still open)
 
-**File:** `lib/thinx/git.js:47-53`, `lib/thinx/git.js:86-89`. Spec: `spec/jasmine/GitSpec.js` `(e2)`
-**Issue:** Unchanged. A regression that dropped `detached: true`, or broke the `ENOBUFS` path, would pass every spec. This matters more now: a `runGit` that never settles also holds the checkout lock (IN-14).
+**File:** `lib/thinx/git.js:47-53`, `lib/thinx/git.js:86-89`
+**Issue:** Unchanged.
 **Fix:** Assert `process.kill(-pid, 0)` throws `ESRCH` after `(e2)`. Add a stubbed-`spawn` test for `ENOBUFS`.
 
 ### IN-09: `chmodCheckoutSync` is a synchronous full-tree walk on the API event loop (carried forward, still open)
 
 **File:** `lib/thinx/git.js:121-134`, called at `lib/thinx/git.js:375`
-**Issue:** Unchanged. On a large repository, the `lstat`+`chmod` per entry (including `.git/objects`) stalls the API.
-**Fix:** Make the walk async (`fs.promises`) and `await` it, keeping the no-symlink rule, or skip `.git`.
+**Issue:** Unchanged.
+**Fix:** Make the walk async, or skip `.git`.
 
-### IN-10: `build()` device matching falls through to an unmatched udid; unused masked `copy` (carried forward, still open)
+### IN-10: `build()` device matching falls through to an unmatched udid (carried forward; the dead `copy` part is fixed)
 
-**File:** `lib/thinx/builder.js:1249-1266`. Dead code: `lib/thinx/builder.js:295-298`
-**Issue:** Unchanged. `udid.indexOf(db_udid)` matching, and a loop that leaves `device` set to the last row, still write `build_id` into the wrong device document when nothing matches. The `run_build` upfront check (`builder.js:750`) still blocks the cross-owner build. The fix report deliberately left `copy` alone. With the `io.emit` branch gone it is now plainly dead: it is computed and never read.
-**Fix:** Track an explicit `matched` device with exact equality, and return `device_not_found` otherwise. Delete `copy`.
+**File:** `lib/thinx/builder.js:1343-1376`
+**Issue:** The masked `copy` is gone. The matching bug is still there: `udid.indexOf(db_udid)` does substring matching, and a loop that leaves `device` set to the last row can write `build_id` into the wrong device document when nothing matches.
+**Fix:** Track an explicit `matched` device with exact equality, and return `device_not_found` otherwise.
 
 ### IN-11: Queue socket.io server still has no handshake authentication (recorded; deliberately not enforced)
 
-**File:** `lib/thinx/queue.js:94-102`, `lib/thinx/queue.js:362-373`
-**Issue:** Any client that can reach port 4000 can `register` as a worker and send `job-status`. Since WR-03, a client that is merely connected no longer receives jobs. A **registered** one still can, through `nextAvailableWorker` and, now that `poll` works, on demand through `poll` (IN-13). Each job it receives carries `WORKER_SECRET` and the `--env` payload. The user confirmed port 4000 is reachable only inside the swarm, and enforcing auth now would break the either-order API/worker deploy (D-01).
-**Fix:** Plan it as a staged change: the worker sends `auth: { token }`, the API accepts with a warning (like the D-03 `cmd`-only pattern), and a later release enforces it.
+**File:** `lib/thinx/queue.js:94-102`, `lib/thinx/queue.js:383-394`
+**Issue:** Unchanged. A registered client receives jobs, which carry `WORKER_SECRET` and the `--env` payload. It can also send `job-status` for its own entry, and that entry is the only one `releasesWorker` can release.
+**Fix:** Staged auth, as recorded in iteration 3.
 
-### IN-12: `runRemoteShell` adds `log` and `job-status` listeners to the worker socket for every job and never removes them (pre-existing)
+### IN-12: `log` payloads are still attributed to every listener on the socket (mostly fixed; residual)
 
-**File:** `lib/thinx/builder.js:315-326`
-**Issue:** Each listener captures its own `build_id`/`owner`/`udid`/`notifiers`. The worker disconnects only when a build process exits, not when `failJob` refuses a job (`class.js:64-74`). If job 1 is refused and job 2 then runs on the same socket, job 2's log lines also reach job 1's `processShellData`. A `status: OK` line then marks **build 1** as `Success` and updates `last_build` (`builder.js:393-402`). Job 2's `job-status` also runs `processExitData` for build 1. Since WR-03, every build goes to one socket (WR-01 above), so listeners pile up on that socket in particular.
-**Fix:** Filter by id (`if (data.build_id !== build_id) return;` in both handlers; the worker's `failJob`, exit and JOB-RESULT payloads all carry `build_id`). Remove both listeners when the terminal `job-status` arrives.
+**File:** `lib/thinx/builder.js:342-378`
+**Issue:**
+- **Fixed:** `job-status` is now scoped by `build_id`, and a refusal or a non-result status detaches both listeners.
+- **Residual:** `log` still carries no `build_id`. As the fix report notes, B's `onLog` is attached from the emit until B's `worker_busy` arrives. An `A` line containing `status: OK` in that window runs `processShellData` for B. That marks B `Success` and updates B's source `last_build` before B's refusal sets `error`. The `last_build` update is not undone.
+**Fix:** Have the worker send `{ build_id, line }` for `log` (still accepting a bare string for D-01), and filter on it the same way as `jobStatusIsFor`.
 
-### IN-13: The `poll` path is now live: concurrent `findNext` can dispatch one action twice, and a `findNext` rejection is unhandled
+### IN-13: `poll` path: concurrent `findNext` can dispatch one action twice, and a `findNext` rejection is unhandled (carried forward; the `loop()` sub-item is now WR-02)
 
-**File:** `lib/thinx/queue.js:375-389`, `lib/thinx/queue.js:174-211`, `lib/thinx/queue.js:277-286`
-**Issue:** Before this fix, `poll` threw inside `runNext`, so it never built anything. Now it can.
-- **Double dispatch.** `findNext` returns the first `waiting` action, and `setStarted` flips it only later, inside `runNext`. Two workers polling at once, or a poll overlapping the cron `loop()`, both get the same action and each call `runNext`. The result is two builds for one device on two workers. The post-`await` re-check guards the worker only, not the action.
-- **Unhandled rejection.** The handler is `async` with no `try`. If `redis.keys`/`get` rejects, the result is an unhandled rejection, and the API has no `unhandledRejection` handler.
+**File:** `lib/thinx/queue.js:396-410`, `lib/thinx/queue.js:174-211`
+**Issue:** Unchanged apart from the `loop()` null/false comparison, which is now WR-02. `findNext` returns a `waiting` action without claiming it. The `async` handler has no `try`, and with Rollbar a rejection is swallowed rather than crashing.
+**Fix:** Wrap the handler body in `try/catch`. Claim the action atomically before dispatch.
 
-This is dormant today because `services/worker` never calls `loop()`, but any registered client can send `poll` (IN-11). Separately, `loop()` checks `workerAvailable !== null`, but `nextAvailableWorker` returns `false`, so with no worker `runNext(next, false)` marks the action as an error instead of leaving it queued.
-**Fix:** Wrap the handler body in `try/catch`. Claim the action atomically before dispatch, for example by re-reading its key and checking it is still `waiting` before `setStarted`, or with `SET queue:<udid> ... XX` via `WATCH`/`MULTI`. In `loop()`, compare against `false`.
-
-### IN-14: Checkout lock limits: wedged when `runGit` never settles, unbounded wait, and reads after release
+### IN-14: Checkout lock limits: wedged when `runGit` never settles, unbounded wait, and reads after release (carried forward, still open)
 
 **File:** `lib/thinx/git.js:149-164`, `lib/thinx/git.js:94-109`; `lib/thinx/devices.js:81-95`
-**Issue:**
-- **The lock holds as long as `runGit` does.** `runGit` settles only on `close`, and its timeout fires once. If a descendant escapes the process group and keeps the pipes open, `close` never fires. The lock for that device path is then held until the process restarts, and every later attach of that device queues behind it without a log line. Before WR-02, only that one prefetch would hang.
-- **No bound on waiters.** A burst of attaches for one device waits in line, each for up to `keys × 2 × gitTimeoutMs`.
-- **Reads after release.** As the fix report notes, `prefetch_repository`'s `updatePlatform(repo_path)` runs after the lock is released, so the next queued clone's `emptyDirSync` can empty the tree under it. `getPlatform` failing is harmless, because the stored platform is kept (`devices.js:109-114`). A partial tree can still be inferred as the wrong platform. If the later clone then fails, nobody corrects it.
+**Issue:** Unchanged. This compounds WR-01: a `prefetchPrivate` that never settles inside `run_build` keeps both the checkout lock and the worker reservation.
+**Fix:** As in iteration 3: SIGKILL, plus settle after a grace period. Run `updatePlatform` inside the lock.
 
-**Fix:** In `runGit`, after `abort` send SIGKILL and settle after a short grace period whether or not `close` has fired. For the reads, run `updatePlatform` inside the lock by adding an optional `afterClone(repoPath)` hook to `fetch`, or clone into a `mkdtemp` sibling and `rename` it into place.
+### IN-15: `buildGuards` calls back `false` and `run_build` keeps going, which breaks the rule that "a false callback means no dispatch" that both release sites now rely on
+
+**File:** `lib/thinx/builder.js:823-825` (`buildGuards` at `:102-121`); consumers `lib/router.build.js:79`, `lib/thinx/queue.js:274`
+**Issue:**
+- **The bug.** `if (!this.buildGuards(...)) { recordStatsEvent(BUILD_FAILED); }` has no `return`. For a source without `branch`, `build()` passes `branch = source.branch`, which is undefined. That case calls `callback(false, "branch undefined")`, and `run_build` then defaults the branch and prepares the whole build.
+- **Router path.**
+  - The first callback releases the worker and answers 200 `{success:false}`.
+  - The later `build_started` callback calls `Util.responder` again. `res.header` then throws `ERR_HTTP_HEADERS_SENT` inside the `apienv.list` callback, and Rollbar swallows it.
+  - As a result, the job is never dispatched and the decrypted `thinx.yml`/`environment.json` stay in `XBUILD_PATH`.
+- **Queue path.**
+  - The worker is released while the build is still being prepared. The emit's safeguard (`builder.js:321`) sets it busy again later.
+  - In the meantime, `nextAvailableWorker` can give the same worker to another build C. If this build's `runRemoteShell` then refuses before the emit, `releaseWorker` frees the worker while C is running.
+**Fix:** `if (!this.buildGuards(callback, owner, git, branch)) { recordStatsEvent(...); return; }`. Also, in the router, guard `Util.responder` with `if (res.headersSent) return;`.
+
+### IN-16: A `worker_busy` refusal, or a worker that disconnects between selection and dispatch, fails the user's build instead of queueing it again
+
+**File:** `lib/thinx/builder.js:261-276`, `lib/thinx/builder.js:356-365`, `lib/thinx/builder.js:421-433`
+**Issue:**
+- **Why it fails.** Both cases are refusals of a job that never ran, and `dispatchRemoteBuild` applies the full D-10 failure: `BUILD_FAILED`, `blog error`, and a notification. The client has already been told `build_started`, so the owner sees a failed build for a transient scheduling reason.
+- **The disconnect window is real.** A failed exit sends `job-status` and then disconnects (`class.js:430-442`). Selection runs in between, and dispatch happens seconds later.
+- **With the current worker (WR-03),** the "disconnected at dispatch" case is the normal outcome for any build selected just before the worker's first build ends.
+**Fix:** On these two reasons, clean up secrets as now, but queue the build again (`queue.add(udid, source_id, owner)`, injected into the builder) instead of recording `BUILD_FAILED`, and notify "queued". Keep the hard failure for failJob refusals such as `Invalid job authentication`.
 
 ---
 
-_Reviewed: 2026-09-28T19:44:26Z_
+_Reviewed: 2026-09-28T20:14:23Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_

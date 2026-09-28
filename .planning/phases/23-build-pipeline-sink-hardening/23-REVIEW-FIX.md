@@ -1,137 +1,137 @@
 ---
 phase: 23-build-pipeline-sink-hardening
-fixed_at: 2026-09-28T19:37:59Z
+fixed_at: 2026-09-28T20:04:14Z
 review_path: .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW.md
-iteration: 2
-findings_in_scope: 3
-fixed: 3
+iteration: 4
+findings_in_scope: 1
+fixed: 1
 skipped: 0
 status: all_fixed
 ---
 
 # Phase 23: Code Review Fix Report
 
-**Fixed at:** 2026-09-28T19:37:59Z
-**Source review:** .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW.md
-**Iteration:** 2
+**Fixed at:** 2026-09-28T20:04:14Z
+**Source review:** .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW.md (iteration 3)
+**Iteration:** 4. The user approved this pass beyond the normal cap of 3 iterations.
 
 **Summary:**
-- Findings in scope: 3 (WR-01, WR-02, WR-03). IN-01..IN-10 are out of scope for `critical_warning`.
-- Fixed: 3
-- Skipped: 0 findings. One optional sub-part of WR-03 (socket.io handshake authentication) was skipped; see *Skipped Issues*.
+- Findings in scope: 1 (WR-01). IN-01..IN-14 are out of scope for `critical_warning`. IN-10 (the dead `copy`) and part of IN-12 were fixed because WR-01 touches the same code.
+- Fixed: 1. It needs human verification because it changes concurrency and state logic.
+- Skipped: 0
 
 All commits are GPG-signed (`%G? = G`). Nothing was pushed or deployed. The legacy `cmd` shell path is untouched.
 
 | Commit | Repo | Subject |
 |---|---|---|
-| `a2e4bfa` | services/worker (`main`) | fix(23): WR-01 echo only identifying fields from failJob |
-| `6b1f5ead` | parent (`thinx-staging`) | fix(23): WR-01 log only identifying job-status fields in the notifier |
-| `a65005f3` | parent | chore(23): bump worker submodule to WR-01 failJob echo fix |
-| `01783ca8` | parent | fix(23): WR-02 serialise clones per checkout directory |
-| `3aa947c0` | parent | fix(23): WR-03 send each remote job to the selected worker only |
+| `4902380` | services/worker (`main`) | fix(23): WR-01 refuse a job that reaches a busy worker |
+| `88c20095` | parent (`thinx-staging`) | fix(23): WR-01 keep the worker busy flag set while a build runs |
+| `07cc256e` | parent | chore(23): bump worker submodule to WR-01 busy refusal |
 
 ## Fixed Issues
 
-### WR-01: Worker `failJob` sends the full job (argv `--env`, `cmd`, `WORKER_SECRET`) back to the API, which logs it verbatim
+### WR-01: Every build goes to the first registered worker, which silently drops jobs that arrive while it is building
 
-**Files modified:** `services/worker/class.js`, `services/worker/test.js`, `lib/thinx/notifier.js`, `spec/jasmine/BuilderRemoteJobSpec.js`, `services/worker` (gitlink)
-**Commits:** `a2e4bfa` (worker), `6b1f5ead` (API), `a65005f3` (pointer bump)
+**Files modified:** `lib/router.build.js`, `lib/thinx/queue.js`, `lib/thinx/builder.js`, `spec/jasmine/BuilderRemoteJobSpec.js`, `spec/jasmine/BuilderPathSpec.js`, `services/worker/class.js`, `services/worker/test.js`, `services/worker` (gitlink)
+**Commits:** `4902380` (worker), `88c20095` (API), `07cc256e` (pointer bump)
+**Status:** fixed: requires human verification (busy-flag lifecycle and listener attribution)
+
 **Applied fix:**
-- **Worker:** `failJob` builds a new object and no longer deep-copies the job. It sends `build_id`, `udid`, `owner`, `status: "Failed"` and `details`, and never `secret`, `argv`, `cmd`, `path` or env. A job that is `null` or not an object no longer throws.
-- **API:** `notifier.process` used to log `{ job_status }`. It now logs `loggableStatus(job_status)`: only the scalar values of `build_id`, `udid`, `owner`, `status`, `state` and `details`. An old worker that still echoes the whole job therefore cannot leak through this log line. The same whitelist also keeps the builder's JOB-RESULT annotation object (git URL, env hash and similar) out of the log.
-- **Worker tests** (+4, 42 -> 46):
-  - A unit test checks that the `failJob` payload has exactly those five keys.
-  - A null-job test.
-  - Two socket round-trips through the mock API server, one with a wrong job secret and one with an invalid argv. Both jobs carry `--env={"WIFI_PASS":"hunter2"}`, and the test asserts that the `job-status` the server receives contains neither `hunter2`, `--env` nor the secret.
-  - All four fail on the old `failJob`.
-- **API specs** (+2):
-  - `notifier.process` is fed a legacy full-job echo with no `outfile`, so it returns before any CouchDB call. The test asserts that no log line contains the env payload, the secret, `argv`, `cmd` or the path.
-  - A `loggableStatus` unit test.
-  - Both fail against the old notifier.
 
-### WR-02: Concurrent `prefetch_repository` calls for the same device now interleave in one checkout directory
+- **Router** (`router.build.js`): the route sets `next_worker.running = true` before calling `app.builder.build`. The callback sets it back to `false` only when `success !== true`, which means the build was refused before dispatch.
+- **Queue** (`queue.js`):
+  - `runNext`'s callback no longer clears `running` at `build_started`. It clears it only when the build fails before dispatch. `action.delete()` is unchanged.
+  - The `job-status` handler now clears `running` only when `Queue.releasesWorker(job_status)` returns true.
+  - It returns false for `details: "worker_busy"`, because the worker is still running another build.
+  - It also returns false for a build result (`completed: true`, the JOB-RESULT line); see *Deviation* below.
+  - Every other status still clears the flag: failJob refusals, a failed exit, and a spawn error.
+  - `disconnect` still deletes the worker entry.
+- **`runRemoteShell`** (`builder.js`):
+  - **Disconnected socket:** a socket where `connected !== true` is now a refusal. It notifies and returns false, so `run_build` applies D-10.
+  - **Busy flag:** every `return false` calls `releaseWorker(worker)`. The emit sets `worker.running = true` again, as a safeguard for callback orderings such as `buildGuards` calling back `false` and later `true`.
+  - **New `onRefused` parameter:** it runs when the worker refuses the job after the emit. A refusal is `status: "Failed"` plus a `details` string, with no `completed` flag. That covers `worker_busy` and all failJob refusals.
+  - **Comment and IN-10:** the misleading "while the queue had marked only this one as running" comment is corrected, and the dead masked `copy` is removed.
+- **D-10 on worker refusal:** the new `dispatchRemoteBuild(...)` takes the `XBUILD_PATH`. `run_build` now calls it in place of the inline refusal branch. It runs `failRemoteBuild` once in either of these cases:
+  - `runRemoteShell` returns false;
+  - the worker refuses the job later.
 
-**Files modified:** `lib/thinx/git.js`, `spec/jasmine/GitSpec.js`
-**Commit:** `01783ca8`
-**Status:** fixed: requires human verification (concurrency logic)
-**Applied fix:**
-- **The lock:** a module-level `withCheckoutLock(buildPath, task)` keeps one promise-chain tail per `path.resolve(buildPath)`.
-  - A task starts only after the previous task for that directory has settled.
-  - The tail is released whether the task resolves, rejects or throws synchronously.
-  - The map entry is deleted when the last tail settles.
-  - A non-string or empty path runs unlocked, so `cloneHoldingLock` still reports the error as before.
-- **`cloneRepository(...)`** now takes the lock and runs the unchanged body, which was renamed `cloneHoldingLock`.
-- **`fetch(...)`** takes the lock once around **all** of its key attempts (`fetchHoldingLock`), and calls `cloneHoldingLock` directly because the lock is not re-entrant. This closes the reviewer's worst case: fetch A's next-key `emptyDirSync` can no longer wipe a checkout that fetch B has just reported as good.
-- Every caller is covered without changes: `Sources.add`, `builder.prefetchPublic`/`prefetchPrivate` and `devices.prefetch_repository` all go through `cloneRepository` or `fetch`.
-- **GitSpec:**
-  - The four existing spies that observed fetch's attempts (`(f)`, `(g)`, `(h)`, D-09) now spy on `cloneHoldingLock`.
-  - Five new cases in "per-directory checkout lock (WR-02)":
-    - two concurrent real `cloneRepository` calls into one directory (spelled two ways, `dir` and `dir/`) both succeed, with at most one clone running at a time and an intact checkout (`basename.json` plus the repo directory, the expected `thinx.yml` and a clean `git status`)
-    - the same with two concurrent keyless `fetch` calls
-    - two keyed fetches whose `k1` fails: the event order proves that B starts only after A has finished both keys
-    - clones into different directories still run in parallel
-    - the lock is released after a synchronous throw and after a rejection, and a third clone then succeeds
-  - With the lock disabled, 3 of the 5 fail. Both concurrent-clone cases fail, matching the reviewer's reproduction.
-- **What to verify:**
-  - The lock is **in-process only**. Two API replicas that share the data volume are not serialised against each other.
-  - The lock ends when the clone ends. A caller that reads the checkout later can still meet the next queued clone re-creating the directory. For example, `devices.prefetch_repository` runs `sources.update` and then `updatePlatform(repo_path)` after `fetch` resolves. Each clone now finishes intact, and the last one leaves a complete tree. But a platform inference made while a second clone is running can still read a partial tree. It is last-writer-wins on the owner document, and the second caller's inference runs later on the complete tree. Closing this fully means holding the lock across the caller's post-clone reads, or cloning into a `mkdtemp` sibling and renaming it into place. The code comment records both.
+  `failRemoteBuild` records `BUILD_FAILED`, calls `blog.state(..., "error")` and runs `cleanupSecrets(XBUILD_PATH)`. The branch where `udid` is null after `build_started` also releases the worker now.
+- **IN-12, as far as the busy refusal needs it:**
+  - The per-job `job-status` listener acts only on a payload whose `build_id` names its own build (`jobStatusIsFor`). Every worker payload carries a `build_id`: failJob, the busy refusal, a failed exit, a spawn error and JOB-RESULT.
+  - A payload without `build_id` keeps the old behaviour and reaches every listener (D-01), except a refusal, which is never attributed.
+  - Once a build is refused or its exit fails, both of its listeners are removed (`socket.off`).
+  - JOB-RESULT keeps them, because the worker streams the rest of the log (including the `status: OK` line that `processShellData` turns into Success) after that line.
+- **Worker** (`services/worker/class.js`):
+  - A job that arrives while `this.running` is set goes to `refuseBusyJob`. It emits `job-status` with only `{ build_id, udid, owner, status: "Failed", details: "worker_busy" }`, and it does **not** call `failJob`, so the build in progress keeps its flag.
+  - `failJob` and `refuseBusyJob` build the payload with the same `reportRefusal` helper.
+  - An empty payload is still ignored, and that check now runs before the busy check, so no refusal without a `build_id` is sent.
 
-### WR-03: `runRemoteShell` broadcasts every job to all sockets on the socket.io server
+**Deviation from the literal instruction:** "clear on a terminal job-status (success or failure)" was applied to failures and refusals, but **not** to the success JOB-RESULT.
+- The worker emits JOB-RESULT from its stdout handler while the builder process is still running. After that line, `node ./notifier.js` still runs (it writes to CouchDB) and so does `cat $LOG_PATH`.
+- The worker's own `this.running` stays true until `exit`. On exit it always disconnects, which deletes the API's entry.
+- If the API cleared the flag at JOB-RESULT, a gap of seconds would open in which the next build goes to a worker that is still busy. The deployed `a2e4bfa` worker would drop that job silently, and the new worker would refuse it.
+- With this choice the API flag follows the worker's own flag exactly.
 
-**Files modified:** `lib/thinx/builder.js`, `lib/thinx/queue.js`, `spec/jasmine/BuilderRemoteJobSpec.js`, `spec/jasmine/BuilderPathSpec.js`
-**Commit:** `3aa947c0`
-**Applied fix:**
-- **`builder.runRemoteShell`:**
-  - `this.io.emit('job', job)` is now `worker.socket.emit('job', job)`. The job, including the job secret and the `--env` payload, goes only to the worker that `queue.runNext` selected and marked as running, so no other idle worker runs it.
-  - The worker guard now also refuses a worker whose socket is `null` or has no `emit`/`on` functions. It returns `false` with the existing notify, which keeps the iteration-1 WR-02 refusal contract in `run_build`.
-  - The `this.io === null` refusal (`error_starting_build`) was removed because nothing uses `io` for delivery any more. `this.io`/`setIo` stay because the queue still assigns it.
-  - The unused masked `copy` (IN-10) was left alone.
-- **Queue bookkeeping** (`queue.js`):
-  - Workers are tracked in `this.workers[socket.id] = { socket, running, connected, previous_id }`. The cron `loop()` already passed that object to `runNext`, which sets `worker.running = true` and clears it in the build callback, and `job-status` clears it as well.
-  - The `poll` handler passed `socket.id`, a string, as the worker. Because class bodies are strict mode, `runNext` threw `Cannot create property 'running' on string` after it had already called `action.setStarted()`.
-  - `poll` now looks up the registered worker object and skips unregistered or busy pollers. It re-checks after the `findNext` await before calling `runNext`.
-  - `services/worker` does not currently call `loop()`/`poll`, so this path is dormant in production.
-- **Specs:**
-  - The `remoteBuilder()` helpers in `BuilderRemoteJobSpec` and `BuilderPathSpec` now record the worker socket's emits separately from `io` broadcasts. The success cases assert that the broadcast list stays empty.
-  - The old "io missing -> refuse" case became "io null -> still delivered to the worker".
-  - Two bad-worker refusals were added: a null socket, and a socket without `emit`.
-- **New "job delivery to the selected worker only (WR-03)" block:** it runs a real socket.io server on an ephemeral 127.0.0.1 port with the Queue's own socket handlers, set up through `Object.create(Queue.prototype)` plus `setupIo`, so it needs no Redis and no port 4000.
-  - Two clients register the way the worker does, and a third connects without registering.
-  - `queue.nextAvailableWorker()` picks the first worker, and `runRemoteShell` is called with `builder.io` set to the live server, so a regression to a broadcast would reach every client.
-  - The chosen client receives the job exactly once. The other registered worker and the unregistered bystander receive nothing within 250 ms.
-  - A second case checks that `poll` hands `runNext` the registered worker object, and that a busy poller and an unregistered poller start nothing.
-  - Against the old broadcast and the old poll handler, 7 cases fail.
+**Specs added:** API +15 (200 -> 215), worker +3 (46 -> 49).
 
-## Skipped Issues
+With the fix removed (`git stash` of the three lib files), 11 of the 15 new API specs fail. With the worker fix removed, 2 of the 3 new worker tests fail. The specs that pass on the old code are guards: a refusal before dispatch releases the worker, a legacy payload without `build_id` still reaches its build, a JOB-RESULT keeps the log listener, and a busy worker ignores an empty payload.
 
-No finding was skipped. One optional part of WR-03 was not implemented.
+New API specs (`BuilderRemoteJobSpec`). The first three groups use a real socket.io server and the Queue's own handlers:
 
-### WR-03 (optional part): socket.io handshake authentication on the queue server
+- **Router:**
+  - With two registered clients, two `/api/v2/build` requests send build A to the first client and build B to the second, and afterwards `nextAvailableWorker()` returns false. On the old code both jobs went to the first client.
+  - A build refused before dispatch hands the worker back.
+- **Queue:**
+  - After `runNext`, the build's `build_started` leaves `running` set.
+  - `worker_busy` and JOB-RESULT keep it set; a failed exit clears it.
+  - A build refused before dispatch releases the worker.
+- **Disconnected worker:** a client is selected and then closes. `dispatchRemoteBuild` returns false and releases the worker. The build log gets exactly `[BUILD_A, owner, udid, "error"]`, stats get `BUILD_FAILED`, and `environment.json`/`thinx.yml` are removed from the checkout.
+- **Busy refusal, end to end:**
+  - A is dispatched, then B goes to the same client, which answers `worker_busy` for B. Only B is marked `error`, recorded as `BUILD_FAILED` and cleaned up; A's secrets stay in place.
+  - No `processExitData` runs for A, and the worker stays `running`.
+  - A later `log` line and A's JOB-RESULT reach A only, because B's listeners are gone.
+- **`runRemoteShell` unit cases:** a disconnected socket and a socket that never reports `connected` are refused, emit nothing and release the worker. Invalid arguments release the worker. An emit marks it running.
+- **Attribution (EventEmitter socket):**
+  - A payload without `build_id` still reaches its build (D-01), and a refusal without `build_id` reaches none.
+  - Each status reaches only the build it names. A refusal detaches that build's two listeners, and a failed exit detaches too.
+  - JOB-RESULT keeps the `log` listener.
+  - A `Queue.releasesWorker` truth table.
 
-**File:** `lib/thinx/queue.js:94-102`, `services/worker/class.js` (constructor `io(build_server)`)
-**Reason:** Port 4000 is swarm-internal, per the user on 2026-09-28. The residual risk is that any container inside the swarm can connect.
-**Why it was not done in this pass:** The broadcast fix above already stops a merely connected socket from receiving jobs. A client now has to register and then be picked by the queue. Enforcing handshake auth is not a small change:
-- Today's workers call `io(build_server)` with no `auth` option, so `socket.auth` is `undefined` and the `connect_error` handler never sets a token. Every deployed worker therefore connects without credentials.
-- If the API required `WORKER_SECRET` at the handshake or at `register`, remote builds would stop the moment the API rolled out ahead of a new worker image (`thinxcloud/worker:latest` is a separate service). Rolling back the worker alone would stop them again. That breaks the D-01 rule that the API and the worker deploy in either order.
-- Doing it safely needs a worker change that sends `auth: { token }`, a warn-only transition on the API (the same pattern as the D-03 `cmd`-only warning), and a later enforcement step.
+New worker tests (`services/worker/test.js`):
+- The `refuseBusyJob` payload is exactly the five keys, and `running` stays true.
+- A socket round trip: a job carrying `--env={"WIFI_PASS":"hunter2"}` and the secret is sent to a busy worker. The mock API receives `worker_busy` with no secret and no env, nothing is spawned, and `running` stays true.
+- A busy worker ignores an empty payload.
 
-**Original issue:** The socket.io server in `queue.js` has no `io.use` authentication, so any client that can reach port 4000 can connect, `register` as a worker and send `job-status`.
+**D-01 (API and worker deploy in either order):**
+- **New API with the deployed worker `a2e4bfa`:** that worker never sends `worker_busy`. Its failJob, exit and JOB-RESULT payloads all carry `build_id`, so the new scoping attributes them as before. It drops a job silently only when the API's flag is wrong, and with this fix that should no longer happen: the flag is now set on both routes and stays set until the worker is idle or disconnects.
+- **New worker with the current API:** the API receives a `job-status` it already knows how to handle. The build that was refused is now marked failed instead of hanging. **Caveat:** the current API does not scope its per-job listeners, so the build still running on that socket also runs `processExitData` with `"Failed"`. Its build log and websocket show "Failed" until its own `status: OK` log line sets `Success` again. This is a temporary wrong status, not lost data. It happens only with the current API, whose selection bug is what sends jobs to busy workers in the first place. **Deploying the API first avoids it.**
+
+## Residual risks (not fixed; for the verifier)
+
+- **Paths that never call back:** if `build()`/`run_build` never calls its callback, the selected worker stays marked busy until it disconnects. On the queue path this was already true before this fix; it is new for the API route. Examples:
+  - `devicelib.view` fails with an error other than `missing`;
+  - an exception is thrown inside a CouchDB callback.
+
+  Most such paths throw an uncaught exception, which restarts the process and resets the state. A time limit on the preparation stage would close this, but it was not added.
+- **Brief log window:** B's `log` listener is attached from the emit until B's `worker_busy` refusal arrives. A `status: OK` line that the busy worker streams for A during those few milliseconds would also reach B's `processShellData`. `log` payloads carry no `build_id`, so this cannot be filtered without a protocol change.
+- **Other silent drops in the worker (pre-existing):** jobs refused in `validateJob` with no `job-status` are still dropped silently. These are an unsafe legacy `cmd` and a missing `WORKER_SECRET`, plus a `path` containing `..`. The API never produces the first and the last, but a worker with no `WORKER_SECRET` still loses the build silently.
+- **Worker never reconnects (pre-existing):** the worker calls `socket.disconnect()` after every build, and socket.io-client does not reconnect after a manual disconnect. A worker process therefore serves one build per connection. This is why "disconnect deletes the entry" is the normal way a successful build releases its worker.
 
 ## Verification
 
-All gates ran in the **main checkout** (`/Users/sychram/Repositories/thinx-api/thinx-device-api`, branch `thinx-staging`), not in an isolated worktree. `workflow.use_worktrees` is not set in `.planning/config.json`, but the caller directed the work into the main tree, and WR-01 needed a commit inside the `services/worker` submodule on `main`. The results can be reproduced from the current tree.
+All gates ran in the **main checkout** (`/Users/sychram/Repositories/thinx-api/thinx-device-api`, branch `thinx-staging`), not in an isolated worktree. The caller asked for the main working tree, and the worker commit had to go inside the `services/worker` submodule on `main`. `workflow.use_worktrees` is not set in `.planning/config.json`. The results can be reproduced from the current tree.
 
 - **API specs (hermetic, no helpers):**
-  - Command: `ENVIRONMENT=development COUCHDB_USER=u COUCHDB_PASS=p npx jasmine --config=<{"spec_dir":"spec/jasmine","helpers":[]}> BuilderPathSpec BuilderRemoteJobSpec GitSpec SafePathSpec SanitkaSpec FinderSpec`
-  - Result: **200 specs, 0 failures**, up from a baseline of 189: +2 for WR-01, +5 for WR-02, +4 for WR-03.
-  - Each new spec was also run against the pre-fix code, and it failed there.
-  - `XBuilderSpec`, `QueueSpec`, `NotifierSpec`, `SourcesSpec` and `DevicesSpec` need Redis or CouchDB and were not run. `XBuilderSpec` passes `queue.getWorkers()[0]` (undefined) as the worker, which `runRemoteShell` already refused before this change.
-  - The WR-03 socket specs print `writePoint Error: connect ECONNREFUSED 127.0.0.1:8086`. This comes from the existing `recordStatsEvent` -> Influx call on a successful remote dispatch, which has no Influx to talk to in a hermetic run. It is not a failure.
-- **Worker:** `npm --prefix services/worker test` gave **46/46**, up from 42.
-- **ESLint:** clean on every touched parent file. `services/worker` is on the parent's ESLint ignore list.
+  - Command: `ENVIRONMENT=development COUCHDB_USER=u COUCHDB_PASS=p npx jasmine --config=<{"spec_dir":"spec/jasmine","helpers":[]}> spec/jasmine/{BuilderPath,BuilderRemoteJob,Git,SafePath,Sanitka,Finder}Spec.js`
+  - Result: **215 specs, 0 failures**, up from a baseline of 200. `BuilderRemoteJobSpec` passed 3 runs in a row.
+  - The `writePoint Error: connect ECONNREFUSED 127.0.0.1:8086` lines come from the older WR-03 socket specs' Influx call. They were already there and are not failures. The new block stubs `InfluxConnector.statsLog` and `BuildLog.prototype.state`.
+- **Worker:** `npm --prefix services/worker test` gave **49/49**, up from 46.
+- **ESLint:** clean on `lib/` and both touched spec files. `services/worker` is on the parent's ignore list.
+- **Syntax:** `node -c` passed on `builder.js`, `queue.js`, `router.build.js` and `services/worker/class.js`.
+- **Not run:** `XBuilderSpec`, `QueueSpec` and the other specs that need Redis or CouchDB. `XBuilderSpec` passes `nextAvailableWorker()`, which is false when no worker is registered, so `run_build` refuses before the changed code.
 
 ---
 
-_Fixed: 2026-09-28T19:37:59Z_
+_Fixed: 2026-09-28T20:04:14Z_
 _Fixer: Claude (gsd-code-fixer)_
-_Iteration: 2_
+_Iteration: 4_
