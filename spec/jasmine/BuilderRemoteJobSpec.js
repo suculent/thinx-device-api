@@ -98,7 +98,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         const calls = { emit: [], broadcast: [], notify: [] };
         builder.io = { emit: (...a) => calls.broadcast.push(a) };
         builder.notify = (...a) => calls.notify.push(a);
-        const worker = { socket: { on() { }, emit: (...a) => calls.emit.push(a) } };
+        const worker = { socket: { connected: true, on() { }, emit: (...a) => calls.emit.push(a) } };
         return { builder, calls, worker };
     }
 
@@ -275,7 +275,12 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             ["null", null],
             ["without a socket", {}],
             ["with a null socket", { socket: null }],
-            ["with a socket that cannot emit", { socket: { on() { } } }]
+            ["with a socket that cannot emit", { socket: { on() { } } }],
+            // Review iteration 3, WR-01: an emit on a disconnected server-side
+            // socket is a silent no-op, so this used to return true and lose
+            // the build.
+            ["with a disconnected socket", { running: true, socket: { connected: false, on() { }, emit() { throw new Error("emitted on a disconnected socket"); } } }],
+            ["with a socket that never reports connected", { running: true, socket: { on() { }, emit() { throw new Error("emitted on an unknown socket"); } } }]
         ];
         for (const [name, badWorker] of badWorkers) {
             it("returns false and emits nothing for a worker that is " + name, function () {
@@ -285,8 +290,25 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 expect(calls.emit).to.deep.equal([]);
                 expect(calls.broadcast).to.deep.equal([]);
                 expect(calls.notify.length).to.equal(1);
+                if ((badWorker !== null) && (typeof badWorker === "object")) {
+                    expect(badWorker.running).to.not.equal(true); // handed back: no job reached it
+                }
             });
         }
+
+        it("releases the selected worker when it refuses invalid build arguments", function () {
+            const { builder, worker } = remoteBuilder();
+            worker.running = true;
+            expect(builder.runRemoteShell(worker, ["./builder"], envi.oid, envi.build_id, envi.udid, [], envi.sid)).to.equal(false);
+            expect(worker.running).to.equal(false);
+        });
+
+        it("marks the worker running when the job is emitted", function () {
+            const { builder, worker } = remoteBuilder();
+            worker.running = false;
+            expect(builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid)).to.equal(true);
+            expect(worker.running).to.equal(true);
+        });
 
         const badArgs = [
             ["a command string instead of an array", "./builder --owner=x"],
@@ -416,5 +438,325 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             await sleep(250);
             expect(started.length).to.equal(1);
         }, 10000);
+
+        // Review iteration 3, WR-01: targeted delivery depends on
+        // worker.running, and neither build path kept it set while the build
+        // ran. With two workers every build went to the first one, which
+        // dropped the jobs it got while busy.
+        describe("busy tracking and refusals (iteration 3, WR-01)", function () {
+
+            const fs = require("fs");
+            const os = require("os");
+            const path = require("path");
+            const BuildLog = require("../../lib/thinx/buildlog");
+            const InfluxConnector = require("../../lib/thinx/influx");
+
+            const BUILD_A = "aaaaaaaa-1111-11f0-9d4a-0b5e6f7a8c9d";
+            const BUILD_B = "bbbbbbbb-2222-11f0-9d4a-0b5e6f7a8c9d";
+
+            let tmp, blogStates, stats;
+
+            beforeEach(() => {
+                tmp = fs.mkdtempSync(path.join(os.tmpdir(), "thinx-wr01-"));
+                // Hermetic: the build log and the stats sink stay local.
+                blogStates = [];
+                stats = [];
+                spyOn(BuildLog.prototype, "state").and.callFake((...a) => { blogStates.push(a); });
+                spyOn(InfluxConnector, "statsLog").and.callFake((...a) => { stats.push(a); });
+            });
+
+            afterEach(() => {
+                fs.rmSync(tmp, { recursive: true, force: true });
+            });
+
+            // A checkout holding the decrypted secrets run_build writes
+            // before it dispatches the job.
+            function checkoutWithSecrets(name) {
+                const dir = fs.mkdtempSync(path.join(tmp, name + "-"));
+                fs.writeFileSync(path.join(dir, "environment.json"), "{\"cpass\":\"hunter2\"}");
+                fs.writeFileSync(path.join(dir, "thinx.yml"), "devsec:\n  pass: hunter2\n");
+                return dir;
+            }
+
+            function quietBuilder() {
+                const builder = new Builder(fakeRedis);
+                builder.io = ioServer;
+                builder.notify = () => { };
+                return builder;
+            }
+
+            const until = async (predicate, ms) => {
+                const deadline = Date.now() + (ms || 3000);
+                while (!predicate()) {
+                    if (Date.now() > deadline) throw new Error("condition not reached");
+                    await sleep(10);
+                }
+            };
+
+            function fakeResponse() {
+                const res = { body: [], header() { }, end(b) { res.body.push(b); return res; }, status() { return res; } };
+                return res;
+            }
+
+            it("router: with two registered workers, a second build goes to the idle worker while the first is running", async function () {
+                const first = await registeredClient();
+                const second = await registeredClient();
+                const builder = quietBuilder();
+
+                // run_build's order: answer build_started, then dispatch.
+                const ids = [BUILD_A, BUILD_B];
+                const routes = {};
+                const app = {
+                    post: (route, fn) => { routes[route] = fn; },
+                    queue: queue,
+                    messenger: null,
+                    builder: {
+                        build(owner, safe_build, notifiers, callback, worker) {
+                            const build_id = ids.shift();
+                            callback(true, { response: "build_started", build_id: build_id });
+                            builder.runRemoteShell(worker, validArgs(), envi.oid, build_id, envi.udid, notifiers, envi.sid);
+                        }
+                    }
+                };
+                require("../../lib/router.build")(app);
+
+                const request = () => ({
+                    headers: { authorization: "Bearer spec" },
+                    session: { owner: envi.oid },
+                    body: { build: { udid: envi.udid, source_id: envi.sid } }
+                });
+
+                routes["/api/v2/build"](request(), fakeResponse());
+                routes["/api/v2/build"](request(), fakeResponse());
+
+                await until(() => (first.received.length + second.received.length) === 2);
+                await sleep(100);
+                expect(first.received.map((job) => job.build_id)).to.deep.equal([BUILD_A]);
+                expect(second.received.map((job) => job.build_id)).to.deep.equal([BUILD_B]);
+                expect(queue.workers[first.id].running).to.equal(true);
+                expect(queue.workers[second.id].running).to.equal(true);
+                expect(queue.nextAvailableWorker()).to.equal(false);
+            }, 10000);
+
+            it("router: a build refused before dispatch hands the worker back", async function () {
+                const only = await registeredClient();
+                const routes = {};
+                require("../../lib/router.build")({
+                    post: (route, fn) => { routes[route] = fn; },
+                    queue: queue,
+                    messenger: null,
+                    builder: { build(owner, safe_build, notifiers, callback) { callback(false, "git_fetch_failed"); } }
+                });
+                routes["/api/v2/build"]({
+                    headers: { authorization: "Bearer spec" },
+                    session: { owner: envi.oid },
+                    body: { build: { udid: envi.udid, source_id: envi.sid } }
+                }, fakeResponse());
+                expect(queue.workers[only.id].running).to.equal(false);
+                expect(queue.nextAvailableWorker().socket.id).to.equal(only.id);
+            }, 10000);
+
+            it("queue: running stays set after build_started and is cleared only when the worker is idle again", async function () {
+                const client = await registeredClient();
+                const worker = queue.workers[client.id];
+                const seen = [];
+                queue.notifier = {
+                    process(job_status) { seen.push({ job_status, running: worker.running }); }
+                };
+                let deleted = 0;
+                queue.builder = {
+                    build(owner, build, notifiers, callback) {
+                        callback(true, { response: "build_started", build_id: BUILD_A });
+                    }
+                };
+                queue.runNext({
+                    action: { udid: envi.udid, source: envi.sid, owner_id: envi.oid },
+                    setStarted() { },
+                    delete() { deleted++; }
+                }, worker);
+
+                expect(deleted).to.equal(1);
+                expect(worker.running).to.equal(true); // used to be cleared at build_started
+                expect(queue.nextAvailableWorker()).to.equal(false);
+
+                // In order on one socket: a busy refusal of another job, the
+                // build's JOB-RESULT, then a failed exit.
+                client.emit("job-status", { build_id: BUILD_B, udid: envi.udid, owner: envi.oid, status: "Failed", details: "worker_busy" });
+                client.emit("job-status", { build_id: BUILD_A, udid: envi.udid, owner: envi.oid, status: "OK", completed: true });
+                client.emit("job-status", { build_id: BUILD_A, udid: envi.udid, state: "Failed", reason: "exit 1" });
+
+                await until(() => worker.running === false);
+                expect(seen.length).to.equal(3);
+                expect(seen[1].running).to.equal(true); // after worker_busy
+                expect(seen[2].running).to.equal(true); // after JOB-RESULT
+            }, 10000);
+
+            it("queue: a build refused before dispatch releases the worker", async function () {
+                const client = await registeredClient();
+                const worker = queue.workers[client.id];
+                queue.builder = { build(owner, build, notifiers, callback) { callback(false, "git_fetch_failed"); } };
+                queue.runNext({
+                    action: { udid: envi.udid, source: envi.sid, owner_id: envi.oid },
+                    setStarted() { },
+                    delete() { }
+                }, worker);
+                expect(worker.running).to.equal(false);
+            }, 10000);
+
+            it("a worker that disconnected after selection is refused, and the build is failed and cleaned up", async function () {
+                const client = await registeredClient();
+                const worker = queue.nextAvailableWorker();
+                expect(worker.socket.id).to.equal(client.id);
+                worker.running = true; // selected
+
+                const id = client.id; // the client forgets its id on close
+                client.close();
+                await until(() => typeof queue.workers[id] === "undefined");
+                expect(worker.socket.connected).to.equal(false);
+
+                const builder = quietBuilder();
+                const XBUILD_PATH = checkoutWithSecrets("disconnected");
+                expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_A, envi.udid, {}, envi.sid, XBUILD_PATH)).to.equal(false);
+
+                expect(worker.running).to.equal(false);
+                expect(blogStates).to.deep.equal([[BUILD_A, envi.oid, envi.udid, "error"]]);
+                expect(stats.map((s) => s[1])).to.deep.equal(["BUILD_FAILED"]);
+                expect(fs.existsSync(path.join(XBUILD_PATH, "environment.json"))).to.equal(false);
+                expect(fs.existsSync(path.join(XBUILD_PATH, "thinx.yml"))).to.equal(false);
+            }, 10000);
+
+            it("a busy worker's worker_busy refusal fails only the refused build; the running build keeps its listeners", async function () {
+                const client = await registeredClient();
+                const worker = queue.workers[client.id];
+                const builder = quietBuilder();
+                const exits = [];
+                const shellData = [];
+                spyOn(builder, "processExitData").and.callFake((owner, build_id) => { exits.push(build_id); });
+                spyOn(builder, "processShellData").and.callFake((opts, data) => { shellData.push([opts.build_id, data]); });
+                spyOn(builder, "cleanupDeviceRepositories");
+
+                // The worker answers every job while it is building A the way
+                // services/worker does now.
+                let busy = false;
+                client.on("job", (job) => {
+                    if (busy) {
+                        client.emit("job-status", { build_id: job.build_id, udid: job.udid, owner: job.owner, status: "Failed", details: "worker_busy" });
+                    }
+                    busy = true;
+                });
+
+                const dirA = checkoutWithSecrets("a");
+                const dirB = checkoutWithSecrets("b");
+                expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_A, envi.udid, {}, envi.sid, dirA)).to.equal(true);
+                await until(() => client.received.length === 1);
+
+                // B reaches the same worker (an API whose flag was stale, or
+                // the gap between JOB-RESULT and the worker's exit).
+                expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_B, envi.udid, {}, envi.sid, dirB)).to.equal(true);
+                await until(() => blogStates.length === 1);
+                await sleep(100);
+
+                // B is failed, recorded and cleaned up; A is untouched.
+                expect(blogStates).to.deep.equal([[BUILD_B, envi.oid, envi.udid, "error"]]);
+                expect(stats.filter((s) => s[1] === "BUILD_FAILED").map((s) => s[2])).to.deep.equal([BUILD_B]);
+                expect(fs.existsSync(path.join(dirB, "environment.json"))).to.equal(false);
+                expect(fs.existsSync(path.join(dirA, "environment.json"))).to.equal(true);
+                expect(exits).to.deep.equal([]);
+                expect(worker.running).to.equal(true); // still building A
+
+                // A's log and its result reach A only: B's listeners are gone.
+                client.emit("log", "[builder] status: OK\n");
+                client.emit("job-status", { build_id: BUILD_A, udid: envi.udid, owner: envi.oid, status: "OK", completed: true });
+                await until(() => exits.length === 1);
+                await sleep(100);
+                expect(exits).to.deep.equal([BUILD_A]);
+                expect(shellData.map((d) => d[0])).to.deep.equal([BUILD_A]);
+                expect(blogStates.length).to.equal(1);
+            }, 10000);
+        });
+    });
+
+    // IN-12, as far as the busy refusal needs it: which runRemoteShell
+    // listener a job-status reaches. An EventEmitter stands in for the
+    // server-side socket.
+    describe("job-status attribution (iteration 3, WR-01 / IN-12)", function () {
+
+        const EventEmitter = require("events");
+
+        function emitterWorker() {
+            const socket = new EventEmitter();
+            socket.connected = true;
+            const emitted = [];
+            const emit = socket.emit.bind(socket);
+            socket.emit = (name, ...a) => { if (name === "job") { emitted.push(a[0]); return true; } return emit(name, ...a); };
+            return { worker: { socket, running: false }, socket, emitted };
+        }
+
+        function trackedBuilder() {
+            const builder = new Builder(fakeRedis);
+            builder.notify = () => { };
+            const exits = [];
+            builder.processExitData = (owner, build_id) => exits.push(build_id);
+            builder.processShellData = () => { };
+            builder.cleanupDeviceRepositories = () => { };
+            return { builder, exits };
+        }
+
+        const B1 = "11111111-aaaa-11f0-9d4a-0b5e6f7a8c9d";
+        const B2 = "22222222-bbbb-11f0-9d4a-0b5e6f7a8c9d";
+
+        it("a legacy job-status without build_id still reaches the build (D-01)", function () {
+            const { worker, socket } = emitterWorker();
+            const { builder, exits } = trackedBuilder();
+            builder.runRemoteShell(worker, validArgs(), envi.oid, B1, envi.udid, {}, envi.sid, () => { });
+            socket.emit("job-status", { state: "Failed", reason: "exit 1" });
+            expect(exits).to.deep.equal([B1]);
+        });
+
+        it("a refusal without build_id is attributed to no build", function () {
+            const { worker, socket } = emitterWorker();
+            const { builder, exits } = trackedBuilder();
+            const refused = [];
+            builder.runRemoteShell(worker, validArgs(), envi.oid, B1, envi.udid, {}, envi.sid, (d) => refused.push(d));
+            socket.emit("job-status", { status: "Failed", details: "worker_busy" });
+            expect(refused).to.deep.equal([]);
+            expect(exits).to.deep.equal([]);
+        });
+
+        it("each job-status reaches only the build it names; a refusal detaches that build's listeners", function () {
+            const { worker, socket } = emitterWorker();
+            const { builder, exits } = trackedBuilder();
+            const refused = [];
+            builder.runRemoteShell(worker, validArgs(), envi.oid, B1, envi.udid, {}, envi.sid, (d) => refused.push([B1, d]));
+            builder.runRemoteShell(worker, validArgs(), envi.oid, B2, envi.udid, {}, envi.sid, (d) => refused.push([B2, d]));
+            expect(socket.listenerCount("job-status")).to.equal(2);
+
+            socket.emit("job-status", { build_id: B2, status: "Failed", details: "worker_busy" });
+            expect(refused).to.deep.equal([[B2, "worker_busy"]]);
+            expect(exits).to.deep.equal([]);
+            expect(socket.listenerCount("job-status")).to.equal(1);
+            expect(socket.listenerCount("log")).to.equal(1);
+
+            socket.emit("job-status", { build_id: B1, state: "Failed", reason: "exit 1" });
+            expect(exits).to.deep.equal([B1]);
+            expect(socket.listenerCount("job-status")).to.equal(0); // a failed exit ends B1 too
+        });
+
+        it("a JOB-RESULT keeps the build's log listener: the rest of the log still follows", function () {
+            const { worker, socket } = emitterWorker();
+            const { builder, exits } = trackedBuilder();
+            builder.runRemoteShell(worker, validArgs(), envi.oid, B1, envi.udid, {}, envi.sid, () => { });
+            socket.emit("job-status", { build_id: B1, status: "OK", completed: true });
+            expect(exits).to.deep.equal([B1]);
+            expect(socket.listenerCount("log")).to.equal(1);
+        });
+
+        it("the queue keeps a worker busy on worker_busy and on a JOB-RESULT, and frees it on other statuses", function () {
+            const Queue = require("../../lib/thinx/queue");
+            expect(Queue.releasesWorker({ status: "Failed", details: "worker_busy" })).to.equal(false);
+            expect(Queue.releasesWorker({ status: "OK", completed: true })).to.equal(false);
+            expect(Queue.releasesWorker({ status: "Failed", details: "Invalid job authentication" })).to.equal(true);
+            expect(Queue.releasesWorker({ state: "Failed", reason: "exit 1" })).to.equal(true);
+        });
     });
 });

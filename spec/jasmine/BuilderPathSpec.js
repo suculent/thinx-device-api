@@ -275,7 +275,7 @@ describe("Builder repository-file guards", function () {
             const calls = { emit: [], broadcast: [], notify: [] };
             builder.io = { emit: (...a) => calls.broadcast.push(a) };
             builder.notify = (...a) => calls.notify.push(a);
-            const worker = { socket: { on() { }, emit: (...a) => calls.emit.push(a) } };
+            const worker = { socket: { connected: true, on() { }, emit: (...a) => calls.emit.push(a) } };
             return { builder, calls, worker };
         }
 
