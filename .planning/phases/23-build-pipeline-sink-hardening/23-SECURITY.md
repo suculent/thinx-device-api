@@ -97,7 +97,7 @@ created: "2026-09-28"
 
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
-| 2026-09-28 | 32 | 32 | 0 | /gsd-secure-phase orchestrator (ASVS L1 grep-level verification; register authored at plan time; auditor skipped per short-circuit rule) |
+| 2026-09-28 | 31 | 31 | 0 | /gsd-secure-phase orchestrator (ASVS L1 grep-level verification; register authored at plan time; auditor skipped per short-circuit rule) |
 
 ---
 
