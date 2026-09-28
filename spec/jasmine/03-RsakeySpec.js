@@ -131,10 +131,14 @@ describe("RSA Key", function() {
   // generating a key we cannot decrypt only fails later, as a clone that
   // silently offers no identity at all.
   it("(11) should refuse to generate a key when GIT_KEY_PASSPHRASE is unset", function (done) {
+    // keyPassphrase() reads through readSecret (D-04), which caches per name.
+    const { _resetCacheForTests } = require("../../lib/thinx/secrets");
     const saved = process.env.GIT_KEY_PASSPHRASE;
     delete process.env.GIT_KEY_PASSPHRASE;
+    _resetCacheForTests();
     rsakey.generate(owner, new Date().getTime(), (err) => {
       if (typeof saved !== "undefined") process.env.GIT_KEY_PASSPHRASE = saved;
+      _resetCacheForTests();
       expect(err).to.be.an('error');
       done();
     });

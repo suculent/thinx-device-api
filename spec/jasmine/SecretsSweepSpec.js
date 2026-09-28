@@ -37,7 +37,13 @@ const FAKE = {
   githubSecretFile: "spec-fake-githubsecret-file-3f6a",
   githubSecretEnv: "spec-fake-githubsecret-env-a90c",
   googleSecretFile: "spec-fake-googlesecret-file-e71b",
-  googleSecretEnv: "spec-fake-googlesecret-env-15d8"
+  googleSecretEnv: "spec-fake-googlesecret-env-15d8",
+  rollbarServerFile: "spec-fake-rollbarserver-file-6c03",
+  rollbarServerEnv: "spec-fake-rollbarserver-env-b4e7",
+  rollbarAccessFile: "spec-fake-rollbaraccess-file-2d95",
+  rollbarAccessEnv: "spec-fake-rollbaraccess-env-f0a1",
+  passphraseFile: "spec-fake-passphrase-file-93be",
+  passphraseEnv: "spec-fake-passphrase-env-47c2"
 };
 
 // ---------------------------------------------------------------------------
@@ -718,5 +724,116 @@ describe("Secrets sweep: OAuth client secrets", function () {
       expect(constructed[0].client.secret).to.equal(FAKE.googleSecretFile);
       expectNoFakeValues(lines);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rollbar server token (globals.js, D-03) and GIT_KEY_PASSPHRASE (rsakey.js,
+// D-04)
+// ---------------------------------------------------------------------------
+
+describe("Secrets sweep: Rollbar server token in globals.js", function () {
+
+  // Resolution order (SEC-CFG-02): ROLLBAR_SERVER_TOKEN (file, then env), then
+  // ROLLBAR_ACCESS_TOKEN (file, then env), then off.
+  async function loadGlobals(secretSpec) {
+    const constructed = [];
+    function FakeRollbar(opts) { constructed.push(opts); }
+    let rollbar;
+    const lines = await withSecrets(secretSpec, () => captureLogs(async () => {
+      const { mod: Globals, restore } = freshRequire("../../lib/thinx/globals.js", { rollbar: FakeRollbar });
+      try {
+        Globals.prefix();
+        Globals.app_config();
+        Globals.rollbar();
+        rollbar = Globals.rollbar();
+      } finally {
+        restore();
+      }
+    }));
+    return { constructed, rollbar, lines, FakeRollbar };
+  }
+
+  it("constructs no Rollbar client and logs once when neither token is set", async function () {
+    const { constructed, rollbar, lines } = await loadGlobals({ ROLLBAR_SERVER_TOKEN: "absent", ROLLBAR_ACCESS_TOKEN: "absent" });
+    expect(constructed.length).to.equal(0);
+    expect(rollbar).to.equal(null);
+    expect(countMatching(lines, /ROLLBAR_SERVER_TOKEN not set/)).to.equal(1);
+    expectNoFakeValues(lines);
+  });
+
+  it("falls back to the access token from env", async function () {
+    const { constructed, rollbar, lines, FakeRollbar } = await loadGlobals({ ROLLBAR_SERVER_TOKEN: "absent", ROLLBAR_ACCESS_TOKEN: { env: FAKE.rollbarAccessEnv } });
+    expect(constructed.length).to.equal(1);
+    expect(constructed[0].accessToken).to.equal(FAKE.rollbarAccessEnv);
+    expect(constructed[0].handleUncaughtExceptions).to.equal(true);
+    expect(constructed[0].handleUnhandledRejections).to.equal(true);
+    expect(rollbar).to.be.an.instanceof(FakeRollbar);
+    expect(countMatching(lines, /ROLLBAR_SERVER_TOKEN not set/)).to.equal(0);
+    expectNoFakeValues(lines);
+  });
+
+  it("prefers the server token file over the access token", async function () {
+    const { constructed, lines } = await loadGlobals({
+      ROLLBAR_SERVER_TOKEN: { file: FAKE.rollbarServerFile },
+      ROLLBAR_ACCESS_TOKEN: { env: FAKE.rollbarAccessEnv }
+    });
+    expect(constructed.length).to.equal(1);
+    expect(constructed[0].accessToken).to.equal(FAKE.rollbarServerFile);
+    expectNoFakeValues(lines);
+  });
+
+  it("tries the whole server-token chain before the access-token chain", async function () {
+    const { constructed, lines } = await loadGlobals({
+      ROLLBAR_SERVER_TOKEN: { env: FAKE.rollbarServerEnv },
+      ROLLBAR_ACCESS_TOKEN: { file: FAKE.rollbarAccessFile }
+    });
+    expect(constructed.length).to.equal(1);
+    expect(constructed[0].accessToken).to.equal(FAKE.rollbarServerEnv);
+    expectNoFakeValues(lines);
+  });
+});
+
+describe("Secrets sweep: GIT_KEY_PASSPHRASE in rsakey.js", function () {
+
+  const RSAKey = require("../../lib/thinx/rsakey.js");
+
+  async function passphrase(secretSpec) {
+    let value;
+    const lines = await withSecrets({ GIT_KEY_PASSPHRASE: secretSpec }, () => captureLogs(async () => {
+      value = RSAKey.keyPassphrase();
+    }));
+    return { value, lines };
+  }
+
+  it("returns null when the passphrase is absent", async function () {
+    const { value, lines } = await passphrase("absent");
+    expect(value).to.equal(null);
+    expectNoFakeValues(lines);
+  });
+
+  it("returns null for an empty env value", async function () {
+    const { value } = await passphrase({ env: "" });
+    expect(value).to.equal(null);
+  });
+
+  it("prefers the secret file over a different env value, as git.js does", async function () {
+    const { value, lines } = await passphrase({ file: FAKE.passphraseFile, env: FAKE.passphraseEnv });
+    expect(value).to.equal(FAKE.passphraseFile);
+    expectNoFakeValues(lines);
+  });
+
+  it("generate() refuses with one info line when the passphrase is absent", async function () {
+    const envi = require("../_envi.json");
+    let err;
+    const lines = await withSecrets({ GIT_KEY_PASSPHRASE: "absent" }, () => captureLogs(async () => {
+      err = await new Promise((resolve) => {
+        new RSAKey().generate(envi.oid, 1, (e) => resolve(e));
+      });
+    }));
+    expect(err).to.be.an("error");
+    expect(err.message).to.equal("GIT_KEY_PASSPHRASE is not set; refusing to generate a deploy key");
+    expect(countMatching(lines, /GIT_KEY_PASSPHRASE not set/)).to.equal(1);
+    expectNoFakeValues(lines);
   });
 });
