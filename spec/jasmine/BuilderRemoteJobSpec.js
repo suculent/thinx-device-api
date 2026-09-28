@@ -650,8 +650,12 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_A, envi.udid, {}, envi.sid, dirA)).to.equal(true);
                 await until(() => client.received.length === 1);
 
-                // B reaches the same worker (an API whose flag was stale, or
-                // the gap between JOB-RESULT and the worker's exit).
+                // B reaches the same worker through an API flag that lost
+                // track of A. Since iteration 4 the API itself refuses a worker
+                // it knows carries another build (see "a worker that carries
+                // another build's job" below), so A's dispatch is forgotten
+                // here to reach the worker's own worker_busy refusal.
+                worker.dispatched = null;
                 expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_B, envi.udid, {}, envi.sid, dirB)).to.equal(true);
                 await until(() => blogStates.length === 1);
                 await sleep(100);
@@ -728,6 +732,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             const { builder, exits } = trackedBuilder();
             const refused = [];
             builder.runRemoteShell(worker, validArgs(), envi.oid, B1, envi.udid, {}, envi.sid, (d) => refused.push([B1, d]));
+            worker.dispatched = null; // an API flag that lost track of B1, so B2 reaches the same socket
             builder.runRemoteShell(worker, validArgs(), envi.oid, B2, envi.udid, {}, envi.sid, (d) => refused.push([B2, d]));
             expect(socket.listenerCount("job-status")).to.equal(2);
 
@@ -757,6 +762,401 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             expect(Queue.releasesWorker({ status: "OK", completed: true })).to.equal(false);
             expect(Queue.releasesWorker({ status: "Failed", details: "Invalid job authentication" })).to.equal(true);
             expect(Queue.releasesWorker({ state: "Failed", reason: "exit 1" })).to.equal(true);
+        });
+    });
+
+    // Review iteration 4, WR-01: the router and runNext reserve a worker at
+    // selection, and only a callback, a job-status or a disconnect handed it
+    // back. A build that died between selection and dispatch without calling
+    // back kept the worker busy for good (Rollbar swallows the exception, the
+    // process keeps running), so every later build was queued.
+    describe("worker reservations (iteration 4, WR-01)", function () {
+
+        const fs = require("fs");
+        const os = require("os");
+        const path = require("path");
+        const EventEmitter = require("events");
+        const Queue = require("../../lib/thinx/queue");
+        const Platform = require("../../lib/thinx/platform");
+        const BuildLog = require("../../lib/thinx/buildlog");
+        const InfluxConnector = require("../../lib/thinx/influx");
+
+        const MIN = 60 * 1000;
+        const BUILD_A = "aaaaaaaa-4444-11f0-9d4a-0b5e6f7a8c9d";
+        const BUILD_B = "bbbbbbbb-5555-11f0-9d4a-0b5e6f7a8c9d";
+
+        let tmp, blogStates, stats;
+
+        beforeEach(() => {
+            // realpath: safepath compares resolved paths, and /var is a link on macOS.
+            tmp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "thinx-wr01-lease-"));
+            blogStates = [];
+            stats = [];
+            spyOn(BuildLog.prototype, "state").and.callFake((...a) => { blogStates.push(a); });
+            spyOn(BuildLog.prototype, "log");
+            spyOn(InfluxConnector, "statsLog").and.callFake((...a) => { stats.push(a); });
+        });
+
+        afterEach(() => {
+            fs.rmSync(tmp, { recursive: true, force: true });
+        });
+
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        const until = async (predicate, ms) => {
+            const deadline = Date.now() + (ms || 3000);
+            while (!predicate()) {
+                if (Date.now() > deadline) throw new Error("condition not reached");
+                await sleep(10);
+            }
+        };
+
+        // The Queue's selection logic without its constructor (Redis, port 4000).
+        function registry(workers) {
+            const queue = Object.create(Queue.prototype);
+            queue.workers = workers;
+            queue.notifier = { process() { } };
+            return queue;
+        }
+
+        function idleWorker() {
+            const emitted = [];
+            const worker = {
+                connected: true,
+                running: false,
+                socket: { connected: true, on() { }, off() { }, emit: (name, job) => { emitted.push([name, job]); } }
+            };
+            return { worker, emitted };
+        }
+
+        function reserved(age, dispatched) {
+            const { worker } = idleWorker();
+            worker.running = true;
+            worker.running_since = Date.now() - age;
+            worker.dispatched = dispatched;
+            return worker;
+        }
+
+        function buildRequest() {
+            return {
+                headers: { authorization: "Bearer spec" },
+                session: { owner: envi.oid },
+                body: { build: { udid: envi.udid, source_id: envi.sid } }
+            };
+        }
+
+        function jsonResponse() {
+            const res = { body: [], header() { }, status() { return res; }, end(b) { res.body.push(JSON.parse(b)); return res; } };
+            return res;
+        }
+
+        function route(queue, builder) {
+            const routes = {};
+            require("../../lib/router.build")({ post: (r, fn) => { routes[r] = fn; }, queue: queue, messenger: null, builder: builder });
+            return routes["/api/v2/build"];
+        }
+
+        function checkoutWithSecrets(name) {
+            const dir = fs.mkdtempSync(path.join(tmp, name + "-"));
+            fs.writeFileSync(path.join(dir, "environment.json"), "{\"cpass\":\"hunter2\"}");
+            fs.writeFileSync(path.join(dir, "thinx.yml"), "devsec:\n  pass: hunter2\n");
+            return dir;
+        }
+
+        describe("bounds", function () {
+
+            it("holds an undispatched reservation for 2 minutes and a dispatched one for 60", function () {
+                expect(Queue.PREP_RESERVATION_MS).to.equal(2 * MIN);
+                expect(Queue.BUILD_RESERVATION_MS).to.equal(60 * MIN);
+            });
+
+            it("reclaims a reservation nothing was dispatched to once it is older than the bound, with a warning", function () {
+                const worker = reserved(2 * MIN + 1000, null);
+                const queue = registry({ w1: worker });
+                const logSpy = spyOn(console, "log");
+                expect(queue.nextAvailableWorker()).to.equal(worker);
+                expect(worker.running).to.equal(false);
+                const lines = logSpy.calls.allArgs().map((a) => util.format(...a));
+                expect(lines.some((l) => l.includes("[warning]") && l.includes("reclaiming") && l.includes("w1") && l.includes("no build dispatched"))).to.equal(true);
+            });
+
+            it("keeps a fresh reservation", function () {
+                const worker = reserved(1000, null);
+                expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(false);
+                expect(worker.running).to.equal(true);
+            });
+
+            it("keeps a dispatched reservation past the preparation bound", function () {
+                const worker = reserved(30 * MIN, BUILD_A);
+                expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(false);
+                expect(worker.running).to.equal(true);
+                expect(worker.dispatched).to.equal(BUILD_A);
+            });
+
+            it("reclaims a dispatched reservation past the build bound", function () {
+                const worker = reserved(61 * MIN, BUILD_A);
+                expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(worker);
+                expect(worker.running).to.equal(false);
+                expect(worker.dispatched).to.equal(null);
+            });
+
+            it("leaves a worker that registered as running (no timestamp) alone", function () {
+                const { worker } = idleWorker();
+                worker.running = true;
+                expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(false);
+                expect(worker.running).to.equal(true);
+            });
+
+            it("serves a poll from a worker whose stale reservation it reclaims", async function () {
+                const socket = new EventEmitter();
+                socket.id = "polling";
+                const worker = reserved(3 * MIN, null);
+                worker.socket = socket;
+                const queue = registry({ polling: worker });
+                queue.setupSocket(socket);
+                const started = [];
+                queue.findNext = async () => ({ action: { build_id: "spec" } });
+                queue.runNext = (action, w) => { started.push(w); };
+                socket.emit("poll", "true");
+                await until(() => started.length === 1);
+                expect(started[0]).to.equal(worker);
+            });
+        });
+
+        describe("selection and dispatch", function () {
+
+            it("router: a build that never calls back holds the worker only until the preparation bound", function () {
+                const { worker } = idleWorker();
+                const queue = registry({ w1: worker });
+                const selected = [];
+                const handler = route(queue, { build(owner, safe_build, notifiers, callback, w) { selected.push(w); } }); // never calls back
+
+                handler(buildRequest(), jsonResponse());
+                expect(selected).to.deep.equal([worker]);
+                expect(worker.running).to.equal(true);
+                expect(worker.running_since).to.be.a("number");
+                expect(worker.dispatched).to.equal(null);
+                expect(queue.nextAvailableWorker()).to.equal(false);
+
+                worker.running_since -= 2 * MIN + 1000; // the lost build's reservation ages out
+                handler(buildRequest(), jsonResponse());
+                expect(selected).to.deep.equal([worker, worker]); // served, not queued
+            });
+
+            it("runNext: its reservation is timed the same way", function () {
+                const { worker } = idleWorker();
+                const queue = registry({ w1: worker });
+                queue.builder = { build() { } }; // never calls back
+                queue.runNext({ action: { udid: envi.udid, source: envi.sid, owner_id: envi.oid }, setStarted() { }, delete() { } }, worker);
+                expect(worker.running).to.equal(true);
+                expect(worker.running_since).to.be.a("number");
+                expect(worker.dispatched).to.equal(null);
+                worker.running_since -= 2 * MIN + 1000;
+                expect(queue.nextAvailableWorker()).to.equal(worker);
+            });
+
+            it("the emit records the dispatched build and restarts the clock under the longer bound", function () {
+                const worker = reserved(90 * 1000, null);
+                const builder = new Builder(fakeRedis);
+                builder.notify = () => { };
+                const before = Date.now();
+                expect(builder.runRemoteShell(worker, validArgs(), envi.oid, BUILD_A, envi.udid, {}, envi.sid)).to.equal(true);
+                expect(worker.dispatched).to.equal(BUILD_A);
+                expect(worker.running_since).to.be.at.least(before);
+                worker.running_since -= 3 * MIN;
+                expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(false);
+            });
+
+            it("a releasing job-status clears the whole reservation", function () {
+                const socket = new EventEmitter();
+                socket.id = "w1";
+                const worker = reserved(1000, BUILD_A);
+                worker.socket = socket;
+                const queue = registry({ w1: worker });
+                queue.setupSocket(socket);
+                socket.emit("job-status", { build_id: BUILD_A, udid: envi.udid, state: "Failed", reason: "exit 1" });
+                expect(worker.running).to.equal(false);
+                expect(worker.running_since).to.equal(null);
+                expect(worker.dispatched).to.equal(null);
+            });
+
+            // A slow preparation can find its reservation reclaimed and the
+            // worker already building another job. a2e4bfa would drop a
+            // second job silently, so the API refuses it and leaves the worker
+            // to the build that holds it.
+            it("a worker that carries another build's job is refused before the emit and is not released", function () {
+                const { worker, emitted } = idleWorker();
+                Object.assign(worker, { running: true, running_since: Date.now(), dispatched: BUILD_A });
+                const builder = new Builder(fakeRedis);
+                const notified = [];
+                builder.notify = (...a) => notified.push(a[3]);
+                const dirB = checkoutWithSecrets("b");
+
+                expect(builder.dispatchRemoteBuild(worker, validArgs(), envi.oid, BUILD_B, envi.udid, {}, envi.sid, dirB)).to.equal(false);
+                expect(emitted).to.deep.equal([]);
+                expect(notified).to.deep.equal(["worker_busy"]);
+                expect(worker.running).to.equal(true);
+                expect(worker.dispatched).to.equal(BUILD_A);
+                expect(blogStates).to.deep.equal([[BUILD_B, envi.oid, envi.udid, "error"]]);
+                expect(stats.map((s) => [s[1], s[2]])).to.deep.equal([["BUILD_FAILED", BUILD_B]]);
+                expect(fs.existsSync(path.join(dirB, "environment.json"))).to.equal(false);
+            });
+
+            it("a lost build that refuses after its reservation was reclaimed does not free the job that now holds the worker", function () {
+                const { worker } = idleWorker();
+                const queue = registry({ w1: worker });
+                const callbacks = [];
+                const handler = route(queue, { build(owner, safe_build, notifiers, callback) { callbacks.push(callback); } });
+                handler(buildRequest(), jsonResponse());
+
+                worker.running_since -= 2 * MIN + 1000; // A is slow; B takes the worker and dispatches
+                handler(buildRequest(), jsonResponse());
+                const builder = new Builder(fakeRedis);
+                builder.notify = () => { };
+                expect(builder.runRemoteShell(worker, validArgs(), envi.oid, BUILD_B, envi.udid, {}, envi.sid)).to.equal(true);
+
+                callbacks[0](false, "git_fetch_failed"); // A finally gives up
+                expect(worker.running).to.equal(true);
+                expect(worker.dispatched).to.equal(BUILD_B);
+            });
+        });
+
+        // Each trigger site from the review, driven through the real router
+        // and Builder.build/run_build. CouchDB, the API key store, git, the
+        // platform probe and the API env store are stood in for; everything
+        // from the router's reservation to the refusal is the real code.
+        describe("trigger sites refuse and release the worker", function () {
+
+            const GIT = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+
+            function device(overrides) {
+                return Object.assign({
+                    udid: envi.udid,
+                    owner: envi.oid,
+                    platform: "arduino:esp8266",
+                    mac: "5C:CF:7F:00:11:22",
+                    environment: { cssid: "enc", cpass: "enc" }
+                }, overrides || {});
+            }
+
+            function harness(opts) {
+                opts = opts || {};
+                const dev = opts.device || device();
+                const builder = new Builder(fakeRedis);
+                const notified = [];
+                builder.notify = (...a) => notified.push(a[3]);
+                builder.devicelib = {
+                    view: opts.view || ((design, view, options, cb) => cb(null, { rows: [{ doc: dev }] })),
+                    get: (udid, cb) => cb(null, dev),
+                    atomic: (design, update, id, body, cb) => cb(null)
+                };
+                const doc = Object.prototype.hasOwnProperty.call(opts, "doc") ? opts.doc : { repos: { [envi.sid]: { url: GIT, branch: "main" } } };
+                builder.userlib = { get: (owner, cb) => cb(null, doc) };
+
+                // run_build's preparation without the API key store, git or the network.
+                const BUILD_PATH = fs.mkdtempSync(path.join(tmp, "build-"));
+                const XBUILD_PATH = path.join(BUILD_PATH, "repo");
+                fs.mkdirSync(XBUILD_PATH);
+                fs.writeFileSync(path.join(XBUILD_PATH, "main.ino"), "void setup() {}\n");
+                builder.buildPathFor = () => BUILD_PATH;
+                builder.getLastAPIKey = (owner, cb) => cb(true, "spec-api-key");
+                builder.createBuildPath = () => { };
+                builder.prefetchPublic = async () => true;
+                builder.prefetchPrivate = async () => true;
+                builder.runGitCommand = () => "1";
+                builder.getTag = () => "1.0";
+                builder.generate_thinx_json = () => ({});
+                builder.apienv = { list: (owner, cb) => cb(true, {}) };
+                spyOn(Platform, "getPlatform").and.callFake((p, cb) => cb(true, "arduino"));
+
+                const { worker, emitted } = idleWorker();
+                const queue = registry({ w1: worker });
+                const res = jsonResponse();
+                const handler = route(queue, builder);
+                return { builder, worker, emitted, queue, res, notified, XBUILD_PATH, run: () => handler(buildRequest(), res) };
+            }
+
+            function expectReleased(h) {
+                expect(h.worker.running).to.equal(false);
+                expect(h.queue.nextAvailableWorker()).to.equal(h.worker);
+                expect(h.emitted).to.deep.equal([]);
+            }
+
+            it("a device list error other than missing is refused", function () {
+                const h = harness({ view: (design, view, options, cb) => cb(new Error("ESOCKETTIMEDOUT")) });
+                h.run();
+                expect(h.res.body.length).to.equal(1);
+                expect(h.res.body[0].success).to.equal(false);
+                expect(h.res.body[0].response.response).to.equal("device_list_failed");
+                expectReleased(h);
+            });
+
+            it("\"No DB shards could be opened\" is refused at once, with no retry", function () {
+                jasmine.clock().install();
+                try {
+                    const h = harness({ view: (design, view, options, cb) => cb(new Error("No DB shards could be opened.")) });
+                    h.run();
+                    expect(h.res.body.length).to.equal(1);
+                    expect(h.res.body[0].response.response).to.equal("device_list_failed");
+                    expectReleased(h);
+                    jasmine.clock().tick(10000); // the old retry called a list() Builder never had
+                    expect(h.res.body.length).to.equal(1);
+                } finally {
+                    jasmine.clock().uninstall();
+                }
+            });
+
+            it("a missing device list is still no_devices", function () {
+                const h = harness({ view: (design, view, options, cb) => cb(new Error("missing")) });
+                h.run();
+                expect(h.res.body.length).to.equal(1);
+                expect(h.res.body[0].response.response).to.equal("no_devices");
+                expectReleased(h);
+            });
+
+            it("an owner document without repos is refused", function () {
+                const h = harness({ doc: { _id: envi.oid } });
+                h.run();
+                expect(h.res.body.length).to.equal(1);
+                expect(h.res.body[0].success).to.equal(false);
+                expect(h.res.body[0].response.response).to.equal("invalid_params");
+                expectReleased(h);
+            });
+
+            it("a device without a platform is refused", async function () {
+                const h = harness({ device: device({ platform: undefined }) });
+                h.run();
+                await until(() => h.res.body.length === 1);
+                expect(h.res.body[0]).to.deep.equal({ success: false, response: "device_platform_unknown" });
+                expectReleased(h);
+                expect(blogStates.map((s) => s[3])).to.deep.equal(["error"]);
+            });
+
+            it("a device without a MAC fails after build_started: BUILD_FAILED, error state, secrets removed", async function () {
+                const h = harness({ device: device({ mac: undefined }) });
+                h.run();
+                await until(() => stats.some((s) => s[1] === "BUILD_FAILED"));
+                await sleep(50);
+                expect(h.res.body.length).to.equal(1);
+                expect(h.res.body[0].success).to.equal(true);
+                expect(h.res.body[0].response.response).to.equal("build_started");
+                const build_id = h.res.body[0].response.build_id;
+                expectReleased(h);
+                expect(h.notified).to.include("device_mac_missing");
+                expect(stats.filter((s) => s[1] === "BUILD_FAILED").map((s) => s[2])).to.deep.equal([build_id]);
+                expect(blogStates).to.deep.equal([[build_id, envi.oid, envi.udid, "error"]]);
+                expect(fs.existsSync(path.join(h.XBUILD_PATH, "environment.json"))).to.equal(false);
+            });
+
+            it("a complete device is dispatched (the harness reaches the emit)", async function () {
+                const h = harness();
+                h.run();
+                await until(() => h.emitted.length === 1);
+                expect(h.res.body[0].response.response).to.equal("build_started");
+                expect(h.emitted[0][1].argv).to.include("--mac=001122");
+                expect(h.worker.running).to.equal(true);
+                expect(h.worker.dispatched).to.equal(h.res.body[0].response.build_id);
+            });
         });
     });
 });
