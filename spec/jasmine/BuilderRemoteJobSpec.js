@@ -1159,4 +1159,73 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             });
         });
     });
+
+    // Review iteration 4, WR-02: loop() compared nextAvailableWorker() with
+    // null, but it returns false, so a build queued while the worker was busy
+    // went to runNext(next, false), whose actionWorkerValid replaced it with
+    // an error record. The owner was told "queued" and the build never ran.
+    describe("queued builds wait for a worker (iteration 4, WR-02)", function () {
+
+        const Queue = require("../../lib/thinx/queue");
+
+        function waitingAction() {
+            const calls = { setError: 0, setStarted: 0, delete: 0 };
+            const action = {
+                action: { udid: envi.udid, source: envi.sid, owner_id: envi.oid, status: "waiting" },
+                setError() { calls.setError++; },
+                setStarted() { calls.setStarted++; },
+                delete() { calls.delete++; }
+            };
+            return { action, calls };
+        }
+
+        // The Queue's scheduling without its constructor (Redis, port 4000).
+        function queueWith(action) {
+            const queue = Object.create(Queue.prototype);
+            queue.workers = {};
+            queue.notifier = { process() { } };
+            queue.findNext = async () => action;
+            const builds = [];
+            queue.builder = { build(owner, build, notifiers, callback, worker) { builds.push({ owner, build, worker }); } };
+            return { queue, builds };
+        }
+
+        it("loop() keeps a queued build waiting while no worker is free, and dispatches it once one is", async function () {
+            const { action, calls } = waitingAction();
+            const { queue, builds } = queueWith(action);
+
+            await queue.loop(); // no worker registered
+            queue.workers.busy = { connected: true, running: true, running_since: Date.now(), dispatched: null, socket: {} };
+            await queue.loop(); // the only worker is busy
+            expect(calls).to.deep.equal({ setError: 0, setStarted: 0, delete: 0 });
+            expect(builds).to.deep.equal([]);
+
+            const idle = { connected: true, running: false, socket: {} };
+            queue.workers.idle = idle;
+            await queue.loop();
+            expect(calls.setError).to.equal(0);
+            expect(calls.setStarted).to.equal(1);
+            expect(builds.length).to.equal(1);
+            expect(builds[0].worker).to.equal(idle);
+            expect(builds[0].owner).to.equal(envi.oid);
+            expect(builds[0].build).to.deep.equal({ udid: envi.udid, source_id: envi.sid, dryrun: false });
+            expect(idle.running).to.equal(true);
+        });
+
+        const notWorkers = [
+            ["false (nextAvailableWorker's no-worker value)", false],
+            ["null", null],
+            ["undefined", undefined],
+            ["an object without a socket", {}]
+        ];
+        for (const [name, notAWorker] of notWorkers) {
+            it("runNext leaves the action waiting and builds nothing for " + name, function () {
+                const { action, calls } = waitingAction();
+                const { queue, builds } = queueWith(action);
+                queue.runNext(action, notAWorker);
+                expect(calls).to.deep.equal({ setError: 0, setStarted: 0, delete: 0 });
+                expect(builds).to.deep.equal([]);
+            });
+        }
+    });
 });
