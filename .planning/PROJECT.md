@@ -38,8 +38,8 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - **WR-04** — `POST /api/v2/user` requires the CSRF token, no machine-client exemption (decision 2026-09-25: non-browser clients must prime the token)
 - **Console CSP source of truth** — the gluster bind-mounted `default.conf` is canonical (decision 2026-09-25); image `default.conf` files and the runbook snapshots mirror it, including the Vue `connect-src` `app.thinx.cloud` fix; spot-check classic register / forgot / reset-confirm under enforcement
 - **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
-- **builder.js path traversal** — fix Aikido-flagged `readFileSync`/`lstatSync` sinks in `lib/thinx/builder.js`
-- **git.js argv** — `lib/thinx/git.js` `execSync` sink takes argv, not a shell string
+- ✓ **builder.js path traversal** — repository-controlled reads and writes are contained by `safepath` *(shipped Phase 23, SEC-PATH-01/02)*
+- ✓ **git.js argv** — git runs argv-only with no shell; remote jobs carry argv; `shell-escape` removed *(shipped Phase 23, SEC-EXEC-01/02)*
 - ✓ **CodeQL workflow** — trigger on `main`, current action majors *(shipped Phase 22, CI-01)*
 - ✓ **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step *(shipped Phase 22, CI-02)*
 - ✓ **Vue hostname var** — separate Vue console hostname build var so footer links point at itself *(shipped Phase 22, CI-03)*
@@ -58,6 +58,10 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 - ✓ **CI-01** — v1.14 (Phase 22) — CodeQL `javascript-typescript` (`codeql-action@v4`, `checkout@v7`, `build-mode: none`) runs on pushes to `thinx-staging`/`main` and PRs to `main`; non-required; default setup off. security-extended baseline recorded (147 alerts). Main-push row pending the merge of PR #569.
 - ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
+- ✓ **SEC-EXEC-01** — v1.14 (Phase 23) — `lib/thinx/git.js` runs git argv-only (`runGit` is a detached `spawn`, `shell:false`; `ls-files` uses `execFileSync`). No shell string, no `ssh-agent sh -c`. Constant `GIT_SSH_COMMAND` + askpass, passphrase in env, publickey-only ssh. Private builds proven in production (43c748d0, 17d30770).
+- ✓ **SEC-EXEC-02** — v1.14 (Phase 23) — Remote jobs carry `argv` (arguments only), and the worker spawns its constant builder program with `shell:false`. `shell-escape` is gone from `package.json` and the lockfile. The legacy `cmd` shell path is retained for now (removal is a pending todo).
+- ✓ **SEC-PATH-01** — v1.14 (Phase 23) — Every builder read/write of a repository-controlled file goes through `safepath` (realpath containment, O_NOFOLLOW, symlink refusal), including the `thinx.yml` write-back. `buildPathFor` refuses a malformed owner/udid (`invalid_device`, owner notified).
+- ✓ **SEC-PATH-02** — v1.14 (Phase 23) — Clone and pull use `core.symlinks=false`, persisted in the checkout.
 - ✓ **CI-03** — v1.14 (Phase 22) — Vue console "THiNX Console" links (layout, login, password reset) point at the Vue console host via `VUE_WEB_HOSTNAME` → `VUE_APP_CONSOLE_HOSTNAME` build arg; dead runtime env removed from `docker-swarm.yml`, gluster and the live service. The authenticated Layout footer needed a gap-closure fix (22-04: missing hostnames mixin), guarded by a plain-node footer test.
 
 </details>
@@ -201,6 +205,9 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 | Phase 22 re-opened CI-03 after verification instead of accepting the public-page evidence | 22-02 marked CI-03 complete without the logged-in Layout check; the verifier found the Layout footer links had no href (missing hostnames mixin, pre-existing) | ✓ Good — 22-04 fixed it with the per-component mixin pattern and marked CI-03 complete only after a logged-in approval |
 | Layout gets the hostnames mixin per component, not a global `Vue.mixin` or a populated prototype | A global mixin would run the hostnames `data()`/`created()` on every component instance, library components included; four pages already use the per-component pattern | ✓ Good — 2-line fix, template byte-identical |
 | Console `test:unit` stays a local pre-deploy guard for now | It runs in no CI job or image build (review WR-03); adding it to the Vue Dockerfile is the known fix | ⚠️ Revisit — wire `yarn test:unit` into the Vue image build |
+| Phase 23 kept the legacy worker `cmd` shell path during the rollout (D-01/D-03) | Either-order API/worker deploys during the change window; production showed 0 legacy jobs afterwards | ⚠️ Revisit — the user confirmed no other deployments exist (2026-09-28); removal is in the worker todo |
+| Phase 23 code review ran 5 fix passes (2 beyond the 3-iteration cap, user-approved) | Each pass surfaced the next edge of the build-queue/worker lifecycle (busy flag, reservation expiry, queue drops, reconnect) | ⚠️ Revisit — plan the queue/worker lifecycle as one change (worker todo Part 3) rather than patching it inside a sink-hardening phase |
+| 35-minute prep reservation as a stopgap instead of per-reservation owner tokens | The 2-minute bound let a second request take the single worker from a build that was still cloning; raising the bound was one constant and safe for 1 replica | ⚠️ Revisit — owner token in the worker todo |
 
 ## Evolution
 
@@ -221,4 +228,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-25 after Phase 22 (CI & SAST Baseline)*
+*Last updated: 2026-09-29 after Phase 23 (Build-Pipeline Sink Hardening)*

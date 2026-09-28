@@ -20,15 +20,16 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-09-25 (v1.14 roadmap created: Phases 22–28, 25/25 requirements mapped)
+**Last updated:** 2026-09-29 (Phase 23 complete; transitioned to Phase 24)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-25 after Phase 22)
+See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 23 Build-Pipeline Sink Hardening (ready to plan).
-- **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
+- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 24 Secrets Sweep (ready to discuss/plan).
+- **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
+- **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
@@ -38,7 +39,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-09-29 — Phase 23 complete, transitioned to Phase 24
 
-Progress: [██████░░░░] 62% (1/7 v1.14 phases; Phase 22 4/4 plans)
+Progress: [███░░░░░░░] 29% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -217,6 +218,14 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 - ⚠️ [Phase 22] Submodule `Test Vue console` CircleCI job has failed on every thinx-staging run since job 836 (2026-09-23) in `Install dependencies and build`; not the deploy path.
 - ⚠️ [Phase 22] Review WR-01 (test job still receives the private-registry credential via context) and WR-02 (AGENTS.md publishes the ssh endpoint) remain open.
 
+### Concerns carried from Phase 23
+
+- ⚠️ [Phase 23] Worker lifecycle (worker todo Parts 1–3): the builder polling loop never detects completion; the worker never reconnects after a build, so with 1 replica each later build queues until the worker restarts; the reservation owner token; re-queue on `worker_busy`.
+- ⚠️ [Phase 23] Legacy worker `cmd` shell path still deployed. No other deployments exist (user, 2026-09-28), so removal is unblocked (worker todo Part 2).
+- ⚠️ [Phase 23] Rotate `WORKER_SECRET`: worker logs from before 23-02 contain it.
+- ⚠️ [Phase 23] Build checkouts are world-writable (0o777/0o766) and have never been hardened; least-privilege follow-up. `thinx.yml` `eval` in the worker `builder` was transferred to the backlog (T-23-14).
+- ⚠️ [Phase 23] Aikido IaC scan not run locally (Checkov binary missing). The platform auto-rescan is weekly and non-blocking.
+
 ### Open Questions
 
 Decided at plan time, not blocking the roadmap:
@@ -246,11 +255,11 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-28T18:46:24.905Z
+**Last session:** 2026-09-29
 
-**Stopped at:** Phase 23 complete, ready to plan Phase 24
+**Stopped at:** Phase 23 complete (verified passed, deployed), ready to plan Phase 24
 
-**Next action:** `/gsd:discuss-phase 23` (then `/gsd:plan-phase 23`)
+**Next action:** `/gsd-discuss-phase 24` (autonomous run continuing)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -263,7 +272,8 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Start Phase 23 with `/gsd:discuss-phase 23`
+- Phase 24 (Secrets Sweep) is next in the autonomous run
+- Run the worker todo (polling fix + legacy `cmd` removal + lifecycle) and the Rollbar token split as `/gsd-quick` tasks in one worker deploy window
 - Push the pending `.planning` docs commits on `thinx-staging` when convenient (triggers CircleCI + PR CodeQL)
 - Merge PR #569 when ready, then record the CodeQL main-push row (CI-01 follow-up)
 - Decide whether to sync `thinx-cloud/console` `main` to its `thinx-staging` (trails by the 22-04 fix commit `a5b0246`)
