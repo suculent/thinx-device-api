@@ -27,7 +27,12 @@ const SECRETS_DIR = "/run/secrets/";
 
 const FAKE = {
   mailgunFile: "spec-fake-mailgun-file-7c1e",
-  mailgunEnv: "spec-fake-mailgun-env-2b9d"
+  mailgunEnv: "spec-fake-mailgun-env-2b9d",
+  slackBotFile: "spec-fake-slackbot-file-4a1f",
+  slackBotEnv: "spec-fake-slackbot-env-9e3c",
+  slackSecretFile: "spec-fake-slacksecret-file-51d0",
+  slackWebhookFile: "spec-fake-slackhook-file-c28a",
+  slackWebhookEnv: "spec-fake-slackhook-env-06b7"
 };
 
 // ---------------------------------------------------------------------------
@@ -189,6 +194,16 @@ function sendMailAsPromise(Klass, contents, type) {
   });
 }
 
+// slack-notify factory stub: records the webhook it is built with.
+function slackNotifyStub() {
+  const calls = [];
+  function factory(webhook) {
+    calls.push(webhook);
+    return { send: () => Promise.resolve() };
+  }
+  return { exports: factory, calls };
+}
+
 const MAIL = { from: "spec@example.invalid", to: "spec@example.invalid", subject: "spec", text: "spec" };
 
 // ---------------------------------------------------------------------------
@@ -289,6 +304,163 @@ describe("Secrets sweep: MAILGUN_API_KEY", function () {
       const { stub, lines } = await loadTransfer({ file: FAKE.mailgunFile, env: FAKE.mailgunEnv });
       expect(stub.calls.length).to.equal(1);
       expect(stub.calls[0].key).to.equal(FAKE.mailgunFile);
+      expectNoFakeValues(lines);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slack: SLACK_BOT_TOKEN, SLACK_CLIENT_SECRET, SLACK_WEBHOOK
+// ---------------------------------------------------------------------------
+
+describe("Secrets sweep: Slack credentials", function () {
+
+  const EventEmitter = require('events');
+
+  beforeAll(function () {
+    require("../../lib/thinx/messenger.js");
+    require("../../lib/thinx/notifier.js");
+  });
+
+  describe("messenger.js SLACK_BOT_TOKEN", function () {
+
+    it("creates no RTM client and reports failure when the token is absent", async function () {
+      const Messenger = require("../../lib/thinx/messenger.js");
+      let attachCalls = 0;
+      const fake = {
+        DISABLE_SLACK: false,
+        redis: { get: async () => null },
+        getBotToken: Messenger.prototype.getBotToken,
+        attachCallbacks: () => { attachCalls++; }
+      };
+      let ok;
+      const lines = await withSecrets({ SLACK_BOT_TOKEN: "absent" }, () => captureLogs(async () => {
+        ok = await new Promise((resolve) => { Messenger.prototype.initSlack.call(fake, resolve); });
+      }));
+      expect(ok).to.equal(false);
+      expect(fake.rtm).to.equal(undefined);
+      expect(attachCalls).to.equal(0);
+      expect(countMatching(lines, /SLACK_BOT_TOKEN not set/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("resolves the bot token from the secret file", async function () {
+      const Messenger = require("../../lib/thinx/messenger.js");
+      let token;
+      const lines = await withSecrets({ SLACK_BOT_TOKEN: { file: FAKE.slackBotFile } }, () => captureLogs(async () => {
+        token = await Messenger.prototype.getBotToken.call({ redis: { get: async () => null } });
+      }));
+      expect(token).to.equal(FAKE.slackBotFile);
+      expectNoFakeValues(lines);
+    });
+
+    it("prefers the secret file over a different env value", async function () {
+      const Messenger = require("../../lib/thinx/messenger.js");
+      let token;
+      await withSecrets({ SLACK_BOT_TOKEN: { file: FAKE.slackBotFile, env: FAKE.slackBotEnv } }, async () => {
+        token = await Messenger.prototype.getBotToken.call({ redis: { get: async () => null } });
+      });
+      expect(token).to.equal(FAKE.slackBotFile);
+    });
+  });
+
+  describe("router.slack.js SLACK_CLIENT_SECRET", function () {
+
+    async function runRedirect(secretSpec) {
+      const https = require('https');
+      const handlers = {};
+      require("../../lib/router.slack.js")({ get: (route, h) => { handlers[route] = h; } });
+      const getCalls = [];
+      const redirects = [];
+      const origGet = https.get;
+      https.get = function (options) {
+        getCalls.push(options);
+        return { on() { return this; } };
+      };
+      let lines;
+      try {
+        lines = await withSecrets({ SLACK_CLIENT_SECRET: secretSpec }, () => captureLogs(async () => {
+          handlers["/api/slack/redirect"](
+            { url: "/api/slack/redirect?code=A&state=B", query: { code: "A", state: "B" } },
+            { redirect: (url) => redirects.push(url) }
+          );
+        }));
+      } finally {
+        https.get = origGet;
+      }
+      return { getCalls, redirects, lines };
+    }
+
+    it("skips the token exchange but still redirects when the secret is absent", async function () {
+      const { getCalls, redirects, lines } = await runRedirect("absent");
+      expect(getCalls.length).to.equal(0);
+      expect(redirects.length).to.equal(1);
+      expect(redirects[0].endsWith("/app/#/profile/help")).to.equal(true);
+      expect(countMatching(lines, /SLACK_CLIENT_SECRET not set/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("exchanges the code with the client secret from the secret file", async function () {
+      const { getCalls, redirects, lines } = await runRedirect({ file: FAKE.slackSecretFile });
+      expect(getCalls.length).to.equal(1);
+      expect(getCalls[0].path).to.contain(FAKE.slackSecretFile);
+      expect(redirects.length).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+  });
+
+  describe("notifier.js SLACK_WEBHOOK", function () {
+
+    async function appStart(secretSpec) {
+      const stub = slackNotifyStub();
+      const lines = await withSecrets({ SLACK_WEBHOOK: secretSpec }, () => captureLogs(async () => {
+        const { mod: Notifier, restore } = freshRequire("../../lib/thinx/notifier.js", { "slack-notify": stub.exports });
+        try {
+          Notifier.notifyAppStart();
+        } finally {
+          restore();
+        }
+      }));
+      return { stub, lines };
+    }
+
+    it("builds no slack-notify client when the webhook is absent", async function () {
+      const { stub, lines } = await appStart("absent");
+      expect(stub.calls.length).to.equal(0);
+      expect(countMatching(lines, /SLACK_WEBHOOK not set — skipping app-start notification/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("prefers the secret file over a different env value", async function () {
+      const { stub, lines } = await appStart({ file: FAKE.slackWebhookFile, env: FAKE.slackWebhookEnv });
+      expect(stub.calls).to.deep.equal([FAKE.slackWebhookFile]);
+      expectNoFakeValues(lines);
+    });
+  });
+
+  describe("redis-health.js SLACK_WEBHOOK", function () {
+
+    async function attachWith(secretSpec) {
+      const { attach } = require("../../lib/thinx/redis-health.js");
+      const calls = [];
+      const spy = (webhook) => { calls.push(webhook); return { send: () => Promise.resolve() }; };
+      const lines = await withSecrets({ SLACK_WEBHOOK: secretSpec }, () => captureLogs(async () => {
+        const handle = attach(new EventEmitter(), { slackNotify: spy });
+        handle.detach();
+      }));
+      return { calls, lines };
+    }
+
+    it("builds no slack-notify client when the webhook is absent", async function () {
+      const { calls, lines } = await attachWith("absent");
+      expect(calls.length).to.equal(0);
+      expect(countMatching(lines, /SLACK_WEBHOOK not set/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("builds the client from the secret file", async function () {
+      const { calls, lines } = await attachWith({ file: FAKE.slackWebhookFile });
+      expect(calls).to.deep.equal([FAKE.slackWebhookFile]);
       expectNoFakeValues(lines);
     });
   });
