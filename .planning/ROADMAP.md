@@ -162,7 +162,25 @@ Plans:
   3. A `CSRF_SECRET` swarm secret exists and `thinx_api` can read it at `/run/secrets/CSRF_SECRET`.
   4. `docker-swarm.yml` mirrors the live stack's secrets and service references, and its stale api image reference is corrected.
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+**Wave 1**
+- [ ] 24-01-PLAN.md — lib sweep A: Mailgun (tracer, owner/transfer) and the Slack bot token, OAuth client secret and webhook through readSecret, with the SecretsSweepSpec harness (wave 1)
+- [ ] 24-02-PLAN.md — worker and transformer (submodules): local readSecret + rollbarServerToken(), WORKER_SECRET file-wins in validateJob, one Rollbar init, dead inits removed (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 24-03-PLAN.md — lib sweep B: WORKER_SECRET into the job with a worker_secret_missing refusal (tracer), GitHub/Google OAuth, Rollbar server-token chain, rsakey passphrase (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 24-04-PLAN.md — pointer bump and ordered push, code live on env fallback, then the gated thinx_api secrets (7 carried over + CSRF_SECRET) with D-11 checks (wave 3, checkpoint)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 24-05-PLAN.md — gated WORKER_SECRET rotation on thinx_api + thinx_worker with a real-build proof, then ROLLBAR_SERVER_TOKEN on thinx_transformer (wave 4, checkpoint)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 24-06-PLAN.md — docker-swarm.yml mirrors the live secrets and api image, mounts proven across a routine redeploy, final D-11 sweep and the human OAuth login check (wave 5)
+
 **Notes**: The env fallback stays (user decision); removing env values is SEC-CFG-03. Never sweep non-secret toggles such as `CSRF_ENFORCE`. `readSecret()` returns `null`, not `undefined`, so `typeof` guards must become truthiness guards.
 
 ### Phase 25: Session-Bound CSRF + Console Edge Headers
