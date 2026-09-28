@@ -1228,4 +1228,85 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             });
         }
     });
+
+    // Review iteration 4, IN-15: buildGuards called back false and run_build
+    // kept going. The router answered twice (the second write throws
+    // ERR_HTTP_HEADERS_SENT in production) and released a worker the build
+    // later dispatched to, and the prepared checkout kept its secrets.
+    describe("a false buildGuards callback is terminal (iteration 4, IN-15)", function () {
+
+        const Queue = require("../../lib/thinx/queue");
+        const BuildLog = require("../../lib/thinx/buildlog");
+        const InfluxConnector = require("../../lib/thinx/influx");
+
+        const GIT = "https://github.com/suculent/thinx-firmware-esp8266-pio.git";
+        const BUILD_ID = "cccccccc-6666-11f0-9d4a-0b5e6f7a8c9d";
+
+        let stats;
+
+        beforeEach(() => {
+            stats = [];
+            spyOn(BuildLog.prototype, "state");
+            spyOn(BuildLog.prototype, "log");
+            spyOn(InfluxConnector, "statsLog").and.callFake((...a) => { stats.push(a); });
+        });
+
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        // devicelib.get is the first step of the preparation after the guards.
+        function guardedBuilder() {
+            const builder = new Builder(fakeRedis);
+            builder.notify = () => { };
+            const prepared = [];
+            const device = { udid: envi.udid, owner: envi.oid, platform: "arduino:esp8266", mac: "5C:CF:7F:00:11:22" };
+            builder.devicelib = {
+                view: (design, view, options, cb) => cb(null, { rows: [{ doc: device }] }),
+                get: (udid, cb) => { prepared.push(udid); cb(new Error("not_found")); },
+                atomic: (design, update, id, body, cb) => cb(null)
+            };
+            builder.userlib = { get: (owner, cb) => cb(null, { repos: { [envi.sid]: { url: GIT } } }) }; // no branch
+            return { builder, prepared };
+        }
+
+        it("run_build calls back once and prepares nothing when a guard fails", async function () {
+            const { builder, prepared } = guardedBuilder();
+            const calls = [];
+            builder.run_build({
+                build_id: BUILD_ID,
+                owner: envi.oid,
+                git: GIT,
+                branch: undefined,
+                udid: envi.udid,
+                source_id: envi.sid,
+                worker: { running: true, socket: { connected: true, on() { }, emit() { } } }
+            }, {}, (success, response) => calls.push([success, response]));
+            await sleep(50);
+            expect(calls).to.deep.equal([[false, "branch undefined"]]);
+            expect(prepared).to.deep.equal([]);
+            expect(BuildLog.prototype.log.calls.count()).to.equal(0);
+            expect(stats.map((s) => [s[1], s[2]])).to.deep.equal([["BUILD_FAILED", BUILD_ID]]);
+        });
+
+        it("the router answers once and gets its worker back for a source without a branch", async function () {
+            const { builder, prepared } = guardedBuilder();
+            const worker = { connected: true, running: false, socket: { connected: true, on() { }, emit() { } } };
+            const queue = Object.create(Queue.prototype);
+            queue.workers = { w1: worker };
+            const routes = {};
+            require("../../lib/router.build")({ post: (r, fn) => { routes[r] = fn; }, queue: queue, messenger: null, builder: builder });
+            const res = { body: [], header() { }, status() { return res; }, end(b) { res.body.push(JSON.parse(b)); return res; } };
+
+            routes["/api/v2/build"]({
+                headers: { authorization: "Bearer spec" },
+                session: { owner: envi.oid },
+                body: { build: { udid: envi.udid, source_id: envi.sid } }
+            }, res);
+            await sleep(50);
+
+            expect(res.body).to.deep.equal([{ success: false, response: "branch undefined" }]);
+            expect(prepared).to.deep.equal([]);
+            expect(worker.running).to.equal(false);
+            expect(queue.nextAvailableWorker()).to.equal(worker);
+        });
+    });
 });
