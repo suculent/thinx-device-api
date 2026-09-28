@@ -33,7 +33,11 @@ const FAKE = {
   slackSecretFile: "spec-fake-slacksecret-file-51d0",
   slackWebhookFile: "spec-fake-slackhook-file-c28a",
   slackWebhookEnv: "spec-fake-slackhook-env-06b7",
-  workerSecretFile: "spec-fake-workersecret-file-8d42"
+  workerSecretFile: "spec-fake-workersecret-file-8d42",
+  githubSecretFile: "spec-fake-githubsecret-file-3f6a",
+  githubSecretEnv: "spec-fake-githubsecret-env-a90c",
+  googleSecretFile: "spec-fake-googlesecret-file-e71b",
+  googleSecretEnv: "spec-fake-googlesecret-env-15d8"
 };
 
 // ---------------------------------------------------------------------------
@@ -512,5 +516,207 @@ describe("Secrets sweep: WORKER_SECRET in queue.js", function () {
     expect(socket.connects).to.equal(1);
     expect(socket.auth.token).to.equal(FAKE.workerSecretFile);
     expectNoFakeValues(lines);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// OAuth: GITHUB_CLIENT_SECRET (router.github.js) and GOOGLE_OAUTH_SECRET
+// (router.google.js)
+// ---------------------------------------------------------------------------
+
+describe("Secrets sweep: OAuth client secrets", function () {
+
+  beforeAll(function () {
+    require("../../lib/router.github.js");
+    require("../../lib/router.google.js");
+  });
+
+  // Records the routes a router registers; `app.get(paths, handler)`.
+  function fakeApp(redisCalls) {
+    const handlers = {};
+    const register = (routes, handler) => {
+      for (const r of [].concat(routes)) handlers[r] = handler;
+    };
+    return {
+      handlers,
+      app: {
+        owner: {},
+        redis_client: {
+          set: (...a) => redisCalls.push(["set", ...a]),
+          expire: (...a) => redisCalls.push(["expire", ...a]),
+          get: (key, cb) => { redisCalls.push(["get", key]); cb(null, null); },
+          del: (...a) => redisCalls.push(["del", ...a])
+        },
+        get: register,
+        post: register
+      }
+    };
+  }
+
+  function fakeReq(url, query) {
+    return { url: url, query: query || {}, headers: {} };
+  }
+
+  // Resolves when the handler answers (status+end, or redirect).
+  function fakeRes() {
+    const res = { statusCode: null, redirected: null, ended: false };
+    res.done = new Promise((resolve) => { res._resolve = resolve; });
+    res.status = (code) => { res.statusCode = code; return res; };
+    res.set = () => res;
+    res.end = () => { res.ended = true; res._resolve(); };
+    res.redirect = (url) => { res.redirected = url; res._resolve(); };
+    res.cookie = () => { };
+    res.clearCookie = () => { };
+    res.setHeader = () => { };
+    return res;
+  }
+
+  describe("router.github.js GITHUB_CLIENT_SECRET", function () {
+
+    const FACTORY_ID = require.resolve("../../lib/thinx/oauth-github.js");
+
+    // The router requires the oauth-github factory lazily, inside the router
+    // function, so replacing its cached exports intercepts every build.
+    async function mountGithub(secretSpec, drive) {
+      require(FACTORY_ID);
+      const factoryCalls = [];
+      const clientCalls = [];
+      const savedExports = require.cache[FACTORY_ID].exports;
+      require.cache[FACTORY_ID].exports = function (specs) {
+        factoryCalls.push(specs);
+        return {
+          on: () => { },
+          login: (req, res) => { clientCalls.push("login"); res.end(); },
+          callback: (req, res) => { clientCalls.push("callback"); res.end(); }
+        };
+      };
+      const redisCalls = [];
+      const { app, handlers } = fakeApp(redisCalls);
+      let lines;
+      try {
+        lines = await withSecrets({ GITHUB_CLIENT_SECRET: secretSpec }, () => captureLogs(async () => {
+          require("../../lib/router.github.js")(app);
+          await drive(handlers);
+        }));
+      } finally {
+        require.cache[FACTORY_ID].exports = savedExports;
+      }
+      return { factoryCalls, clientCalls, lines };
+    }
+
+    it("builds no client, answers 400 on login and callback when the secret is absent", async function () {
+      const results = {};
+      const { factoryCalls, clientCalls, lines } = await mountGithub("absent", async (handlers) => {
+        const loginRes = fakeRes();
+        handlers["/api/oauth/github"](fakeReq("/api/oauth/github"), loginRes);
+        await loginRes.done;
+        results.login = loginRes.statusCode;
+        const cbRes = fakeRes();
+        handlers["/api/oauth/github/callback"](fakeReq("/api/oauth/github/callback?code=abcd&state=x", { code: "abcd", state: "x" }), cbRes);
+        await cbRes.done;
+        results.callback = cbRes.statusCode;
+      });
+      expect(factoryCalls.length).to.equal(0);
+      expect(clientCalls).to.deep.equal([]);
+      expect(results).to.deep.equal({ login: 400, callback: 400 });
+      expect(countMatching(lines, /GITHUB_CLIENT_SECRET not set/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("builds the client once from the secret file and serves login and callback", async function () {
+      const { factoryCalls, clientCalls, lines } = await mountGithub({ file: FAKE.githubSecretFile }, async (handlers) => {
+        const loginRes = fakeRes();
+        handlers["/api/oauth/github"](fakeReq("/api/oauth/github"), loginRes);
+        await loginRes.done;
+        const cbRes = fakeRes();
+        handlers["/api/oauth/github/callback"](fakeReq("/api/oauth/github/callback?code=abcd&state=x", { code: "abcd", state: "x" }), cbRes);
+        await cbRes.done;
+      });
+      expect(factoryCalls.length).to.equal(1);
+      expect(factoryCalls[0].githubSecret).to.equal(FAKE.githubSecretFile);
+      expect(factoryCalls[0].githubClient).to.equal(process.env.GITHUB_CLIENT_ID);
+      expect(clientCalls).to.deep.equal(["login", "callback"]);
+      expect(countMatching(lines, /GITHUB_CLIENT_SECRET not set/)).to.equal(0);
+      expectNoFakeValues(lines);
+    });
+
+    it("prefers the secret file over a different env value", async function () {
+      const { factoryCalls, lines } = await mountGithub({ file: FAKE.githubSecretFile, env: FAKE.githubSecretEnv }, async () => { });
+      expect(factoryCalls.length).to.equal(1);
+      expect(factoryCalls[0].githubSecret).to.equal(FAKE.githubSecretFile);
+      expectNoFakeValues(lines);
+    });
+  });
+
+  describe("router.google.js GOOGLE_OAUTH_SECRET", function () {
+
+    // simple-oauth2 is required at module load, so the router is loaded fresh
+    // with a recording AuthorizationCode.
+    async function mountGoogle(secretSpec, drive) {
+      const constructed = [];
+      function FakeAC(config) { constructed.push(config); }
+      FakeAC.prototype.authorizeURL = function (params) {
+        return "https://accounts.google.com/o/oauth2/v2/auth?state=" + encodeURIComponent(params.state);
+      };
+      FakeAC.prototype.getToken = function () { return Promise.reject(new Error("spec: no token exchange")); };
+      const redisCalls = [];
+      const { app, handlers } = fakeApp(redisCalls);
+      const lines = await withSecrets({ GOOGLE_OAUTH_SECRET: secretSpec }, () => captureLogs(async () => {
+        const { mod, restore } = freshRequire("../../lib/router.google.js", { "simple-oauth2": { AuthorizationCode: FakeAC } });
+        try {
+          mod(app);
+          await drive(handlers);
+        } finally {
+          restore();
+        }
+      }));
+      return { constructed, redisCalls, lines };
+    }
+
+    it("constructs no client and answers 400 before any Redis work when the secret is absent", async function () {
+      const results = {};
+      const { constructed, redisCalls, lines } = await mountGoogle("absent", async (handlers) => {
+        const loginRes = fakeRes();
+        handlers["/api/oauth/google"](fakeReq("/api/oauth/google"), loginRes);
+        await loginRes.done;
+        results.login = loginRes.statusCode;
+        const cbRes = fakeRes();
+        await handlers["/api/oauth/google/callback"](fakeReq("/api/oauth/google/callback?code=x", { code: "x" }), cbRes);
+        await cbRes.done;
+        results.callback = cbRes.statusCode;
+      });
+      expect(constructed.length).to.equal(0);
+      expect(redisCalls).to.deep.equal([]);
+      expect(results).to.deep.equal({ login: 400, callback: 400 });
+      expect(countMatching(lines, /GOOGLE_OAUTH_SECRET not set/)).to.equal(1);
+      expectNoFakeValues(lines);
+    });
+
+    it("redirects to Google with a client built from the secret file", async function () {
+      let redirected;
+      const { constructed, lines } = await mountGoogle({ file: FAKE.googleSecretFile }, async (handlers) => {
+        const loginRes = fakeRes();
+        handlers["/api/oauth/google"](fakeReq("/api/oauth/google"), loginRes);
+        await loginRes.done;
+        redirected = loginRes.redirected;
+      });
+      expect(constructed.length).to.equal(1);
+      expect(constructed[0].client.secret).to.equal(FAKE.googleSecretFile);
+      expect(constructed[0].client.id).to.equal(process.env.GOOGLE_OAUTH_ID);
+      expect(redirected).to.match(/^https:\/\/accounts\.google\.com\//);
+      expect(countMatching(lines, /GOOGLE_OAUTH_SECRET not set/)).to.equal(0);
+      expectNoFakeValues(lines);
+    });
+
+    it("prefers the secret file over a different env value", async function () {
+      const { constructed, lines } = await mountGoogle({ file: FAKE.googleSecretFile, env: FAKE.googleSecretEnv }, async (handlers) => {
+        const loginRes = fakeRes();
+        handlers["/api/oauth/google"](fakeReq("/api/oauth/google"), loginRes);
+        await loginRes.done;
+      });
+      expect(constructed.length).to.equal(1);
+      expect(constructed[0].client.secret).to.equal(FAKE.googleSecretFile);
+      expectNoFakeValues(lines);
+    });
   });
 });
