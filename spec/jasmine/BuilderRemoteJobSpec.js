@@ -137,8 +137,9 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             process.env.WORKER_SECRET = "spec-worker-secret";
             const { builder, calls } = remoteBuilder();
             const buildArgs = validArgs();
-            builder.runRemoteShell(worker, buildArgs, envi.oid, envi.build_id, envi.udid, [], envi.sid);
+            const emitted = builder.runRemoteShell(worker, buildArgs, envi.oid, envi.build_id, envi.udid, [], envi.sid);
 
+            expect(emitted).to.equal(true);
             expect(calls.notify).to.deep.equal([]);
             expect(calls.emit.length).to.equal(1);
             expect(calls.emit[0][0]).to.equal("job");
@@ -203,10 +204,32 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
         it("emits nothing and notifies invalid_device for an invalid owner (23-03 guard)", function () {
             const { builder, calls } = remoteBuilder();
-            builder.runRemoteShell(worker, validArgs(), "../bad", envi.build_id, envi.udid, [], envi.sid);
+            const emitted = builder.runRemoteShell(worker, validArgs(), "../bad", envi.build_id, envi.udid, [], envi.sid);
+            expect(emitted).to.equal(false);
             expect(calls.emit).to.deep.equal([]);
             expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_device"]);
         });
+
+        // WR-02: run_build has already answered build_started and written the
+        // decrypted secrets by now; false is what makes it set the build-log
+        // state to error and run cleanupSecrets.
+        it("returns false and notifies when the io socket is missing", function () {
+            const { builder, calls } = remoteBuilder();
+            builder.io = null;
+            const emitted = builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
+            expect(emitted).to.equal(false);
+            expect(calls.notify.map(c => c[3])).to.deep.equal(["error_starting_build"]);
+        });
+
+        for (const [name, badWorker] of [["undefined", undefined], ["null", null], ["without a socket", {}]]) {
+            it("returns false and emits nothing for a worker that is " + name, function () {
+                const { builder, calls } = remoteBuilder();
+                const emitted = builder.runRemoteShell(badWorker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
+                expect(emitted).to.equal(false);
+                expect(calls.emit).to.deep.equal([]);
+                expect(calls.notify.length).to.equal(1);
+            });
+        }
 
         const badArgs = [
             ["a command string instead of an array", "./builder --owner=x"],
@@ -219,7 +242,8 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         for (const [name, args] of badArgs) {
             it("emits nothing and notifies invalid_build_arguments for " + name, function () {
                 const { builder, calls } = remoteBuilder();
-                builder.runRemoteShell(worker, args, envi.oid, envi.build_id, envi.udid, [], envi.sid);
+                const emitted = builder.runRemoteShell(worker, args, envi.oid, envi.build_id, envi.udid, [], envi.sid);
+                expect(emitted).to.equal(false);
                 expect(calls.emit).to.deep.equal([]);
                 expect(calls.notify.map(c => c[3])).to.deep.equal(["invalid_build_arguments"]);
             });
