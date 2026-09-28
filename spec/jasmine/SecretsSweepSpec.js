@@ -32,7 +32,8 @@ const FAKE = {
   slackBotEnv: "spec-fake-slackbot-env-9e3c",
   slackSecretFile: "spec-fake-slacksecret-file-51d0",
   slackWebhookFile: "spec-fake-slackhook-file-c28a",
-  slackWebhookEnv: "spec-fake-slackhook-env-06b7"
+  slackWebhookEnv: "spec-fake-slackhook-env-06b7",
+  workerSecretFile: "spec-fake-workersecret-file-8d42"
 };
 
 // ---------------------------------------------------------------------------
@@ -463,5 +464,53 @@ describe("Secrets sweep: Slack credentials", function () {
       expect(calls).to.deep.equal([FAKE.slackWebhookFile]);
       expectNoFakeValues(lines);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// WORKER_SECRET — queue.js connect_error (the builder.js job side is covered
+// in BuilderRemoteJobSpec)
+// ---------------------------------------------------------------------------
+
+describe("Secrets sweep: WORKER_SECRET in queue.js", function () {
+
+  // setupSocket only registers handlers, so it runs on a bare prototype
+  // instance with a recording socket (the constructor needs Redis and binds
+  // port 4000).
+  function fakeQueueSocket() {
+    const Queue = require("../../lib/thinx/queue.js");
+    const handlers = {};
+    const socket = {
+      id: "spec-socket",
+      auth: {},
+      connects: 0,
+      on(event, handler) { handlers[event] = handler; },
+      connect() { this.connects++; }
+    };
+    const queue = Object.create(Queue.prototype);
+    queue.workers = {};
+    queue.setupSocket(socket);
+    return { socket, handlers };
+  }
+
+  it("does not retry the connection when WORKER_SECRET is absent", async function () {
+    const { socket, handlers } = fakeQueueSocket();
+    expect(typeof handlers.connect_error).to.equal("function");
+    const lines = await withSecrets({ WORKER_SECRET: "absent" }, () => captureLogs(async () => {
+      handlers.connect_error(new Error("spec"));
+    }));
+    expect(socket.connects).to.equal(0);
+    expect(socket.auth.token).to.equal(undefined);
+    expectNoFakeValues(lines);
+  });
+
+  it("retries once with the token from the secret file", async function () {
+    const { socket, handlers } = fakeQueueSocket();
+    const lines = await withSecrets({ WORKER_SECRET: { file: FAKE.workerSecretFile } }, () => captureLogs(async () => {
+      handlers.connect_error(new Error("spec"));
+    }));
+    expect(socket.connects).to.equal(1);
+    expect(socket.auth.token).to.equal(FAKE.workerSecretFile);
+    expectNoFakeValues(lines);
   });
 });

@@ -12,9 +12,11 @@
 // shell-escape here.
 
 const expect = require("chai").expect;
+const fs = require("fs");
 const util = require("util");
 
 const Builder = require("../../lib/thinx/builder");
+const { _resetCacheForTests } = require("../../lib/thinx/secrets");
 const Notifier = require("../../lib/thinx/notifier");
 const envi = require("../_envi.json");
 
@@ -90,6 +92,27 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         console.log(`🚸 [chai] <<< completed BuilderRemoteJob spec`);
     });
 
+    // Every describe below that expects runRemoteShell to emit needs a
+    // WORKER_SECRET: without one it refuses to dispatch (D-02, SEC-CFG-02).
+    // readSecret caches per name, so the cache is reset around each change,
+    // and CI's real value is restored afterwards.
+    let outerSavedSecret;
+
+    beforeEach(() => {
+        outerSavedSecret = process.env.WORKER_SECRET;
+        process.env.WORKER_SECRET = "spec-worker-secret";
+        _resetCacheForTests();
+    });
+
+    afterEach(() => {
+        if (typeof outerSavedSecret === "undefined") {
+            delete process.env.WORKER_SECRET;
+        } else {
+            process.env.WORKER_SECRET = outerSavedSecret;
+        }
+        _resetCacheForTests();
+    });
+
     // calls.emit records what reaches the selected worker's socket;
     // calls.broadcast records anything sent through the socket.io server,
     // which must stay empty (review iteration 2, WR-03).
@@ -126,19 +149,26 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
     describe("runRemoteShell job shape (D-01, D-04)", function () {
 
+        // runRemoteShell reads WORKER_SECRET through readSecret (SEC-CFG-02),
+        // which caches per name, so every env change here is followed by a
+        // cache reset. CI sets a real WORKER_SECRET; it is restored after.
         let savedSecret;
 
-        beforeEach(() => { savedSecret = process.env.WORKER_SECRET; });
+        beforeEach(() => {
+            savedSecret = process.env.WORKER_SECRET;
+            process.env.WORKER_SECRET = "spec-worker-secret";
+            _resetCacheForTests();
+        });
         afterEach(() => {
             if (typeof savedSecret === "undefined") {
                 delete process.env.WORKER_SECRET;
             } else {
                 process.env.WORKER_SECRET = savedSecret;
             }
+            _resetCacheForTests();
         });
 
         it("emits one job with argv (a copy), the legacy cmd and the contained path", function () {
-            process.env.WORKER_SECRET = "spec-worker-secret";
             const { builder, calls, worker } = remoteBuilder();
             const buildArgs = validArgs();
             const emitted = builder.runRemoteShell(worker, buildArgs, envi.oid, envi.build_id, envi.udid, [], envi.sid);
@@ -178,11 +208,59 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             expect(calls.emit[0][1].argv.includes("--late=1")).to.equal(false);
         });
 
-        it("sends secret null when WORKER_SECRET is not set", function () {
+        // D-02 (SEC-CFG-02): no secret file and no env var means no remote
+        // build. Before Phase 24 this sent a job with `secret: null`.
+        it("emits no job and notifies worker_secret_missing when WORKER_SECRET is not set", function () {
             delete process.env.WORKER_SECRET;
+            _resetCacheForTests();
             const { builder, calls, worker } = remoteBuilder();
-            builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
-            expect(calls.emit[0][1].secret).to.equal(null);
+            // Reserved for this build, as the callers do before dispatch.
+            worker.running = true;
+            worker.dispatched = envi.build_id;
+            const lines = [];
+            const origLog = console.log;
+            console.log = (...a) => lines.push(util.format(...a));
+            let emitted;
+            try {
+                emitted = builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
+            } finally {
+                console.log = origLog;
+            }
+            expect(emitted).to.equal(false);
+            expect(calls.emit).to.deep.equal([]);
+            expect(calls.broadcast).to.deep.equal([]);
+            expect(calls.notify.map(c => c[3])).to.deep.equal(["worker_secret_missing"]);
+            expect(worker.running).to.equal(false); // released for the next build
+            expect(worker.dispatched).to.equal(null);
+            expect(lines.filter(l => /WORKER_SECRET not set/.test(l)).length).to.equal(1);
+        });
+
+        // D-07: after the rotation the mounted secret holds the new value
+        // while the service env still holds the old one; the file must win.
+        it("sends the /run/secrets/WORKER_SECRET value over a different env value", function () {
+            process.env.WORKER_SECRET = "spec-env-worker-secret";
+            const SECRET_PATH = "/run/secrets/WORKER_SECRET";
+            const origExists = fs.existsSync;
+            const origRead = fs.readFileSync;
+            fs.existsSync = function (p) {
+                if (p === SECRET_PATH) return true;
+                return origExists.apply(fs, arguments);
+            };
+            fs.readFileSync = function (p) {
+                if (p === SECRET_PATH) return "spec-file-worker-secret\n";
+                return origRead.apply(fs, arguments);
+            };
+            _resetCacheForTests();
+            try {
+                const { builder, calls, worker } = remoteBuilder();
+                expect(builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid)).to.equal(true);
+                expect(calls.emit.length).to.equal(1);
+                expect(calls.emit[0][1].secret).to.equal("spec-file-worker-secret");
+            } finally {
+                fs.existsSync = origExists;
+                fs.readFileSync = origRead;
+                _resetCacheForTests();
+            }
         });
     });
 
@@ -369,6 +447,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         beforeEach(async () => {
             savedSecret = process.env.WORKER_SECRET;
             process.env.WORKER_SECRET = "spec-worker-secret";
+            _resetCacheForTests();
             clients = [];
             httpServer = http.createServer();
             ioServer = new Server(httpServer);
@@ -390,6 +469,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             } else {
                 process.env.WORKER_SECRET = savedSecret;
             }
+            _resetCacheForTests();
         });
 
         it("sends the job to the chosen worker's socket; other connected clients receive nothing", async function () {

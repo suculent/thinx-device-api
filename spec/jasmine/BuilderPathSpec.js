@@ -12,6 +12,7 @@ const path = require("path");
 const expect = require("chai").expect;
 
 const Builder = require("../../lib/thinx/builder");
+const { _resetCacheForTests } = require("../../lib/thinx/secrets");
 
 const fakeRedis = {
     get(k, cb) { if (typeof cb === "function") cb(null, null); },
@@ -266,6 +267,26 @@ describe("Builder repository-file guards", function () {
     describe("runRemoteShell (D-12)", function () {
 
         const envi = require("../_envi.json");
+
+        // runRemoteShell refuses to dispatch without a WORKER_SECRET (D-02,
+        // SEC-CFG-02) and reads it through readSecret, which caches per name:
+        // reset the cache around each env change and restore CI's real value.
+        let savedSecret;
+
+        beforeEach(() => {
+            savedSecret = process.env.WORKER_SECRET;
+            process.env.WORKER_SECRET = "spec-worker-secret";
+            _resetCacheForTests();
+        });
+
+        afterEach(() => {
+            if (typeof savedSecret === "undefined") {
+                delete process.env.WORKER_SECRET;
+            } else {
+                process.env.WORKER_SECRET = savedSecret;
+            }
+            _resetCacheForTests();
+        });
 
         // The job goes to the selected worker's socket only (review
         // iteration 2, WR-03); calls.emit records that socket, and anything
