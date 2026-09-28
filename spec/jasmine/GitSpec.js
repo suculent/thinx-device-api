@@ -181,7 +181,7 @@ describe("Git", function () {
         it("(f) with no keys makes exactly one keyless attempt", async function () {
             const git = newGit();
             git.keyNamesForOwner = () => [];
-            const spy = spyOn(git, "cloneRepository").and.callThrough();
+            const spy = spyOn(git, "cloneHoldingLock").and.callThrough();
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(true);
             expect(spy.calls.count()).to.equal(1);
@@ -195,10 +195,10 @@ describe("Git", function () {
             git.keyNamesForOwner = () => ["k1"];
             let recorded = null;
             let askpassExisted = false;
-            const spy = spyOn(git, "cloneRepository").and.callFake(function (b, u, br, env) {
+            const spy = spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
                 recorded = env;
                 askpassExisted = fs.existsSync(env.SSH_ASKPASS);
-                return Git.prototype.cloneRepository.call(git, b, u, br, env);
+                return Git.prototype.cloneHoldingLock.call(git, b, u, br, env);
             });
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(true);
@@ -217,7 +217,7 @@ describe("Git", function () {
             const git = newGit();
             git.keyNamesForOwner = () => ["k1"];
             let askpass = null;
-            spyOn(git, "cloneRepository").and.callFake(function (b, u, br, env) {
+            spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
                 askpass = env.SSH_ASKPASS;
                 throw new Error("boom");
             });
@@ -226,6 +226,133 @@ describe("Git", function () {
             expect(typeof askpass).to.equal("string");
             expect(fs.existsSync(path.dirname(askpass))).to.equal(false);
         });
+    });
+
+    // Review iteration 2, WR-02: since git runs async, two clones into one
+    // directory interleaved (one failed with "destination path already
+    // exists", and fetch's next-key attempt emptied the other's checkout).
+    describe("per-directory checkout lock (WR-02)", function () {
+
+        // Wraps cloneHoldingLock so every attempt is recorded and the number
+        // of attempts running at the same time is tracked.
+        function trackAttempts(git, impl) {
+            const track = { inFlight: 0, maxInFlight: 0, events: [] };
+            spyOn(git, "cloneHoldingLock").and.callFake(async function (b, u, br, env) {
+                track.inFlight += 1;
+                track.maxInFlight = Math.max(track.maxInFlight, track.inFlight);
+                const label = (env && env.THINX_GIT_KEY) ? path.basename(env.THINX_GIT_KEY) : "keyless";
+                track.events.push("start " + label);
+                try {
+                    return await impl(b, u, br, env);
+                } finally {
+                    track.inFlight -= 1;
+                    track.events.push("end " + label);
+                }
+            });
+            return track;
+        }
+
+        function expectIntactCheckout(buildPath) {
+            const meta = JSON.parse(fs.readFileSync(path.join(buildPath, "basename.json"), "utf8"));
+            const repoPath = path.join(buildPath, meta.basename);
+            expect(fs.readdirSync(buildPath).sort()).to.deep.equal(["basename.json", meta.basename].sort());
+            expect(fs.readFileSync(path.join(repoPath, "thinx.yml"), "utf8")).to.equal("platformio:\n  arch: esp8266\n");
+            const status = exec.execFileSync("git", ["-c", "core.fileMode=false", "status", "--porcelain"], { cwd: repoPath, encoding: "utf8" }); // the 0o766 walk sets x bits
+            expect(status).to.equal("");
+        }
+
+        it("runs two concurrent clones into one directory one after the other; both succeed", async function () {
+            const git = newGit();
+            const buildPath = tmpdir(root, "build");
+            const track = trackAttempts(git, (b, u, br, env) => Git.prototype.cloneHoldingLock.call(git, b, u, br, env));
+            const [r1, r2] = await Promise.all([
+                git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv()),
+                git.cloneRepository(buildPath + path.sep, repoUrl, "main", git.baseEnv()) // same directory, other spelling
+            ]);
+            expect(r1.ok).to.equal(true);
+            expect(r2.ok).to.equal(true);
+            expect(track.maxInFlight).to.equal(1);
+            expectIntactCheckout(buildPath);
+        }, 20000);
+
+        it("runs two concurrent fetches into one directory one after the other; both succeed", async function () {
+            const git = newGit();
+            git.keyNamesForOwner = () => [];
+            const buildPath = tmpdir(root, "build");
+            const track = trackAttempts(git, (b, u, br, env) => Git.prototype.cloneHoldingLock.call(git, b, u, br, env));
+            const results = await Promise.all([
+                git.fetch(OWNER, repoUrl, "main", buildPath),
+                git.fetch(OWNER, repoUrl, "main", buildPath)
+            ]);
+            expect(results).to.deep.equal([true, true]);
+            expect(track.maxInFlight).to.equal(1);
+            expect(track.events).to.deep.equal(["start keyless", "end keyless", "start keyless", "end keyless"]);
+            expectIntactCheckout(buildPath);
+        }, 20000);
+
+        it("holds the lock across all key attempts of one fetch", async function () {
+            // The reviewer's case: fetch A's first key fails; fetch B must not
+            // clone in between, or A's next-key attempt would empty B's checkout.
+            const git = newGit();
+            git.keyNamesForOwner = () => ["k1", "k2"];
+            const buildPath = tmpdir(root, "build");
+            const track = trackAttempts(git, async (b, u, br, env) => {
+                await new Promise((resolve) => setTimeout(resolve, 30));
+                return { ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null };
+            });
+            const results = await Promise.all([
+                git.fetch(OWNER, repoUrl, "main", buildPath),
+                git.fetch(OWNER, repoUrl, "main", buildPath)
+            ]);
+            expect(results).to.deep.equal([true, true]);
+            expect(track.maxInFlight).to.equal(1);
+            expect(track.events).to.deep.equal([
+                "start k1", "end k1", "start k2", "end k2", // fetch A, both keys
+                "start k1", "end k1", "start k2", "end k2"  // fetch B, only then
+            ]);
+        });
+
+        it("does not serialise clones into different directories", async function () {
+            const git = newGit();
+            let release;
+            const gate = new Promise((resolve) => { release = resolve; });
+            const track = trackAttempts(git, async () => {
+                await gate;
+                return { ok: true, repoPath: null, reason: null };
+            });
+            const both = Promise.all([
+                git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv()),
+                git.cloneRepository(tmpdir(root, "build"), repoUrl, "main", git.baseEnv())
+            ]);
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            expect(track.inFlight).to.equal(2);
+            release();
+            await both;
+            expect(track.maxInFlight).to.equal(2);
+        });
+
+        it("releases the lock when an attempt rejects or throws", async function () {
+            const git = newGit();
+            const buildPath = tmpdir(root, "build");
+            let calls = 0;
+            spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
+                calls += 1;
+                if (calls === 1) throw new Error("thrown");
+                if (calls === 2) return Promise.reject(new Error("rejected"));
+                return Git.prototype.cloneHoldingLock.call(git, b, u, br, env);
+            });
+            const first = git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv());
+            const second = git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv());
+            const third = git.cloneRepository(buildPath, repoUrl, "main", git.baseEnv());
+            let firstError = null;
+            let secondError = null;
+            await first.catch((e) => { firstError = e.message; });
+            await second.catch((e) => { secondError = e.message; });
+            expect(firstError).to.equal("thrown");
+            expect(secondError).to.equal("rejected");
+            expect((await third).ok).to.equal(true);
+            expectIntactCheckout(buildPath);
+        }, 20000);
     });
 
     describe("symlink checkout (SEC-PATH-02, D-13)", function () {
@@ -510,7 +637,7 @@ describe("Git", function () {
                 set(...a) { sets.push(a); const cb = a[a.length - 1]; if (typeof cb === "function") cb(null, "OK"); }
             });
             git.keyNamesForOwner = () => ["k1", "k2"];
-            spyOn(git, "cloneRepository").and.callFake((b, u, br, env) => ({ ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null }));
+            spyOn(git, "cloneHoldingLock").and.callFake((b, u, br, env) => ({ ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null }));
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(true);
             expect(sets.length).to.equal(1);
