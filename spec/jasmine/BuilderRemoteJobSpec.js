@@ -180,6 +180,25 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
         });
     });
 
+    describe("--env log redaction (T-23-13)", function () {
+
+        it("redactBuildArgs masks only the --env value", function () {
+            const args = validArgs();
+            const redacted = new Builder(fakeRedis).redactBuildArgs(args);
+            expect(redacted.slice(0, -1)).to.deep.equal(args.slice(0, -1));
+            expect(redacted[redacted.length - 1]).to.equal("--env=<redacted>");
+            expect(args[args.length - 1]).to.equal("--env={\"KEY\":\"a b\",\"Q\":\"it's\"}");
+        });
+
+        it("runRemoteShell writes no --env value to the log", function () {
+            const { builder } = remoteBuilder();
+            const logSpy = spyOn(console, "log");
+            builder.runRemoteShell(worker, validArgs(), envi.oid, envi.build_id, envi.udid, [], envi.sid);
+            const lines = logSpy.calls.allArgs().map((a) => a.join(" "));
+            expect(lines.some((line) => line.includes("it's") || line.includes("a b"))).to.equal(false);
+        });
+    });
+
     describe("runRemoteShell refusals", function () {
 
         it("emits nothing and notifies invalid_device for an invalid owner (23-03 guard)", function () {
