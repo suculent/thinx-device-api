@@ -96,3 +96,30 @@ Remove the matching accepted-residual row from `23-SAST-DELTA.md` and scripts'
 
 **Also consider in the same change window:** rotate `WORKER_SECRET` (logs from before 23-02
 contain it).
+
+## Part 3 — Worker/queue lifecycle leftovers from the phase-23 review (added 2026-09-28)
+
+Phase 23 passes 4–5 made the API's worker busy flag real (reservation + expiry). The review
+loop left these deferred. They all concern the same worker lifecycle, so fix them together
+with Parts 1–2:
+
+- **WR-03 — the worker never reconnects after a build.** Its post-build manual disconnect
+  (confirmed with socket.io-client 4.8.3) means that with 1 replica, every build after the first
+  is queued until the worker container restarts. Add a reconnect. At the same time, make a
+  success JOB-RESULT release the worker on the API side (`Queue.releasesWorker`), because the
+  release currently relies on that disconnect.
+- **Reservation owner token.** `PREP_RESERVATION_MS` was raised to 35 min (commit `6d83f819`) as
+  a stopgap. The proper fix is a per-reservation token: release only on a matching token, and
+  renew it after the clone. Then a late failure from a reclaimed build can never free another
+  build's reservation (pass-5 review WR-01).
+- **IN-16:** re-queue on `worker_busy` or a pre-dispatch disconnect, instead of failing the user's
+  build.
+- **Nothing runs `loop()` when a worker reconnects.** Queued builds wait for the 5-minute cron tick.
+- **IN-19:** the release rule is implemented twice (`Queue.releaseReservation` and
+  `Builder.releaseWorker`). Unify them.
+- **IN-20:** the 60-min dispatched bound assumes a builder time limit that the direct
+  `docker run` paths do not have.
+- **IN-21 (cosmetic, user commit `d6ca153`):** the "Entering SINK" line sits in an unreachable
+  branch (`SINK=$BUILD_PATH/*` is never glob-expanded). Delete the commented-out `ls` lines.
+
+Details are in `.planning/phases/23-build-pipeline-sink-hardening/23-REVIEW.md`, commit `e922e0c3`.
