@@ -865,13 +865,13 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
 
         describe("bounds", function () {
 
-            it("holds an undispatched reservation for 2 minutes and a dispatched one for 60", function () {
-                expect(Queue.PREP_RESERVATION_MS).to.equal(2 * MIN);
+            it("holds an undispatched reservation for 35 minutes and a dispatched one for 60", function () {
+                expect(Queue.PREP_RESERVATION_MS).to.equal(35 * MIN);
                 expect(Queue.BUILD_RESERVATION_MS).to.equal(60 * MIN);
             });
 
             it("reclaims a reservation nothing was dispatched to once it is older than the bound, with a warning", function () {
-                const worker = reserved(2 * MIN + 1000, null);
+                const worker = reserved(Queue.PREP_RESERVATION_MS + 1000, null);
                 const queue = registry({ w1: worker });
                 const logSpy = spyOn(console, "log");
                 expect(queue.nextAvailableWorker()).to.equal(worker);
@@ -887,7 +887,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             });
 
             it("keeps a dispatched reservation past the preparation bound", function () {
-                const worker = reserved(30 * MIN, BUILD_A);
+                const worker = reserved(Queue.PREP_RESERVATION_MS + MIN, BUILD_A);
                 expect(registry({ w1: worker }).nextAvailableWorker()).to.equal(false);
                 expect(worker.running).to.equal(true);
                 expect(worker.dispatched).to.equal(BUILD_A);
@@ -910,7 +910,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             it("serves a poll from a worker whose stale reservation it reclaims", async function () {
                 const socket = new EventEmitter();
                 socket.id = "polling";
-                const worker = reserved(3 * MIN, null);
+                const worker = reserved(Queue.PREP_RESERVATION_MS + MIN, null);
                 worker.socket = socket;
                 const queue = registry({ polling: worker });
                 queue.setupSocket(socket);
@@ -938,7 +938,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 expect(worker.dispatched).to.equal(null);
                 expect(queue.nextAvailableWorker()).to.equal(false);
 
-                worker.running_since -= 2 * MIN + 1000; // the lost build's reservation ages out
+                worker.running_since -= Queue.PREP_RESERVATION_MS + 1000; // the lost build's reservation ages out
                 handler(buildRequest(), jsonResponse());
                 expect(selected).to.deep.equal([worker, worker]); // served, not queued
             });
@@ -951,7 +951,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 expect(worker.running).to.equal(true);
                 expect(worker.running_since).to.be.a("number");
                 expect(worker.dispatched).to.equal(null);
-                worker.running_since -= 2 * MIN + 1000;
+                worker.running_since -= Queue.PREP_RESERVATION_MS + 1000;
                 expect(queue.nextAvailableWorker()).to.equal(worker);
             });
 
@@ -1009,7 +1009,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 const handler = route(queue, { build(owner, safe_build, notifiers, callback) { callbacks.push(callback); } });
                 handler(buildRequest(), jsonResponse());
 
-                worker.running_since -= 2 * MIN + 1000; // A is slow; B takes the worker and dispatches
+                worker.running_since -= Queue.PREP_RESERVATION_MS + 1000; // A is slow; B takes the worker and dispatches
                 handler(buildRequest(), jsonResponse());
                 const builder = new Builder(fakeRedis);
                 builder.notify = () => { };
