@@ -1268,6 +1268,48 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
             return { builder, prepared };
         }
 
+        // Phase-23 verification advisory (a): the D-12 invalid_device refusals set
+        // the build log to error and called back, but never told the owner.
+        describe("invalid_device refusals notify the owner", function () {
+
+            function refusingBuilder(device, buildPathFor) {
+                const builder = new Builder(fakeRedis);
+                const notified = [];
+                builder.notify = (udid, build_id, notifiers, message, ok) => notified.push([build_id, message, ok]);
+                builder.devicelib = { get: (udid, cb) => cb(null, device) };
+                builder.buildPathFor = buildPathFor;
+                return { builder, notified };
+            }
+
+            function request() {
+                return { build_id: BUILD_ID, owner: envi.oid, git: GIT, branch: "main", udid: envi.udid, source_id: envi.sid, worker: { running: true, socket: { connected: true, on() { }, emit() { } } } };
+            }
+
+            it("notifies invalid_device when the device record cannot form a BUILD_PATH", async function () {
+                const { builder, notified } = refusingBuilder({ udid: envi.udid, owner: "../evil" }, () => null);
+                const calls = [];
+                builder.run_build(request(), {}, (success, response) => calls.push([success, response]));
+                await sleep(20);
+                expect(calls).to.deep.equal([[false, "invalid_device"]]);
+                expect(notified).to.deep.equal([[BUILD_ID, "invalid_device", false]]);
+                expect(BuildLog.prototype.state.calls.mostRecent().args[3]).to.equal("error");
+            });
+
+            it("notifies invalid_device when the request owner/udid do not match the device", async function () {
+                const { builder, notified } = refusingBuilder(
+                    { udid: envi.udid, owner: envi.oid },
+                    (owner, udid) => (owner === envi.oid && udid === envi.udid ? "/device/path" : "/request/path")
+                );
+                const calls = [];
+                const req = request();
+                req.owner = "f".repeat(64);
+                builder.run_build(req, {}, (success, response) => calls.push([success, response]));
+                await sleep(20);
+                expect(calls).to.deep.equal([[false, "invalid_device"]]);
+                expect(notified).to.deep.equal([[BUILD_ID, "invalid_device", false]]);
+            });
+        });
+
         it("run_build calls back once and prepares nothing when a guard fails", async function () {
             const { builder, prepared } = guardedBuilder();
             const calls = [];
