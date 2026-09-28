@@ -15,10 +15,10 @@
 
 ### Build Pipeline Sinks
 
-- [ ] **SEC-EXEC-01**: `lib/thinx/git.js` runs git via argv (`execFileSync("git", …)`), with no shell string and no `ssh-agent sh -c` wrapper; SSH auth uses a constant `GIT_SSH_COMMAND` + askpass with `GIT_KEY_PASSPHRASE` passed explicitly; stderr is captured so success detection is unchanged; a private-repo build succeeds in production
-- [ ] **SEC-EXEC-02**: The remote-builder command (`builder.js:~944`) runs via argv, and the `shell-escape` dependency is removed
-- [ ] **SEC-PATH-01**: Every builder read/write of a repo-controlled file (incl. `thinx.yml` write-back) is contained by `realpath` + `path.relative` and refuses symlinks; `device.owner` / `device.udid` are sanitized before building `BUILD_PATH`
-- [ ] **SEC-PATH-02**: Firmware repositories are cloned with `core.symlinks=false`
+- [x] **SEC-EXEC-01**: `lib/thinx/git.js` runs git via argv (`execFileSync("git", …)`), with no shell string and no `ssh-agent sh -c` wrapper; SSH auth uses a constant `GIT_SSH_COMMAND` + askpass with `GIT_KEY_PASSPHRASE` passed explicitly; stderr is captured so success detection is unchanged; a private-repo build succeeds in production
+- [x] **SEC-EXEC-02**: The remote-builder command (`builder.js:~944`) runs via argv, and the `shell-escape` dependency is removed
+- [x] **SEC-PATH-01**: Every builder read/write of a repo-controlled file (incl. `thinx.yml` write-back) is contained by `realpath` + `path.relative` and refuses symlinks; `device.owner` / `device.udid` are sanitized before building `BUILD_PATH`
+- [x] **SEC-PATH-02**: Firmware repositories are cloned with `core.symlinks=false`
 
 ### Secrets
 
@@ -84,10 +84,10 @@
 | CI-01 | Phase 22 | Complete |
 | CI-02 | Phase 22 | Complete |
 | CI-03 | Phase 22 | Complete |
-| SEC-EXEC-01 | Phase 23 | Pending |
-| SEC-EXEC-02 | Phase 23 | Pending |
-| SEC-PATH-01 | Phase 23 | Pending |
-| SEC-PATH-02 | Phase 23 | Pending |
+| SEC-EXEC-01 | Phase 23 | Complete |
+| SEC-EXEC-02 | Phase 23 | Complete |
+| SEC-PATH-01 | Phase 23 | Complete |
+| SEC-PATH-02 | Phase 23 | Complete |
 | SEC-CFG-02 | Phase 24 | Pending |
 | SEC-CSRF-02 | Phase 25 | Pending |
 | SEC-CSRF-03 | Phase 25 | Pending |
