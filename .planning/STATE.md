@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 25
 current_phase_name: Session-Bound CSRF + Console Edge Headers
 status: executing
-stopped_at: Phase 24 complete, ready to plan Phase 25
-last_updated: "2026-09-29T13:57:48.122Z"
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-09-29T14:13:51.502Z"
 last_activity: 2026-09-29
-last_activity_desc: Phase 24 complete, transitioned to Phase 25
-state_head: 07c86f2db28744eb4210c5eab6020b1e95fd56b9
+last_activity_desc: Phase 25 execution started
+state_head: f77df51711daf94921d20d148c20d084524970ec
 progress:
   total_phases: 7
   completed_phases: 9
   total_plans: 25
-  completed_plans: 15
-  percent: 60
+  completed_plans: 16
+  percent: 64
 ---
 
 # STATE — THiNX Device API
@@ -34,12 +34,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 ## Current Position
 
-Phase: 25 (Session-Bound CSRF + Console Edge Headers) — READY TO EXECUTE
-Plan: Not started
+Phase: 25 (Session-Bound CSRF + Console Edge Headers) — EXECUTING
+Plan: 2 of 10
 Status: Ready to execute
-Last activity: 2026-09-29 — Phase 24 complete, transitioned to Phase 25
+Last activity: 2026-09-29 — Phase 25 execution started
 
-Progress: [████████████████████] 15/15 plans ([██████░░░░] 60% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([██████░░░░] 64% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -203,6 +203,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 24]: 24-05: ROLLBAR_SERVER_TOKEN mounted on thinx_worker then thinx_transformer from the existing secret, no rotation
 - [Phase 24]: 24-06: docker-swarm.yml mirrors the live phase-24 secrets (external: true, per-service lists) and the api image ${REGISTRY}/thinx/api:swarm; api keeps its unmounted COUCHDB/REDIS entries under a SEC-CFG-04 comment
 - [Phase 24]: 24-06: a Swarmpit autoredeploy of thinx_api (push to thinx-staging) keeps every --secret-add mount; WORKER_SECRET fp12 still equals the worker's after the redeploy
+- [Phase 25]: 25-01: establishSession queues the rotated XSRF-TOKEN before writing owner/markLogin, so a mint failure leaves no owned session
+- [Phase 25]: 25-01: CSRF priming answers 503 service_unavailable without req.session and 503 csrf_key_unavailable without a key, before writing any pre-session
+- [Phase 25]: 25-01: CSRF_MODE unset/empty is silent legacy; an unrecognised non-empty value warns once per process
 
 ### Todos
 
@@ -280,9 +283,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T12:45:00Z
+**Last session:** 2026-09-29T14:13:19.807Z
 
-**Stopped at:** Phase 24 complete, ready to plan Phase 25
+**Stopped at:** Completed 25-01-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -322,3 +325,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 24 P04 | 51 min | 3 tasks | 2 files |
 | Phase 24 P05 | 42 min | 3 tasks | 1 files |
 | Phase 24 P06 | 9 min | 3 tasks | 1 files |
+| Phase 25 P01 | 12 min | 2 tasks | 6 files |
