@@ -9,7 +9,7 @@ findings:
     title: "GitHub OAuth `token` listeners pile up on a shared emitter, so one user's token can be delivered on another user's response (pre-existing, in a function this phase rewrote)"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "The rotated WORKER_SECRET still falls back to the old, leaked value in the env of both services"
   - id: WR-02
     severity: warning
@@ -39,7 +39,7 @@ findings:
     severity: info
     disposition: open
     title: "The transformer's `app.js` and `trans.js` are unreachable, and the three copies of `secrets.js` are kept in sync by comment only"
-open: 8
+open: 7
 total: 9
 recorded: 2026-09-29T12:09:29.539Z
 ---
@@ -49,7 +49,7 @@ recorded: 2026-09-29T12:09:29.539Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | CR-01 | critical | fixed | b09aea35 |
-| WR-01 | warning | open | - |
+| WR-01 | warning | deferred | SEC-CFG-03 (remove env fallbacks; WORKER_SECRET first) |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
 | WR-04 | warning | open | - |

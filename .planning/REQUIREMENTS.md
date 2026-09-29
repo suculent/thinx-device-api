@@ -58,7 +58,7 @@
 
 ## Future Requirements
 
-- **SEC-CFG-03**: Remove env-var fallbacks for swept secrets (`WORKER_SECRET` waits on the worker repo)
+- **SEC-CFG-03**: Remove env-var fallbacks for swept secrets (`WORKER_SECRET` waits on the worker repo). Priority: the rotated `WORKER_SECRET` still has the old, leaked value as its env fallback on thinx_api and thinx_worker (Phase 24 review WR-01, deferred here)
 - **SEC-CFG-04**: Move `config.json`-held secrets (session secret, JWT material) and host scripts to swarm secrets
 - **SEC-CSP-02**: `unsafe-eval` removal — blocked on AngularJS console retirement
 - **SEC-CSP-05**: Retire the gluster bind mount so images own the console headers
