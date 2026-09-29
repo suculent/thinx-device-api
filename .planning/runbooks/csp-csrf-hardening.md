@@ -389,6 +389,178 @@ check that a cold console login tolerates that 404 (Vue `OAuthReturn.vue` awaits
 
 ---
 
+## Phase 25: session-bound CSRF (CSRF_MODE)
+
+Phase 25 binds the XSRF-TOKEN to the httpOnly `x-thx-core` session (HMAC over the session id), so a
+cookie planted from a sibling `.thinx.cloud` host no longer passes. The wire contract is unchanged:
+`XSRF-TOKEN` cookie, `X-XSRF-TOKEN` header, `GET /api/csrf-token` and `/api/v2/csrf-token`, 403
+`csrf_token_invalid`. A new env var `CSRF_MODE` on `thinx_api` selects the behaviour. `CSRF_ENFORCE`
+stays `true` throughout and is **not** touched by this phase (D-17): the v1.13 double-submit protection
+is never switched off.
+
+### The three states
+
+| `CSRF_MODE` | What is minted | What is checked | What is enforced (with `CSRF_ENFORCE=true`) |
+|---|---|---|---|
+| `legacy` (also unset, empty or unrecognised) | A random 48-hex `XSRF-TOKEN` on any browser request that has none (v1.13) | Double-submit: cookie equals header | Double-submit failures answer 403 |
+| `observe` | Only the priming GET mints: a signed `{hmac}.{nonce}` token bound to a 15-minute pre-session; a login rotates it; a persisted session with a stale or foreign token is re-minted lazily. Anonymous requests get no cookie and no session (D-02) | Double-submit, then the session binding | Double-submit failures answer 403; binding failures are **only logged and counted** |
+| `signed` | Same as observe | Same as observe | Double-submit **and** binding failures answer 403 |
+
+Every mode keeps the login `regenerate()` (session-fixation fix) and the logout `XSRF-TOKEN` clear.
+Verified Bearer and API-key requests are exempt in every mode (D-09: `req.thx_auth`, set in
+`lib/router.js` only after the token or key verified). The rollout order is
+`legacy` → `observe` (at least 24 h, zero unexplained reasons) → operator cold logins → `signed`.
+
+`observe` and `signed` need a key. `thinx_api` resolves it once at boot from the `CSRF_SECRET` Docker
+secret, else HKDF of the session secret. With neither, the task refuses to start
+(`CRITICAL CSRF_MODE=… needs CSRF_SECRET or a session secret; refusing to start`). The boot line
+`CSRF mode=<mode> key_source=<secret|hkdf|none> enforce=<bool>` confirms what is running.
+
+### Flip (one service, never `restart.sh` / stack deploy)
+
+Check placement first; `docker exec` is node-local and placement floats between `micro` and `core`.
+
+```bash
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service ps thinx_api --filter desired-state=running --format "{{.Node}} {{.CurrentState}}"'
+
+# observe
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 300 docker service update --env-add CSRF_MODE=observe --no-resolve-image thinx_api'
+# signed (only after the operator approved it at the 25-06 gate)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 300 docker service update --env-add CSRF_MODE=signed --no-resolve-image thinx_api'
+
+# converged and running the expected mode
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 20 docker service inspect thinx_api --format "{{range .Spec.TaskTemplate.ContainerSpec.Env}}{{println .}}{{end}}" | grep CSRF; timeout 60 docker service logs thinx_api --since 3m 2>&1 | grep "CSRF mode=" | tail -1'
+```
+
+Then persist the line in `thinx.yml` (see *Persisting `CSRF_MODE` in thinx.yml* below), or the next
+stack deploy silently drops it.
+
+### Rollback (one command)
+
+```bash
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 300 docker service update --env-add CSRF_MODE=legacy --no-resolve-image thinx_api'
+```
+
+`CSRF_MODE=legacy` restores the v1.13 double-submit behaviour and keeps `CSRF_ENFORCE` on (D-08). It
+keeps the login `regenerate()` and the logout clear, so it does not re-open session fixation. Signed
+tokens already in browsers keep working in legacy: the double-submit check only compares cookie and
+header. Persist `CSRF_MODE=legacy` in `thinx.yml` with the same procedure. **SLA: under 5 minutes.**
+
+**Second-level escape only:** `--env-rm CSRF_ENFORCE` (or `CSRF_ENFORCE=false`) turns every CSRF
+failure into a log line (fail-open) and re-opens login CSRF. Use it only when `legacy` does not stop
+the lockout, and only with the operator's explicit approval (Rollback A above).
+
+### Reason codes and the explained / unexplained rule
+
+| Code | Layer | Meaning |
+|---|---|---|
+| `no_cookie`, `no_header`, `length_mismatch`, `value_mismatch` | double-submit (all modes) | No `XSRF-TOKEN` cookie, no header, or cookie and header differ |
+| `missing` | binding | No `x-thx-core` cookie on the request (never primed, or the jar dropped the session) |
+| `session_mismatch` | binding | An `x-thx-core` cookie was sent but no persisted session loaded (expired or destroyed pre-session) |
+| `stale` | binding | The token is not in the signed shape (a pre-deploy 48-hex cookie) |
+| `binding_mismatch` | binding | Signed shape, persisted session, but the HMAC does not match this session id (a planted cookie, a token for another session, or a rotation the client did not pick up) |
+| `no_key` | binding | No key; unreachable once the task has started |
+
+Classification rule used at the 25-06 gate:
+
+- **Explained:** `stale` (a pre-deploy 48-hex cookie migrating lazily); `session_mismatch` on the
+  login, password, user-create and `session/token` routes (an expired pre-session that the console
+  re-primes and retries).
+- **Unexplained:** `binding_mismatch` and `missing` outside the executor's own probe timestamps, and
+  **any** code on any other route. One unexplained reason blocks the `signed` flip.
+
+### Reading the telemetry
+
+Log lines (lost when a task is rescheduled, hence the counters):
+
+```bash
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 120 docker service logs thinx_api --since 24h 2>&1 | grep -E "CSRF binding (observed|rejected)|CSRF token (rejected|missing)" | grep -oE "(binding observed|binding rejected|token rejected|token missing/mismatched) reason=[a-z_]+ .* for [A-Z]+ [^ ]+" | sed -E "s/ xsrf_cookies=[0-9]+( duplicate_cookie=true)?//; s/ mode=[a-z]+//" | sort | uniq -c'
+```
+
+Durable counters: Redis hash `csrf:obs:{YYYYMMDD UTC}`, field `{mode}:{reason}:{METHOD} {route pattern}`,
+30-day expiry. Every double-submit and binding failure is counted in every mode (the field starts with
+the mode). Read them with the read-only script, fed over stdin into the running `thinx_api` container
+(use the node that `docker service ps` reported; for `core`, go through the `core` entry in
+`~/.aliases`):
+
+```bash
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker exec -i -e OBS_REDIS=/opt/thinx/thinx-device-api/node_modules/redis -e OBS_GLOBALS=/opt/thinx/thinx-device-api/lib/thinx/globals.js -e OBS_SINCE=20260929 $(docker ps -qf name=thinx_api | head -1) node -' < scripts/csrf-obs-counters.js
+# prints "{key} {field} {count}" lines, then OBS-TOTAL {sum}; OBS-FAIL {code} exit 2; OBS-TIMEOUT exit 3
+```
+
+### Live probe
+
+`scripts/csrf-live-probe.sh` (User-Agent `thinx-p25-probe`) sends read-only probe traffic: every body
+is `{}` or names a non-existent owner, so handlers refuse before any write. It prints key=value lines
+only, never a cookie or token value. Exit 2 means a transport failure.
+
+```bash
+scripts/csrf-live-probe.sh             # base probe
+scripts/csrf-live-probe.sh --guards    # plus the route-guard probes (after the guards ship)
+PROBE_API=https://rtm.thinx.cloud/api scripts/csrf-live-probe.sh   # through the console proxy
+```
+
+| Key | legacy | observe | signed |
+|---|---|---|---|
+| `anon_set_cookie` | `1` | `0` | `0` |
+| `prime_token_shape` | `legacy` | `signed` | `signed` |
+| `pre_session_ttl_s` | `0` | about `900` | about `900` |
+| `valid` | `200:email_required` | `200:email_required` | `200:email_required` |
+| `planted` | `200:email_required` | `200:email_required` (counted `binding_mismatch`) | `403:csrf_token_invalid` |
+| `stale` | `200:email_required` | `200:email_required` (counted `stale`) | `403:csrf_token_invalid` |
+| `header_less` | `403:csrf_token_invalid` | `403:csrf_token_invalid` | `403:csrf_token_invalid` |
+
+With `--guards` after the route guards ship: `v2user_unprimed`, `cookie_only_delete_v2user`,
+`cookie_only_user_delete`, `cookie_only_gdpr_revoke` and `cookie_only_profile` are
+`403:csrf_token_invalid`; `v2user_primed` and `paired_profile` are the handler's own answer, never
+`csrf_token_invalid`. The probe's own `planted` and `stale` requests are counted too, so record the
+probe timestamps in the annex: counts inside those windows are explained.
+
+### Persisting `CSRF_MODE` in thinx.yml (index-only commit)
+
+The swarm repo's `thinx.yml` carries unrelated uncommitted edits, and interactive `git add -p` is not
+available to the executor. Commit only the `CSRF_MODE` line by writing the blob straight into the
+index, then make the same one-line change in the working tree. On `micro`:
+
+```bash
+cd /mnt/gluster/deployment/swarm
+MODE=observe                                   # observe | signed | legacy
+test "$(git show HEAD:thinx.yml | grep -c 'CSRF_ENFORCE=true')" = 1 || echo "STOP: expected one CSRF_ENFORCE line"
+SETMODE='/^[[:space:]]*- "CSRF_MODE=/ { next }
+{ print }
+/^[[:space:]]*- "CSRF_ENFORCE=true"/ { match($0, /^[[:space:]]*/); printf "%s- \"CSRF_MODE=%s\"\n", substr($0, 1, RLENGTH), m }'
+git show HEAD:thinx.yml | awk -v m="$MODE" "$SETMODE" > /tmp/thinx.yml.p25
+git show HEAD:thinx.yml | diff - /tmp/thinx.yml.p25        # exactly one CSRF_MODE line added or changed
+BLOB=$(git hash-object -w /tmp/thinx.yml.p25)
+git update-index --cacheinfo 100644,"$BLOB",thinx.yml
+git commit -m "thinx_api: CSRF_MODE=$MODE (Phase 25)"
+awk -v m="$MODE" "$SETMODE" thinx.yml > /tmp/thinx.yml.wt && cat /tmp/thinx.yml.wt > thinx.yml
+git diff HEAD -- thinx.yml | grep -c CSRF_MODE              # must print 0; the unrelated edits stay uncommitted
+rm -f /tmp/thinx.yml.p25 /tmp/thinx.yml.wt
+```
+
+The line goes directly after `- "CSRF_ENFORCE=true"` in the `api` service's `environment:` list.
+
+### Phase 25 Execution Annex
+
+| Step | UTC | Evidence / value |
+|---|---|---|
+| D-05 external `POST /api/v2/user` callers: start of observe | | |
+| D-05 external callers: end of observe | | |
+| D-05 external callers: before the route guards | | |
+| Legacy deploy (Phase 25 code, `CSRF_MODE` unset) | | |
+| Observe flip (`CSRF_MODE=observe`, `thinx.yml` commit) | | |
+| Observe window evidence (counters, log counts, classification) | | |
+| Forced `thinx_api` redeploy mid-session | | |
+| Operator cold logins (password, Google, GitHub; both consoles) | | |
+| Signed flip (`CSRF_MODE=signed`, `thinx.yml` commit) | | |
+| Guard deploy (route guards, `--guards` probe) | | |
+| Gluster header edit (`console/default.conf`) | | |
+| Final combined two-console pass | | |
+| Rollbacks (when, why, command) | | |
+
+---
+
 ## Execution Annex (fill in at flip time)
 
 | Field | Value |
