@@ -27,7 +27,9 @@
  * (deleteUser: empty 403; revokeGDPR: deletion_not_confirmed). The logged-in
  * user's own owner id is never sent. Profile calls send {}.
  *
- * Plan 25-07 extends this file with the remaining D-11 account routes.
+ * D-11 (plan 25-07): the credential, GitHub token, admin and device-transfer
+ * mutations are refused cookie-only (403 csrf_token_invalid) and pass the CSRF
+ * layer with a verified Bearer token.
  *
  * Nothing here prints a token, cookie value or session id.
  */
@@ -112,6 +114,25 @@ const TIER1 = [
     ["post", "/api/gdpr/revoke", { owner: ZERO_OWNER }]
 ];
 
+// [method, path, body] for the twelve D-11 credential mutations (API keys,
+// deploy keys, environment secrets). Bodies are {} so a request that slipped
+// past the CSRF layer would still be refused by the handler's own validation.
+// GET /api/user/rsakey/create is a state-changing GET, guarded like the POSTs.
+const CREDENTIALS = [
+    ["post", "/api/user/apikey", {}],
+    ["post", "/api/user/apikey/revoke", {}],
+    ["post", "/api/v2/apikey", {}],
+    ["delete", "/api/v2/apikey", {}],
+    ["put", "/api/v2/rsakey", {}],
+    ["delete", "/api/v2/rsakey", {}],
+    ["get", "/api/user/rsakey/create", null],
+    ["post", "/api/user/rsakey/revoke", {}],
+    ["put", "/api/v2/env", {}],
+    ["delete", "/api/v2/env", {}],
+    ["post", "/api/user/env/add", {}],
+    ["post", "/api/user/env/revoke", {}]
+];
+
 // Cold prime: a fresh pre-session plus its bound XSRF-TOKEN.
 async function prime() {
     const res = await go(chai.request(thx.app).get('/api/v2/csrf-token'));
@@ -120,6 +141,25 @@ async function prime() {
     expect(typeof (jar["x-thx-core"]) === "string", "prime sets x-thx-core").to.equal(true);
     expect(typeof (jar["XSRF-TOKEN"]) === "string", "prime sets XSRF-TOKEN").to.equal(true);
     return jar;
+}
+
+// prime -> login dynamic/dynamic with the primed pair -> rotated pair + Bearer token.
+async function loginDynamic() {
+    const primed = await prime();
+    const res = await go(withJar(chai.request(thx.app).post('/api/v2/login'), primed)
+        .set("X-XSRF-TOKEN", primed["XSRF-TOKEN"])
+        .send({ username: "dynamic", password: "dynamic", remember: false }));
+    expect(res.status).to.equal(200);
+    const jar = absorb(primed, res);
+    expect(jar["XSRF-TOKEN"] !== primed["XSRF-TOKEN"], "XSRF-TOKEN rotated at login").to.equal(true);
+    const accessToken = JSON.parse(res.text).access_token;
+    expect(accessToken).to.be.a("string");
+    return { jar, accessToken };
+}
+
+// Sends the body unless it is null (GET routes).
+function sendBody(request, body) {
+    return (body === null) ? request : request.send(body);
 }
 
 describe("ZZ-CSRFRouteGuardSpec (SEC-CSRF-04/05, CSRF_MODE=signed + CSRF_ENFORCE=true)", function () {
@@ -267,6 +307,46 @@ describe("ZZ-CSRFRouteGuardSpec (SEC-CSRF-04/05, CSRF_MODE=signed + CSRF_ENFORCE
                 expect(res.status, "attempt " + (i + 1)).to.equal(403);
                 expect(responseOf(res), "attempt " + (i + 1)).to.equal("csrf_token_invalid");
             }
+        }, 30000);
+    });
+
+    describe("SEC-CSRF-05 / D-11: credential routes (API keys, deploy keys, environment secrets)", function () {
+
+        let loggedJar;
+        let accessToken;
+
+        beforeAll(async () => {
+            const session = await loginDynamic();
+            loggedJar = session.jar;
+            accessToken = session.accessToken;
+        }, 30000);
+
+        CREDENTIALS.forEach(([method, route, body]) => {
+            it("C1. cookie session without X-XSRF-TOKEN: " + method.toUpperCase() + " " + route + " answers 403 csrf_token_invalid", async function () {
+                const res = await go(sendBody(withJar(chai.request(thx.app)[method](route), loggedJar), body));
+                expect(res.status).to.equal(403);
+                expect(responseOf(res)).to.equal("csrf_token_invalid");
+            }, 30000);
+        });
+
+        it("C2. verified Bearer, no cookies, no header: POST /api/v2/apikey, DELETE /api/v2/rsakey and PUT /api/v2/env pass the CSRF layer (D-09)", async function () {
+            const calls = [
+                ["post", "/api/v2/apikey", { alias: "p25-ci" }],
+                ["delete", "/api/v2/rsakey", { filenames: [] }],
+                ["put", "/api/v2/env", { name: "P25_CI", value: "x" }]
+            ];
+            for (const [method, route, body] of calls) {
+                const res = await go(chai.request(thx.app)[method](route)
+                    .set("Authorization", "Bearer " + accessToken)
+                    .send(body));
+                expect(responseOf(res), method + " " + route).to.not.equal("csrf_token_invalid");
+            }
+        }, 30000);
+
+        it("C3. rotated pair: the state-changing GET /api/user/rsakey/create passes the CSRF layer", async function () {
+            const res = await go(withJar(chai.request(thx.app).get('/api/user/rsakey/create'), loggedJar)
+                .set("X-XSRF-TOKEN", loggedJar["XSRF-TOKEN"]));
+            expect(responseOf(res)).to.not.equal("csrf_token_invalid");
         }, 30000);
     });
 });

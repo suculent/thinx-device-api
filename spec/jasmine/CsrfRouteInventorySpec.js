@@ -10,7 +10,9 @@
  * the middleware. A row whose registration line cannot be found fails with the
  * row in the message, so a renamed or moved route cannot drop out silently.
  *
- * Plan 25-07 extends GUARDED with the remaining D-11 account routes.
+ * Plan 25-07 added the remaining D-11 account routes (credentials, GitHub token
+ * link, admin mutations, device-ownership transfer POSTs) and their exclusions.
+ * The runbook's "Phase 25 guarded-route inventory" mirrors these tables.
  */
 
 const fs = require("fs");
@@ -39,7 +41,20 @@ const GUARDED = [
     ["router.profile.js", "post", "/api/v2/profile"],
     ["router.profile.js", "post", "/api/user/profile"],
     ["router.gdpr.js", "delete", "/api/v2/gdpr"],
-    ["router.gdpr.js", "post", "/api/gdpr/revoke"]
+    ["router.gdpr.js", "post", "/api/gdpr/revoke"],
+    // D-11 credential mutations: API keys, deploy keys, environment secrets
+    ["router.apikey.js", "post", "/api/user/apikey"],
+    ["router.apikey.js", "post", "/api/user/apikey/revoke"],
+    ["router.apikey.js", "post", "/api/v2/apikey"],
+    ["router.apikey.js", "delete", "/api/v2/apikey"],
+    ["router.rsakey.js", "put", "/api/v2/rsakey"],
+    ["router.rsakey.js", "delete", "/api/v2/rsakey"],
+    ["router.rsakey.js", "get", "/api/user/rsakey/create"], // state-changing GET
+    ["router.rsakey.js", "post", "/api/user/rsakey/revoke"],
+    ["router.env.js", "put", "/api/v2/env"],
+    ["router.env.js", "delete", "/api/v2/env"],
+    ["router.env.js", "post", "/api/user/env/add"],
+    ["router.env.js", "post", "/api/user/env/revoke"]
 ];
 
 // [file, method, path, reason]
@@ -57,7 +72,13 @@ const NOT_GUARDED = [
     ["router.deviceapi.js", "post", "/device/firmware", "firmware API (non-browser)"],
     ["router.deviceapi.js", "post", "/device/register", "firmware API (non-browser)"],
     ["router.profile.js", "get", "/api/v2/profile", "GET read, D-10"],
-    ["router.profile.js", "get", "/api/user/profile", "GET read, D-10"]
+    ["router.profile.js", "get", "/api/user/profile", "GET read, D-10"],
+    ["router.apikey.js", "get", "/api/user/apikey/list", "GET read"],
+    ["router.apikey.js", "get", "/api/v2/apikey", "GET read"],
+    ["router.rsakey.js", "get", "/api/v2/rsakey", "GET read"],
+    ["router.rsakey.js", "get", "/api/user/rsakey/list", "GET read"],
+    ["router.env.js", "get", "/api/v2/env", "GET read"],
+    ["router.env.js", "get", "/api/user/env/list", "GET read"]
 ];
 
 const sources = {};
