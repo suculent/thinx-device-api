@@ -53,6 +53,9 @@ coverage:
       - kind: other
         ref: "worker log: runArgv --id=f7362090-bbf4-11f1-bc0f-6db2168c8032 at 11:00:46Z (count 1); auth_fail=0 in worker+API logs since 10:50:37Z; build service log ends 'THiNX BUILD SUCCESSFUL.' at 11:08:26Z, service Complete"
         status: pass
+      - kind: manual_procedural
+        ref: "operator confirmed (relayed by orchestrator): build f7362090-bbf4-11f1-bc0f-6db2168c8032 for Fridge finished with THiNX BUILD SUCCESSFUL."
+        status: pass
     human_judgment: false
   - id: D3
     description: "thinx_worker and thinx_transformer read ROLLBAR_SERVER_TOKEN from the mounted secret (no rotation) and report to Rollbar"
@@ -124,7 +127,7 @@ status: complete
   - The operator pressed Build shortly before 11:00:38Z. The operator's relay gave the build_id `f7362090-bbf4-11f1-bc0f-6db2168c8032`, and it matches the worker log.
   - The worker logged `runArgv` with `--id=f7362090-bbf4-11f1-bc0f-6db2168c8032` at 11:00:46Z (count 1), about 10 minutes after the rotation.
   - `auth_fail=0`: the worker and API logs since 10:50:37Z contain no `Invalid job authentication`, `Missing job secret`, `WORKER_SECRET is not configured` or `worker_secret_missing`. `worker refused build`=0 and `refusing remote build`=0.
-  - Final status: the build service log ends `THiNX BUILD SUCCESSFUL.` at 11:08:26Z (platformio, d1_mini / d1_mini_pro firmware). The build service is `Complete`, and the API's status poll saw `0/1` at 11:08:29Z. The build can offer new firmware to Fridge, as the Phase 23 proof builds did.
+  - Final status: the build service log ends `THiNX BUILD SUCCESSFUL.` at 11:08:26Z (platformio, d1_mini / d1_mini_pro firmware). The build service is `Complete`, and the API's status poll saw `0/1` at 11:08:29Z. The operator also confirmed, through the orchestrator's relay, that the build finished with `THiNX BUILD SUCCESSFUL.`. The build can offer new firmware to Fridge, as the Phase 23 proof builds did.
 - **Rollbar:** `p24-rollbar.js` in thinx_worker printed `ROLLBAR-OK` (item label `phase-24 secrets check thinx_worker`).
 - **thinx_api regression (24-04 checks):** `SLACK-OK` and `ROLLBAR-OK`. OAuth initiators: github `302 github.com`, google `302 accounts.google.com`, the same as 24-04. `not set —` lines since the rotation: 0.
 - **Mounts after Task 2:** thinx_api = CSRF_SECRET, SLACK_BOT_TOKEN, SLACK_WEBHOOK, GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY, GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET. thinx_worker = WORKER_SECRET, ROLLBAR_SERVER_TOKEN.
