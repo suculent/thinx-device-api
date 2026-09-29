@@ -286,11 +286,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Resume file:** None
+**Resume file:** .planning/phases/25-session-bound-csrf-console-edge-headers/.continue-here.md
 
-**Last session:** 2026-09-29T14:38:27.364Z
+**Last session:** 2026-09-29T15:42:43.031Z
 
-**Stopped at:** Completed 25-03-PLAN.md
+**Stopped at:** Session resumed, proceeding to Phase 25 wave 3 (25-04, production checkpoint first)
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
