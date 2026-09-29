@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 25
 current_phase_name: Session-Bound CSRF + Console Edge Headers
 status: executing
-stopped_at: Completed 25-02-PLAN.md
-last_updated: "2026-09-29T14:23:17.249Z"
+stopped_at: Completed 25-03-PLAN.md
+last_updated: "2026-09-29T14:38:27.514Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 25 execution started
-state_head: 8f9be007c4cbe089b7475dc943eafd3974f42587
+state_head: e04dc979b607076b3ab691b1049fb7799bd730d0
 progress:
   total_phases: 7
   completed_phases: 9
   total_plans: 25
-  completed_plans: 17
-  percent: 68
+  completed_plans: 18
+  percent: 72
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 25 (Session-Bound CSRF + Console Edge Headers) — EXECUTING
-Plan: 3 of 10
+Plan: 4 of 10
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 25 execution started
 
-Progress: [████████████████████] 15/15 plans ([███████░░░] 68% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([███████░░░] 72% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -208,6 +208,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 25]: 25-01: CSRF_MODE unset/empty is silent legacy; an unrecognised non-empty value warns once per process
 - [Phase 25]: 25-02: classic dashboard XSRF seam only sends X-XSRF-TOKEN to urlBase or same-origin relative URLs (rejects // and /\ forms); committed in console 3c906ff, unpushed until 25-04
 - [Phase 25]: 25-02: check-console-headers.js resolves proxy_hide_header with nginx inheritance; --canonical keeps the default snapshot as a compared file; extra fail-closed markers MALFORMED/DUPLICATE-HEADER/UNPARSEABLE
+- [Phase 25]: 25-03: CSRF observe telemetry is a Redis hash csrf:obs:{UTC day}, field {mode}:{reason}:{METHOD} {route pattern}, 30-day expiry, counted in every mode; read with scripts/csrf-obs-counters.js
+- [Phase 25]: 25-03: CSRF exemption keys only on request-local req.thx_auth (bearer|apikey) set in router.js after verified auth; header presence and validateSession never exempt (D-09)
+- [Phase 25]: 25-03: Google new-user callback writes no session; login happens only via POST /login {token} (establishSession)
 
 ### Todos
 
@@ -285,9 +288,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T14:23:17.049Z
+**Last session:** 2026-09-29T14:38:27.364Z
 
-**Stopped at:** Completed 25-02-PLAN.md
+**Stopped at:** Completed 25-03-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -329,3 +332,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 24 P06 | 9 min | 3 tasks | 1 files |
 | Phase 25 P01 | 12 min | 2 tasks | 6 files |
 | Phase 25 P02 | 7min | 2 tasks | 6 files |
+| Phase 25 P03 | 12min | 3 tasks | 9 files |

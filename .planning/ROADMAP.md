@@ -196,7 +196,7 @@ Plans:
   4. Under enforcement, the classic console's register, forgot-password and reset-confirm flows complete end to end.
   5. Each console host returns exactly one CSP header, plus `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`, all from the gluster `default.conf`. A normalising parity script confirms that both image `default.conf` files and the `.planning/runbooks/swarm-configs/` snapshots match it.
 
-**Plans**: 2/10 plans executed
+**Plans**: 3/10 plans executed
 
 Plans:
 **Wave 1**
@@ -204,7 +204,7 @@ Plans:
 - [x] 25-02-PLAN.md — console prep: classic dashboard `$.ajaxSetup` XSRF seam (console submodule, D-18) and the normalising header parity script with node:test (not yet in CI)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 25-03-PLAN.md — observe telemetry (reason codes + Redis `csrf:obs` counters), lazy re-mint, verified-auth `req.thx_auth` exemption, Google callback session write removed, CI enforce spec, runbook CSRF_MODE section, live probe and counter scripts
+- [x] 25-03-PLAN.md — observe telemetry (reason codes + Redis `csrf:obs` counters), lazy re-mint, verified-auth `req.thx_auth` exemption, Google callback session write removed, CI enforce spec, runbook CSRF_MODE section, live probe and counter scripts
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 25-04-PLAN.md — production: D-05 log check → seam + code shipped in legacy mode → `CSRF_MODE=observe` (starts the ≥24 h window) (checkpoint)
@@ -292,7 +292,7 @@ Plans:
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
-| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 2/10 | In Progress|  |
+| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 3/10 | In Progress|  |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
