@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-09-29T18:20:16.243Z",
+  "phase": "25",
+  "phase_name": "Session-Bound CSRF + Console Edge Headers",
+  "phase_dir": ".planning/phases/25-session-bound-csrf-console-edge-headers",
+  "plan": 6,
+  "task": 1,
+  "total_tasks": 3,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "25-01", "name": "Signed session-bound token, pre-session, login rotation, fail-closed key", "status": "done", "commit": "2d7ba9f6"},
+    {"id": "25-02", "name": "Classic dashboard XSRF seam + header parity script", "status": "done", "commit": "27e11b3d"},
+    {"id": "25-03", "name": "Observe telemetry, lazy re-mint, req.thx_auth exemption, enforce spec", "status": "done", "commit": "491a65f3"},
+    {"id": "25-04", "name": "PROD: seam + code shipped in legacy; CSRF_MODE=observe since 2026-09-29T17:06:30Z", "status": "done", "commit": "a5221caa"},
+    {"id": "25-05", "name": "WR-04 + SEC-CSRF-05 guards + OpenAPI (local, unpushed)", "status": "done", "commit": "e1d4150b"},
+    {"id": "25-07", "name": "D-11 account-route guards (23 routes) + OpenAPI + runbook inventory (local, unpushed)", "status": "done", "commit": "61451013"}
+  ],
+  "remaining_tasks": [
+    {"id": "25-06", "name": "PRODUCTION: observe review (>=24 h), forced thinx_api redeploy probe, operator cold logins on both consoles. Precondition: now >= 2026-09-30T17:06:30Z", "status": "not_started"},
+    {"id": "25-08", "name": "PRODUCTION: flip CSRF_MODE=signed (auto rollback to legacy), D-05 re-check incl. the 23 D-11 paths, push guards", "status": "not_started"},
+    {"id": "25-09", "name": "PRODUCTION: gluster header hardening + proxy_hide_header, consoles --force, image mirrors, parity in CI", "status": "not_started"},
+    {"id": "25-10", "name": "Combined two-console operator verification + closeout", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "25-06 cannot start before 2026-09-30T17:06:30Z (>=24 h observe window)", "type": "external", "workaround": "none - wait"}
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {"action": "After 2026-09-30T17:06:30Z: resume and answer 25-06 checkpoints (observe review; cold logins password/Google/GitHub on both consoles; tabs survive a forced thinx_api redeploy)", "context": "Gate before the CSRF_MODE=signed flip", "blocking": true},
+    {"action": "GPG agent cache (TTL ~8 h) will have expired by resume; unlock with `echo unlock | gpg --clearsign -u 0FCAE40C3C7D6609 >/dev/null` in a real terminal before executor commits", "context": "Executors cannot answer the passphrase prompt; they stop at a human-action checkpoint instead of bypassing", "blocking": false},
+    {"action": "Do NOT push thinx-staging during the observe window", "context": "A push redeploys thinx_api; 16 local commits (25-04 docs, 25-05, 25-07 guards) ship in 25-08", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Ran 25-05 and 25-07 (code-only) during the observe window, then paused", "rationale": "User choice; 25-06 is time-gated", "phase": "25"}
+  ],
+  "uncommitted_files": [
+    "?? .claude/", "?? .gsd/", "?? .planning/milestone.lock", "?? .planning/state.json",
+    "?? .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW{,-FIX}.iter{2..5}.md (8 files, pre-existing)",
+    "?? thinx-firmware-esp32-pio/", "?? thinx-firmware-esp8266-ino/", "?? thinx-firmware-esp8266-pio/"
+  ],
+  "next_action": "After 2026-09-30T17:06:30Z: /gsd-resume-work -> force dispatch-isolation none -> execute 25-06 (starts with its observe-review checkpoint)",
+  "context_notes": "Prod: thinx_api CSRF_MODE=observe + CSRF_ENFORCE=true since 17:06:30Z; seam live on classic; digests recorded in 25-04-SUMMARY. 25-06 should look at 8 pre-switch missing-cookie rejections at 16:52Z (v1.13 task around the first thinx_vue restart) and any Vue session/token rejections since. Traefik logs no User-Agent (D-05 matches probe traffic by timestamp; window ~57 h). 25-07 notes the D-05 re-check in 25-08 must include the 23 D-11 paths. ZZ-CSRFRouteGuardSpec (CI only) first runs on the 25-08 push."
+}
