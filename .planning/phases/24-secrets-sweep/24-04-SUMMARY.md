@@ -84,7 +84,7 @@ coverage:
         ref: "p24-slack.js SLACK-OK; p24-rollbar.js ROLLBAR-OK; log 'password_reset_init true reset_sent' count=1; oauth github 302 github.com / google 302 accounts.google.com; keyPassphrase() non-null"
         status: pass
       - kind: manual_procedural
-        ref: "operator confirmed (relayed by orchestrator): Slack message arrived, Rollbar item visible, reset mail arrived"
+        ref: "operator confirmed (relayed by orchestrator): Slack message arrived, Rollbar item `phase-24 secrets check thinx_api` arrived, reset mail arrived"
         status: pass
     human_judgment: false
   - id: D5
@@ -179,7 +179,7 @@ status: complete
 - **p24-fp.js:** `file=1` and `read=` equal to `env=` for all 7 names; `CSRF_SECRET file=1 len=64`.
 - **D-11 checks:**
   - Slack: `SLACK-OK`. The operator confirmed the message arrived with the text `phase-24 secrets check: thinx_api SLACK_WEBHOOK from /run/secrets`.
-  - Rollbar: `ROLLBAR-OK` through the mounted server token. The operator confirmed the item is visible in Rollbar.
+  - Rollbar: `ROLLBAR-OK` through the mounted server token. The operator confirmed the Rollbar item arrived, titled `phase-24 secrets check thinx_api`.
   - Mailgun: the reset POST got `200 password_reset_request_accepted`, and the API log shows `password_reset_init true reset_sent` (count 1). The operator confirmed that the mail reached the operator-owned address named at Task 1. The address is not recorded here.
   - OAuth initiators: github `302 github.com`, google `302 accounts.google.com`, the same as the Task 2 baseline.
   - OAuth logins: the operator confirmed that GitHub and Google login work after the thinx_api mount. The plan scheduled this human check for the end of the phase (24-06), and for thinx_api it is now done.
@@ -230,3 +230,10 @@ None. No external service configuration is required.
 ---
 *Phase: 24-secrets-sweep*
 *Completed: 2026-09-29*
+
+## Self-Check: PASSED
+
+- FOUND: .planning/phases/24-secrets-sweep/24-04-SUMMARY.md
+- FOUND: e60e3c92 (pointer bump, signed), 9dd6f240 (SUMMARY, signed)
+- Gitlinks: services/worker b8c03b6, services/transformer a75c490
+- All Task 2 and Task 3 verify commands passed; no rollback run

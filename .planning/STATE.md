@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 24
 current_phase_name: Secrets Sweep
 status: executing
-stopped_at: Completed 24-03-PLAN.md
-last_updated: "2026-09-28T23:56:44.510Z"
+stopped_at: Completed 24-04-PLAN.md
+last_updated: "2026-09-29T10:26:02.660Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 24 execution started
-state_head: 566c8b6be357d81b3e1761682f1e35eb0a0a8ec6
+state_head: 9dd6f240688a3519a93b9dae6d1f152666deae1b
 progress:
   total_phases: 7
   completed_phases: 8
   total_plans: 15
-  completed_plans: 12
-  percent: 80
+  completed_plans: 13
+  percent: 87
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 ## Current Position
 
 Phase: 24 (Secrets Sweep) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 24 execution started
 
-Progress: [████████░░] 80% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [█████████░] 87% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -193,6 +193,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 24]: runRemoteShell refuses with worker_secret_missing (release, notify, one info line) when readSecret(WORKER_SECRET) is falsy, instead of emitting secret: null
 - [Phase 24]: An empty-string GITHUB_CLIENT_SECRET or GOOGLE_OAUTH_SECRET disables that OAuth provider (readSecret truthiness); with a non-empty secret behaviour is unchanged
 - [Phase 24]: globals.js builds Rollbar at most once per process from ROLLBAR_SERVER_TOKEN, then ROLLBAR_ACCESS_TOKEN (file before env in each chain)
+- [Phase 24]: 24-04: thinx_api now mounts SLACK_BOT_TOKEN, SLACK_WEBHOOK, GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY, ROLLBAR_SERVER_TOKEN (from ROLLBAR_ACCESS_TOKEN), GIT_KEY_PASSPHRASE and CSRF_SECRET via one --secret-add; fp12 unchanged, env kept as fallback
+- [Phase 24]: 24-04: SLACK_CLIENT_SECRET left off (empty env); WORKER_SECRET stays env-only on thinx_api until the 24-05 rotation; ROLLBAR_SERVER_TOKEN secret already exists, 24-05 mounts it without re-creating
 
 ### Todos
 
@@ -262,9 +264,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-28T23:56:23.344Z
+**Last session:** 2026-09-29T10:26:02.581Z
 
-**Stopped at:** Completed 24-03-PLAN.md
+**Stopped at:** Completed 24-04-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
@@ -300,3 +302,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 24 P01 | 7 min | 2 tasks | 7 files |
 | Phase 24 P02 | 7 min | 3 tasks | 10 files |
 | Phase 24 P03 | 9 min | 3 tasks | 10 files |
+| Phase 24 P04 | 51 min | 3 tasks | 2 files |
