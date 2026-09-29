@@ -74,7 +74,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
 
 - [x] **Phase 22: CI & SAST Baseline** - CodeQL on the branches production code arrives on, retrying registry logins, Vue console hostname verified in the live bundle (verify-first) (completed 2026-09-25)
 - [x] **Phase 23: Build-Pipeline Sink Hardening** - git and remote-builder commands run via argv; repo-controlled file access is contained and refuses symlinks (completed 2026-09-29)
-- [ ] **Phase 24: Secrets Sweep** - the 9 `lib/` credentials plus a new `CSRF_SECRET` load from swarm secrets, provisioned one service at a time
+- [x] **Phase 24: Secrets Sweep** - the 9 `lib/` credentials plus a new `CSRF_SECRET` load from swarm secrets, provisioned one service at a time (completed 2026-09-29)
 - [ ] **Phase 25: Session-Bound CSRF + Console Edge Headers** - HMAC session-bound CSRF token with login rotation, WR-04 and mutation routes covered, hardened console headers mirrored into the images
 - [ ] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept
 - [ ] **Phase 27: InfluxDB 2 Upgrade** - `thinx_influxdb` 1.8 → 2 from a verified backup, `influx.js` on v2, 90-day bucket retention on `stats`
@@ -162,7 +162,7 @@ Plans:
   3. A `CSRF_SECRET` swarm secret exists and `thinx_api` can read it at `/run/secrets/CSRF_SECRET`.
   4. `docker-swarm.yml` mirrors the live stack's secrets and service references, and its stale api image reference is corrected.
 
-**Plans**: 6/6 plans executed
+**Plans**: 6/6 plans complete
 
 Plans:
 **Wave 1**
@@ -263,7 +263,7 @@ Plans:
 | 21. CSP Wildcard Removal + Anti-CSRF Token | v1.13 | 5/5 | Complete | 2026-09-25 |
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
-| 24. Secrets Sweep | v1.14 | 6/6 | In Progress|  |
+| 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |

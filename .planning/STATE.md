@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
-current_phase: 24
-current_phase_name: Secrets Sweep
-status: verifying
-stopped_at: Completed 24-06-PLAN.md
-last_updated: "2026-09-29T12:00:46.512Z"
+current_phase: 25
+current_phase_name: Session-Bound CSRF + Console Edge Headers
+status: planning
+stopped_at: Phase 24 complete, ready to plan Phase 25
+last_updated: "2026-09-29T12:29:59.577Z"
 last_activity: 2026-09-29
-last_activity_desc: Phase 24 execution started
-state_head: 6381310b11242c8ae1cf3e5ec91264ea94dc623d
+last_activity_desc: Phase 24 complete, transitioned to Phase 25
+state_head: f3831b5745581ac8601cd5cd6e8a33277a44330b
 progress:
   total_phases: 7
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 15
   completed_plans: 15
-  percent: 100
+  percent: 69
 ---
 
 # STATE — THiNX Device API
@@ -34,12 +34,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 
 ## Current Position
 
-Phase: 24 (Secrets Sweep) — EXECUTING
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-09-29 — Phase 24 execution started
+Phase: 25 — Session-Bound CSRF + Console Edge Headers
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-29 — Phase 24 complete, transitioned to Phase 25
 
-Progress: [██████████] 100% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [███████░░░] 69% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -240,6 +240,14 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 - ⚠️ [Phase 23] Build checkouts are world-writable (0o777/0o766) and have never been hardened; least-privilege follow-up. `thinx.yml` `eval` in the worker `builder` was transferred to the backlog (T-23-14).
 - ⚠️ [Phase 23] Aikido IaC scan not run locally (Checkov binary missing). The platform auto-rescan is weekly and non-blocking.
 
+### Concerns carried from Phase 24
+
+- ⚠️ [Phase 24] **Stack deploy hazard (review WR-02):** `docker-swarm.yml` lists COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD as api secrets, which the live `thinx_api` does not mount. Because the secret file wins over env, the next `restart.sh`/`docker stack deploy` will switch the API to those values. Compare them with the current env values, or comment the three entries out, before any stack deploy.
+- ⚠️ [Phase 24] WR-01 (old leaked WORKER_SECRET kept as env fallback) is deferred to SEC-CFG-03. The operator removed WORKER_SECRET from the swarm `.env` (2026-09-29). The live `thinx_api`/`thinx_worker` specs still carry it until the next stack deploy. The mounted secret file wins in the meantime.
+- ⚠️ [Phase 24] Production build-queue cron loop does not dispatch (probably the `.legacy()` Redis client), and there are 3 stale `waiting` entries. See `24-secrets-sweep/deferred-items.md`. Console Build presses are unaffected.
+- ⚠️ [Phase 24] Review WR-03 (worker socket has no worker auth), WR-04 (Slack bot-token precedence) and IN-01..04 are open. See `24-REVIEW-DISPOSITION.md`. CR-01 (GitHub OAuth cross-user token) was fixed and deployed in b09aea35.
+- ⚠️ [Phase 24] `thinx_api` GIT_KEY_PASSPHRASE is only 5 characters long. It was not rotated in this phase.
+
 ### Open Questions
 
 Decided at plan time, not blocking the roadmap:
@@ -271,7 +279,7 @@ Decided at plan time, not blocking the roadmap:
 
 **Last session:** 2026-09-29T12:00:39.247Z
 
-**Stopped at:** Completed 24-06-PLAN.md
+**Stopped at:** Phase 24 complete, ready to plan Phase 25
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
