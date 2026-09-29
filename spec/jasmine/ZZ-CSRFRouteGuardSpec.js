@@ -133,6 +133,24 @@ const CREDENTIALS = [
     ["post", "/api/user/env/revoke", {}]
 ];
 
+// [method, path, body] for the remaining D-11 account mutations: GitHub token
+// link, admin session revoke / impersonation / reactivation, device-ownership
+// transfer POSTs. Never a real owner id or transfer id: admin paths carry the
+// all-zero id and every body is {}.
+const ACCOUNT_REST = [
+    ["post", "/api/github/token", {}],
+    ["post", "/api/v2/github/token", {}],
+    ["delete", "/api/v2/admin/session/" + ZERO_OWNER, {}],
+    ["post", "/api/v2/admin/impersonate", {}],
+    ["post", "/api/v2/admin/user/" + ZERO_OWNER + "/reactivate", {}],
+    ["post", "/api/v2/transfer/request", {}],
+    ["post", "/api/v2/transfer/decline", {}],
+    ["post", "/api/v2/transfer/accept", {}],
+    ["post", "/api/transfer/request", {}],
+    ["post", "/api/transfer/decline", {}],
+    ["post", "/api/transfer/accept", {}]
+];
+
 // Cold prime: a fresh pre-session plus its bound XSRF-TOKEN.
 async function prime() {
     const res = await go(chai.request(thx.app).get('/api/v2/csrf-token'));
@@ -347,6 +365,42 @@ describe("ZZ-CSRFRouteGuardSpec (SEC-CSRF-04/05, CSRF_MODE=signed + CSRF_ENFORCE
             const res = await go(withJar(chai.request(thx.app).get('/api/user/rsakey/create'), loggedJar)
                 .set("X-XSRF-TOKEN", loggedJar["XSRF-TOKEN"]));
             expect(responseOf(res)).to.not.equal("csrf_token_invalid");
+        }, 30000);
+    });
+
+    describe("SEC-CSRF-05 / D-11: GitHub token link, admin mutations, device-transfer POSTs", function () {
+
+        let loggedJar;
+        let accessToken;
+
+        beforeAll(async () => {
+            const session = await loginDynamic();
+            loggedJar = session.jar;
+            accessToken = session.accessToken;
+        }, 30000);
+
+        ACCOUNT_REST.forEach(([method, route, body]) => {
+            it("A1. cookie session without X-XSRF-TOKEN: " + method.toUpperCase() + " " + route.replace(ZERO_OWNER, "<zero>") + " answers 403 csrf_token_invalid", async function () {
+                const res = await go(withJar(chai.request(thx.app)[method](route), loggedJar).send(body));
+                expect(res.status).to.equal(403);
+                expect(responseOf(res)).to.equal("csrf_token_invalid");
+            }, 30000);
+        });
+
+        it("A2. verified Bearer of the non-admin user, no cookies, no header: POST /api/v2/admin/impersonate is refused by requireAdmin, not by the CSRF layer", async function () {
+            const res = await go(chai.request(thx.app).post('/api/v2/admin/impersonate')
+                .set("Authorization", "Bearer " + accessToken)
+                .send({}));
+            expect(res.status).to.equal(403);
+            expect(responseOf(res)).to.not.equal("csrf_token_invalid");
+        }, 30000);
+
+        it("A3. verified Bearer, no cookies, no header: POST /api/v2/transfer/decline {} passes the CSRF layer and answers transfer_id_missing", async function () {
+            const res = await go(chai.request(thx.app).post('/api/v2/transfer/decline')
+                .set("Authorization", "Bearer " + accessToken)
+                .send({}));
+            expect(responseOf(res)).to.not.equal("csrf_token_invalid");
+            expect(responseOf(res)).to.equal("transfer_id_missing");
         }, 30000);
     });
 });

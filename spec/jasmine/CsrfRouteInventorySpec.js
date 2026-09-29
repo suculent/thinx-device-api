@@ -54,7 +54,21 @@ const GUARDED = [
     ["router.env.js", "put", "/api/v2/env"],
     ["router.env.js", "delete", "/api/v2/env"],
     ["router.env.js", "post", "/api/user/env/add"],
-    ["router.env.js", "post", "/api/user/env/revoke"]
+    ["router.env.js", "post", "/api/user/env/revoke"],
+    // D-11 GitHub token link (one array registration serves both paths)
+    ["router.github.js", "post", "/api/github/token"],
+    ["router.github.js", "post", "/api/v2/github/token"],
+    // D-11 admin mutations (CSRF check before requireAdmin)
+    ["router.admin.js", "delete", "/api/v2/admin/session/:owner"],
+    ["router.admin.js", "post", "/api/v2/admin/impersonate"],
+    ["router.admin.js", "post", "/api/v2/admin/user/:id/reactivate"],
+    // D-11 device-ownership transfer POSTs (account mutations, not D-21 resources)
+    ["router.transfer.js", "post", "/api/v2/transfer/request"],
+    ["router.transfer.js", "post", "/api/v2/transfer/decline"],
+    ["router.transfer.js", "post", "/api/v2/transfer/accept"],
+    ["router.transfer.js", "post", "/api/transfer/request"],
+    ["router.transfer.js", "post", "/api/transfer/decline"],
+    ["router.transfer.js", "post", "/api/transfer/accept"]
 ];
 
 // [file, method, path, reason]
@@ -78,7 +92,16 @@ const NOT_GUARDED = [
     ["router.rsakey.js", "get", "/api/v2/rsakey", "GET read"],
     ["router.rsakey.js", "get", "/api/user/rsakey/list", "GET read"],
     ["router.env.js", "get", "/api/v2/env", "GET read"],
-    ["router.env.js", "get", "/api/user/env/list", "GET read"]
+    ["router.env.js", "get", "/api/user/env/list", "GET read"],
+    ["router.admin.js", "get", "/api/v2/admin/users", "GET read"],
+    ["router.transfer.js", "get", "/api/v2/transfer/decline", "e-mail capability link"],
+    ["router.transfer.js", "get", "/api/v2/transfer/accept", "e-mail capability link"],
+    ["router.transfer.js", "get", "/api/transfer/decline", "e-mail capability link"],
+    ["router.transfer.js", "get", "/api/transfer/accept", "e-mail capability link"],
+    ["router.github.js", "get", "/api/oauth/github", "OAuth redirect flow"],
+    ["router.github.js", "get", "/api/oauth/github/callback", "OAuth redirect flow"],
+    ["router.google.js", "get", "/api/oauth/google", "OAuth redirect flow"],
+    ["router.google.js", "get", "/api/oauth/google/callback", "OAuth redirect flow"]
 ];
 
 const sources = {};
@@ -139,6 +162,15 @@ describe("CsrfRouteInventorySpec (SEC-CSRF-04/05 guarded-route inventory)", func
     NOT_GUARDED.forEach((row) => {
         it("does not guard " + row[1].toUpperCase() + " " + row[2] + " (" + row[3] + ")", function () {
             expect(checkRow(sourceOf(row[0]), row, false)).toBeNull();
+        });
+    });
+
+    it("the guarded admin mutations run the CSRF check before requireAdmin (no DB read for a forged request)", function () {
+        GUARDED.filter((row) => row[0] === "router.admin.js").forEach((row) => {
+            const lines = registrationLines(sourceOf(row[0]), row[1], row[2]);
+            expect(lines.length).withContext(row[2]).toBe(1);
+            expect((lines[0] || "").indexOf(GUARD + ", requireAdmin") !== -1)
+                .withContext(row[1].toUpperCase() + " " + row[2] + " must register " + GUARD + " before requireAdmin").toBe(true);
         });
     });
 
