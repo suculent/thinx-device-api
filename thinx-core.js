@@ -350,6 +350,14 @@ module.exports = class THiNX extends EventEmitter {
             // XSRF-TOKEN cookie is refreshed on every proxied round-trip.
             app.use(cookieParser());
             const csrf = require("./lib/middleware/csrf")(app);
+            // SEC-CSRF-02 / D-04: fail closed. observe/signed without a key must not
+            // serve tokens; exiting lets the swarm task fail visibly instead.
+            try {
+              csrf.assertReady();
+            } catch (_e) {
+              console.log("☣️ [error] CRITICAL CSRF key unavailable, refusing to start");
+              process.exit(1);
+            }
             app.use(csrf.ensureXsrfCookie);
 
             app.use(express.json({
