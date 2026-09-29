@@ -32,7 +32,14 @@ const GUARDED = [
     ["router.user.js", "post", "/api/user/password/set"],
     ["router.user.js", "post", "/api/user/password/reset"],
     // SEC-CSRF-04 / WR-04: registration, no machine-client exemption (decision 2026-09-25)
-    ["router.user.js", "post", "/api/v2/user"]
+    ["router.user.js", "post", "/api/v2/user"],
+    // SEC-CSRF-05 account mutations and their same-handler twins (D-10, D-11)
+    ["router.user.js", "delete", "/api/v2/user"],
+    ["router.user.js", "post", "/api/user/delete"],
+    ["router.profile.js", "post", "/api/v2/profile"],
+    ["router.profile.js", "post", "/api/user/profile"],
+    ["router.gdpr.js", "delete", "/api/v2/gdpr"],
+    ["router.gdpr.js", "post", "/api/gdpr/revoke"]
 ];
 
 // [file, method, path, reason]

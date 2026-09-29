@@ -15,6 +15,18 @@
  *   a new registration (the guard is stateless and a refused request never
  *   reaches the handler).
  *
+ * SEC-CSRF-05 Tier 1 (D-09, D-10, D-11 same-handler twins): DELETE /api/v2/user,
+ *   POST /api/user/delete, POST /api/v2/profile, POST /api/user/profile,
+ *   DELETE /api/v2/gdpr, POST /api/gdpr/revoke. A logged-in cookie session
+ *   without X-XSRF-TOKEN is refused on all six; with the rotated pair the
+ *   request reaches the handler; a verified Bearer call passes without cookies
+ *   or header; a repeated cookie-only call is refused every time.
+ *
+ * Non-destructive by construction: delete and revoke bodies carry a
+ * non-matching all-zero owner, so the handlers refuse after the CSRF layer
+ * (deleteUser: empty 403; revokeGDPR: deletion_not_confirmed). The logged-in
+ * user's own owner id is never sent. Profile calls send {}.
+ *
  * Plan 25-07 extends this file with the remaining D-11 account routes.
  *
  * Nothing here prints a token, cookie value or session id.
@@ -86,6 +98,19 @@ function responseOf(res) {
         return undefined;
     }
 }
+
+// A 64-character owner id that never matches the logged-in session owner.
+const ZERO_OWNER = "0000000000000000000000000000000000000000000000000000000000000000";
+
+// [method, path, body] for the six SEC-CSRF-05 Tier 1 routes.
+const TIER1 = [
+    ["delete", "/api/v2/user", { owner: ZERO_OWNER }],
+    ["post", "/api/user/delete", { owner: ZERO_OWNER }],
+    ["post", "/api/v2/profile", {}],
+    ["post", "/api/user/profile", {}],
+    ["delete", "/api/v2/gdpr", { owner: ZERO_OWNER }],
+    ["post", "/api/gdpr/revoke", { owner: ZERO_OWNER }]
+];
 
 // Cold prime: a fresh pre-session plus its bound XSRF-TOKEN.
 async function prime() {
@@ -163,6 +188,85 @@ describe("ZZ-CSRFRouteGuardSpec (SEC-CSRF-04/05, CSRF_MODE=signed + CSRF_ENFORCE
             expect(parsed.success, "new registration (not email_already_exists)").to.equal(true);
             expect(parsed.response).to.be.a("string");
             expect(/^[0-9a-f]{64}$/.test(parsed.response), "activation code shape").to.equal(true);
+        }, 30000);
+    });
+
+    describe("SEC-CSRF-05: Tier 1 account routes", function () {
+
+        let loggedJar;    // rotated x-thx-core + XSRF-TOKEN after login
+        let accessToken;  // Bearer token from the same login
+
+        // prime -> login dynamic/dynamic with the primed pair -> rotated pair
+        beforeAll(async () => {
+            const primed = await prime();
+            const res = await go(withJar(chai.request(thx.app).post('/api/v2/login'), primed)
+                .set("X-XSRF-TOKEN", primed["XSRF-TOKEN"])
+                .send({ username: "dynamic", password: "dynamic", remember: false }));
+            expect(res.status).to.equal(200);
+            loggedJar = absorb(primed, res);
+            expect(loggedJar["XSRF-TOKEN"] !== primed["XSRF-TOKEN"], "XSRF-TOKEN rotated at login").to.equal(true);
+            accessToken = JSON.parse(res.text).access_token;
+            expect(accessToken).to.be.a("string");
+        }, 30000);
+
+        function call(method, route, jar) {
+            return withJar(chai.request(thx.app)[method](route), jar);
+        }
+
+        TIER1.forEach(([method, route, body]) => {
+            it("T1. cookie session without X-XSRF-TOKEN: " + method.toUpperCase() + " " + route + " answers 403 csrf_token_invalid", async function () {
+                const res = await go(call(method, route, loggedJar).send(body));
+                expect(res.status).to.equal(403);
+                expect(responseOf(res)).to.equal("csrf_token_invalid");
+            }, 30000);
+        });
+
+        it("T2. rotated pair: DELETE /api/v2/user and POST /api/user/delete with a non-matching owner reach the handler (empty 403)", async function () {
+            for (const [method, route] of [["delete", "/api/v2/user"], ["post", "/api/user/delete"]]) {
+                const res = await go(call(method, route, loggedJar)
+                    .set("X-XSRF-TOKEN", loggedJar["XSRF-TOKEN"])
+                    .send({ owner: ZERO_OWNER }));
+                expect(res.status, method + " " + route).to.equal(403);
+                expect(responseOf(res), method + " " + route).to.not.equal("csrf_token_invalid");
+                expect(res.text || "", method + " " + route + " handler refusal has an empty body").to.equal("");
+            }
+        }, 30000);
+
+        it("T3. rotated pair: POST /api/gdpr/revoke and DELETE /api/v2/gdpr with a non-matching owner answer deletion_not_confirmed", async function () {
+            for (const [method, route] of [["post", "/api/gdpr/revoke"], ["delete", "/api/v2/gdpr"]]) {
+                const res = await go(call(method, route, loggedJar)
+                    .set("X-XSRF-TOKEN", loggedJar["XSRF-TOKEN"])
+                    .send({ owner: ZERO_OWNER }));
+                expect(responseOf(res), method + " " + route).to.equal("deletion_not_confirmed");
+            }
+        }, 30000);
+
+        it("T4. rotated pair: POST /api/v2/profile {} passes the CSRF layer twice in a row, and POST /api/user/profile {} once (idempotency edge)", async function () {
+            for (const route of ["/api/v2/profile", "/api/v2/profile", "/api/user/profile"]) {
+                const res = await go(call("post", route, loggedJar)
+                    .set("X-XSRF-TOKEN", loggedJar["XSRF-TOKEN"])
+                    .send({}));
+                expect(responseOf(res), route).to.not.equal("csrf_token_invalid");
+            }
+        }, 30000);
+
+        it("T5. verified Bearer, no cookies, no header: DELETE /api/v2/user (non-matching owner) and POST /api/v2/profile {} pass the CSRF layer (D-09)", async function () {
+            const del = await go(chai.request(thx.app).delete('/api/v2/user')
+                .set("Authorization", "Bearer " + accessToken)
+                .send({ owner: ZERO_OWNER }));
+            expect(responseOf(del)).to.not.equal("csrf_token_invalid");
+            const prof = await go(chai.request(thx.app).post('/api/v2/profile')
+                .set("Authorization", "Bearer " + accessToken)
+                .send({}));
+            expect(responseOf(prof)).to.not.equal("csrf_token_invalid");
+        }, 30000);
+
+        it("T6. a cookie-only POST /api/v2/profile repeated twice is refused both times", async function () {
+            for (let i = 0; i < 2; i++) {
+                const res = await go(call("post", "/api/v2/profile", loggedJar).send({}));
+                expect(res.status, "attempt " + (i + 1)).to.equal(403);
+                expect(responseOf(res), "attempt " + (i + 1)).to.equal("csrf_token_invalid");
+            }
         }, 30000);
     });
 });
