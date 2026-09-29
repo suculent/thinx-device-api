@@ -545,11 +545,11 @@ The line goes directly after `- "CSRF_ENFORCE=true"` in the `api` service's `env
 
 | Step | UTC | Evidence / value |
 |---|---|---|
-| D-05 external `POST /api/v2/user` callers: start of observe | | |
+| D-05 external `POST /api/v2/user` callers: start of observe | 2026-09-29 ~15:44 (read-only, before any push) | Traefik access log window about 57 h (27/Sep 06:48:11 → 29/Sep 15:44:34 UTC, 315,305 lines). `POST /api/v2/user`: 0 hits. `POST /api/user/create` on router `thinx-api-https@docker`: 4 hits, all at 29/Sep 14:34:53–54Z, which is the 25-03 legacy probe (matched by timestamp). **External callers: 0.** Traefik logs no User-Agent (0 of 313,322 lines; bare `--accesslog`), so callers are told apart by timestamp against the probe runs. Repeat at the end of observe (25-06) and before the guards (25-08). |
 | D-05 external callers: end of observe | | |
 | D-05 external callers: before the route guards | | |
-| Legacy deploy (Phase 25 code, `CSRF_MODE` unset) | | |
-| Observe flip (`CSRF_MODE=observe`, `thinx.yml` commit) | | |
+| Legacy deploy (Phase 25 code, `CSRF_MODE` unset) | Push 16:47:42Z, re-push 16:53:22Z; `thinx_api` Running 16:58:27Z | Console `3c906ff` pushed to console thinx-staging (fast-forward), then parent `c48e354a` (gitlink bump). CircleCI `test` 15490 failed on `LoggingQualityAuditSpec` (`full_user_wrapper` in `lib/router.google.js`); node-repair fix `dcbbd416` re-pushed once. For `dcbbd416`: test 15492 (686 specs, 0 failures), api-registry 15493, console-classic-registry 15496, vue-console-registry 15494, all success. Swarmpit rolled `thinx_api` → `api:swarm@sha256:bfe2a2fc73e3…`, `thinx_console` → `console:swarm@sha256:972a3c3a9237…` (rolled twice, once per console publish), `thinx_vue` → `console:vue@sha256:61cdf6e39262…` (twice). Pre-deploy rollback digests: api `66b3aa781b56…`, console `5d501928ee06…`, vue `c2163d1dbc3b…`. `rtm.thinx.cloud/app/js/thinx-api.js` carries `X-XSRF-TOKEN` (2 hits). Probe 17:05:16Z: `anon_set_cookie=1 prime_token_shape=legacy pre_session_ttl_s=0 valid=200:email_required planted=200:email_required stale=200:email_required header_less=403:csrf_token_invalid`. Boot line `CSRF mode=legacy key_source=secret enforce=true` ×1, 0 CRITICAL, 0 failed tasks. Env: `CSRF_ENFORCE=true` only. |
+| Observe flip (`CSRF_MODE=observe`, `thinx.yml` commit) | Update 17:06:15Z → converged 17:06:35Z; **observe_start_utc 2026-09-29T17:06:30Z** | `timeout 300 docker service update --env-add CSRF_MODE=observe --no-resolve-image thinx_api`, converged; 0 restarts after 5 min (checked 17:11:51Z). Env: `CSRF_ENFORCE=true`, `CSRF_MODE=observe`. Boot line `CSRF mode=observe key_source=secret enforce=true` ×1, 0 CRITICAL. Probe 17:06:58–59Z: `anon_set_cookie=0 prime_token_shape=signed pre_session_ttl_s=900 valid=200:email_required planted=200:email_required stale=200:email_required header_less=403:csrf_token_invalid`. Log: `binding observed reason=binding_mismatch mode=observe for POST /api/user/create` ×1, `reason=stale` ×1. Counters `csrf:obs:20260929`: `observe:binding_mismatch:POST /api/user/create 1`, `observe:stale:POST /api/user/create 1`, `observe:no_cookie:POST /api/user/create 1`, `legacy:no_cookie:POST /api/user/create 1` (all probe traffic, 17:05:16Z and 17:06:58Z). Swarm repo commit `a50dda1` (`thinx.yml` only, 1 line; the other uncommitted edits left in place). Before the Phase 25 image rolled, v1.13 logged 8 `no_cookie` rejections (16:52:38–56Z: 6 × `POST /api/v2/session/token`, 2 × `POST /api/v2/login`); none since. Classify them at 25-06. |
 | Observe window evidence (counters, log counts, classification) | | |
 | Forced `thinx_api` redeploy mid-session | | |
 | Operator cold logins (password, Google, GitHub; both consoles) | | |
@@ -557,7 +557,7 @@ The line goes directly after `- "CSRF_ENFORCE=true"` in the `api` service's `env
 | Guard deploy (route guards, `--guards` probe) | | |
 | Gluster header edit (`console/default.conf`) | | |
 | Final combined two-console pass | | |
-| Rollbacks (when, why, command) | | |
+| Rollbacks (when, why, command) | 25-04: none | No trigger fired: the task converged, had no restarts in 5 min, the valid pair passed, and the key source is secret. |
 
 ---
 
