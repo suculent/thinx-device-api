@@ -20,7 +20,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 **Codebase posture (as of v1.13):**
 - Web edge: pinned-host CSP (no scheme wildcards; `unsafe-eval` still present for AngularJS); double-submit CSRF enforced on cookie-session login/account POSTs; rollback via `CSRF_ENFORCE` flag per `.planning/runbooks/csp-csrf-hardening.md`.
-- Core credentials (Redis, CouchDB) load through `readSecret()` from Docker secrets; GDPR purge is a single orchestrator (`owner_purge.js`) reused by scheduled purges.
+- Core credentials (Redis, CouchDB) and, since v1.14 Phase 24, every integration credential in `lib/` (Slack, GitHub/Google OAuth, Mailgun, Rollbar, worker secret, deploy-key passphrase) load through `readSecret()` from Docker secrets, falling back to env; GDPR purge is a single orchestrator (`owner_purge.js`) reused by scheduled purges.
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
 - WebSocket lifecycle is deterministic (raw-socket `close` handler), session cookie is `httpOnly: true` with documented sub-5-min rollback, edge-handshake gap captured in an operator runbook.
 - Account lifecycle: admin `POST /api/v2/admin/user/:id/reactivate` exists for soft-deleted users; password-reset emails land on the Vue console (`/password-reset?`).
@@ -37,7 +37,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - **WR-06** — session-bound CSRF token (HMAC(secret, random‖session_id)), rotated on login
 - **WR-04** — `POST /api/v2/user` requires the CSRF token, no machine-client exemption (decision 2026-09-25: non-browser clients must prime the token)
 - **Console CSP source of truth** — the gluster bind-mounted `default.conf` is canonical (decision 2026-09-25); image `default.conf` files and the runbook snapshots mirror it, including the Vue `connect-src` `app.thinx.cloud` fix; spot-check classic register / forgot / reset-confirm under enforcement
-- **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
+- ✓ **SEC-CFG-02**: the 9 credentials read in `lib/`, and the worker/transformer Rollbar and worker secrets, now come from swarm secrets. The env fallback is kept. `CSRF_SECRET` is provisioned for Phase 25 *(shipped Phase 24)*
 - ✓ **builder.js path traversal** — repository-controlled reads and writes are contained by `safepath` *(shipped Phase 23, SEC-PATH-01/02)*
 - ✓ **git.js argv** — git runs argv-only with no shell; remote jobs carry argv; `shell-escape` removed *(shipped Phase 23, SEC-EXEC-01/02)*
 - ✓ **CodeQL workflow** — trigger on `main`, current action majors *(shipped Phase 22, CI-01)*
@@ -57,6 +57,9 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 <summary>v1.14 Backlog & Hardening Sweep (in progress)</summary>
 
 - ✓ **CI-01** — v1.14 (Phase 22) — CodeQL `javascript-typescript` (`codeql-action@v4`, `checkout@v7`, `build-mode: none`) runs on pushes to `thinx-staging`/`main` and PRs to `main`; non-required; default setup off. security-extended baseline recorded (147 alerts). Main-push row pending the merge of PR #569.
+- ✓ **SEC-CFG-02** — v1.14 (Phase 24) — `SLACK_BOT_TOKEN`, `SLACK_CLIENT_SECRET`, `SLACK_WEBHOOK`, `GITHUB_CLIENT_SECRET`, `GOOGLE_OAUTH_SECRET`, `MAILGUN_API_KEY`, `ROLLBAR_SERVER_TOKEN` (falling back to `ROLLBAR_ACCESS_TOKEN`), `WORKER_SECRET` and `GIT_KEY_PASSPHRASE` all load through `readSecret()`, secret file first, then env. When both are absent the integration is switched off, and `SecretsSweepSpec` covers that.
+  - Production: each service was switched with its own `docker service update --secret-add`. `thinx_api` mounts 9 secrets, including the new `CSRF_SECRET`. `thinx_worker` mounts `WORKER_SECRET` and `ROLLBAR_SERVER_TOKEN`; `thinx_transformer` mounts `ROLLBAR_SERVER_TOKEN`.
+  - `WORKER_SECRET` was rotated, and a real build on the new value succeeded. `docker-swarm.yml` mirrors the live stack. There was no outage.
 - ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
 - ✓ **SEC-EXEC-01** — v1.14 (Phase 23) — `lib/thinx/git.js` runs git argv-only (`runGit` is a detached `spawn`, `shell:false`; `ls-files` uses `execFileSync`). No shell string, no `ssh-agent sh -c`. Constant `GIT_SSH_COMMAND` + askpass, passphrase in env, publickey-only ssh. Private builds proven in production (43c748d0, 17d30770).
 - ✓ **SEC-EXEC-02** — v1.14 (Phase 23) — Remote jobs carry `argv` (arguments only), and the worker spawns its constant builder program with `shell:false`. `shell-escape` is gone from `package.json` and the lockfile. The legacy `cmd` shell path is retained for now (removal is a pending todo).
@@ -208,6 +211,10 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 | Phase 23 kept the legacy worker `cmd` shell path during the rollout (D-01/D-03) | Either-order API/worker deploys during the change window; production showed 0 legacy jobs afterwards | ⚠️ Revisit — the user confirmed no other deployments exist (2026-09-28); removal is in the worker todo |
 | Phase 23 code review ran 5 fix passes (2 beyond the 3-iteration cap, user-approved) | Each pass surfaced the next edge of the build-queue/worker lifecycle (busy flag, reservation expiry, queue drops, reconnect) | ⚠️ Revisit — plan the queue/worker lifecycle as one change (worker todo Part 3) rather than patching it inside a sink-hardening phase |
 | 35-minute prep reservation as a stopgap instead of per-reservation owner tokens | The 2-minute bound let a second request take the single worker from a build that was still cloning; raising the bound was one constant and safe for 1 replica | ⚠️ Revisit — owner token in the worker todo |
+| Phase 24 kept the env fallback behind every `readSecret()` (D-06) | Code could deploy before any secret existed; each `--secret-add` was reversible with `--secret-rm` and no value was lost | ✓ Good — no outage across three services. ⚠️ Revisit — SEC-CFG-03 removes the fallbacks, WORKER_SECRET first (review WR-01; operator already dropped it from `.env`) |
+| Secrets added one service at a time with `docker service update`, never `restart.sh`/stack deploy | A stack deploy would also re-read `.env` and re-apply the yml, e.g. mount the unmounted DB/Redis secrets (WR-02) | ✓ Good — every step had a checkpoint and a one-command rollback |
+| WORKER_SECRET rotated as a paired api+worker update, proven by a manual console Build | The value in env had leaked into logs (Phase 23), and the production build-queue cron loop does not dispatch | ✓ Good — the Fridge build succeeded on the new value. The queue defect is deferred |
+| Critical review finding CR-01 (GitHub OAuth cross-user token) fixed and deployed inside Phase 24 | Pre-existing but live; the operator asked for it ASAP | ✓ Good — per-request token handling, isolation spec, CI and live logins green |
 
 ## Evolution
 
@@ -228,4 +235,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-29 after Phase 23 (Build-Pipeline Sink Hardening)*
+*Last updated: 2026-09-29 after Phase 24 (Secrets Sweep)*

@@ -24,10 +24,10 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
+See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 24 Secrets Sweep (context gathered, ready to plan).
+- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 25 Session-Bound CSRF + Console Edge Headers (ready to discuss; `CSRF_SECRET` is provisioned on `thinx_api`).
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
@@ -39,7 +39,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-09-29 — Phase 24 complete, transitioned to Phase 25
 
-Progress: [███████░░░] 69% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [████████████████████] 15/15 plans (100% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -159,6 +159,9 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 
 Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
+- 2026-09-29 — Phase 24 complete (SEC-CFG-02). The swarm secrets were added one service at a time with `docker service update --secret-add`. The env fallback is kept (removing it is SEC-CFG-03). `WORKER_SECRET` was rotated and proven by a real build, and `CSRF_SECRET` (64 hex) is mounted on `thinx_api`.
+- 2026-09-29 — Review CR-01 (GitHub OAuth cross-user token delivery, pre-existing) was fixed in b09aea35 and deployed as thinx-staging 5e4ebe88. The operator confirmed GitHub and Google logins afterwards. WR-01 is deferred to SEC-CFG-03, and the operator removed WORKER_SECRET from the swarm `.env`.
+
 - 2026-09-25 — v1.14 roadmap shape: 7 phases (22–28) under `granularity: coarse`. Boundaries follow deploy surfaces and risk windows (CI only / backend image / swarm secrets / backend + consoles + gluster / backend + Vue submodule / InfluxDB storage / Swarmpit). Phase 24 (single requirement) is kept separate as a production secret migration with its own verification; it is the fold candidate if fewer phases are wanted.
 - 2026-09-25 — v1.14 ordering: CodeQL baseline (22) before sink fixes (23); sinks before the secrets sweep (24) so `/run/secrets` grows only after symlink containment; secrets before CSRF (25) so `CSRF_SECRET` exists and the HMAC key is never random; log paging (26) after CSRF so regressions stay distinguishable; InfluxDB 2 (27) after all other code deploys; Swarmpit (28) last in its own window.
 - 2026-09-25 — InfluxDB scope changed after research: `thinx_influxdb` is upgraded 1.8 → InfluxDB 2 (irreversible; verified backup first), and 90-day retention becomes bucket retention. CI keeps `dhi.io/influxdb:2`; research's `influxdb:1.8` CI switch is dropped. Phase 27 re-homes or drops the `swarmpit/influxdb.conf` bind mount, which decouples it from the Swarmpit trim.
@@ -277,11 +280,11 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T12:00:39.247Z
+**Last session:** 2026-09-29T12:45:00Z
 
 **Stopped at:** Phase 24 complete, ready to plan Phase 25
 
-**Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
+**Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -294,7 +297,8 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Phase 24 (Secrets Sweep) is next in the autonomous run
+- Phase 25 (Session-Bound CSRF + Console Edge Headers) is next in the autonomous run
+- Before any `restart.sh`/stack deploy, resolve review WR-02: the yml's COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD api mounts would take effect
 - Run the worker todo (polling fix + legacy `cmd` removal + lifecycle) and the Rollbar token split as `/gsd-quick` tasks in one worker deploy window
 - Push the pending `.planning` docs commits on `thinx-staging` when convenient (triggers CircleCI + PR CodeQL)
 - Merge PR #569 when ready, then record the CodeQL main-push row (CI-01 follow-up)
