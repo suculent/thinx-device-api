@@ -525,23 +525,30 @@ components:
           example: true
         csrf_token:
           type: string
-          description: The anti-CSRF token (48 hex characters). Same value as the `XSRF-TOKEN` cookie.
-          example: "3f9a0c2b7d1e4a5f8b6c0d2e9f1a3b5c7d9e0f2a4b6c8d0e"
+          description: |
+            The anti-CSRF token. Treat it as opaque: in the session-bound mode it has the shape
+            `<hmac>.<nonce>` and is valid only together with the `x-thx-core` session cookie it
+            was issued for. Same value as the `XSRF-TOKEN` cookie. It rotates at login, so take
+            the new value from the login response's `Set-Cookie`.
+          example: "9c1f0a7e3b5d2c4f6a8e0b1d3f5a7c9e2b4d6f8a0c1e3b5d7f9a2c4e6b8d0f1a.4e7b1c9d2a5f8e0b3c6d9f1a4e7b0c2d"
 
-  # SEC-CSRF-01 double-submit check (enforced in production since 2026-09-25).
-  # Applies only to the routes that reference these components; every other
-  # route, and every Bearer / API-key authenticated call, is unaffected.
+  # SEC-CSRF-01 double-submit check (enforced in production since 2026-09-25),
+  # session-bound since SEC-CSRF-02/04/05. Applies only to the routes that
+  # reference these components; every other route, and every Bearer / API-key
+  # authenticated call, is unaffected.
   parameters:
     XsrfTokenHeader:
       name: X-XSRF-TOKEN
       in: header
       required: true
       description: |
-        Anti-CSRF double-submit token. Must equal the `XSRF-TOKEN` cookie sent with the same
-        request (compared in constant time). Obtain both by calling `GET /csrf-token` first
-        and keeping its cookie. Browser consoles do this automatically; machine clients that
-        do not keep cookies should use Bearer (JWT) or API-key authentication instead of
-        these cookie-session routes.
+        Anti-CSRF token. Must equal the `XSRF-TOKEN` cookie sent with the same request
+        (compared in constant time) and must be bound to the `x-thx-core` session cookie sent
+        with it. Obtain it by calling `GET /csrf-token` first and keeping every cookie that
+        call sets (`x-thx-core` and `XSRF-TOKEN`) in a cookie jar. The token rotates at login:
+        take the new value from the login response's `Set-Cookie`. Browser consoles do this
+        automatically. Bearer (JWT) and API-key authenticated calls are exempt and need
+        neither the header nor the cookies.
       schema:
         type: string
     XsrfTokenCookie:
@@ -549,18 +556,21 @@ components:
       in: cookie
       required: true
       description: |
-        Anti-CSRF cookie set by the API (`SameSite=Lax`, not httpOnly, `Path=/`) on the first
-        request that arrives without it, including `GET /csrf-token`. Its value must be echoed
-        in the `X-XSRF-TOKEN` header.
+        Anti-CSRF cookie set by the API (`SameSite=Lax`, not httpOnly, `Path=/`), issued
+        together with the httpOnly `x-thx-core` session cookie by `GET /csrf-token`. Its value
+        must be echoed in the `X-XSRF-TOKEN` header, and it is only valid with the session it
+        was issued for, so keep both cookies.
       schema:
         type: string
 
   responses:
     CsrfTokenInvalid:
       description: |
-        Anti-CSRF check failed: the `X-XSRF-TOKEN` header is missing, or does not match the
-        `XSRF-TOKEN` cookie. Rejected before the route handler runs, so nothing was changed.
-        Re-fetch `GET /csrf-token` and retry once.
+        Anti-CSRF check failed: the `X-XSRF-TOKEN` header is missing, does not match the
+        `XSRF-TOKEN` cookie, or the token is not bound to the `x-thx-core` session sent with
+        it (stale, foreign, or taken from before login). Rejected before the route handler
+        runs, so nothing was changed. Re-prime with `GET /csrf-token` (keeping every cookie it
+        sets) and retry once.
       content:
         application/json:
           schema:
@@ -578,11 +588,24 @@ paths:
     get:
       summary: Anti-CSRF token
       description: |
-        Returns the anti-CSRF token for the double-submit check and sets the `XSRF-TOKEN`
-        cookie when the request did not already carry one (an existing cookie is echoed, never
-        rotated). Call it before the cookie-session routes that require `X-XSRF-TOKEN`:
-        `POST /login`, `POST /session/token` (v2), `POST /password/reset`, `POST /password/set`,
-        and the v1 `POST /user/create`, `POST /user/password/reset` and `POST /user/password/set`.
+        Priming call for the anti-CSRF check. The contract:
+
+        1. Call `GET /csrf-token` first and keep every cookie it sets (`x-thx-core` session and
+           `XSRF-TOKEN`) in a cookie jar.
+        2. Send the token as the `X-XSRF-TOKEN` header on every guarded call, with both cookies.
+        3. The token is opaque and bound to the session. A request without a session gets a
+           15-minute pre-session; a stale or foreign token is re-minted, and the current token
+           is echoed in the body and the cookie.
+        4. Login regenerates the session and rotates the token: take the new value from the
+           login response's `Set-Cookie`, not from before login.
+        5. Bearer (JWT) and API-key authenticated calls are exempt.
+        6. A 403 `csrf_token_invalid` means re-prime and retry once.
+
+        Guarded routes: `POST /login`, `POST /session/token` (v2), `POST /password/reset`,
+        `POST /password/set`, `POST /user` (registration), `DELETE /user`, `POST /profile` and
+        `DELETE /gdpr`, and the v1-only routes that have no v2 path in this document:
+        `POST /user/delete`, `POST /gdpr/revoke`, `POST /user/profile`, `POST /user/create`,
+        `POST /user/password/reset` and `POST /user/password/set`.
       tags:
         - Authentication
       responses:
@@ -590,7 +613,7 @@ paths:
           description: Token issued or echoed
           headers:
             Set-Cookie:
-              description: '`XSRF-TOKEN=<token>; Domain=<parent domain>; Path=/; SameSite=Lax`, only when the request had no `XSRF-TOKEN` cookie'
+              description: '`x-thx-core` (httpOnly session, when the request had none) and `XSRF-TOKEN=<token>; Domain=<parent domain>; Path=/; SameSite=Lax` (when absent, stale or foreign)'
               schema:
                 type: string
           content:
@@ -1360,9 +1383,14 @@ paths:
   /user:
     post:
       summary: Create user
-      description: Register a new user account
+      description: |
+        Register a new user account. Registration has no machine-client exemption: prime with `GET /csrf-token` first.
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1394,15 +1422,22 @@ paths:
                     example: "registered"
         '400':
           description: Bad request
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
     delete:
       summary: Delete user
-      description: Delete the authenticated user account
+      description: |
+        Delete the authenticated user account.
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       responses:
         '200':
           description: User deleted
@@ -1419,6 +1454,8 @@ paths:
                     example: "deleted"
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   /activate:
     get:
@@ -1690,12 +1727,17 @@ paths:
 
     post:
       summary: Update user profile
-      description: Update the authenticated user's profile
+      description: |
+        Update the authenticated user's profile.
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1723,6 +1765,8 @@ paths:
                     example: "OK"
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # GDPR endpoints
   /gdpr:
@@ -1782,12 +1826,17 @@ paths:
 
     delete:
       summary: Revoke user data (GDPR)
-      description: Request deletion of all user data in compliance with GDPR
+      description: |
+        Request deletion of all user data in compliance with GDPR.
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - GDPR
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       responses:
         '200':
           description: Data deletion initiated
@@ -1801,6 +1850,8 @@ paths:
                     example: true
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # Mesh management
   /mesh:
