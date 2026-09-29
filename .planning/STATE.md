@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 25
 current_phase_name: Session-Bound CSRF + Console Edge Headers
 status: executing
-stopped_at: "Completed 25-04-PLAN.md (observe live since 2026-09-29T17:06:30Z)"
-last_updated: "2026-09-29T17:14:30.688Z"
+stopped_at: Completed 25-05-PLAN.md
+last_updated: "2026-09-29T18:10:08.305Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 25 execution started
-state_head: e58d126e258a10e161750aff8be56037a3fd0ab9
+state_head: 1a13f3f491596055ad075e14e17aaefc48171525
 progress:
   total_phases: 7
   completed_phases: 9
   total_plans: 25
-  completed_plans: 19
-  percent: 76
+  completed_plans: 20
+  percent: 80
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 25 (Session-Bound CSRF + Console Edge Headers) — EXECUTING
-Plan: 5 of 10
+Plan: 6 of 10
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 25 execution started
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 76% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 80% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -214,6 +214,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 25]: 25-04: observe_start_utc 2026-09-29T17:06:30Z (thinx_api task Running); 25-06 may start at 2026-09-30T17:06:30Z
 - [Phase 25]: 25-04: D-05 start-of-observe found 0 external POST /api/v2/user or /api/user/create callers (Traefik logs no User-Agent; probe traffic matched by timestamp)
 - [Phase 25]: 25-04: node repair dcbbd416 logs the Google new-user owner via a local so LoggingQualityAuditSpec full_user_wrapper passes
+- [Phase 25]: 25-05: Tier 1 OpenAPI operations carry the XsrfTokenHeader ref only (they also accept Bearer); login/password routes keep header+cookie refs
+- [Phase 25]: 25-05: guarded-route set locked by static CsrfRouteInventorySpec (GUARDED + NOT_GUARDED with reasons); new guards add a row there
 
 ### Todos
 
@@ -291,9 +293,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T17:14:30.582Z
+**Last session:** 2026-09-29T18:10:08.195Z
 
-**Stopped at:** Completed 25-04-PLAN.md (observe live since 2026-09-29T17:06:30Z)
+**Stopped at:** Completed 25-05-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -337,3 +339,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 25 P02 | 7min | 2 tasks | 6 files |
 | Phase 25 P03 | 12min | 3 tasks | 9 files |
 | Phase 25 P04 | 27 min | 3 tasks | 3 files |
+| Phase 25 P05 | 15 min | 2 tasks | 6 files |

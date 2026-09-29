@@ -196,7 +196,7 @@ Plans:
   4. Under enforcement, the classic console's register, forgot-password and reset-confirm flows complete end to end.
   5. Each console host returns exactly one CSP header, plus `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`, all from the gluster `default.conf`. A normalising parity script confirms that both image `default.conf` files and the `.planning/runbooks/swarm-configs/` snapshots match it.
 
-**Plans**: 4/10 plans executed
+**Plans**: 5/10 plans executed
 
 Plans:
 **Wave 1**
@@ -210,7 +210,7 @@ Plans:
 - [x] 25-04-PLAN.md — production: D-05 log check → seam + code shipped in legacy mode → `CSRF_MODE=observe` (starts the ≥24 h window) (checkpoint)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 25-05-PLAN.md — WR-04 and SEC-CSRF-05 account-route guards, OpenAPI priming contract, route inventory and CI guard specs (code only, written during observe)
+- [x] 25-05-PLAN.md — WR-04 and SEC-CSRF-05 account-route guards, OpenAPI priming contract, route inventory and CI guard specs (code only, written during observe)
 - [ ] 25-06-PLAN.md — production: ≥24 h observe review, forced `thinx_api` redeploy mid-session, operator cold logins on both consoles (checkpoint)
 
 **Wave 5** *(blocked on Wave 4 completion)*
@@ -292,7 +292,7 @@ Plans:
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
-| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 4/10 | In Progress|  |
+| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 5/10 | In Progress|  |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
