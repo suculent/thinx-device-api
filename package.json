@@ -21,6 +21,7 @@
     "logging-audit": "node scripts/logging-quality-audit.js",
     "roadmap-entropy": "node scripts/roadmap-entropy.js",
     "privacy-check": "node scripts/privacy-policy-check.js",
+    "check:headers": "node scripts/check-console-headers.js",
     "lint": "eslint ./",
     "lint:commit": "commitlint --from HEAD~1 --to HEAD --verbose",
     "setup:hooks": "git config core.hooksPath .githooks",
