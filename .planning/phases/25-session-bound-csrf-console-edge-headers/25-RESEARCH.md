@@ -551,11 +551,12 @@ $.ajaxSetup( { beforeSend: function( xhr ) {
 | A4 | No external clients depend on the cookie-auth mutation routes (only the consoles) | Route Inventory | Medium: extend the D-05 Traefik query to the Tier 1-3 paths during observe |
 | A5 | Legacy-mode rollback keeps `regenerate()` (it is a session-fixation fix, not CSRF) | Open Question 5 | Medium if the user expects `legacy` to undo *all* phase behaviour |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-None of these is resolved. Each is a research recommendation that changes or refines CONTEXT wording, so the user must confirm it before the plan locks. Questions 1 and 2 are the blocking ones.
+**All six were resolved by the user on 2026-09-29 and are recorded in `25-CONTEXT.md` as post-research amendments. Each question below carries an inline `RESOLVED:` line; where the user chose differently from the research recommendation (Q3), the CONTEXT decision is authoritative.**
 
 1. **The enforcement switch while `CSRF_ENFORCE=true` is already live (blocking).** Production `thinx_api` env shows `CSRF_ENFORCE=true` (verified 2026-09-29). D-06 says "deploy signed fail-open" and D-07 says "flip `CSRF_ENFORCE`". Taken literally, that means turning v1.13 enforcement off for at least 24 h.
+   - **RESOLVED: D-17.** The recommendation was taken: three-state `CSRF_MODE` legacy → observe → signed; `CSRF_ENFORCE` is never flipped.
    - **Recommendation:** a three-state `CSRF_MODE`:
 
      | `CSRF_MODE` | mint | binding check | 8 existing routes | new routes (WR-04 + Tier 1-3) |
@@ -567,16 +568,21 @@ None of these is resolved. Each is a research recommendation that changes or ref
      The D-07 flip becomes `--env-add CSRF_MODE=signed` and D-08 rollback stays `--env-add CSRF_MODE=legacy`, with `CSRF_ENFORCE` untouched throughout. This changes the D-06/D-07 mechanism (observe stands in for "signed fail-open"; the flip changes `CSRF_MODE`, not `CSRF_ENFORCE`).
    - **Alternative (literal CONTEXT):** `CSRF_ENFORCE=false` + `CSRF_MODE=signed` for ≥24 h, then `CSRF_ENFORCE=true`. Simpler, but login CSRF protection is off during observation.
 2. **The classic dashboard seam (blocking, a console code change).** `POST /api/user/delete` (named in SEC-CSRF-05) and every D-11 Tier 2 route the classic dashboard uses are headerless today.
+   - **RESOLVED: D-18.** The recommendation was taken: add the classic `$.ajaxSetup` seam, deployed before any new API route guard.
    - **Recommendation:** the 4-line `$.ajaxSetup beforeSend` in `app/js/thinx-api.js` (Code Example 5), pushed to console `thinx-staging` → pointer bump → classic image, deployed and verified before the API guards. The wire contract is unchanged, but this contradicts the CONTEXT line "Frozen wire contract (no console CSRF code change)".
    - **Alternative:** leave the classic-used routes unguarded and record them as accepted risk. That fails SEC-CSRF-05 as written for `POST /api/user/delete`.
 3. **"Exactly one CSP" scope.** Proxied `/api/*` responses on the console hosts carry 2 CSP headers today (verified live).
+   - **RESOLVED: D-19. The user chose the ALTERNATIVE:** `proxy_hide_header` in the gluster proxy locations, so proxied `/api/*` responses on the console hosts also carry exactly one CSP. The recommendation below is superseded.
    - **Recommendation:** measure console-served paths only and record the proxied double header as accepted (JSON responses are never rendered as documents).
    - **Alternative:** `proxy_hide_header Content-Security-Policy;` in the 5 proxy locations of the gluster file. It is a larger live edit.
 4. **Which snapshots the parity script compares.**
+   - **RESOLVED: D-20.** The recommendation was taken: compare `console-default.conf.prod` and `rtm…post.nginx`; `pre.nginx` is excluded.
    - **Recommendation:** `console-default.conf.prod` and `rtm…post.nginx` only. By the swarm-configs README convention, `pre.nginx` is the before-state of a change. The phase refreshes `pre` (the before-edit capture) and `post` (the after-edit capture). This narrows D-16's "the snapshots".
 5. **Whether `CSRF_MODE=legacy` should also skip `regenerate()`.**
+   - **RESOLVED: D-08.** The recommendation was taken: `legacy` keeps `regenerate()` in all modes.
    - **Recommendation:** keep regenerate in all modes. It closes session fixation, the CI ZZ login specs exercise it, and it does not touch legacy tokens. The second-level escape for a regenerate bug is a code revert. Confirm, because SC-2 says `legacy` "restores v1.13 behaviour".
 6. **Tier 3 resource-mutation coverage** (devices, sources, mesh, build, chat) goes beyond the letter of D-11 ("account mutations").
+   - **RESOLVED: D-21.** Tier 3 (devices, sources, mesh, build, chat) is deferred to a follow-up requirement. Phase 25 guards account mutations only.
    - **Recommendation:** cover it in the same plan as Tier 2 once the classic seam exists, or record it as accepted risk. **Needs a user choice.**
 
 ## Environment Availability
