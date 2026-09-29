@@ -1,0 +1,123 @@
+/*
+ * CsrfRouteInventorySpec — SEC-CSRF-04 / SEC-CSRF-05 guarded-route inventory.
+ *
+ * Static, local, no services: reads the router sources as text. It does NOT boot
+ * the app (no bootstrap, no CouchDB, no Redis), so it runs anywhere.
+ *
+ * GUARDED rows must be registered with `csrf.verifyCsrfToken` on the same source
+ * line as `app.{method}(` and the quoted path. NOT_GUARDED rows are the recorded
+ * exclusions (D-11 inventory record), each with its reason; they must NOT carry
+ * the middleware. A row whose registration line cannot be found fails with the
+ * row in the message, so a renamed or moved route cannot drop out silently.
+ *
+ * Plan 25-07 extends GUARDED with the remaining D-11 account routes.
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const LIB = path.join(__dirname, "..", "..", "lib");
+const FACTORY = 'require("./middleware/csrf")(app)';
+const GUARD = "csrf.verifyCsrfToken";
+
+// [file, method, path]
+const GUARDED = [
+    // SEC-CSRF-01 (v1.13) guards
+    ["router.auth.js", "post", "/api/login"],
+    ["router.auth.js", "post", "/api/v2/login"],
+    ["router.auth.js", "post", "/api/v2/session/token"],
+    ["router.user.js", "post", "/api/v2/password/reset"],
+    ["router.user.js", "post", "/api/v2/password/set"],
+    ["router.user.js", "post", "/api/user/create"],
+    ["router.user.js", "post", "/api/user/password/set"],
+    ["router.user.js", "post", "/api/user/password/reset"],
+    // SEC-CSRF-04 / WR-04: registration, no machine-client exemption (decision 2026-09-25)
+    ["router.user.js", "post", "/api/v2/user"]
+];
+
+// [file, method, path, reason]
+const NOT_GUARDED = [
+    ["router.gdpr.js", "put", "/api/v2/gdpr", "one-shot body token, not cookie-authenticated"],
+    ["router.gdpr.js", "post", "/api/gdpr", "one-shot body token, not cookie-authenticated"],
+    ["router.gdpr.js", "post", "/api/v2/gdpr", "read carried as POST"],
+    ["router.gdpr.js", "post", "/api/gdpr/transfer", "read carried as POST"],
+    ["router.user.js", "get", "/api/v2/activate", "e-mail capability link"],
+    ["router.user.js", "get", "/api/user/activate", "e-mail capability link"],
+    ["router.user.js", "get", "/api/v2/password/reset", "e-mail capability link"],
+    ["router.user.js", "get", "/api/user/password/reset", "e-mail capability link"],
+    ["router.user.js", "post", "/api/v2/chat", "Tier 3, deferred by D-21"],
+    ["router.user.js", "post", "/api/user/chat", "Tier 3, deferred by D-21"],
+    ["router.deviceapi.js", "post", "/device/firmware", "firmware API (non-browser)"],
+    ["router.deviceapi.js", "post", "/device/register", "firmware API (non-browser)"],
+    ["router.profile.js", "get", "/api/v2/profile", "GET read, D-10"],
+    ["router.profile.js", "get", "/api/user/profile", "GET read, D-10"]
+];
+
+const sources = {};
+function sourceOf(file) {
+    if (!(file in sources)) sources[file] = fs.readFileSync(path.join(LIB, file), "utf8");
+    return sources[file];
+}
+
+// Registration lines for `app.{method}(` with the path quoted in either style
+// (array literals such as ['/api/github/token', '/api/v2/github/token'] count).
+// Comment lines are ignored so a commented-out route cannot satisfy a row.
+function registrationLines(src, method, route) {
+    const call = "app." + method + "(";
+    return src.split("\n").filter((line) => {
+        const t = line.trim();
+        if (t.indexOf("//") === 0 || t.indexOf("*") === 0 || t.indexOf("/*") === 0) return false;
+        if (line.indexOf(call) === -1) return false;
+        return (line.indexOf('"' + route + '"') !== -1) || (line.indexOf("'" + route + "'") !== -1);
+    });
+}
+
+// Returns null when the row holds, otherwise a message naming the row.
+function checkRow(src, row, expectGuarded) {
+    const [file, method, route] = row;
+    const label = method.toUpperCase() + " " + route + " (" + file + ")";
+    const lines = registrationLines(src, method, route);
+    if (lines.length === 0) return "registration line not found: " + label;
+    if (lines.length > 1) return "registration line is ambiguous (" + lines.length + " matches): " + label;
+    const guarded = lines[0].indexOf(GUARD) !== -1;
+    if (expectGuarded && !guarded) return "guarded route lacks " + GUARD + ": " + label;
+    if (!expectGuarded && guarded) return "excluded route gained " + GUARD + " (reason: " + row[3] + "): " + label;
+    return null;
+}
+
+describe("CsrfRouteInventorySpec (SEC-CSRF-04/05 guarded-route inventory)", function () {
+
+    it("the row checker fails on a missing line, a missing guard and a guarded exclusion", function () {
+        const src = [
+            'app.post("/api/a", csrf.verifyCsrfToken, function (req, res) {',
+            "app.post('/api/b', function (req, res) {",
+            '// app.post("/api/c", csrf.verifyCsrfToken, function (req, res) {'
+        ].join("\n");
+        expect(checkRow(src, ["x.js", "post", "/api/a"], true)).toBeNull();
+        expect(checkRow(src, ["x.js", "post", "/api/b"], false)).toBeNull();
+        expect(checkRow(src, ["x.js", "post", "/api/b"], true)).toContain("lacks");
+        expect(checkRow(src, ["x.js", "post", "/api/a", "r"], false)).toContain("gained");
+        expect(checkRow(src, ["x.js", "post", "/api/c"], true)).toContain("not found");
+        expect(checkRow(src, ["x.js", "delete", "/api/a"], true)).toContain("not found");
+        expect(checkRow(src, ["x.js", "post", "/api"], true)).toContain("not found");
+    });
+
+    GUARDED.forEach((row) => {
+        it("guards " + row[1].toUpperCase() + " " + row[2] + " (" + row[0] + ")", function () {
+            expect(checkRow(sourceOf(row[0]), row, true)).toBeNull();
+        });
+    });
+
+    NOT_GUARDED.forEach((row) => {
+        it("does not guard " + row[1].toUpperCase() + " " + row[2] + " (" + row[3] + ")", function () {
+            expect(checkRow(sourceOf(row[0]), row, false)).toBeNull();
+        });
+    });
+
+    it("every router with a guarded row instantiates the csrf factory", function () {
+        const files = Array.from(new Set(GUARDED.map((row) => row[0])));
+        files.forEach((file) => {
+            expect(sourceOf(file).indexOf(FACTORY) !== -1).withContext(file + " lacks " + FACTORY).toBe(true);
+        });
+    });
+});
