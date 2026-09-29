@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 25
 current_phase_name: Session-Bound CSRF + Console Edge Headers
 status: executing
-stopped_at: Completed 25-03-PLAN.md
-last_updated: "2026-09-29T14:38:27.514Z"
+stopped_at: "Completed 25-04-PLAN.md (observe live since 2026-09-29T17:06:30Z)"
+last_updated: "2026-09-29T17:14:30.688Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 25 execution started
-state_head: e04dc979b607076b3ab691b1049fb7799bd730d0
+state_head: e58d126e258a10e161750aff8be56037a3fd0ab9
 progress:
   total_phases: 7
   completed_phases: 9
   total_plans: 25
-  completed_plans: 18
-  percent: 72
+  completed_plans: 19
+  percent: 76
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 25 (Session-Bound CSRF + Console Edge Headers) — EXECUTING
-Plan: 4 of 10
+Plan: 5 of 10
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 25 execution started
 
-Progress: [████████████████████] 15/15 plans ([███████░░░] 72% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 76% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -211,6 +211,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 25]: 25-03: CSRF observe telemetry is a Redis hash csrf:obs:{UTC day}, field {mode}:{reason}:{METHOD} {route pattern}, 30-day expiry, counted in every mode; read with scripts/csrf-obs-counters.js
 - [Phase 25]: 25-03: CSRF exemption keys only on request-local req.thx_auth (bearer|apikey) set in router.js after verified auth; header presence and validateSession never exempt (D-09)
 - [Phase 25]: 25-03: Google new-user callback writes no session; login happens only via POST /login {token} (establishSession)
+- [Phase 25]: 25-04: observe_start_utc 2026-09-29T17:06:30Z (thinx_api task Running); 25-06 may start at 2026-09-30T17:06:30Z
+- [Phase 25]: 25-04: D-05 start-of-observe found 0 external POST /api/v2/user or /api/user/create callers (Traefik logs no User-Agent; probe traffic matched by timestamp)
+- [Phase 25]: 25-04: node repair dcbbd416 logs the Google new-user owner via a local so LoggingQualityAuditSpec full_user_wrapper passes
 
 ### Todos
 
@@ -286,11 +289,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/25-session-bound-csrf-console-edge-headers/.continue-here.md
+**Resume file:** None
 
-**Last session:** 2026-09-29T15:42:43.031Z
+**Last session:** 2026-09-29T17:14:30.582Z
 
-**Stopped at:** Session resumed, proceeding to Phase 25 wave 3 (25-04, production checkpoint first)
+**Stopped at:** Completed 25-04-PLAN.md (observe live since 2026-09-29T17:06:30Z)
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -333,3 +336,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 25 P01 | 12 min | 2 tasks | 6 files |
 | Phase 25 P02 | 7min | 2 tasks | 6 files |
 | Phase 25 P03 | 12min | 3 tasks | 9 files |
+| Phase 25 P04 | 27 min | 3 tasks | 3 files |
