@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 24
 current_phase_name: Secrets Sweep
 status: executing
-stopped_at: Completed 24-04-PLAN.md
-last_updated: "2026-09-29T10:26:02.660Z"
+stopped_at: Completed 24-05-PLAN.md
+last_updated: "2026-09-29T11:11:01.878Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 24 execution started
-state_head: 9dd6f240688a3519a93b9dae6d1f152666deae1b
+state_head: 9e5372a7703f22603c52bbdd9104d1d12ca071c1
 progress:
   total_phases: 7
   completed_phases: 8
   total_plans: 15
-  completed_plans: 13
-  percent: 87
+  completed_plans: 14
+  percent: 93
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 ## Current Position
 
 Phase: 24 (Secrets Sweep) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-09-29 — Phase 24 execution started
 
-Progress: [█████████░] 87% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [█████████░] 93% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -195,6 +195,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 24]: globals.js builds Rollbar at most once per process from ROLLBAR_SERVER_TOKEN, then ROLLBAR_ACCESS_TOKEN (file before env in each chain)
 - [Phase 24]: 24-04: thinx_api now mounts SLACK_BOT_TOKEN, SLACK_WEBHOOK, GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY, ROLLBAR_SERVER_TOKEN (from ROLLBAR_ACCESS_TOKEN), GIT_KEY_PASSPHRASE and CSRF_SECRET via one --secret-add; fp12 unchanged, env kept as fallback
 - [Phase 24]: 24-04: SLACK_CLIENT_SECRET left off (empty env); WORKER_SECRET stays env-only on thinx_api until the 24-05 rotation; ROLLBAR_SERVER_TOKEN secret already exists, 24-05 mounts it without re-creating
+- [Phase 24]: 24-05: WORKER_SECRET rotated to a new random swarm secret mounted on thinx_api and thinx_worker together; the file wins over the old env value on both sides (env kept as D-12 fallback until SEC-CFG-03)
+- [Phase 24]: 24-05: proof build dispatched by the operator via console Build (rotate-build-manual); console builds bypass the Redis queue, so the build_id is taken from the worker runArgv line
+- [Phase 24]: 24-05: ROLLBAR_SERVER_TOKEN mounted on thinx_worker then thinx_transformer from the existing secret, no rotation
 
 ### Todos
 
@@ -264,9 +267,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T10:26:02.581Z
+**Last session:** 2026-09-29T11:11:01.793Z
 
-**Stopped at:** Completed 24-04-PLAN.md
+**Stopped at:** Completed 24-05-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
@@ -303,3 +306,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 24 P02 | 7 min | 3 tasks | 10 files |
 | Phase 24 P03 | 9 min | 3 tasks | 10 files |
 | Phase 24 P04 | 51 min | 3 tasks | 2 files |
+| Phase 24 P05 | 42 min | 3 tasks | 1 files |
