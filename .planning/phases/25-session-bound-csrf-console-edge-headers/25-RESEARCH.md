@@ -583,7 +583,7 @@ $.ajaxSetup( { beforeSend: function( xhr ) {
    - **Recommendation:** keep regenerate in all modes. It closes session fixation, the CI ZZ login specs exercise it, and it does not touch legacy tokens. The second-level escape for a regenerate bug is a code revert. Confirm, because SC-2 says `legacy` "restores v1.13 behaviour".
 6. **Tier 3 resource-mutation coverage** (devices, sources, mesh, build, chat) goes beyond the letter of D-11 ("account mutations").
    - **RESOLVED: D-21.** Tier 3 (devices, sources, mesh, build, chat) is deferred to a follow-up requirement. Phase 25 guards account mutations only.
-   - **Recommendation:** cover it in the same plan as Tier 2 once the classic seam exists, or record it as accepted risk. **Needs a user choice.**
+   - **Recommendation:** cover it in the same plan as Tier 2 once the classic seam exists, or record it as accepted risk. *(Superseded by D-21: deferred.)*
 
 ## Environment Availability
 
