@@ -541,6 +541,105 @@ rm -f /tmp/thinx.yml.p25 /tmp/thinx.yml.wt
 
 The line goes directly after `- "CSRF_ENFORCE=true"` in the `api` service's `environment:` list.
 
+### Phase 25 guarded-route inventory
+
+Source of truth: `spec/jasmine/CsrfRouteInventorySpec.js`. It reads the router sources as text (no
+services) and fails when a guarded route loses `csrf.verifyCsrfToken`, when a recorded exclusion gains
+it, when a registration line moves out of reach (renamed, split or duplicated), when a router with a
+guarded row lacks the csrf factory, or when an admin mutation stops running the CSRF check before
+`requireAdmin`. This section mirrors its tables as of plan 25-07; line numbers drift with edits, the
+spec does not. Runtime behaviour (cookie-only 403, Bearer pass-through) is covered in CI by
+`spec/jasmine/ZZ-CSRFRouteGuardSpec.js` under `CSRF_MODE=signed` + `CSRF_ENFORCE=true`.
+
+**Guarded: 38 routes** (8 SEC-CSRF-01, 7 SEC-CSRF-04/05 Tier 1, 23 D-11). Every guard is live only once
+the image carrying it is deployed (plan 25-08 for the 25-05 and 25-07 guards). Bearer (JWT) and API-key
+calls are exempt through `req.thx_auth` (D-09). The GitHub token POST is one array registration serving
+both paths. The admin mutations register `csrf.verifyCsrfToken, requireAdmin`, so a forged request is
+refused before the admin profile lookup. `GET /api/user/rsakey/create` is a state-changing GET; the
+classic dashboard sends `X-XSRF-TOKEN` on it through the D-18 `$.ajaxSetup` seam.
+
+| # | Method | Path | File:line | Set |
+|---|---|---|---|---|
+| 1 | POST | `/api/login` | `lib/router.auth.js:364` | SEC-CSRF-01 (v1.13) |
+| 2 | POST | `/api/v2/login` | `lib/router.auth.js:383` | SEC-CSRF-01 (v1.13) |
+| 3 | POST | `/api/v2/session/token` | `lib/router.auth.js:394` | SEC-CSRF-01 (v1.13) |
+| 4 | POST | `/api/v2/password/reset` | `lib/router.user.js:159` | SEC-CSRF-01 (v1.13) |
+| 5 | POST | `/api/v2/password/set` | `lib/router.user.js:169` | SEC-CSRF-01 (v1.13) |
+| 6 | POST | `/api/user/create` | `lib/router.user.js:198` | SEC-CSRF-01 (v1.13) |
+| 7 | POST | `/api/user/password/set` | `lib/router.user.js:208` | SEC-CSRF-01 (v1.13) |
+| 8 | POST | `/api/user/password/reset` | `lib/router.user.js:218` | SEC-CSRF-01 (v1.13) |
+| 9 | POST | `/api/v2/user` | `lib/router.user.js:150` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 10 | DELETE | `/api/v2/user` | `lib/router.user.js:190` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 11 | POST | `/api/user/delete` | `lib/router.user.js:231` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 12 | POST | `/api/v2/profile` | `lib/router.profile.js:49` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 13 | POST | `/api/user/profile` | `lib/router.profile.js:63` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 14 | DELETE | `/api/v2/gdpr` | `lib/router.gdpr.js:146` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 15 | POST | `/api/gdpr/revoke` | `lib/router.gdpr.js:173` | SEC-CSRF-04/05 Tier 1 (25-05) |
+| 16 | POST | `/api/user/apikey` | `lib/router.apikey.js:73` | D-11 (25-07) |
+| 17 | POST | `/api/user/apikey/revoke` | `lib/router.apikey.js:78` | D-11 (25-07) |
+| 18 | POST | `/api/v2/apikey` | `lib/router.apikey.js:92` | D-11 (25-07) |
+| 19 | DELETE | `/api/v2/apikey` | `lib/router.apikey.js:97` | D-11 (25-07) |
+| 20 | PUT | `/api/v2/rsakey` | `lib/router.rsakey.js:55` | D-11 (25-07) |
+| 21 | DELETE | `/api/v2/rsakey` | `lib/router.rsakey.js:63` | D-11 (25-07) |
+| 22 | GET | `/api/user/rsakey/create` | `lib/router.rsakey.js:73` | D-11 (25-07) |
+| 23 | POST | `/api/user/rsakey/revoke` | `lib/router.rsakey.js:83` | D-11 (25-07) |
+| 24 | PUT | `/api/v2/env` | `lib/router.env.js:73` | D-11 (25-07) |
+| 25 | DELETE | `/api/v2/env` | `lib/router.env.js:77` | D-11 (25-07) |
+| 26 | POST | `/api/user/env/add` | `lib/router.env.js:90` | D-11 (25-07) |
+| 27 | POST | `/api/user/env/revoke` | `lib/router.env.js:94` | D-11 (25-07) |
+| 28 | POST | `/api/github/token` | `lib/router.github.js:282` | D-11 (25-07) |
+| 29 | POST | `/api/v2/github/token` | `lib/router.github.js:282` | D-11 (25-07) |
+| 30 | DELETE | `/api/v2/admin/session/:owner` | `lib/router.admin.js:87` | D-11 (25-07) |
+| 31 | POST | `/api/v2/admin/impersonate` | `lib/router.admin.js:88` | D-11 (25-07) |
+| 32 | POST | `/api/v2/admin/user/:id/reactivate` | `lib/router.admin.js:89` | D-11 (25-07) |
+| 33 | POST | `/api/v2/transfer/request` | `lib/router.transfer.js:98` | D-11 (25-07) |
+| 34 | POST | `/api/v2/transfer/decline` | `lib/router.transfer.js:107` | D-11 (25-07) |
+| 35 | POST | `/api/v2/transfer/accept` | `lib/router.transfer.js:116` | D-11 (25-07) |
+| 36 | POST | `/api/transfer/request` | `lib/router.transfer.js:125` | D-11 (25-07) |
+| 37 | POST | `/api/transfer/decline` | `lib/router.transfer.js:136` | D-11 (25-07) |
+| 38 | POST | `/api/transfer/accept` | `lib/router.transfer.js:147` | D-11 (25-07) |
+
+**Recorded exclusions: 29 rows**, each with its reason. The OAuth rows also cover their `/api/v2/...`
+twins (same array registration). The transfer accept/decline GETs are e-mail capability links: the
+`transfer_id` in the query is the authority, not the cookie, and the mail client sends no header.
+
+| Method | Path | File:line | Reason |
+|---|---|---|---|
+| PUT | `/api/v2/gdpr` | `lib/router.gdpr.js:141` | one-shot body token, not cookie-authenticated |
+| POST | `/api/gdpr` | `lib/router.gdpr.js:162` | one-shot body token, not cookie-authenticated |
+| POST | `/api/v2/gdpr` | `lib/router.gdpr.js:151` | read carried as POST |
+| POST | `/api/gdpr/transfer` | `lib/router.gdpr.js:168` | read carried as POST |
+| GET | `/api/v2/activate` | `lib/router.user.js:154` | e-mail capability link |
+| GET | `/api/user/activate` | `lib/router.user.js:203` | e-mail capability link |
+| GET | `/api/v2/password/reset` | `lib/router.user.js:164` | e-mail capability link |
+| GET | `/api/user/password/reset` | `lib/router.user.js:213` | e-mail capability link |
+| POST | `/api/v2/chat` | `lib/router.user.js:185` | Tier 3, deferred by D-21 |
+| POST | `/api/user/chat` | `lib/router.user.js:222` | Tier 3, deferred by D-21 |
+| POST | `/device/firmware` | `lib/router.deviceapi.js:40` | firmware API (non-browser) |
+| POST | `/device/register` | `lib/router.deviceapi.js:63` | firmware API (non-browser) |
+| GET | `/api/v2/profile` | `lib/router.profile.js:54` | GET read, D-10 |
+| GET | `/api/user/profile` | `lib/router.profile.js:68` | GET read, D-10 |
+| GET | `/api/user/apikey/list` | `lib/router.apikey.js:83` | GET read |
+| GET | `/api/v2/apikey` | `lib/router.apikey.js:102` | GET read |
+| GET | `/api/v2/rsakey` | `lib/router.rsakey.js:59` | GET read |
+| GET | `/api/user/rsakey/list` | `lib/router.rsakey.js:78` | GET read |
+| GET | `/api/v2/env` | `lib/router.env.js:81` | GET read |
+| GET | `/api/user/env/list` | `lib/router.env.js:98` | GET read |
+| GET | `/api/v2/admin/users` | `lib/router.admin.js:86` | GET read |
+| GET | `/api/v2/transfer/decline` | `lib/router.transfer.js:103` | e-mail capability link |
+| GET | `/api/v2/transfer/accept` | `lib/router.transfer.js:112` | e-mail capability link |
+| GET | `/api/transfer/decline` | `lib/router.transfer.js:131` | e-mail capability link |
+| GET | `/api/transfer/accept` | `lib/router.transfer.js:142` | e-mail capability link |
+| GET | `/api/oauth/github` | `lib/router.github.js:232` | OAuth redirect flow |
+| GET | `/api/oauth/github/callback` | `lib/router.github.js:248` | OAuth redirect flow |
+| GET | `/api/oauth/google` | `lib/router.google.js:186` | OAuth redirect flow |
+| GET | `/api/oauth/google/callback` | `lib/router.google.js:241` | OAuth redirect flow |
+
+**Deferred by D-21 (Tier 3 resource mutations):** devices, sources, mesh, build and chat. These
+cookie-authenticated resource edits are not guarded in Phase 25 and move to a follow-up requirement;
+the chat rows above are the ones the inventory records. The device-ownership transfer POSTs are not
+Tier 3: they move devices between owner accounts, which is account state (D-11).
+
 ### Phase 25 Execution Annex
 
 | Step | UTC | Evidence / value |

@@ -602,10 +602,23 @@ paths:
         6. A 403 `csrf_token_invalid` means re-prime and retry once.
 
         Guarded routes: `POST /login`, `POST /session/token` (v2), `POST /password/reset`,
-        `POST /password/set`, `POST /user` (registration), `DELETE /user`, `POST /profile` and
-        `DELETE /gdpr`, and the v1-only routes that have no v2 path in this document:
-        `POST /user/delete`, `POST /gdpr/revoke`, `POST /user/profile`, `POST /user/create`,
-        `POST /user/password/reset` and `POST /user/password/set`.
+        `POST /password/set`, `POST /user` (registration), `DELETE /user`, `POST /profile`,
+        `DELETE /gdpr`, `POST /apikey`, `DELETE /apikey`, `PUT /rsakey`, `DELETE /rsakey`,
+        `PUT /env`, `DELETE /env`, `POST /github/token`, `POST /transfer/request`,
+        `POST /transfer/accept` and `POST /transfer/decline`.
+
+        Guarded routes with no path in this document: the v2 admin mutations
+        `DELETE /admin/session/{owner}`, `POST /admin/impersonate` and
+        `POST /admin/user/{id}/reactivate` (the CSRF check runs before the admin check), and the
+        v1-only routes `POST /user/delete`, `POST /gdpr/revoke`, `POST /user/profile`,
+        `POST /user/create`, `POST /user/password/reset`, `POST /user/password/set`,
+        `POST /user/apikey`, `POST /user/apikey/revoke`, `POST /user/rsakey/revoke`,
+        `GET /user/rsakey/create` (a state-changing GET), `POST /user/env/add`,
+        `POST /user/env/revoke`, and `POST /transfer/request`, `POST /transfer/accept` and
+        `POST /transfer/decline` under `/api`.
+
+        Not guarded: reads, the `GET /transfer/accept` and `GET /transfer/decline` e-mail links
+        (the `transfer_id` in the query is the capability) and the OAuth redirect flows.
       tags:
         - Authentication
       responses:
@@ -988,12 +1001,17 @@ paths:
     
     post:
       summary: Create API key
-      description: Create a new API key
+      description: |
+        Create a new API key
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - API Keys
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1008,15 +1026,22 @@ paths:
                 $ref: '#/components/schemas/ApiKeyResponse'
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
     
     delete:
       summary: Revoke API key
-      description: Revoke one or more API keys
+      description: |
+        Revoke one or more API keys
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - API Keys
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1040,6 +1065,8 @@ paths:
                     description: List of revoked API key hashes
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # Transformer endpoints
   /transformer/run:
@@ -1198,12 +1225,17 @@ paths:
           
     put:
       summary: Add environment variable
-      description: Add a new environment variable
+      description: |
+        Add a new environment variable
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Environment Variables
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1228,14 +1260,21 @@ paths:
         '400':
           description: Bad request
           
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
     delete:
       summary: Delete environment variable
-      description: Delete one or more environment variables
+      description: |
+        Delete one or more environment variables
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Environment Variables
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -1259,6 +1298,8 @@ paths:
           description: Unauthorized
         '400':
           description: Bad request
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # Device API endpoints (not requiring user authentication)
   /device/register:
@@ -1989,12 +2030,17 @@ paths:
 
     put:
       summary: Create RSA key
-      description: Generate a new RSA key pair
+      description: |
+        Generate a new RSA key pair
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - RSA Keys
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       responses:
         '200':
           description: RSA key created
@@ -2012,15 +2058,22 @@ paths:
                     type: string
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
     delete:
       summary: Delete RSA key
-      description: Delete one or more RSA keys by fingerprint
+      description: |
+        Delete one or more RSA keys by fingerprint
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - RSA Keys
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -2045,6 +2098,8 @@ paths:
                     example: true
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # Logs endpoints
   /logs/audit:
@@ -2263,12 +2318,17 @@ paths:
   /transfer/request:
     post:
       summary: Request device transfer
-      description: Initiate a transfer of one or more devices to another owner
+      description: |
+        Initiate a transfer of one or more devices to another owner
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -2299,6 +2359,8 @@ paths:
                     type: string
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   /transfer/accept:
     get:
@@ -2320,12 +2382,17 @@ paths:
 
     post:
       summary: Accept selective device transfer
-      description: Accept specific devices from a transfer request
+      description: |
+        Accept specific devices from a transfer request
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -2353,6 +2420,8 @@ paths:
                     example: true
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   /transfer/decline:
     get:
@@ -2374,12 +2443,17 @@ paths:
 
     post:
       summary: Decline selective device transfer
-      description: Decline specific devices from a transfer request
+      description: |
+        Decline specific devices from a transfer request
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -2407,6 +2481,8 @@ paths:
                     example: true
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   # OAuth endpoints
   /oauth/github:
@@ -2468,12 +2544,17 @@ paths:
   /github/token:
     post:
       summary: Add GitHub public key
-      description: Add a public key to the authenticated user's GitHub account
+      description: |
+        Add a public key to the authenticated user's GitHub account
+
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - OAuth
       security:
         - bearerAuth: []
         - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfTokenHeader'
       requestBody:
         content:
           application/json:
@@ -2497,6 +2578,8 @@ paths:
                     example: true
         '401':
           description: Unauthorized
+        '403':
+          $ref: '#/components/responses/CsrfTokenInvalid'
 
   /slack/direct_install:
     get:
