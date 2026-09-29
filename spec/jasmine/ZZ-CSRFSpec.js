@@ -971,6 +971,88 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01/02)", function () {
         });
     });
 
+    describe("verified-auth exemption through req.thx_auth (D-09, SEC-CSRF-05)", function () {
+
+        // A request with no XSRF cookie and no header: only the exemption can pass it.
+        function bareReq(overrides) {
+            return Object.assign({
+                cookies: {},
+                headers: {},
+                session: { cookie: {} },
+                sessionID: "sid-A",
+                method: "POST",
+                originalUrl: "/api/v2/session/token"
+            }, overrides || {});
+        }
+
+        function run(req) {
+            const res = mockRes();
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+            });
+            return { res: res, lines: lines, nextCalled: nextCalled };
+        }
+
+        beforeEach(function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_ENFORCE = "true";
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("x1. signed + enforce, req.thx_auth 'bearer', no cookie and no header: next(), nothing logged", function () {
+            const out = run(bareReq({ thx_auth: "bearer", headers: { authorization: "Bearer abc" } }));
+            expect(out.nextCalled).to.equal(true);
+            expect(out.res._status).to.equal(null);
+            expect(out.lines.length).to.equal(0);
+        });
+
+        it("x2. signed + enforce, req.thx_auth 'apikey', no cookie and no header: next(), nothing logged", function () {
+            const out = run(bareReq({ thx_auth: "apikey", body: { owner: "o", api_key: "k" } }));
+            expect(out.nextCalled).to.equal(true);
+            expect(out.res._status).to.equal(null);
+            expect(out.lines.length).to.equal(0);
+        });
+
+        it("x3. an Authorization header without req.thx_auth is checked like any cookie request (403)", function () {
+            ["Bearer eyJhbGciOiJIUzI1NiJ9.e30.x", "Bearer null", "Basic dTpw"].forEach(function (h) {
+                const out = run(bareReq({ headers: { authorization: h } }));
+                expect(out.nextCalled, h).to.equal(false);
+                expect(out.res._status, h).to.equal(403);
+                expect(JSON.parse(out.res._ended).response).to.equal("csrf_token_invalid");
+            });
+        });
+
+        it("x4. req.thx_auth set to any other value is checked (403)", function () {
+            ["admin", "true", true, 1, "Bearer", "APIKEY", {}].forEach(function (v) {
+                const out = run(bareReq({ thx_auth: v }));
+                expect(out.nextCalled, String(v)).to.equal(false);
+                expect(out.res._status, String(v)).to.equal(403);
+            });
+        });
+
+        it("x5. a body owner_id + api_key pair without req.thx_auth is checked (403)", function () {
+            const out = run(bareReq({ body: { owner_id: "o", api_key: "k", owner: "o" } }));
+            expect(out.nextCalled).to.equal(false);
+            expect(out.res._status).to.equal(403);
+        });
+
+        it("x6. the exemption applies in legacy and observe as well", function () {
+            ["legacy", "observe"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                ["bearer", "apikey"].forEach(function (a) {
+                    const out = run(bareReq({ thx_auth: a }));
+                    expect(out.nextCalled, m + "/" + a).to.equal(true);
+                    expect(out.res._status, m + "/" + a).to.equal(null);
+                    expect(out.lines.length, m + "/" + a).to.equal(0);
+                });
+                const checked = run(bareReq());
+                expect(checked.res._status, m).to.equal(403);
+            });
+        });
+    });
+
     describe("token boundaries and precision (SEC-CSRF-02)", function () {
 
         beforeEach(function () {
