@@ -22,7 +22,7 @@
 
 ### Secrets
 
-- [ ] **SEC-CFG-02**: The 9 credentials read in `lib/` load through `readSecret()` with env fallback kept and null-safe guards (`readSecret` returns `null`); each is provisioned as a swarm secret one service at a time (not via `restart.sh`), plus a new `CSRF_SECRET`; `docker-swarm.yml` mirrors the stack (incl. its stale api image reference)
+- [x] **SEC-CFG-02**: The 9 credentials read in `lib/` load through `readSecret()` with env fallback kept and null-safe guards (`readSecret` returns `null`); each is provisioned as a swarm secret one service at a time (not via `restart.sh`), plus a new `CSRF_SECRET`; `docker-swarm.yml` mirrors the stack (incl. its stale api image reference)
 
 ### CSRF
 
@@ -88,7 +88,7 @@
 | SEC-EXEC-02 | Phase 23 | Complete |
 | SEC-PATH-01 | Phase 23 | Complete |
 | SEC-PATH-02 | Phase 23 | Complete |
-| SEC-CFG-02 | Phase 24 | Pending |
+| SEC-CFG-02 | Phase 24 | Complete |
 | SEC-CSRF-02 | Phase 25 | Pending |
 | SEC-CSRF-03 | Phase 25 | Pending |
 | SEC-CSRF-04 | Phase 25 | Pending |

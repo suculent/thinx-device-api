@@ -4,18 +4,18 @@ milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 current_phase: 24
 current_phase_name: Secrets Sweep
-status: executing
-stopped_at: Completed 24-05-PLAN.md
-last_updated: "2026-09-29T11:11:01.878Z"
+status: verifying
+stopped_at: Completed 24-06-PLAN.md
+last_updated: "2026-09-29T12:00:46.512Z"
 last_activity: 2026-09-29
 last_activity_desc: Phase 24 execution started
-state_head: 9e5372a7703f22603c52bbdd9104d1d12ca071c1
+state_head: 6381310b11242c8ae1cf3e5ec91264ea94dc623d
 progress:
   total_phases: 7
   completed_phases: 8
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -36,10 +36,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 23)
 
 Phase: 24 (Secrets Sweep) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-29 — Phase 24 execution started
 
-Progress: [█████████░] 93% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
+Progress: [██████████] 100% (2/7 v1.14 phases; Phase 22 4/4, Phase 23 5/5 plans)
 
 ## Milestones
 
@@ -198,6 +198,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 24]: 24-05: WORKER_SECRET rotated to a new random swarm secret mounted on thinx_api and thinx_worker together; the file wins over the old env value on both sides (env kept as D-12 fallback until SEC-CFG-03)
 - [Phase 24]: 24-05: proof build dispatched by the operator via console Build (rotate-build-manual); console builds bypass the Redis queue, so the build_id is taken from the worker runArgv line
 - [Phase 24]: 24-05: ROLLBAR_SERVER_TOKEN mounted on thinx_worker then thinx_transformer from the existing secret, no rotation
+- [Phase 24]: 24-06: docker-swarm.yml mirrors the live phase-24 secrets (external: true, per-service lists) and the api image ${REGISTRY}/thinx/api:swarm; api keeps its unmounted COUCHDB/REDIS entries under a SEC-CFG-04 comment
+- [Phase 24]: 24-06: a Swarmpit autoredeploy of thinx_api (push to thinx-staging) keeps every --secret-add mount; WORKER_SECRET fp12 still equals the worker's after the redeploy
 
 ### Todos
 
@@ -267,9 +269,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-09-29T11:11:01.793Z
+**Last session:** 2026-09-29T12:00:39.247Z
 
-**Stopped at:** Completed 24-05-PLAN.md
+**Stopped at:** Completed 24-06-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 24` (skips discuss, since the context exists; then plan → execute)
 
@@ -307,3 +309,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 24 P03 | 9 min | 3 tasks | 10 files |
 | Phase 24 P04 | 51 min | 3 tasks | 2 files |
 | Phase 24 P05 | 42 min | 3 tasks | 1 files |
+| Phase 24 P06 | 9 min | 3 tasks | 1 files |
