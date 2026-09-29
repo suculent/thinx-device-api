@@ -5,7 +5,7 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "GitHub OAuth `token` listeners pile up on a shared emitter, so one user's token can be delivered on another user's response (pre-existing, in a function this phase rewrote)"
   - id: WR-01
     severity: warning
@@ -39,7 +39,7 @@ findings:
     severity: info
     disposition: open
     title: "The transformer's `app.js` and `trans.js` are unreachable, and the three copies of `secrets.js` are kept in sync by comment only"
-open: 9
+open: 8
 total: 9
 recorded: 2026-09-29T12:09:29.539Z
 ---
@@ -48,7 +48,7 @@ recorded: 2026-09-29T12:09:29.539Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
+| CR-01 | critical | fixed | b09aea35 |
 | WR-01 | warning | open | - |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
