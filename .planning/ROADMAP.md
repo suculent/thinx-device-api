@@ -196,7 +196,34 @@ Plans:
   4. Under enforcement, the classic console's register, forgot-password and reset-confirm flows complete end to end.
   5. Each console host returns exactly one CSP header, plus `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`, all from the gluster `default.conf`. A normalising parity script confirms that both image `default.conf` files and the `.planning/runbooks/swarm-configs/` snapshots match it.
 
-**Plans**: TBD
+**Plans**: 10 plans
+
+Plans:
+**Wave 1**
+- [ ] 25-01-PLAN.md — session-bound token core: CSRF_MODE legacy/observe/signed, module-scope key (CSRF_SECRET → HKDF → fail closed), 15-min pre-session priming, login regenerate + rotation via establishSession, logout clear (tracer: local prime → login → rotated token flow)
+- [ ] 25-02-PLAN.md — console prep: classic dashboard `$.ajaxSetup` XSRF seam (console submodule, D-18) and the normalising header parity script with node:test (not yet in CI)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 25-03-PLAN.md — observe telemetry (reason codes + Redis `csrf:obs` counters), lazy re-mint, verified-auth `req.thx_auth` exemption, Google callback session write removed, CI enforce spec, runbook CSRF_MODE section, live probe and counter scripts
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 25-04-PLAN.md — production: D-05 log check → seam + code shipped in legacy mode → `CSRF_MODE=observe` (starts the ≥24 h window) (checkpoint)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 25-05-PLAN.md — WR-04 and SEC-CSRF-05 account-route guards, OpenAPI priming contract, route inventory and CI guard specs (code only, written during observe)
+- [ ] 25-06-PLAN.md — production: ≥24 h observe review, forced `thinx_api` redeploy mid-session, operator cold logins on both consoles (checkpoint)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 25-07-PLAN.md — D-11 account routes (API keys, deploy keys, env, GitHub token, admin, transfer), OpenAPI refs, runbook route inventory (code only)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 25-08-PLAN.md — production: flip to `CSRF_MODE=signed`, D-05 re-check, push and prove the account-route guards (checkpoint)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 25-09-PLAN.md — production: gluster header hardening with one CSP on proxied `/api/*`, both consoles forced, image mirrors + snapshots + parity step in CI (checkpoint)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 25-10-PLAN.md — combined two-console verification pass under enforcement and requirement closeout (checkpoint)
 **Notes**: Highest-risk phase. Plan order: check production logs for external `POST /api/v2/user` callers → deploy WR-06 fail-open with reason-coded telemetry → observe → verify cold logins on both consoles and both OAuth paths → enforce → WR-04 and the mutation routes. For headers, harden the gluster file first, then mirror it into the images; after any gluster edit, `service update --force` both console services (a single-file bind mount pins the inode). The wire contract (`XSRF-TOKEN` / `X-XSRF-TOKEN` / `…/csrf-token` / `csrf_token_invalid`) stays frozen, so consoles need no CSRF code change. Finish with one combined two-console verification pass.
 **Research**: Needed at planning: the pre-auth binding and pre-session TTL, rotation seams across the login sites, and classic console behaviour after rotation (the classic console has no retry).
 
@@ -264,7 +291,7 @@ Plans:
 | 22. CI & SAST Baseline | v1.14 | 4/4 | Complete    | 2026-09-25 |
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
-| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/TBD | Not started | - |
+| 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 0/10 | Planned | - |
 | 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
