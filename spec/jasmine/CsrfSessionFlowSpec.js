@@ -395,6 +395,25 @@ describe("CsrfSessionFlowSpec (SEC-CSRF-02/03)", function () {
         expect(csrfModule.check(again.res.body.csrf_token, newSid) === null, "bound to the new pre-session").to.equal(true);
     });
 
+    it("a logged-in session carrying a pre-deploy 48-hex cookie gets a bound token on its next GET, and the new pair passes (25-03 lazy migration)", async function () {
+        const primed = await prime();
+        const loggedIn = await login(primed.jar);
+        const sid = sidOf(loggedIn.jar["x-thx-core"]);
+        const legacy = require("crypto").randomBytes(24).toString("hex");
+        const oldJar = Object.assign({}, loggedIn.jar, { "XSRF-TOKEN": legacy });
+
+        const get = await send(server, "GET", "/api/v2/other", oldJar);
+        expect(get.status).to.equal(200);
+        const xsrfLines = cookieLines(get.setCookie, "XSRF-TOKEN");
+        expect(xsrfLines.length).to.equal(1);
+        const migrated = absorb(oldJar, get.setCookie);
+        expect(migrated["XSRF-TOKEN"] !== legacy, "a new token replaces the 48-hex one").to.equal(true);
+        expect(csrfModule.check(migrated["XSRF-TOKEN"], sid) === null, "bound to the logged-in session").to.equal(true);
+
+        const ok = await send(server, "POST", "/api/v2/protected", migrated, migrated["XSRF-TOKEN"], {});
+        expect(ok.status).to.equal(200);
+    });
+
     it("parallel logins on one pre-session each answer a self-consistent pair and never own the pre-login session (backstop)", async function () {
         const primed = await prime();
         const oldSid = sidOf(primed.jar["x-thx-core"]);

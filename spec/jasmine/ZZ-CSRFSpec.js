@@ -37,6 +37,13 @@
  * exact shape with a wrong MAC -> binding_mismatch; the MAC input is length
  * prefixed, so shifting characters between sid and nonce never validates.
  *
+ * Observe telemetry and lazy re-mint (25-03, D-06/D-17): every double-submit and
+ * binding failure bumps the Redis hash csrf:obs:{YYYYMMDD UTC} field
+ * {mode}:{reason}:{METHOD} {route pattern} (30-day expiry) through a stub
+ * redis_client; a missing or failing client never throws; persisted sessions with
+ * a stale or foreign XSRF-TOKEN get a bound one from ensureXsrfCookie, and a
+ * duplicate host-only cookie is cleared.
+ *
  * Captured log lines never contain a token value or a session id.
  */
 
@@ -675,6 +682,292 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01/02)", function () {
             expect(lines[0]).to.contain("CSRF mode=signed key_source=secret enforce=true");
             expect(lines[0]).to.not.contain(SPEC_CSRF_SECRET);
             expect(lines[0]).to.not.contain(csrfFactory.resolveKey().toString("hex"));
+        });
+    });
+
+    describe("observe telemetry and lazy re-mint (25-03, D-06/D-17)", function () {
+
+        const OBS_TTL_S = 30 * 24 * 3600;
+
+        function todayKey() {
+            return "csrf:obs:" + new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        }
+
+        // Records HINCRBY / EXPIRE calls (upper-case names, as on the node-redis
+        // legacy client) and invokes their callbacks, optionally with an error.
+        function stubRedis(fail) {
+            const calls = [];
+            function reply(cb) {
+                if (typeof (cb) !== "function") return;
+                if (fail) {
+                    const err = new Error("connect ECONNREFUSED");
+                    err.code = "ECONNREFUSED";
+                    return cb(err);
+                }
+                cb(null, 1);
+            }
+            return {
+                calls: calls,
+                HINCRBY: function (key, field, incr, cb) {
+                    calls.push({ cmd: "HINCRBY", key: key, field: field, incr: incr, hasCb: typeof (cb) === "function" });
+                    reply(cb);
+                },
+                EXPIRE: function (key, secs, cb) {
+                    calls.push({ cmd: "EXPIRE", key: key, secs: secs, hasCb: typeof (cb) === "function" });
+                    reply(cb);
+                }
+            };
+        }
+
+        function runVerify(instance, req, res) {
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                instance.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+            });
+            return { lines: lines, nextCalled: nextCalled };
+        }
+
+        function fields(redis) {
+            return redis.calls.filter((c) => c.cmd === "HINCRBY").map((c) => c.field);
+        }
+
+        beforeEach(function () {
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("t1. observe + foreign token: next(), one observed line, HINCRBY + EXPIRE on csrf:obs:{UTC date}", function () {
+            process.env.CSRF_MODE = "observe";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const token = csrfFactory.mint("sid-B");
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", token, { originalUrl: "/api/login?next=secret" }), res);
+
+            expect(out.nextCalled).to.equal(true);
+            expect(res._status).to.equal(null);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding observed reason=binding_mismatch mode=observe");
+
+            const hincr = redis.calls.filter((c) => c.cmd === "HINCRBY");
+            const expire = redis.calls.filter((c) => c.cmd === "EXPIRE");
+            expect(hincr.length).to.equal(1);
+            expect(hincr[0].key).to.equal(todayKey());
+            expect(/^csrf:obs:\d{8}$/.test(hincr[0].key)).to.equal(true);
+            expect(hincr[0].field).to.equal("observe:binding_mismatch:POST /api/login");
+            expect(hincr[0].incr).to.equal(1);
+            expect(hincr[0].hasCb).to.equal(true);
+            expect(expire.length).to.equal(1);
+            expect(expire[0].key).to.equal(todayKey());
+            expect(expire[0].secs).to.equal(OBS_TTL_S);
+            expect(expire[0].hasCb).to.equal(true);
+            expect(hincr[0].field.indexOf(token)).to.equal(-1);
+            expect(hincr[0].field).to.not.contain("sid-");
+        });
+
+        it("t2. observe + stale 48-hex pair: next(), reason stale counted", function () {
+            process.env.CSRF_MODE = "observe";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const legacyToken = crypto.randomBytes(24).toString("hex");
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", legacyToken), res);
+            expect(out.nextCalled).to.equal(true);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("reason=stale mode=observe");
+            expect(fields(redis)).to.deep.equal(["observe:stale:POST /api/v2/login"]);
+        });
+
+        it("t3. signed + enforce + foreign token: 403, rejected line, counter field prefix signed:", function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", csrfFactory.mint("sid-B")), res);
+            expect(out.nextCalled).to.equal(false);
+            expect(res._status).to.equal(403);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding rejected reason=binding_mismatch mode=signed");
+            expect(out.lines[0]).to.contain("(enforced, 403)");
+            expect(fields(redis)).to.deep.equal(["signed:binding_mismatch:POST /api/v2/login"]);
+        });
+
+        it("t4. a double-submit failure (no_header) keeps its log string and is counted in every mode", function () {
+            ["legacy", "observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                delete process.env.CSRF_ENFORCE;
+                const redis = stubRedis(false);
+                const instance = csrfFactory({ redis_client: redis });
+                const req = {
+                    cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+                    headers: { cookie: 'XSRF-TOKEN=cookietoken1' },
+                    method: 'POST',
+                    originalUrl: '/api/user/create'
+                };
+                const out = runVerify(instance, req, mockRes());
+                expect(out.nextCalled, m).to.equal(true);
+                expect(out.lines.length, m).to.equal(1);
+                expect(out.lines[0], m).to.contain("CSRF token missing/mismatched reason=no_header xsrf_cookies=1 for POST /api/user/create (fail-open, not enforced)");
+                expect(fields(redis), m).to.deep.equal([m + ":no_header:POST /api/user/create"]);
+
+                process.env.CSRF_ENFORCE = "true";
+                const redis2 = stubRedis(false);
+                const res2 = mockRes();
+                const out2 = runVerify(csrfFactory({ redis_client: redis2 }), req, res2);
+                expect(res2._status, m).to.equal(403);
+                expect(out2.lines[0], m).to.contain("CSRF token rejected reason=no_header");
+                expect(fields(redis2), m).to.deep.equal([m + ":no_header:POST /api/user/create"]);
+            });
+        });
+
+        it("t5. a route with a param is counted by its pattern, never by the concrete owner", function () {
+            process.env.CSRF_MODE = "observe";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const owner = "d6ff2bb0df7a4bd1b0e3b6e5b9a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9";
+            const req = {
+                cookies: {},
+                headers: {},
+                method: 'DELETE',
+                originalUrl: '/api/v2/admin/session/' + owner,
+                route: { path: '/api/v2/admin/session/:owner' }
+            };
+            runVerify(instance, req, mockRes());
+            expect(fields(redis)).to.deep.equal(["observe:no_cookie:DELETE /api/v2/admin/session/:owner"]);
+            expect(fields(redis)[0]).to.not.contain(owner);
+        });
+
+        it("t6. no redis_client, or a client whose HINCRBY fails: no throw, the request continues, one warning per process", function () {
+            process.env.CSRF_MODE = "observe";
+            const token = csrfFactory.mint("sid-B");
+
+            [{}, { redis_client: null }, { redis_client: {} }].forEach(function (app) {
+                const out = runVerify(csrfFactory(app), boundReq("sid-A", token), mockRes());
+                expect(out.nextCalled).to.equal(true);
+                expect(out.lines.length).to.equal(1);
+            });
+
+            const failing = stubRedis(true);
+            const instance = csrfFactory({ redis_client: failing });
+            const first = runVerify(instance, boundReq("sid-A", token), mockRes());
+            const second = runVerify(instance, boundReq("sid-A", token), mockRes());
+            expect(first.nextCalled).to.equal(true);
+            expect(second.nextCalled).to.equal(true);
+            const warnings = first.lines.concat(second.lines).filter((l) => l.indexOf("CSRF telemetry counter failed: ECONNREFUSED") !== -1);
+            expect(warnings.length).to.equal(1);
+
+            const throwing = { HINCRBY: function () { throw new Error("client closed"); }, EXPIRE: function () { throw new Error("client closed"); } };
+            const out = runVerify(csrfFactory({ redis_client: throwing }), boundReq("sid-A", token), mockRes());
+            expect(out.nextCalled).to.equal(true);
+        });
+
+        it("t7. ensureXsrfCookie re-mints a bound token for a persisted session with a stale or foreign cookie", function () {
+            ["observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                [crypto.randomBytes(24).toString("hex"), csrfFactory.mint("sid-B"), undefined].forEach(function (stale) {
+                    const req = {
+                        cookies: (typeof (stale) === "string") ? { 'XSRF-TOKEN': stale } : {},
+                        headers: { cookie: 'x-thx-core=s%3Asid-A.sig' + ((typeof (stale) === "string") ? '; XSRF-TOKEN=' + stale : '') },
+                        session: { owner: "o", login_owner: "o", cookie: {} },
+                        sessionID: "sid-A",
+                        method: "GET",
+                        path: "/api/v2/device"
+                    };
+                    const res = mockRes();
+                    let nextCalled = false;
+                    csrf.ensureXsrfCookie(req, res, function next() { nextCalled = true; });
+                    expect(nextCalled, m).to.equal(true);
+                    expect(res._cookieCalls.length, m).to.equal(1);
+                    expect(res._cookieCalls[0].name).to.equal("XSRF-TOKEN");
+                    expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+                    expect(csrfFactory.check(res._cookieCalls[0].value, "sid-A") === null, "bound to the session").to.equal(true);
+                    expect(res.locals.xsrfToken === res._cookieCalls[0].value).to.equal(true);
+                    expect(res._clearCalls.length, m).to.equal(0);
+                });
+            });
+        });
+
+        it("t7-bound. ensureXsrfCookie leaves an already bound cookie alone", function () {
+            process.env.CSRF_MODE = "signed";
+            const token = csrfFactory.mint("sid-A");
+            const req = {
+                cookies: { 'XSRF-TOKEN': token },
+                headers: { cookie: 'x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + token },
+                session: { csrf_pre: 1, cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            csrf.ensureXsrfCookie(req, res, function () { });
+            expect(res._cookieCalls.length).to.equal(0);
+        });
+
+        it("t7-duplicate. two XSRF-TOKEN pairs: the host-only duplicate is cleared and a bound domain cookie set", function () {
+            process.env.CSRF_MODE = "observe";
+            const a = crypto.randomBytes(24).toString("hex");
+            const b = crypto.randomBytes(24).toString("hex");
+            const req = {
+                cookies: { 'XSRF-TOKEN': a },
+                headers: { cookie: 'XSRF-TOKEN=' + a + '; x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + b },
+                session: { owner: "o", cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            csrf.ensureXsrfCookie(req, res, function () { });
+            expect(res._clearCalls.length).to.equal(1);
+            expect(res._clearCalls[0].name).to.equal("XSRF-TOKEN");
+            expect(res._clearCalls[0].options).to.deep.equal({ path: "/" });
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+            expect(csrfFactory.check(res._cookieCalls[0].value, "sid-A") === null).to.equal(true);
+        });
+
+        it("t7-anon. no persisted session: no cookie and no session write, even with a stale cookie (D-02)", function () {
+            ["observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                const stale = crypto.randomBytes(24).toString("hex");
+                const req = {
+                    cookies: { 'XSRF-TOKEN': stale },
+                    headers: { cookie: 'x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + stale + '; XSRF-TOKEN=x' },
+                    session: { cookie: {} },
+                    sessionID: "sid-A",
+                    method: "GET",
+                    path: "/api/v2/device"
+                };
+                const res = mockRes();
+                let nextCalled = false;
+                csrf.ensureXsrfCookie(req, res, function () { nextCalled = true; });
+                expect(nextCalled, m).to.equal(true);
+                expect(res._cookieCalls.length, m).to.equal(0);
+                expect(res._clearCalls.length, m).to.equal(0);
+                expect(req.session, m).to.deep.equal({ cookie: {} });
+            });
+        });
+
+        it("t7-throw. a throwing res.cookie during the re-mint still calls next()", function () {
+            process.env.CSRF_MODE = "signed";
+            const req = {
+                cookies: {},
+                headers: { cookie: 'x-thx-core=s%3Asid-A.sig' },
+                session: { owner: "o", cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            res.cookie = function () { throw new TypeError("option domain is invalid"); };
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                csrf.ensureXsrfCookie(req, res, function () { nextCalled = true; });
+            });
+            expect(nextCalled).to.equal(true);
+            expect(lines.join("\n")).to.contain("XSRF-TOKEN cookie not set");
         });
     });
 
