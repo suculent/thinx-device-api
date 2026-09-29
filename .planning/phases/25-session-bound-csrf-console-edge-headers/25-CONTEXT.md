@@ -25,9 +25,9 @@ Frozen wire contract (no console CSRF code change): `XSRF-TOKEN` cookie, `X-XSRF
 
 ### Rollout, observation & enforcement
 - **D-05:** The phase opens with a production-log check for external `POST /api/v2/user` callers. If any exist, **report them and stop at a checkpoint** before enforcing WR-04. There is no machine-client exemption (decision 2026-09-25), so those clients must prime the token.
-- **D-06:** Deploy `CSRF_MODE=signed` **fail-open** with reason-coded telemetry: `binding_mismatch`, `session_mismatch`, `missing`, `stale`, plus the existing codes. Observe for **at least 24 h**, and enforce only when there are zero unexplained failure reasons.
-- **D-07:** **The operator approves the enforcement flip at a checkpoint.** Before that, they check password, Google and GitHub cold logins on both consoles, plus a forced `thinx_api` redeploy mid-session with no 403s and no logouts. The executor then flips `CSRF_ENFORCE` with a single `docker service update` (never `restart.sh` / stack deploy).
-- **D-08:** Rollback: **`CSRF_MODE=legacy`** restores the v1.13 double-submit behaviour and leaves `CSRF_ENFORCE` on. It is one command, documented in `.planning/runbooks/csp-csrf-hardening.md`. `CSRF_ENFORCE=false` stays the second-level escape hatch.
+- **D-06 (amended 2026-09-29 after research; see D-17):** Deploy in `CSRF_MODE=observe`, a fail-open *binding* check with reason-coded telemetry: `binding_mismatch`, `session_mismatch`, `missing`, `stale`, plus the existing codes. Observe for **at least 24 h**, and enforce only when there are zero unexplained failure reasons.
+- **D-07:** **The operator approves the enforcement flip at a checkpoint.** Before that, they check password, Google and GitHub cold logins on both consoles, plus a forced `thinx_api` redeploy mid-session with no 403s and no logouts. The executor then flips the mode with a single `docker service update --env-add CSRF_MODE=signed` (never `restart.sh` / stack deploy). `CSRF_ENFORCE` is not touched (see D-17).
+- **D-08:** Rollback: **`CSRF_MODE=legacy`** restores the v1.13 double-submit behaviour and leaves `CSRF_ENFORCE` on. `legacy` still keeps the login `regenerate()` (session-fixation fix; research Open Question 5). It is one command, documented in `.planning/runbooks/csp-csrf-hardening.md`. `CSRF_ENFORCE=false` stays the second-level escape hatch.
 
 ### Mutation-route coverage (SEC-CSRF-04/05)
 - **D-09:** A request is exempt **only when a valid `Authorization: Bearer` or API-key header actually authenticated it**. A cookie-session request without such a header must present the token, and a bogus or invalid `Authorization` header does not bypass it. The per-request Bearer bridge (`router.js`) must not regenerate the session (SEC-CSRF-03).
@@ -40,6 +40,18 @@ Frozen wire contract (no console CSRF code change): `XSRF-TOKEN` cookie, `X-XSRF
 - **D-14:** `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()`, plus `X-Permitted-Cross-Domain-Policies: none` (production currently sends `all`).
 - **D-15:** Gluster edit order: **checkpoint first**. Commit the current `/mnt/gluster/deployment/swarm/console/default.conf` to the gluster repo as the rollback point, then edit, run `nginx -t` in the container, and `docker service update --force` both `thinx_console` and `thinx_vue` (the single-file bind mount pins the inode). Verify that each host returns **exactly one** CSP header plus the new headers.
 - **D-16:** Parity script `scripts/check-console-headers.js` normalises the header directives (ordering, quoting, `always`, templated hosts) and compares the gluster file, both image `default.conf` files and the `.planning/runbooks/swarm-configs/` snapshots. It **runs as a CI step** and fails on drift.
+
+### Post-research amendments (2026-09-29, user-decided)
+- **D-17:** Research found `CSRF_ENFORCE=true` already live on `thinx_api` since v1.13. So `CSRF_MODE` is **three-state**:
+  - `legacy`: v1.13 double-submit.
+  - `observe`: double-submit still enforced; session-binding failures are only logged with reason codes.
+  - `signed`: binding enforced.
+  Rollout goes legacy → observe (≥24 h) → signed. `CSRF_ENFORCE` is never flipped in this phase, and v1.13 protection is never switched off.
+- **D-18:** The classic dashboard (`app/js/thinx-api.js`, plain `$.ajax`) sends no `X-XSRF-TOKEN`. **Add a small `$.ajaxSetup` seam** in the classic console that sends the existing `XSRF-TOKEN` cookie value as `X-XSRF-TOKEN`. The wire contract is unchanged. This is an **accepted, scoped exception** to the "no console CSRF code change" note. The seam ships (console submodule commit + pointer bump + deploy) **before** any new API route guard, because `CSRF_ENFORCE=true` applies to newly guarded routes immediately.
+- **D-19:** "Exactly one CSP header" also covers **proxied `/api/*` responses on the console hosts**. They currently carry two (the API's plus nginx's). Fix it in the gluster config with `proxy_hide_header` or an equivalent, so every response from a console host has exactly one CSP. Verify on console pages and proxied API paths alike. The parity script and runbook describe the rule.
+- **D-20:** The parity script compares the gluster file with the `.planning/runbooks/swarm-configs/console-default.conf.prod` and `rtm.thinx.cloud-server.post.nginx` snapshots, and with both image configs. `pre.nginx` is historical and excluded (research Open Question 4).
+- **D-21:** Tier 3 cookie-auth resource mutations (devices, sources, mesh, build, chat) are **deferred** to a follow-up requirement. Phase 25 guards the account mutations only: SEC-CSRF-04/05 plus the D-11 account routes.
+- Research also found that only `loginAction` and `performTokenLogin` establish sessions and need `regenerate()`. The OAuth callbacks hand off via `POST /login {token}`. Drop the stray `req.session.owner` write at `router.google.js:163`. The D-09 exemption uses a request-local `req.thx_auth`, set in `router.js` only after Bearer or API-key auth succeeds, not `Util.validateSession`. D-05's log check reads the Traefik access log (0 external `POST /api/v2/user` in the 2 days currently held).
 
 ### Claude's Discretion
 - Exact reason-code names beyond those listed, the log format, and how telemetry is counted, for example with a grep-able log line.
@@ -84,5 +96,6 @@ Frozen wire contract (no console CSRF code change): `XSRF-TOKEN` cookie, `X-XSRF
 
 - Review WR-02 from Phase 24 (the `docker-swarm.yml` api DB/Redis secret mounts would take effect on a stack deploy) is not in this phase's scope. This phase must not run a stack deploy.
 - SEC-CSP-02 (`unsafe-eval`) stays deferred until AngularJS is retired.
+- Tier 3 cookie-auth resource mutations (devices, sources, mesh, build, chat) need CSRF guards: a follow-up requirement (D-21).
 
 </deferred>
