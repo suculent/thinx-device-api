@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Completed 26-03-PLAN.md
-last_updated: "2026-10-01T14:56:46.202Z"
+stopped_at: Completed 26-04-PLAN.md
+last_updated: "2026-10-01T15:14:37.949Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: 6b8b03e3bbf8a6f163fc9d57c624b0ab613f2f9b
+state_head: fd5d336c26096c599d38cd8c87c2fb809e627386
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 27
-  percent: 79
+  completed_plans: 28
+  percent: 82
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 79% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 82% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -224,6 +224,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 26]: 26-03: --targets without --apply is a usage error (exit 2), mirroring --apply without --targets
 - [Phase 26]: 26-03: cleanup CLI apply prints before-state aggregates then apply counters; bulk rejection is fatal (INCOMPLETE, exit 1), rerun converges
 - [Phase 26]: 26-03: alog.log static guard accepts cond ? literal : literal (owner_purge.js); any other non-literal flag fails the spec
+- [Phase 26]: 26-04: retention job fails closed - audit_by_date or either build view failing is LOG-RETENTION FAIL (audit_read_failed / record_read_failed) before any folder is inspected; zero build rows aborts the orphan sweep
+- [Phase 26]: 26-04: --roots and --no-audit without --apply are usage errors (exit 2); the wrapper mounts a root read-write only when --apply --roots names it
+- [Phase 26]: 26-04: retention schedule is /etc/cron.d/thinx-log-retention at 09:40 UTC; old job files retire to /usr/local/sbin/retired/couchdb-log-retention.{cron,sh}
 
 ### Todos
 
@@ -302,9 +305,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T14:56:46.057Z
+**Last session:** 2026-10-01T15:14:37.827Z
 
-**Stopped at:** Completed 26-03-PLAN.md
+**Stopped at:** Completed 26-04-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -352,3 +355,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 25 P07 | 6min | 3 tasks | 10 files |
 | Phase 26 P01 | 8 min | 2 tasks | 8 files |
 | Phase 26 P03 | 7min | 2 tasks | 5 files |
+| Phase 26 P04 | 14 min | 3 tasks | 6 files |
