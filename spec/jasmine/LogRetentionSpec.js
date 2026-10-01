@@ -552,6 +552,253 @@ describe("LogRetention (LOG-04)", function () {
         });
     });
 
+    describe("apply", function () {
+
+        // Task 2 fixture: E's deploy folder also holds a symlink to a file
+        // outside every root.
+        function makeApplyFixture() {
+            const fx = makeFixture();
+            fs.symlinkSync(path.join(fx.outside, "secret.txt"), path.join(fx.eDeploy, "link"));
+            return fx;
+        }
+
+        // fs whose rmSync records each call into the shared event log, and can
+        // be told to throw for one directory.
+        function recordingFs(events, failFor) {
+            const wrapped = Object.create(fs);
+            wrapped.rmSync = function (p, opts) {
+                events.push({ type: "rm", path: fs.realpathSync(p) });
+                if (failFor && fs.realpathSync(p) === fs.realpathSync(failFor)) {
+                    throw Object.assign(new Error("EACCES: permission denied"), { code: "EACCES" });
+                }
+                return fs.rmSync(p, opts);
+            };
+            return wrapped;
+        }
+
+        function exists(p) {
+            try {
+                fs.lstatSync(p);
+                return true;
+            } catch (_e) {
+                return false;
+            }
+        }
+
+        function survivors(fx) {
+            return [
+                fx.o2, fx.o3, fx.lDeploy, fx.tDeploy,
+                path.join(fx.deploy, OWNER_A, U1, "build.json"),
+                path.join(fx.deploy, OWNER_A, U1, B_L + ".zip"),
+                path.join(fx.deploy, OWNER_A, U1, "firmware.bin"),
+                path.join(fx.deploy, OWNER_A, "avatar.json"),
+                path.join(fx.deploy, OWNER_A, U1, "my-repo", "README.md"),
+                path.join(fx.eEvil, "build.log"),
+                path.join(fx.outside, "secret.txt"),
+                path.join(fx.sOutside, "build.log")
+            ];
+        }
+
+        it("--apply --roots deploy,repos removes E in both roots and O1, keeps everything else, and deletes E and N records", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const r = await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events) });
+            expect(r.code).to.equal(0);
+            expect(r.lines[r.lines.length - 1]).to.equal("LOG-RETENTION APPLY OK");
+            expect(exists(fx.eDeploy)).to.equal(false);
+            expect(exists(fx.eRepos)).to.equal(false);
+            expect(exists(fx.o1)).to.equal(false);
+            for (const p of survivors(fx)) expect(exists(p), p.slice(fx.base.length)).to.equal(true);
+            expect(fs.readFileSync(path.join(fx.outside, "secret.txt"), "utf8")).to.equal("outside secret\n");
+            expect(exists(path.join(fx.deploy, OWNER_B))).to.equal(true);
+
+            const buildDocsDeleted = [].concat(...client.builds.bulkCalls);
+            expect(buildDocsDeleted.map((d) => d._id).sort()).to.deep.equal(["a0000000000000000000000000000001", B_N].sort());
+            for (const d of buildDocsDeleted) {
+                expect(Object.keys(d).sort()).to.deep.equal(["_deleted", "_id", "_rev"]);
+                expect(d._deleted).to.equal(true);
+            }
+            const auditDeleted = [].concat(...client.logs.bulkCalls);
+            expect(auditDeleted.map((d) => d._id).sort()).to.deep.equal(["c0000000000000000000000000000001", "c0000000000000000000000000000002"]);
+            for (const d of auditDeleted) expect(d).to.deep.equal({ _id: d._id, _rev: d._rev, _deleted: true });
+
+            expect(valueOf(r.lines, "mode")).to.equal("apply");
+            expect(valueOf(r.lines, "roots")).to.equal("deploy,repos");
+            expect(valueOf(r.lines, "audit")).to.equal("on");
+            expect(valueOf(r.lines, "audit_deleted")).to.equal("2");
+            expect(valueOf(r.lines, "audit_conflicts")).to.equal("0");
+            expect(valueOf(r.lines, "audit_failed")).to.equal("0");
+            expect(valueOf(r.lines, "build_records_deleted")).to.equal("2");
+            expect(valueOf(r.lines, "build_records_kept")).to.equal("1");
+            expect(valueOf(r.lines, "deploy_folders_deleted")).to.equal("1");
+            expect(valueOf(r.lines, "deploy_orphans_deleted")).to.equal("1");
+            expect(valueOf(r.lines, "deploy_delete_failed")).to.equal("0");
+            expect(valueOf(r.lines, "deploy_untracked_after")).to.equal("0");
+            expect(valueOf(r.lines, "repos_folders_deleted")).to.equal("1");
+            expect(valueOf(r.lines, "repos_orphans_deleted")).to.equal("0");
+            expect(valueOf(r.lines, "repos_delete_failed")).to.equal("0");
+            expect(valueOf(r.lines, "repos_untracked_after")).to.equal("0");
+            assertHygiene(r.lines, fx);
+        });
+
+        it("apply output keys follow the dry-run keys in contract order", async function () {
+            const fx = makeApplyFixture();
+            const r = await cli.run(["--apply", "--roots", "repos,deploy"], { env: envFor(fx), client: fakeClient(), now: NOW });
+            const keys = r.lines.map((l) => l.split("=")[0]);
+            const tail = keys.slice(keys.indexOf("orphan_sweep") + 1);
+            expect(tail).to.deep.equal([
+                "roots", "audit", "audit_deleted", "audit_conflicts", "audit_failed",
+                "build_records_deleted", "build_records_kept",
+                "deploy_folders_deleted", "deploy_orphans_deleted", "deploy_delete_failed", "deploy_untracked_after",
+                "repos_folders_deleted", "repos_orphans_deleted", "repos_delete_failed", "repos_untracked_after",
+                "LOG-RETENTION APPLY OK"
+            ]);
+            expect(valueOf(r.lines, "roots")).to.equal("deploy,repos");
+        });
+
+        it("every folder rm of a record happens before the bulk call that deletes the record", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const eDeployReal = fs.realpathSync(fx.eDeploy);
+            const eReposReal = fs.realpathSync(fx.eRepos);
+            await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events) });
+            const ev = client.events;
+            const rmE = ev.findIndex((e) => e.type === "rm" && e.path === eDeployReal);
+            const rmER = ev.findIndex((e) => e.type === "rm" && e.path === eReposReal);
+            const bulkE = ev.findIndex((e) => e.type === "bulk" && e.db === "managed_builds" && e.ids.indexOf("a0000000000000000000000000000001") !== -1);
+            expect(rmE).to.be.at.least(0);
+            expect(rmER).to.be.at.least(0);
+            expect(bulkE).to.be.above(rmE);
+            expect(bulkE).to.be.above(rmER);
+        });
+
+        it("--apply --roots deploy leaves E's repos folder (repos_untracked_after=1) and deletes E's record after its deploy folder", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const eDeployReal = fs.realpathSync(fx.eDeploy);
+            const r = await cli.run(["--apply", "--roots", "deploy"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events) });
+            expect(r.code).to.equal(0);
+            expect(exists(fx.eDeploy)).to.equal(false);
+            expect(exists(fx.eRepos)).to.equal(true);
+            expect(valueOf(r.lines, "roots")).to.equal("deploy");
+            expect(valueOf(r.lines, "repos_untracked_after")).to.equal("1");
+            expect(valueOf(r.lines, "repos_folders_deleted")).to.equal("0");
+            expect(valueOf(r.lines, "build_records_deleted")).to.equal("2");
+            const ids = [].concat(...client.builds.bulkCalls).map((d) => d._id);
+            expect(ids).to.include("a0000000000000000000000000000001");
+            const rmE = client.events.findIndex((e) => e.type === "rm" && e.path === eDeployReal);
+            const bulkE = client.events.findIndex((e) => e.type === "bulk" && e.db === "managed_builds");
+            expect(rmE).to.be.at.least(0);
+            expect(bulkE).to.be.above(rmE);
+            for (const e of client.events) {
+                if (e.type === "rm") expect(e.path.indexOf(fs.realpathSync(fx.repos))).to.equal(-1);
+            }
+            assertHygiene(r.lines, fx);
+        });
+
+        it("--apply --roots none removes no folder and makes no build bulk call, but still expires audit docs", async function () {
+            const fx = makeApplyFixture();
+            const before = listing(fx.base);
+            const client = fakeClient();
+            const r = await cli.run(["--apply", "--roots", "none"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events) });
+            expect(r.code).to.equal(0);
+            expect(listing(fx.base)).to.deep.equal(before);
+            expect(client.builds.bulkCalls.length).to.equal(0);
+            expect(client.logs.bulkCalls.length).to.equal(1);
+            expect(valueOf(r.lines, "roots")).to.equal("none");
+            expect(valueOf(r.lines, "audit_deleted")).to.equal("2");
+            expect(valueOf(r.lines, "build_records_deleted")).to.equal("0");
+            expect(r.lines[r.lines.length - 1]).to.equal("LOG-RETENTION APPLY OK");
+        });
+
+        it("--apply --roots none --no-audit makes no bulk call of any kind", async function () {
+            const fx = makeApplyFixture();
+            const before = listing(fx.base);
+            const client = fakeClient();
+            const r = await cli.run(["--apply", "--roots", "none", "--no-audit"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events) });
+            expect(r.code).to.equal(0);
+            expect(listing(fx.base)).to.deep.equal(before);
+            expect(client.builds.bulkCalls.length).to.equal(0);
+            expect(client.logs.bulkCalls.length).to.equal(0);
+            expect(valueOf(r.lines, "audit")).to.equal("off");
+            expect(valueOf(r.lines, "audit_deleted")).to.equal("0");
+        });
+
+        it("a failed rm of E's deploy folder keeps E's record and ends APPLY INCOMPLETE with exit 1", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const r = await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW, fs: recordingFs(client.events, fx.eDeploy) });
+            expect(r.code).to.equal(1);
+            expect(r.lines[r.lines.length - 1]).to.equal("LOG-RETENTION APPLY INCOMPLETE");
+            expect(valueOf(r.lines, "deploy_delete_failed")).to.equal("1");
+            expect(exists(fx.eDeploy)).to.equal(true);
+            const ids = [].concat(...client.builds.bulkCalls).map((d) => d._id);
+            expect(ids).to.not.include("a0000000000000000000000000000001");
+            expect(ids).to.include(B_N);
+            expect(valueOf(r.lines, "build_records_kept")).to.equal("2");
+            assertHygiene(r.lines, fx);
+        });
+
+        it("a bulk conflict for N counts it as kept and ends APPLY INCOMPLETE", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient({ builds: { conflictIds: [B_N] } });
+            const r = await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW });
+            expect(r.code).to.equal(1);
+            expect(r.lines[r.lines.length - 1]).to.equal("LOG-RETENTION APPLY INCOMPLETE");
+            expect(valueOf(r.lines, "build_records_deleted")).to.equal("1");
+            expect(valueOf(r.lines, "build_records_kept")).to.equal("2");
+        });
+
+        it("a rejected bulk call keeps every record of the batch and ends APPLY INCOMPLETE", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient({ builds: { failBulk: true } });
+            const r = await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW });
+            expect(r.code).to.equal(1);
+            expect(r.lines[r.lines.length - 1]).to.equal("LOG-RETENTION APPLY INCOMPLETE");
+            expect(valueOf(r.lines, "build_records_deleted")).to.equal("0");
+            expect(valueOf(r.lines, "build_records_kept")).to.equal("3");
+            assertHygiene(r.lines, fx);
+        });
+
+        it("re-checks containment right before rm: a folder swapped for a symlink after plan() is refused and its target survives", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const lr = new LogRetention({ logsDb: client.logs, buildsDb: client.builds, roots: { deploy: fx.deploy, repos: fx.repos }, now: NOW });
+            const report = await lr.plan();
+            // Swap E's deploy folder for a symlink to an outside directory.
+            const victim = path.join(fx.outside, "victim");
+            writeFile(path.join(victim, "keep.txt"), "must survive\n");
+            fs.rmSync(fx.eDeploy, { recursive: true, force: true });
+            fs.symlinkSync(victim, fx.eDeploy);
+            const spy = spyOn(safepath, "resolveInside").and.callThrough();
+            const result = await lr.apply(report, { roots: ["deploy", "repos"], audit: true });
+            expect(spy.calls.count()).to.be.above(0);
+            expect(fs.readFileSync(path.join(victim, "keep.txt"), "utf8")).to.equal("must survive\n");
+            expect(fs.lstatSync(fx.eDeploy).isSymbolicLink()).to.equal(true);
+            const lines = LogRetention.formatReport(report, "apply", result);
+            expect(valueOf(lines, "deploy_delete_failed")).to.equal("1");
+            expect(lines[lines.length - 1]).to.equal("LOG-RETENTION APPLY INCOMPLETE");
+            const ids = [].concat(...client.builds.bulkCalls).map((d) => d._id);
+            expect(ids).to.not.include("a0000000000000000000000000000001");
+            assertHygiene(lines, fx);
+        });
+
+        it("a second plan after a full apply finds only the refused record S and no orphan", async function () {
+            const fx = makeApplyFixture();
+            const client = fakeClient();
+            const a = await cli.run(["--apply", "--roots", "deploy,repos"], { env: envFor(fx), client, now: NOW });
+            expect(a.code).to.equal(0);
+            const r = await cli.run([], { env: envFor(fx), client, now: NOW });
+            expect(r.code).to.equal(0);
+            expect(valueOf(r.lines, "build_records_expired")).to.equal("1");
+            expect(valueOf(r.lines, "deploy_refused")).to.equal("1");
+            expect(valueOf(r.lines, "deploy_orphans")).to.equal("0");
+            expect(valueOf(r.lines, "repos_orphans")).to.equal("0");
+            expect(valueOf(r.lines, "audit_expired")).to.equal("0");
+            assertHygiene(r.lines, fx);
+        });
+    });
+
     describe("CLI usage", function () {
 
         const bad = [
