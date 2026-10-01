@@ -258,6 +258,78 @@ mv /usr/local/sbin/retired/couchdb-log-retention.cron /etc/cron.daily/couchdb-lo
 
 ---
 
+## D-15 credential cleanup
+
+Before Phase 26, two audit writers (`owner.js` `apply_update` and `sources.js` `updateUser`) passed
+the whole user document as the audit `flags` argument, so `managed_logs` holds password hashes,
+reset keys, emails and repository lists inside some audit docs. Separately, user documents keep a
+`reset_key` after a reset link was issued, and some of those keys were copied into the audit docs
+too. Plan 26-03 fixed the writers; this one-time cleanup removes what is already stored.
+
+### What it changes
+
+| Target | Store | Change |
+|---|---|---|
+| `reset-keys` | `managed_users` | `reset_key` is set to `null` on every user doc that has one, through the `_design/users` `edit` update handler (server side, on the latest revision). Nothing else on the user doc changes. |
+| `audit-flags` | `managed_logs` | Only the `flags` field of audit docs whose flags hold a non-string element is rewritten: the string elements are kept, and an empty result falls back to `["info"]`. Message, date, owner and every other field stay as they are. |
+
+Nothing else is written: no design doc, no other database, no file.
+
+### One-way by design
+
+There is **no snapshot and no undo**. A snapshot would store the same password hashes and reset
+keys again, which is what the cleanup removes. The record of the run is the aggregate counts in the
+annex. Users who were in the middle of a password reset when `reset-keys` ran simply request a new
+reset link; the reset flow itself is unchanged.
+
+### Commands
+
+Run **on the API node** (look up the `thinx_api` placement first, as at the top of this runbook).
+The script reads `COUCHDB_USER` / `COUCHDB_PASS` from the container environment; no host, address
+or credential goes on the command line.
+
+```bash
+A=$(docker ps -qf name=thinx_api | head -1)
+
+# Dry run (default): reads managed_users and managed_logs, prints aggregates, writes nothing
+docker exec "$A" node scripts/clear-leaked-credentials.js
+
+# Apply, only after the operator approved the targets
+docker exec "$A" node scripts/clear-leaked-credentials.js --apply --targets reset-keys,audit-flags
+docker exec "$A" node scripts/clear-leaked-credentials.js --apply --targets reset-keys
+docker exec "$A" node scripts/clear-leaked-credentials.js --apply --targets audit-flags
+```
+
+`--apply` without `--targets`, or `--targets` without `--apply`, is a usage error (exit 2) and
+touches nothing.
+
+### Reading the output
+
+| Keys | Meaning |
+|---|---|
+| `users_scanned`, `users_with_reset_key` | user docs read; those with a non-empty `reset_key` |
+| `audit_scanned`, `audit_with_object_flags` | audit docs read; those whose flags hold an object |
+| `audit_object_flags_with_password`, `…_with_reset_key`, `…_with_email`, `…_with_repos` | what the affected flags carry (a doc can count in several) |
+| `audit_object_flags_oldest`, `audit_object_flags_newest` | date range of the affected audit docs |
+| apply only: `users_cleared`, `audit_redacted`, `audit_conflicts`, `audit_failed` | what the run changed or could not change |
+| last line | `CLEANUP-DRY-RUN OK`, `CLEANUP-APPLY OK`, `CLEANUP-APPLY INCOMPLETE` (exit 1) or a failure line |
+
+`audit_object_flags_newest` must be older than the start of the first API task that runs the fixed
+writers. A newer date means an object-flag writer is still live; stop and find it before applying.
+
+`CLEANUP-APPLY INCOMPLETE` means some docs changed between the scan and the write (conflicts) or
+failed. Run the same apply once more; it converges on the docs that are left.
+
+### Zero check after the apply
+
+Run the dry run again. For every target that was applied its count must be zero:
+`users_with_reset_key` for reset keys, `audit_with_object_flags` for audit flags. A target that was
+not applied keeps its count. Then rerun the paging probe (section 3); it must still end
+`LOG-PAGING-PROBE OK` with `legacy_object_flags=0`. The approved targets are recorded once, in the
+annex row "D-15 apply".
+
+---
+
 ## Phase 26 Execution Annex
 
 Fill each row when the step runs. Aggregates only: counts, sizes, dates, durations, digests and
@@ -265,11 +337,11 @@ SHAs. Never owner ids, emails, doc ids, cursors, credentials or paths below an a
 
 | Step | UTC | Result (aggregates only) |
 |---|---|---|
-| push 1 | pending | pending |
-| design upsert | pending | pending |
-| index warm-up | pending | pending |
-| paging probe | pending | pending |
-| D-15 dry run | pending | pending |
+| push 1 | 2026-10-01 19:32:45 | Parent `thinx-staging` pushed `2a9569c1..355b19b7` (47 commits, backend only; `services/console` gitlink unchanged at `c58dd091`). Pre-push: local Phase 26 backend set 250 specs / 0 failures, retention wrapper `node --test` 14 / 0, `secret_hits=0`, no thinx-staging job active. CI for `355b19b7`: `test` (build 15527) success, `api-registry` success (19:36:58), `console-classic-registry` success, `vue-console-registry` success; the `test` log shows ZZ-LogPagingCouchSpec ran (12 specs) inside `989 specs, 0 failures, 1 pending` (the pending one is a pre-existing `xit` in AppSpec). `thinx_api` stop-first rollout on micro, new task started 19:37:16, restarts 0. Image digest before `sha256:c42333a3bb0a`, after `sha256:52d5d082ea1b`. Both console images were rebuilt from the unchanged pin and rolled: `thinx_console` (core) `f6cafcf065bd` → `eb64ebb2789e`, `thinx_vue` (micro) `8457cf023402` → `68001eee952b`. No node repair. |
+| design upsert | 2026-10-01 19:37:26 | `managed_builds _design/paging action=created` (19:37:26.426), `managed_logs _design/paging action=created` (19:37:26.514). `action=failed` lines 0, `CRITICAL` lines 0. Before the push both `_design/paging` docs were absent (HTTP 404) and `_design/logs` was rev gen 1; managed_builds `doc_del_count` 0. |
+| index warm-up | 2026-10-01 19:37:26–19:39:39 | T0 = 19:37:26 (boot upsert). managed_logs: two shard indexers, 63 % at 19:38:35, 95 % at 19:39:07, gone by 19:39:23, `updater_running=false` at 19:39:39, about 2 min (331k changes per shard, tombstones included). managed_builds: already idle at the first poll (19:38:35), under 1.2 min. First `limit=1` query, including about 136 ms of `docker exec` overhead: `audit_by_owner_date` 184 ms (total_rows 4467), `audit_by_date` 302 ms (4967), `builds_by_owner_time` 196 ms (126), `builds_by_time` 195 ms (126), no `error`. `owner-keyed audit view unavailable` lines between T0 and T_done: 0. Both windows (01:00–05:00, 06:25–07:10) avoided. |
+| paging probe | 2026-10-01 19:40:01 | `ddoc_paging_logs=ok ddoc_paging_builds=ok ddoc_logs_rev_gen=1 ddoc_logs_map_sha12=41de3686cde2 index_logs_updater_running=false index_builds_updater_running=false audit_owners=266 legacy_len=200 legacy_expected=200 legacy_match=1 legacy_object_flags=0 legacy_fallback_used=0 audit_pages=15 audit_total=1489 audit_expected=1489 audit_dupes=0 audit_order_ok=1 audit_foreign=0 audit_cursor_owner_free=1 audit_first_page_ms=101 replay_rows=100 replay_foreign=0 build_owners=4 build_pages=2 build_total=117 build_expected=117 build_dupes=0 build_order_ok=1 build_foreign=0 build_nested=110 build_first_page_ms=1004 builds_del_before=0 builds_del_after=0`, last line `LOG-PAGING-PROBE OK`. The map sha12 `41de3686cde2` is sha256 of the exact `logs_by_owner` map string, the same as the repository's `design/design_logs.json`. The planned value `925f3cee0cc4` is the same string with a trailing newline (measured with `jq -r … \| sha256sum`). Rev gen 1 shows `_design/logs` was never rewritten (D-13). |
+| D-15 dry run | 2026-10-01 19:40:58 | `users_scanned=662 users_with_reset_key=44 audit_scanned=4967 audit_with_object_flags=197 audit_object_flags_with_password=88 audit_object_flags_with_reset_key=103 audit_object_flags_with_email=164 audit_object_flags_with_repos=197 audit_object_flags_oldest=2025-10-01 audit_object_flags_newest=2026-10-01T15:38Z`, last line `CLEANUP-DRY-RUN OK`. The newest affected audit doc predates the Push 1 task start (19:37:16), so the fixed writers are live. Nothing written. |
 | D-15 apply | pending | pending |
 | push 2 | pending | pending |
 | retention install + dry run | pending | pending |
