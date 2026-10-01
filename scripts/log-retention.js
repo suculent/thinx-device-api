@@ -223,8 +223,14 @@ async function run(argv, deps) {
     return done(EXIT_OK);
   }
 
-  // The apply branch is implemented in plan 26-04 Task 2.
-  return fail("apply_not_implemented");
+  let result;
+  try {
+    result = await retention.apply(report, { roots: args.roots, audit: !args.noAudit });
+  } catch (e) {
+    return fail("apply_failed", e);
+  }
+  for (const l of LogRetention.formatReport(report, "apply", result)) emit(l);
+  return done(result.complete ? EXIT_OK : EXIT_RUNTIME);
 }
 
 module.exports = { run, parseArgs, errorTag, EXIT_OK, EXIT_RUNTIME, EXIT_USAGE };
