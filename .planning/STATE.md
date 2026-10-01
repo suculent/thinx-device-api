@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
-current_phase: 25
-current_phase_name: Session-Bound CSRF + Console Edge Headers
-status: executing
-stopped_at: Completed 25-07-PLAN.md
-last_updated: "2026-09-29T18:18:58.608Z"
-last_activity: 2026-09-29
-last_activity_desc: Phase 25 execution started
-state_head: e1bf90c28d6c823394e98b62c4b16fb4b5908630
+current_phase: 26
+current_phase_name: Vue Console Log Paging
+status: planning
+stopped_at: Phase 25 complete, ready to plan Phase 26
+last_updated: "2026-10-01T12:26:03.098Z"
+last_activity: 2026-10-01
+last_activity_desc: Phase 25 complete, transitioned to Phase 26
+state_head: 4bc3b150ecd83280c592b2a86b812813addbb16a
 progress:
   total_phases: 7
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 25
-  completed_plans: 21
-  percent: 84
+  completed_plans: 25
+  percent: 77
 ---
 
 # STATE — THiNX Device API
@@ -34,12 +34,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 ## Current Position
 
-Phase: 25 (Session-Bound CSRF + Console Edge Headers) — EXECUTING
-Plan: 7 of 10
-Status: Ready to execute
-Last activity: 2026-09-29 — Phase 25 execution started
+Phase: 26 — Vue Console Log Paging
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-01 — Phase 25 complete, transitioned to Phase 26
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 84% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 77% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -282,6 +282,7 @@ Decided at plan time, not blocking the roadmap:
 | 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./archive/quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
 | 260605-inf | Influx stats fix (v1.10 OBS addition): dashboard check-in numbers read 0/stale + API log spammed `error parsing query: found BADSTRING`. Fixed `lib/thinx/influx.js` — tag mismatch (write `owner` vs read `owner_id`), malformed time predicates (stray `'`, Date/number → `'<ISO>'` / `now() - 7d`), `mean`→`count`, `${measurement}`→`${kpi}` loop index, removed malformed helper queries. Return shape preserved (statistics.js + Visits.vue compatible). CI green (pipeline 5266). Live in prod (autoredeployed). | 2026-06-05 | 9b6d931c | (loose commit — folded into v1.10, no quick-task dir) |
 | 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./archive/quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
+| 6 | Vue console Dockerfile: run nginx as non-root (Aikido USER root finding) — console 7c6f90c | 2026-09-30 | 056d313d | — |
 
 ## Cross-Project Touchpoints
 
@@ -296,7 +297,7 @@ Decided at plan time, not blocking the roadmap:
 
 **Last session:** 2026-09-29T18:18:58.502Z
 
-**Stopped at:** Completed 25-07-PLAN.md
+**Stopped at:** Phase 25 complete, ready to plan Phase 26
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
