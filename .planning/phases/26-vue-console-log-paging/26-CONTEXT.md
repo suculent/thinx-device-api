@@ -60,6 +60,22 @@ Locked contract (ROADMAP/REQUIREMENTS, not re-opened here):
 - **D-13:** `_design/logs` stays **untouched**, including its now-unused views. Its `delete_expired` update handler is still used by the audit-log retention job. Removing the unused views is later cleanup.
 - **D-14:** The production steps follow the Phase 25 pattern. The executor runs read-only and timed steps itself (index warm-up and timing, the dry run) and **stops at a checkpoint** for operator approval before the retention job's real run and before the Vue push. Use a single-service `docker service update` only, never `restart.sh` or a stack deploy. Push `thinx-staging` only.
 
+### Post-research decisions (2026-10-01, operator)
+Research (26-RESEARCH.md) found credentials in audit-log `flags`, a broken audit retention job, a second artifact root, and a GDPR purge gap. The operator decided:
+- **D-15:** **Invalidate the leaked reset keys and redact the audit docs, as a gated first task.**
+  - Clear every outstanding `reset_key` on user docs. Affected users simply request a new reset.
+  - Redact the credential objects in the ~195 audit docs whose `flags` contain objects (password hashes, reset keys), leaving string flags only.
+  - Stop the two writers (`lib/thinx/owner.js:417`, `lib/thinx/sources.js:361`) from logging objects as flags.
+  - Each production write starts with a dry-run count (aggregates only: no ids, emails, hashes or keys are ever printed) and needs operator approval.
+  - The new audit view emits string flags only, defence in depth. — **Reversibility:** one-way — cleared reset keys and redacted log fields cannot be restored, which is intended.
+- **D-16:** The retention job's deletion (D-09/D-11) covers **two roots**: `/mnt/gluster/thinx/deploy/<owner>/<udid>/<build_id>` and the build workspaces under `/mnt/gluster/thinx/repos/...`. Both are record-driven plus the 365-day orphan sweep, each root is shown separately in the dry run, and the operator approves per root at the D-10 checkpoint. Every delete passes a containment check (`safepath.resolveInside` against the root). — **Reversibility:** one-way.
+- **D-17:** The broken audit-log retention job (`/usr/local/sbin/couchdb-log-retention.sh`, which silently deletes nothing because the DHI CouchDB image has no curl/wget) is **replaced** by the new retention script. It handles audit logs (365 d) and builds in one job, behind the same dry-run checkpoint. It runs from a throwaway container from the running API image, not inside the 256M-capped API container. The old cron entry is removed in the same gated step.
+- **D-18:** **Fix the GDPR purge here.** `purgeOwner` must also find and delete the ~113 old-shape build docs (owner nested under `log[0]`), using the new owner-keyed build view that covers both shapes.
+- **D-19 (Claude's discretion, from research):**
+  - The Vue `Api.parseResult` (`services/console/vue/src/core/api.js:70-78`) gets an additive fix so it keeps `paging`, shipped in Push 2.
+  - Whether the legacy audit call falls back to the old view while the new index builds is up to the planner. Prefer warming before switching.
+  - DeviceDetail's per-device history is the planner's call. It must not silently shrink below today's behaviour without a note in the plan.
+
 ### Claude's Discretion
 - How the paged views are keyed: owner-first keys such as `[owner, date]`, with an opaque cursor that encodes the last key and doc id but no owner. The researcher and planner decide the exact design (including the `startkey_docid` tie-break), within the locked contract.
 - The new design doc's name (for example `_design/paging`) and the mechanics of the rev-aware upsert, provided LOG-01 holds (created or updated at boot; `_design/logs` untouched).
@@ -130,6 +146,7 @@ Locked contract (ROADMAP/REQUIREMENTS, not re-opened here):
 ## Deferred Ideas
 
 - **Server-side date jump** (`before` parameter) so History can open at a date range instead of paging to it. A new API capability, outside the LOG-03 contract.
+- **Restore the CouchDB compaction window.** The smoosh 01:00–05:00 UTC config was lost when the container was recreated on 2026-09-23, because `local.d` isn't persisted. Follow-up outside this phase.
 - **Removing the unused `_design/logs` views** (`logs_by_owner`, `logs_by_date`) once nothing reads them. Keep `delete_expired`.
 
 ### Reviewed Todos (not folded)
