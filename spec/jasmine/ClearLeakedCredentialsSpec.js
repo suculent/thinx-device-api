@@ -399,6 +399,15 @@ describe("clear-leaked-credentials CLI", function () {
     assertClean(r.lines);
   });
 
+  it("reduces a nano socket failure to its errno token", async function () {
+    const err = new Error("error happened in your connection. Reason: Error: connect ECONNREFUSED 10.0.0.1:5984");
+    const client = fakeClient({ usersOpts: { listError: err } });
+    const r = await run([], client);
+    expect(r.code).to.equal(1);
+    expect(r.lines).to.include("error=none:ECONNREFUSED");
+    expect(r.lines.join("\n")).not.to.contain("10.0.0.1");
+  });
+
   it("no captured output in this spec carries an id, a 64-hex value, an address or a URL", async function () {
     // Self-sufficient when run alone (--filter): produce at least one run.
     if (ALL_OUTPUT.length === 0) await run([], fakeClient());
