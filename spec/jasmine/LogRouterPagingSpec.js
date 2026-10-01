@@ -217,4 +217,75 @@ describe("LOG-03/LOG-04 router.logs paged and legacy branches", function () {
       });
     });
   });
+
+  ["/api/v2/logs/build", "/api/user/logs/build/list"].forEach((route) => {
+
+    describe("builds " + route, function () {
+
+      it("no query: legacy {success, response} with toBuildListItem over list rows", async function () {
+        const res = await call(app, route, {}, OWNER_A);
+        const body = json(res);
+        expect(res.statusCode).to.equal(200);
+        expect(Object.keys(body)).to.deep.equal(["success", "response"]);
+        expect(body).to.deep.equal({ success: true, response: [{ mapped: FLAT_DOC._id }] });
+        expect(calls.list).to.deep.equal([{ owner: OWNER_A }]);
+        expect(calls.listPage).to.have.length(0);
+        expect(res.body).to.not.contain("total_rows");
+      });
+
+      it("?limit=1: {success, response, paging}, listPage with the session owner, items from row.doc", async function () {
+        const res = await call(app, route, { limit: "1", owner: OWNER_B }, OWNER_A);
+        const body = json(res);
+        expect(Object.keys(body)).to.deep.equal(["success", "response", "paging"]);
+        expect(Object.keys(body.paging)).to.deep.equal(["limit", "has_more", "next_cursor"]);
+        expect(body.response).to.deep.equal([{ mapped: FLAT_DOC._id }]);
+        expect(body.paging).to.deep.equal({ limit: 1, has_more: true, next_cursor: NEXT_BUILD });
+        expect(calls.listPage).to.deep.equal([{ owner: OWNER_A, limit: 1, cursor: null }]);
+        expect(calls.list).to.have.length(0);
+        expect(res.body).to.not.contain("total_rows");
+      });
+
+      it("?limit=2 maps nested docs too", async function () {
+        const body = json(await call(app, route, { limit: "2" }, OWNER_A));
+        expect(body.response).to.deep.equal([{ mapped: FLAT_DOC._id }, { mapped: NESTED_DOC._id }]);
+      });
+
+      it("?cursor=<builds cursor> decodes a numeric k, limit 100", async function () {
+        await call(app, route, { cursor: NEXT_BUILD }, OWNER_A);
+        expect(calls.listPage).to.deep.equal([{ owner: OWNER_A, limit: 100, cursor: { k: 1790000000000, i: UUID } }]);
+      });
+
+      it("an audit-kind cursor (string k) gives 400 invalid_cursor", async function () {
+        const res = await call(app, route, { cursor: NEXT_AUDIT }, OWNER_A);
+        expect(res.statusCode).to.equal(400);
+        expect(json(res)).to.deep.equal({ success: false, response: "invalid_cursor" });
+        expect(calls.listPage).to.have.length(0);
+      });
+
+      it("?limit=abc gives 400 invalid_limit", async function () {
+        const res = await call(app, route, { limit: "abc" }, OWNER_A);
+        expect(res.statusCode).to.equal(400);
+        expect(json(res)).to.deep.equal({ success: false, response: "invalid_limit" });
+      });
+
+      it("a listPage error gives build_list_failed", async function () {
+        mode.listPage = "error";
+        const res = await call(app, route, { limit: "5" }, OWNER_A);
+        expect(json(res)).to.deep.equal({ success: false, response: "build_list_failed" });
+      });
+
+      it("legacy errors keep build_list_failed and build_list_empty", async function () {
+        mode.list = "error";
+        expect(json(await call(app, route, {}, OWNER_A))).to.deep.equal({ success: false, response: "build_list_failed" });
+        mode.list = "empty";
+        expect(json(await call(app, route, {}, OWNER_A))).to.deep.equal({ success: false, response: "build_list_empty" });
+      });
+
+      it("no session gives 401", async function () {
+        const res = await call(app, route, { limit: "1" }, undefined);
+        expect(res.statusCode).to.equal(401);
+        expect(calls.listPage).to.have.length(0);
+      });
+    });
+  });
 });
