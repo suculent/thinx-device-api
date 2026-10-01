@@ -294,6 +294,9 @@ services:
       - "SLACK_WEBHOOK=${SLACK_WEBHOOK}"
       - "MAILGUN_API_KEY=${MAILGUN_API_KEY}"
       - "GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}"
+      # Phase 25: CSRF_MODE legacy|observe|signed; roll back with CSRF_MODE=legacy. CSRF_ENFORCE stays true.
+      - "CSRF_ENFORCE=true"
+      - "CSRF_MODE=signed"
     ports:
       - 7442:7442
     volumes:
