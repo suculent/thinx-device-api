@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Completed 26-01-PLAN.md
-last_updated: "2026-10-01T14:46:10.745Z"
+stopped_at: Completed 26-03-PLAN.md
+last_updated: "2026-10-01T14:56:46.202Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: abe4077d99345960eeef73233644851afff05ae0
+state_head: 6b8b03e3bbf8a6f163fc9d57c624b0ab613f2f9b
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 26
-  percent: 76
+  completed_plans: 27
+  percent: 79
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 76% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 79% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -221,6 +221,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 26]: loadPagingDesign accepts only _id _design/paging, so the boot upsert can never write _design/logs (D-13)
 - [Phase 26]: One Audit.stringFlags filter serves read (toAuditItem, both fetch paths) and write (_buildRecord) for D-15
 - [Phase 26]: Audit.fetch D-19 fallback uses first-answer-wins: a late owner-keyed view answer after VIEW_TIMEOUT_MS is dropped
+- [Phase 26]: 26-03: --targets without --apply is a usage error (exit 2), mirroring --apply without --targets
+- [Phase 26]: 26-03: cleanup CLI apply prints before-state aggregates then apply counters; bulk rejection is fatal (INCOMPLETE, exit 1), rerun converges
+- [Phase 26]: 26-03: alog.log static guard accepts cond ? literal : literal (owner_purge.js); any other non-literal flag fails the spec
 
 ### Todos
 
@@ -299,9 +302,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T14:46:10.641Z
+**Last session:** 2026-10-01T14:56:46.057Z
 
-**Stopped at:** Completed 26-01-PLAN.md
+**Stopped at:** Completed 26-03-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -348,3 +351,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 25 P05 | 15 min | 2 tasks | 6 files |
 | Phase 25 P07 | 6min | 3 tasks | 10 files |
 | Phase 26 P01 | 8 min | 2 tasks | 8 files |
+| Phase 26 P03 | 7min | 2 tasks | 5 files |
