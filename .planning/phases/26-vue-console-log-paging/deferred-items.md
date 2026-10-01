@@ -42,5 +42,9 @@ and the `set_password_reset` body only.
   update key plus the status code only.
 - `audit.js` `_buildRecord` missing-message warning printed the owner id (noted after 26-01): fixed in
   the same commit.
-- Still open: 26-02 item 1 (ZZ-LogPagingCouchSpec not run by CI `split-tests`; needs an operator
-  decision on the `package.json` change before 26-06) and 26-02 item 2 (`fetchBuildLogID` owner check).
+- 26-02 item 1 (ZZ-LogPagingCouchSpec not run by CI): operator approved. `split-tests` now keeps that
+  one ZZ spec on node 0 (`package.json`, with a note in `docker-entrypoint.sh`). `npm run test` is still
+  `jasmine || true`, so 26-06 must read the CI job log, not the job status.
+- 26-02 item 2 (`fetchBuildLogID` owner check): operator approved. The three by-id routes now require a
+  session and use the owner-checked `Buildlog#fetchOwned`; another owner's build reads exactly like a
+  missing build, and the owner id and log text are no longer logged. Spec: `BuildLogOwnerSpec.js`.
