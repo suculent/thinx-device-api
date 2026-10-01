@@ -614,20 +614,26 @@ docker run --rm --network thinx_internal --memory 256m --entrypoint node \
 | A7 | A standalone container on `thinx_internal` resolves the stack alias `couchdb` | Retention runner | Low: make the host configurable; the dry run fails loudly. |
 | A8 | Cypress 9.7 `req.url` in a route handler carries the query string | Cypress stub | Low: an alternative is the `query` RouteMatcher. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Is the repos workspace in D-09/D-11 scope?** (one-way)
+All seven were decided on 2026-10-01 after research (26-CONTEXT.md "Post-research decisions" and "Deferred Ideas"). Each question carries its resolution inline.
+
+1. **Is the repos workspace in D-09/D-11 scope?** (one-way) — RESOLVED: D-16. Both roots are in scope, each reported separately in the dry run and approved per root at the D-10 checkpoint (plans 26-04, 26-08).
    - What we know: "artifact folders" literally means the deploy root, which holds 4 expired folders (44K) and 0 orphans. The workspace tree `/mnt/data/repos/<owner>/<udid>/<build_id>` is keyed identically and holds 103 expired-record folders (29M) plus 61 orphans (227M, 2021–2022). It contains checkouts (regenerable) and some `<uuid>.zip` copies.
    - Recommendation: include repos as a second root in the same job and show both roots separately in the dry-run report. The operator decides at the D-10 checkpoint. Default to the deploy root only if they decline.
-2. **Fix the broken audit retention job in this phase?**
+2. **Fix the broken audit retention job in this phase?** — RESOLVED: D-17. The new retention script replaces it (audit 365 d plus builds, one-shot container), and the old cron entry is retired in the same gated step (plans 26-04, 26-08).
    - What we know: it has been dead since 2026-09-24 and its 365-day guarantee has lapsed (30 docs past the window). D-07 says to mirror it.
    - Recommendation: yes, as a small operator-checkpointed task. Change its transport to the same one-shot-container approach, or to `docker exec <thinx_api> curl`, and treat an empty response as an error.
-3. **Legacy audit fallback during the first index build?**
+3. **Legacy audit fallback during the first index build?** — RESOLVED: D-19 (planner's call). Plan 26-01 keeps a bounded fallback to `logs_by_owner` with strict owner equality; plan 26-06 warms the index before the Vue switch; removing the fallback is a recorded follow-up with the deferred `_design/logs` cleanup.
    - Recommendation: on `not_found` or error from the new view, the no-param path falls back to the current `logs_by_owner` behaviour (the old code kept as `legacyFetchGlobal`). That protects the classic console during Push 1, at small extra code cost. Remove the fallback in the deferred `_design/logs` cleanup.
-4. **DeviceDetail per-device history = newest 100 owner builds** (was: flat builds of the last 30 days). It is acceptable today. A per-device server query is a later capability.
-5. **Existing 195 audit docs with object flags (password hashes, reset keys, emails):** the view filters them out of responses, but the data stays in `managed_logs` until retention ages it out (up to 365 d). Redact now with `scripts/redact-managed-logs.js` (runbook `managed-logs-redaction.md`), or accept? This is outside the LOG requirements, so it is an operator call.
-6. **Restore the smoosh 01:00–05:00 window config?** It is not persisted, because `local.d` isn't mounted. That is outside Phase 26. Record it as a follow-up and update the memory note.
-7. **GDPR `purgeOwner` misses nested build docs** (113 docs have no root `owner`; `latest_builds` keys them `null`). It could switch to `builds_by_owner_time` (`startkey [owner]`, `endkey [owner,{}]`). It is cheap but outside LOG-04, so the planner decides.
+4. **DeviceDetail per-device history = newest 100 owner builds** (was: flat builds of the last 30 days). — RESOLVED: D-19 (planner's call). Accepted as described, with the note recorded in plan 26-05 (must_haves and SUMMARY); no per-device Load more in this phase.
+   - Background: it is acceptable today. A per-device server query is a later capability.
+5. **Existing 195 audit docs with object flags (password hashes, reset keys, emails):** — RESOLVED: D-15. Redact them and clear outstanding reset keys as a gated, dry-run-first, one-way step (code in plan 26-03, production in plan 26-06).
+   - Background: the view filters them out of responses, but the data stays in `managed_logs` until retention ages it out (up to 365 d). Redact now with `scripts/redact-managed-logs.js` (runbook `managed-logs-redaction.md`), or accept? This is outside the LOG requirements, so it is an operator call.
+6. **Restore the smoosh 01:00–05:00 window config?** — RESOLVED: deferred (26-CONTEXT.md "Deferred Ideas": restore the CouchDB compaction window). Recorded as a follow-up in plan 26-08.
+   - Background: it is not persisted, because `local.d` isn't mounted. That is outside Phase 26. Record it as a follow-up and update the memory note.
+7. **GDPR `purgeOwner` misses nested build docs** — RESOLVED: D-18. `purgeOwner` moves to `builds_by_owner_time`, covering both shapes (plan 26-02).
+   - Background: 113 docs have no root `owner`, and `latest_builds` keys them `null`. It could switch to `builds_by_owner_time` (`startkey [owner]`, `endkey [owner,{}]`). It is cheap but outside LOG-04, so the planner decides.
 
 ## Environment Availability
 
