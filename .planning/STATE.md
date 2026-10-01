@@ -315,9 +315,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T16:01:56.534Z
+**Last session:** 2026-10-01T16:04:46Z
 
-**Stopped at:** Completed 26-09-PLAN.md
+**Stopped at:** Waves 1-2 complete (6/9) + deferred log-leak fixes (1b7dfc74); paused before 26-06 (Push 1) for operator — pending decision on CI split-tests change for ZZ-LogPagingCouchSpec
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 

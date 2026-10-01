@@ -34,3 +34,13 @@ and the `set_password_reset` body only.
 2. **`GET /api/v2/logs/build/:bid` (`fetchBuildLogID`, `lib/router.logs.js`) has no owner check.**
    Pre-existing, out of scope for 26-02 (LOG-04 covers the list routes only). It also logs the
    whole build log and the owner on two lines.
+
+## Resolved (orchestrator, 2026-10-01, after wave 2)
+
+- 26-03 items 1 and 2 (`owner.js` `atomic()` and `apply_update()` error-path logging): fixed in `1b7dfc74`,
+  proven by `spec/jasmine/OwnerLogLeakSpec.js` (RED `4f635785`). The lines now log the action name or
+  update key plus the status code only.
+- `audit.js` `_buildRecord` missing-message warning printed the owner id (noted after 26-01): fixed in
+  the same commit.
+- Still open: 26-02 item 1 (ZZ-LogPagingCouchSpec not run by CI `split-tests`; needs an operator
+  decision on the `package.json` change before 26-06) and 26-02 item 2 (`fetchBuildLogID` owner check).
