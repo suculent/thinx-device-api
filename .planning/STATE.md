@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Completed 26-05-PLAN.md
-last_updated: "2026-10-01T15:27:34.675Z"
+stopped_at: Completed 26-02-PLAN.md
+last_updated: "2026-10-01T15:50:55.286Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: b7eefc1608129ce32aa2ee224118cbdddd0ce17d
+state_head: 56f8af04b07d33eefab3934eb6164eb143c31b72
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 29
-  percent: 85
+  completed_plans: 30
+  percent: 88
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 85% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 88% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -231,6 +231,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 26]: 26-05: Load more is a plain button.btn.btn-outline-secondary.btn-sm, because bootstrap-vue BButton overwrites a caller aria-disabled with null on real buttons
 - [Phase 26]: 26-05: normalizeBuildItems falls back to item.udid/item.date for flat {date, udid} build items; DeviceDetail per-device history now derives from the owner's newest 100 builds (D-19), no per-device Load more
 - [Phase 26]: 26-05: History initial load uses Promise.allSettled + finally so each table loads independently and Loading... always clears
+- [Phase 26]: 26-02: log_paging.buildQuery merges extra first and then forces the owner bounds, direction and limit and drops skip/startkey_docid, so no option can widen the owner range
+- [Phase 26]: 26-02: the paged audit/build branches are opt-in on hasOwnProperty(limit|cursor) and answer {success, response, paging} via Util.respond; the legacy no-param shape is unchanged; owner only from the session
+- [Phase 26]: 26-02: Buildlog reads are side-effect free (prune removed); purgeOwner ranges over paging/builds_by_owner_time with include_docs and falls back to latest_builds {key: owner}
+- [Phase 26]: 26-02: the log-paging probe FAILs when Audit.fetch used its legacy fallback; ZZ-LogPagingCouchSpec does not run in CI today (split-tests deletes ZZ*.js on node 0), see deferred-items 26-02 item 1
 
 ### Todos
 
@@ -309,9 +313,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T15:27:34.565Z
+**Last session:** 2026-10-01T15:50:55.133Z
 
-**Stopped at:** Completed 26-05-PLAN.md
+**Stopped at:** Completed 26-02-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -361,3 +365,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 26 P03 | 7min | 2 tasks | 5 files |
 | Phase 26 P04 | 14 min | 3 tasks | 6 files |
 | Phase 26 P05 | 10min | 3 tasks | 7 files |
+| Phase 26 P02 | 17 min | 3 tasks | 10 files |
