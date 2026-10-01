@@ -241,7 +241,32 @@ Plans:
   4. In the Vue Console, a user can page through the build list, and paging never prunes build records.
   5. The console submodule pointer that carries the Vue paging UI is bumped in this repo and deployed to the Vue console host.
 
-**Plans**: TBD
+**Plans**: 8 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 26-01-PLAN.md — `_design/paging` docs upserted rev-aware at boot; legacy audit call owner-keyed with string-only flags and a bounded fallback (LOG-01, LOG-02)
+- [ ] 26-03-PLAN.md — D-15 code: audit writers stop logging credential objects; aggregate-only cleanup script (dry run by default)
+- [ ] 26-04-PLAN.md — Retention job for audit and builds on two roots (containment gates, dry run, folder-before-record), host wrapper, runbook
+- [ ] 26-05-PLAN.md — Vue History Load more per table, first-page stores, parseResult keeps paging, Cypress harness repaired
+
+**Wave 2** *(blocked on 26-01)*
+
+- [ ] 26-02-PLAN.md — Opt-in cursor paging for audit and builds, side-effect-free build list, GDPR purge over both shapes, production probe, CI CouchDB spec (LOG-03, LOG-04)
+
+**Wave 3** *(blocked on Waves 1–2)*
+
+- [ ] 26-06-PLAN.md — Push 1 (backend), index warm-up timed, production probe, D-15 dry run → operator decision → one-way cleanup
+
+**Wave 4** *(blocked on 26-05, 26-06)*
+
+- [ ] 26-07-PLAN.md — Push 2 rehearsal → operator approval → Vue UI and console pointer deployed; LOG-01..04 marked complete
+
+**Wave 5** *(blocked on 26-07)*
+
+- [ ] 26-08-PLAN.md — Retention dry run per root → operator decision → real run, daily schedule, broken audit job retired
+
 **Notes**: Order is backend, then Vue, then the pointer bump. Warm the new view index outside the 01:00–05:00 UTC compaction window.
 **Research**: Needed at planning: the `date` format across old `managed_logs` docs (collation), index build time on the production corpus, and the Vue store contract shared with `store/stats.js`.
 **UI hint**: yes
