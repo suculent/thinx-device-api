@@ -70,11 +70,19 @@ coverage:
   - **Under `signed`:** each Vue OAuth login would first get a 403 `csrf_token_invalid`. `fetchWithCsrf` would then force a re-prime and retry once. That retry path has not been exercised in production.
   - **Classification:** formally this is "explained" (`session_mismatch` on login and `session/token` routes). But the cause is the OAuth hop, not an expired pre-session.
 
+## Finding resolved (operator chose "fix it first")
+
+- Console commit `5d3ab53`: `OAuthReturn.vue` and `App.vue`'s hydrate force the shared prime on `/oauth-return`.
+  - Test: Cypress `oauth-return.spec.js`. It fails without the fix and passes with it.
+  - The 13 other Cypress failures are present on the unchanged code too, with the same per-spec counts.
+- Shipped in parent `72725c66` on 2026-10-01. CI green. All three services rolled by 09:51:15Z, still in observe mode.
+- This deploy also shipped the 25-05 and 25-07 guards. In observe mode they only log.
+- Operator Vue Google × 2 and GitHub × 2 (09:57–09:59Z): each OAuth return primes once before its POSTs. **0 CSRF lines since the rollout.**
+
 ## For 25-08
 
-- Before the flip, choose one of these:
-  - (a) Force the prime on the OAuth return. This is a one-line change in `OAuthReturn.vue`: `ensureCsrfToken(api, { force: true })`. It needs a Vue console deploy before the flip.
-  - (b) Flip with the automatic rollback armed, and check that a Vue Google and a Vue GitHub login each show exactly one 403 followed by a successful retry.
+- The Vue OAuth finding is fixed. The flip still needs its own operator approval.
+- The guards are already live, so the D-05 re-check before the guards becomes a check that the 23 D-11 paths log nothing unexplained under observe.
 - The D-05 re-check before the guards must include the 23 D-11 paths.
 
 ## Deviations
