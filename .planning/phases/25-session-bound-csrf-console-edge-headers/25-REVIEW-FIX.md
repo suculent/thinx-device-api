@@ -15,7 +15,7 @@ status: all_fixed
 **Source review:** .planning/phases/25-session-bound-csrf-console-edge-headers/25-REVIEW.md
 **Scope:** the user asked for the Critical and Warning findings (CR-01, CR-02, WR-01, WR-02). IN-01 (OpenAPI wording) and IN-03 (router comment) were fixed as part of CR-01 and CR-02. IN-02 (`CSRF_SECRET` length and trimming) was not touched.
 
-Both commits are GPG-signed and **not pushed**. Production still runs the vulnerable code until the operator approves a deploy.
+Both commits are GPG-signed. **Deployed 2026-10-01:** parent `2a9569c1` was pushed with operator approval. CI was green (test 15516, api-registry 15522), and `thinx_api` rolled to `c42333a3bb0a` at 12:05:33Z. The live re-check passed: env still signed, 0 restarts, boot line once, 0 CRITICAL, signed and `--guards` probe unchanged, `LIVE-HEADERS OK`, and the operator's browser checks (cold logins, Vue profile save, Vue reload) all passed.
 
 | Commit | Finding | Change |
 |---|---|---|
