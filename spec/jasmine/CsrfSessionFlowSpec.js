@@ -34,6 +34,7 @@ const Util = require("../../lib/thinx/util");
 const secrets = require("../../lib/thinx/secrets");
 const csrfModule = require("../../lib/middleware/csrf");
 const { establishSession } = require("../../lib/thinx/establish_session");
+const { bindBearerOwner } = require("../../lib/thinx/bearer_owner");
 
 const SPEC_CSRF_SECRET = "5f1c0a9e7b3d2468ace013579bdf2468ace013579bdf2468ace013579bdf2468";
 const SIGNED_SHAPE = /^[0-9a-f]{64}\.[0-9a-f]{32}$/;
@@ -57,7 +58,22 @@ function buildApp(store) {
     app.use(csrf.ensureXsrfCookie);
     app.use(express.json());
 
+    // Stand-in for lib/router.js: "X-Spec-Auth: apikey" marks a verified API-key
+    // request; "X-Spec-Bearer: <owner>" a verified Bearer request, bound through the
+    // same helper the router uses.
+    app.use((req, res, next) => {
+        if (req.headers["x-spec-auth"] === "apikey") req.thx_auth = "apikey";
+        const bearer = req.headers["x-spec-bearer"];
+        if (typeof (bearer) === "string") {
+            bindBearerOwner(req, res, bearer);
+            req.thx_auth = "bearer";
+        }
+        next();
+    });
+
     app.get("/api/v2/csrf-token", (req, res) => csrf.issueCsrfToken(req, res));
+
+    app.get("/api/v2/whoami", (req, res) => res.json({ success: true, owner: req.session ? (req.session.owner || null) : null }));
 
     app.post("/api/v2/login", csrf.verifyCsrfToken, (req, res) => {
         establishSession(req, res, csrf, "owner-a", (err) => {
@@ -93,9 +109,9 @@ function stopServer(server) {
 }
 
 // Issue one request; `cookies` is a { name: rawValue } map, `xsrf` the header value.
-function send(server, method, path, cookies, xsrf, body) {
+function send(server, method, path, cookies, xsrf, body, extraHeaders) {
     return new Promise((resolve, reject) => {
-        const headers = {};
+        const headers = Object.assign({}, extraHeaders || {});
         const jar = Object.keys(cookies || {}).map((k) => k + "=" + cookies[k]);
         if (jar.length > 0) headers.Cookie = jar.join("; ");
         if (typeof (xsrf) === "string") headers["X-XSRF-TOKEN"] = xsrf;
@@ -437,5 +453,92 @@ describe("CsrfSessionFlowSpec (SEC-CSRF-02/03)", function () {
             expect(leftover.owner).to.equal(undefined);
             expect(leftover.login_owner).to.equal(undefined);
         }
+    });
+});
+
+// 25-REVIEW CR-01, CR-02, WR-02.
+describe("CsrfSessionFlowSpec review fixes (25-REVIEW)", function () {
+
+    let store;
+    let server;
+
+    function resetAll() {
+        secrets._resetCacheForTests();
+        csrfModule._resetForTests();
+    }
+
+    beforeEach(async function () {
+        process.env.CSRF_MODE = "signed";
+        process.env.CSRF_ENFORCE = "true";
+        process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+        resetAll();
+        store = new session.MemoryStore();
+        server = await startServer(buildApp(store));
+    });
+
+    afterEach(async function () {
+        await stopServer(server);
+        delete process.env.CSRF_MODE;
+        delete process.env.CSRF_ENFORCE;
+        delete process.env.CSRF_SECRET;
+        resetAll();
+    });
+
+    async function prime(jar) {
+        const res = await send(server, "GET", "/api/v2/csrf-token", jar || {});
+        return absorb(jar || {}, res.setCookie);
+    }
+
+    const APIKEY = { "X-Spec-Auth": "apikey" };
+
+    it("CR-01: a verified API key does not exempt a request that carries a session cookie", async function () {
+        const jar = await prime();
+        const res = await send(server, "POST", "/api/v2/protected", { "x-thx-core": jar["x-thx-core"] }, undefined, {}, APIKEY);
+        expect(res.status).to.equal(403);
+        expect(res.body.response).to.equal("csrf_token_invalid");
+    });
+
+    it("CR-01: a verified API key does not exempt the public login route (login CSRF)", async function () {
+        const res = await send(server, "POST", "/api/v2/login", {}, undefined, { username: "u" }, APIKEY);
+        expect(res.status).to.equal(403);
+        expect(res.body.response).to.equal("csrf_token_invalid");
+    });
+
+    it("CR-01: a cookieless verified API-key call to a guarded route stays exempt (machine client)", async function () {
+        const res = await send(server, "POST", "/api/v2/protected", {}, undefined, {}, APIKEY);
+        expect(res.status).to.equal(200);
+    });
+
+    it("CR-02: a Bearer request acts as the token owner but never persists it into the cookie's session", async function () {
+        const jar = await prime();
+        const sid = sidOf(jar["x-thx-core"]);
+        const res = await send(server, "GET", "/api/v2/whoami", jar, undefined, undefined, { "X-Spec-Bearer": "owner-victim" });
+        expect(res.status).to.equal(200);
+        expect(res.body.owner).to.equal("owner-victim");
+        const stored = storedSession(store, sid);
+        expect(stored, "pre-session still stored").to.be.an("object");
+        expect(stored.owner, "bearer owner must not be written to the planted session").to.equal(undefined);
+    });
+
+    it("CR-02: a Bearer request on a session of the same owner leaves that session's owner in place", async function () {
+        const jar = await prime();
+        const loggedIn = absorb(jar, (await send(server, "POST", "/api/v2/login", jar, jar["XSRF-TOKEN"], { username: "u" })).setCookie);
+        const sid = sidOf(loggedIn["x-thx-core"]);
+        await send(server, "GET", "/api/v2/whoami", loggedIn, undefined, undefined, { "X-Spec-Bearer": "owner-a" });
+        expect(storedSession(store, sid).owner).to.equal("owner-a");
+    });
+
+    it("WR-02: in signed mode a bound header token passes even when a planted XSRF-TOKEN cookie shadows the real one", async function () {
+        const jar = await prime();
+        const planted = { "x-thx-core": jar["x-thx-core"], "XSRF-TOKEN": "planted-by-a-sibling" };
+        const res = await send(server, "POST", "/api/v2/protected", planted, jar["XSRF-TOKEN"], {});
+        expect(res.status).to.equal(200);
+    });
+
+    it("WR-02: a header token bound to another session is still refused", async function () {
+        const a = await prime();
+        const b = await prime();
+        const res = await send(server, "POST", "/api/v2/protected", { "x-thx-core": a["x-thx-core"], "XSRF-TOKEN": "planted" }, b["XSRF-TOKEN"], {});
+        expect(res.status).to.equal(403);
     });
 });

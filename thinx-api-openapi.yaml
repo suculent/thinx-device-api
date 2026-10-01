@@ -547,8 +547,9 @@ components:
         with it. Obtain it by calling `GET /csrf-token` first and keeping every cookie that
         call sets (`x-thx-core` and `XSRF-TOKEN`) in a cookie jar. The token rotates at login:
         take the new value from the login response's `Set-Cookie`. Browser consoles do this
-        automatically. Bearer (JWT) and API-key authenticated calls are exempt and need
-        neither the header nor the cookies.
+        automatically. Bearer (JWT) calls, and API-key calls that send no session cookie, are
+        exempt and need neither the header nor the cookies. An API key never exempts the login,
+        registration or password routes.
       schema:
         type: string
     XsrfTokenCookie:
@@ -598,7 +599,8 @@ paths:
            is echoed in the body and the cookie.
         4. Login regenerates the session and rotates the token: take the new value from the
            login response's `Set-Cookie`, not from before login.
-        5. Bearer (JWT) and API-key authenticated calls are exempt.
+        5. Bearer (JWT) calls are exempt. API-key calls are exempt only without a session cookie,
+           and never on the login, registration or password routes.
         6. A 403 `csrf_token_invalid` means re-prime and retry once.
 
         Guarded routes: `POST /login`, `POST /session/token` (v2), `POST /password/reset`,
@@ -1004,7 +1006,7 @@ paths:
       description: |
         Create a new API key
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - API Keys
       security:
@@ -1034,7 +1036,7 @@ paths:
       description: |
         Revoke one or more API keys
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - API Keys
       security:
@@ -1228,7 +1230,7 @@ paths:
       description: |
         Add a new environment variable
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Environment Variables
       security:
@@ -1267,7 +1269,7 @@ paths:
       description: |
         Delete one or more environment variables
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Environment Variables
       security:
@@ -1427,7 +1429,7 @@ paths:
       description: |
         Register a new user account. Registration has no machine-client exemption: prime with `GET /csrf-token` first.
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
       parameters:
@@ -1471,7 +1473,7 @@ paths:
       description: |
         Delete the authenticated user account.
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
       security:
@@ -1771,7 +1773,7 @@ paths:
       description: |
         Update the authenticated user's profile.
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Users
       security:
@@ -1870,7 +1872,7 @@ paths:
       description: |
         Request deletion of all user data in compliance with GDPR.
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - GDPR
       security:
@@ -2033,7 +2035,7 @@ paths:
       description: |
         Generate a new RSA key pair
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - RSA Keys
       security:
@@ -2066,7 +2068,7 @@ paths:
       description: |
         Delete one or more RSA keys by fingerprint
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - RSA Keys
       security:
@@ -2321,7 +2323,7 @@ paths:
       description: |
         Initiate a transfer of one or more devices to another owner
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
@@ -2385,7 +2387,7 @@ paths:
       description: |
         Accept specific devices from a transfer request
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
@@ -2446,7 +2448,7 @@ paths:
       description: |
         Decline specific devices from a transfer request
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - Transfer
       security:
@@ -2547,7 +2549,7 @@ paths:
       description: |
         Add a public key to the authenticated user's GitHub account
 
-        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) and API-key calls are exempt; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
+        Anti-CSRF (SEC-CSRF-04/05): a cookie-session call must send the session-bound `X-XSRF-TOKEN` header together with the `x-thx-core` and `XSRF-TOKEN` cookies obtained from `GET /csrf-token`; Bearer (JWT) calls are exempt, and so are API-key calls that carry no session cookie; a missing or unbound token is refused with 403 `csrf_token_invalid` before the handler runs.
       tags:
         - OAuth
       security:

@@ -1008,11 +1008,25 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01/02)", function () {
             expect(out.lines.length).to.equal(0);
         });
 
-        it("x2. signed + enforce, req.thx_auth 'apikey', no cookie and no header: next(), nothing logged", function () {
-            const out = run(bareReq({ thx_auth: "apikey", body: { owner: "o", api_key: "k" } }));
+        it("x2. signed + enforce, req.thx_auth 'apikey' on a guarded account route, no cookie and no header: next(), nothing logged", function () {
+            const out = run(bareReq({ thx_auth: "apikey", originalUrl: "/api/v2/profile", body: { owner: "o", api_key: "k" } }));
             expect(out.nextCalled).to.equal(true);
             expect(out.res._status).to.equal(null);
             expect(out.lines.length).to.equal(0);
+        });
+
+        it("x2b. req.thx_auth 'apikey' with a session cookie is checked like a cookie request (403, 25-REVIEW CR-01)", function () {
+            const out = run(bareReq({ thx_auth: "apikey", originalUrl: "/api/v2/profile", headers: { cookie: "x-thx-core=s%3Asid-A.sig" }, body: { owner: "o", api_key: "k" } }));
+            expect(out.nextCalled).to.equal(false);
+            expect(out.res._status).to.equal(403);
+        });
+
+        it("x2c. req.thx_auth 'apikey' never exempts a public login, registration or password route (403, 25-REVIEW CR-01)", function () {
+            ["/api/login", "/api/v2/login", "/api/v2/session/token", "/api/user/create", "/api/v2/user", "/API/V2/Password/Reset/", "/api/user/password/set?x=1"].forEach(function (url) {
+                const out = run(bareReq({ thx_auth: "apikey", originalUrl: url, body: { owner: "o", api_key: "k" } }));
+                expect(out.nextCalled, url).to.equal(false);
+                expect(out.res._status, url).to.equal(403);
+            });
         });
 
         it("x3. an Authorization header without req.thx_auth is checked like any cookie request (403)", function () {
@@ -1042,7 +1056,7 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01/02)", function () {
             ["legacy", "observe"].forEach(function (m) {
                 process.env.CSRF_MODE = m;
                 ["bearer", "apikey"].forEach(function (a) {
-                    const out = run(bareReq({ thx_auth: a }));
+                    const out = run(bareReq({ thx_auth: a, originalUrl: "/api/v2/profile" }));
                     expect(out.nextCalled, m + "/" + a).to.equal(true);
                     expect(out.res._status, m + "/" + a).to.equal(null);
                     expect(out.lines.length, m + "/" + a).to.equal(0);
