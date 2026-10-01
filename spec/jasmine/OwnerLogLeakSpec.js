@@ -84,7 +84,7 @@ describe("Owner/Audit log leak guards (phase 26 deferred items)", function () {
 
   it("_buildRecord() missing-message warning does not print the owner id", function () {
     const lines = captureConsole();
-    const record = new Audit()._buildRecord(OWNER_SENTINEL, undefined, "warning", 1700000000000);
+    const record = new Audit()._buildRecord(OWNER_SENTINEL, undefined, "warning", new Date(1700000000000));
     expect(record.owner).to.equal(OWNER_SENTINEL);
     expect(record.message).to.equal("warning");
     expect(lines.length, "the warning must still be logged").to.be.above(0);
