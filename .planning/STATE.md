@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Completed 26-04-PLAN.md
-last_updated: "2026-10-01T15:14:37.949Z"
+stopped_at: Completed 26-05-PLAN.md
+last_updated: "2026-10-01T15:27:34.675Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: fd5d336c26096c599d38cd8c87c2fb809e627386
+state_head: b7eefc1608129ce32aa2ee224118cbdddd0ce17d
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 28
-  percent: 82
+  completed_plans: 29
+  percent: 85
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 82% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 85% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -227,6 +227,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 26]: 26-04: retention job fails closed - audit_by_date or either build view failing is LOG-RETENTION FAIL (audit_read_failed / record_read_failed) before any folder is inspected; zero build rows aborts the orphan sweep
 - [Phase 26]: 26-04: --roots and --no-audit without --apply are usage errors (exit 2); the wrapper mounts a root read-write only when --apply --roots names it
 - [Phase 26]: 26-04: retention schedule is /etc/cron.d/thinx-log-retention at 09:40 UTC; old job files retire to /usr/local/sbin/retired/couchdb-log-retention.{cron,sh}
+- [Phase 26]: 26-05: History owns its paged rows and cursors (copies the store first page once, appends only its own pages), so Header/Notifications/DeviceDetail first-page refreshes cannot reset a paged table
+- [Phase 26]: 26-05: Load more is a plain button.btn.btn-outline-secondary.btn-sm, because bootstrap-vue BButton overwrites a caller aria-disabled with null on real buttons
+- [Phase 26]: 26-05: normalizeBuildItems falls back to item.udid/item.date for flat {date, udid} build items; DeviceDetail per-device history now derives from the owner's newest 100 builds (D-19), no per-device Load more
+- [Phase 26]: 26-05: History initial load uses Promise.allSettled + finally so each table loads independently and Loading... always clears
 
 ### Todos
 
@@ -305,9 +309,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T15:14:37.827Z
+**Last session:** 2026-10-01T15:27:34.565Z
 
-**Stopped at:** Completed 26-04-PLAN.md
+**Stopped at:** Completed 26-05-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -356,3 +360,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 26 P01 | 8 min | 2 tasks | 8 files |
 | Phase 26 P03 | 7min | 2 tasks | 5 files |
 | Phase 26 P04 | 14 min | 3 tasks | 6 files |
+| Phase 26 P05 | 10min | 3 tasks | 7 files |
