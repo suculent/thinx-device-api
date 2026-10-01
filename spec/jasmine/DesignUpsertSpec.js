@@ -101,6 +101,7 @@ describe("LOG-01 design_upsert.ensureDesignDoc", function () {
     const doc = U.loadPagingDesign("logs");
     expect(doc).to.be.an('object');
     expect(doc._id).to.equal("_design/paging");
+    expect(U.loadPagingDesign("builds")._id).to.equal("_design/paging");
     expect(U.loadPagingDesign("devices")).to.equal(null);
     expect(U.loadPagingDesign("../logs")).to.equal(null);
     expect(U.loadPagingDesign(undefined)).to.equal(null);
@@ -280,12 +281,13 @@ describe("LOG-01 Database.initDatabase installs _design/paging on both init bran
 
     expect(probe.calls.filter((n) => n === "logs" || n === "builds").sort()).to.deep.equal(["builds", "logs"]);
     expect(nano.dbs.managed_logs.inserts).to.deep.equal(["_design/paging"]);
+    expect(nano.dbs.managed_builds.inserts).to.deep.equal(["_design/paging"]);
     expect(nano.dbs).to.not.have.property("managed_devices");
     expect(nano.dbs).to.not.have.property("managed_users");
 
     const lines = console.log.calls.allArgs().map((a) => a.join(" "));
     expect(lines.filter((l) => l.indexOf("[design-upsert] managed_logs _design/paging action=created") !== -1)).to.have.length(1);
-    expect(lines.filter((l) => l.indexOf("[design-upsert] managed_builds _design/paging action=") !== -1)).to.have.length(1);
+    expect(lines.filter((l) => l.indexOf("[design-upsert] managed_builds _design/paging action=created") !== -1)).to.have.length(1);
   });
 
   it("create success: injectDesign, injectReplFilter and ensureDesignDocs all run", async function () {

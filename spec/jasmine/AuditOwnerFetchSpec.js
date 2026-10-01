@@ -255,6 +255,50 @@ describe("LOG-02 Audit.fetch on the owner-keyed paging view", function () {
     expect(Audit.toAuditItem(null)).to.deep.equal({ date: undefined, message: undefined, flags: ["info"] });
   });
 
+  describe("_buildRecord writes string-only flags (D-15)", function () {
+
+    const MTIME = new Date("2026-09-30T10:11:12.345Z");
+
+    function flagsFor(flag) {
+      return audit._buildRecord("owner-fixture", "message-fixture", flag, MTIME).flags;
+    }
+
+    it("turns an object flag carrying a password into ['info']", function () {
+      expect(flagsFor({ password: "h" })).to.deep.equal(["info"]);
+    });
+
+    it("keeps only the strings of a mixed array", function () {
+      expect(flagsFor(["warning", { a: 1 }])).to.deep.equal(["warning"]);
+    });
+
+    it("falls back to ['info'] for an array of objects only", function () {
+      expect(flagsFor([{ a: 1 }, { repos: {} }])).to.deep.equal(["info"]);
+    });
+
+    it("falls back to ['info'] for a string longer than 32 characters", function () {
+      expect(flagsFor("z".repeat(33))).to.deep.equal(["info"]);
+    });
+
+    it("keeps a valid string array unchanged and wraps a valid string", function () {
+      expect(flagsFor(["admin", "revoke"])).to.deep.equal(["admin", "revoke"]);
+      expect(flagsFor("warning")).to.deep.equal(["warning"]);
+    });
+
+    it("uses ['info'] for an undefined or null flag", function () {
+      expect(flagsFor(undefined)).to.deep.equal(["info"]);
+      expect(flagsFor(null)).to.deep.equal(["info"]);
+    });
+
+    it("keeps the undefined-message behaviour: the message takes the flag string, flags become ['info']", function () {
+      spyOn(console, "warn");
+      const record = audit._buildRecord("owner-fixture", undefined, "warning", MTIME);
+      expect(record.message).to.equal("warning");
+      expect(record.flags).to.deep.equal(["info"]);
+      expect(record.date).to.equal(MTIME);
+      expect(record.expire_at).to.be.instanceOf(Date);
+    });
+  });
+
   describe("fallback to the legacy view (D-19)", function () {
 
     function fallbackFixture() {
