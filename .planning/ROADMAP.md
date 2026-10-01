@@ -241,12 +241,12 @@ Plans:
   4. In the Vue Console, a user can page through the build list, and paging never prunes build records.
   5. The console submodule pointer that carries the Vue paging UI is bumped in this repo and deployed to the Vue console host.
 
-**Plans**: 9 plans
+**Plans**: 1/9 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 26-01-PLAN.md — `_design/paging` docs upserted rev-aware at boot; legacy audit call owner-keyed with string-only flags and a bounded fallback (LOG-01, LOG-02)
+- [x] 26-01-PLAN.md — `_design/paging` docs upserted rev-aware at boot; legacy audit call owner-keyed with string-only flags and a bounded fallback (LOG-01, LOG-02)
 - [ ] 26-03-PLAN.md — D-15 code: audit writers stop logging credential objects; aggregate-only cleanup script (dry run by default)
 - [ ] 26-04-PLAN.md — Retention job for audit and builds on two roots (containment gates, dry run, folder-before-record), host wrapper, runbook
 - [ ] 26-05-PLAN.md — Vue History Load more per table, first-page stores, parseResult keeps paging (plain-node unit proof)
@@ -319,7 +319,7 @@ Plans:
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
-| 26. Vue Console Log Paging | v1.14 | 0/TBD | Not started | - |
+| 26. Vue Console Log Paging | v1.14 | 1/9 | In Progress|  |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 

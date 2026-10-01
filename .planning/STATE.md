@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Phase 26 context gathered
-last_updated: "2026-10-01T14:35:13.305Z"
+stopped_at: Completed 26-01-PLAN.md
+last_updated: "2026-10-01T14:46:10.745Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: 8ef23d8d61013700d523e3fa85ea3d153bdfb08a
+state_head: abe4077d99345960eeef73233644851afff05ae0
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 25
-  percent: 74
+  completed_plans: 26
+  percent: 76
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 1 of 9
-Status: Executing Phase 26
+Plan: 2 of 9
+Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([███████░░░] 74% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([████████░░] 76% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -217,6 +217,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 25]: 25-05: Tier 1 OpenAPI operations carry the XsrfTokenHeader ref only (they also accept Bearer); login/password routes keep header+cookie refs
 - [Phase 25]: 25-05: guarded-route set locked by static CsrfRouteInventorySpec (GUARDED + NOT_GUARDED with reasons); new guards add a row there
 - [Phase 25]: 25-07: admin mutations run csrf.verifyCsrfToken before requireAdmin (inventory spec enforces the order); GET /api/user/rsakey/create guarded as a state-changing GET via the D-18 seam; transfer POSTs are D-11 account mutations, e-mail GETs stay open
+- [Phase 26]: ensureDesignDoc reason tokens come only from statusCode, CouchDB error word, Node error code or timeout, validated; e.message never read (credentialed URL)
+- [Phase 26]: loadPagingDesign accepts only _id _design/paging, so the boot upsert can never write _design/logs (D-13)
+- [Phase 26]: One Audit.stringFlags filter serves read (toAuditItem, both fetch paths) and write (_buildRecord) for D-15
+- [Phase 26]: Audit.fetch D-19 fallback uses first-answer-wins: a late owner-keyed view answer after VIEW_TIMEOUT_MS is dropped
 
 ### Todos
 
@@ -295,9 +299,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T14:28:22Z
+**Last session:** 2026-10-01T14:46:10.641Z
 
-**Stopped at:** Phase 26 planned (9 plans, plan check iter 2 passed); next /gsd-execute-phase 26
+**Stopped at:** Completed 26-01-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -343,3 +347,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 25 P04 | 27 min | 3 tasks | 3 files |
 | Phase 25 P05 | 15 min | 2 tasks | 6 files |
 | Phase 25 P07 | 6min | 3 tasks | 10 files |
+| Phase 26 P01 | 8 min | 2 tasks | 8 files |
