@@ -101,6 +101,10 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   # triage AND a CI hang investigated before it can be switched on.
   #
   # Re-enable by deleting this line — but fix the hang and the failures first.
+  #
+  # One exception is kept on node 0: ZZ-LogPagingCouchSpec.js (phase 26, LOG-03/04
+  # paging against real CouchDB; scratch DBs, no bootstrap app). split-tests deletes
+  # every other ZZ spec. `npm run test` is `jasmine || true`, so read the job log.
   npm run split-tests
   npm run test
 else
