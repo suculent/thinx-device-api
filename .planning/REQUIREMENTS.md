@@ -26,16 +26,16 @@
 
 ### CSRF
 
-- [ ] **SEC-CSRF-02** (WR-06): The CSRF token is HMAC-signed and bound to the session id; the priming GET creates a short-TTL pre-session; a stale/invalid token is re-minted rather than echoed; the key comes from `CSRF_SECRET` (HKDF-from-session-secret fallback, fail closed, never random); a `CSRF_MODE` (legacy|signed) switch allows rollback independently of `CSRF_ENFORCE`; the wire contract (`XSRF-TOKEN` / `X-XSRF-TOKEN` / `…/csrf-token` / `csrf_token_invalid`) is unchanged
-- [ ] **SEC-CSRF-03**: The session id is regenerated at every interactive login (password, token login, Google, GitHub) but not on the per-request Bearer bridge; the login response sets the new `XSRF-TOKEN`; logout clears it
-- [ ] **SEC-CSRF-04** (WR-04): `POST /api/v2/user` requires a valid CSRF token (no machine-client exemption); the priming contract is documented in OpenAPI
-- [ ] **SEC-CSRF-05**: Cookie-authenticated mutation routes (`DELETE /api/v2/user`, `POST /api/user/delete`, `/api/gdpr/revoke`, `/api/v2/profile`) require the CSRF token; Bearer / API-key requests stay exempt
-- [ ] **SEC-CSRF-06**: Under enforcement, cold login on both consoles, Google and GitHub OAuth, a forced `thinx_api` redeploy mid-session, and the classic register / forgot-password / reset-confirm flows all work
+- [x] **SEC-CSRF-02** (WR-06): The CSRF token is HMAC-signed and bound to the session id; the priming GET creates a short-TTL pre-session; a stale/invalid token is re-minted rather than echoed; the key comes from `CSRF_SECRET` (HKDF-from-session-secret fallback, fail closed, never random); a `CSRF_MODE` (legacy|signed) switch allows rollback independently of `CSRF_ENFORCE`; the wire contract (`XSRF-TOKEN` / `X-XSRF-TOKEN` / `…/csrf-token` / `csrf_token_invalid`) is unchanged
+- [x] **SEC-CSRF-03**: The session id is regenerated at every interactive login (password, token login, Google, GitHub) but not on the per-request Bearer bridge; the login response sets the new `XSRF-TOKEN`; logout clears it
+- [x] **SEC-CSRF-04** (WR-04): `POST /api/v2/user` requires a valid CSRF token (no machine-client exemption); the priming contract is documented in OpenAPI
+- [x] **SEC-CSRF-05**: Cookie-authenticated mutation routes (`DELETE /api/v2/user`, `POST /api/user/delete`, `/api/gdpr/revoke`, `/api/v2/profile`) require the CSRF token; Bearer / API-key requests stay exempt
+- [x] **SEC-CSRF-06**: Under enforcement, cold login on both consoles, Google and GitHub OAuth, a forced `thinx_api` redeploy mid-session, and the classic register / forgot-password / reset-confirm flows all work
 
 ### Console Edge
 
-- [ ] **SEC-CSP-03**: The gluster `/mnt/gluster/deployment/swarm/console/default.conf` is the canonical console header config, hardened with `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`; each console host emits exactly one CSP header
-- [ ] **SEC-CSP-04**: Both image `default.conf` files (classic + Vue) and the `.planning/runbooks/swarm-configs/` snapshots mirror the gluster headers; a normalising parity script confirms it
+- [x] **SEC-CSP-03**: The gluster `/mnt/gluster/deployment/swarm/console/default.conf` is the canonical console header config, hardened with `Referrer-Policy`, `Permissions-Policy` and `X-Permitted-Cross-Domain-Policies: none`; each console host emits exactly one CSP header
+- [x] **SEC-CSP-04**: Both image `default.conf` files (classic + Vue) and the `.planning/runbooks/swarm-configs/` snapshots mirror the gluster headers; a normalising parity script confirms it
 
 ### Log Paging
 
@@ -89,13 +89,13 @@
 | SEC-PATH-01 | Phase 23 | Complete |
 | SEC-PATH-02 | Phase 23 | Complete |
 | SEC-CFG-02 | Phase 24 | Complete |
-| SEC-CSRF-02 | Phase 25 | Pending |
-| SEC-CSRF-03 | Phase 25 | Pending |
-| SEC-CSRF-04 | Phase 25 | Pending |
-| SEC-CSRF-05 | Phase 25 | Pending |
-| SEC-CSRF-06 | Phase 25 | Pending |
-| SEC-CSP-03 | Phase 25 | Pending |
-| SEC-CSP-04 | Phase 25 | Pending |
+| SEC-CSRF-02 | Phase 25 | Complete |
+| SEC-CSRF-03 | Phase 25 | Complete |
+| SEC-CSRF-04 | Phase 25 | Complete |
+| SEC-CSRF-05 | Phase 25 | Complete |
+| SEC-CSRF-06 | Phase 25 | Complete |
+| SEC-CSP-03 | Phase 25 | Complete |
+| SEC-CSP-04 | Phase 25 | Complete |
 | LOG-01 | Phase 26 | Pending |
 | LOG-02 | Phase 26 | Pending |
 | LOG-03 | Phase 26 | Pending |
@@ -115,4 +115,4 @@
 
 ---
 *Requirements defined: 2026-09-25*
-*Last updated: 2026-09-25 after roadmap creation (traceability mapped to Phases 22–28)*
+*Last updated: 2026-10-01 after Phase 25 (SEC-CSRF-02..06, SEC-CSP-03/04 complete)*
