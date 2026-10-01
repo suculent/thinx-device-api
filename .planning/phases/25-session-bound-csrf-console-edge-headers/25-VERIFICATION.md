@@ -1,7 +1,8 @@
 ---
 phase: 25-session-bound-csrf-console-edge-headers
 verified: 2026-10-01T13:05:00Z
-status: human_needed
+status: passed
+human_signoff: "2026-10-01: operator confirmed all five human_verification items (production change discipline, no sensitive values, non-destructive testing, gate discipline, gluster in-place edit)"
 score: 9/9 must-haves verified (5 roadmap SCs + 4 review-fix truths); debt-marker gate passes
 covered_files:
   - .circleci/config.yml
@@ -247,3 +248,7 @@ Remaining non-blocking follow-ups:
 
 _Verified: 2026-10-01T13:05:00Z (re-verification; initial run 12:40:00Z)_
 _Verifier: Claude (gsd-verifier)_
+
+## Operator sign-off (2026-10-01)
+
+The operator confirmed all five `human_verification` items: (1) production change discipline and (2) no sensitive values in commits, (3) non-destructive testing, (4) gate discipline, (5) the gluster in-place edit. Status moves from `human_needed` to `passed`.
