@@ -1,0 +1,12 @@
+{
+  "_id": "_design/paging",
+  "language": "javascript",
+  "views": {
+    "audit_by_owner_date": {
+      "map": "function (doc) { if (typeof doc.owner !== 'string' || doc.owner.length === 0) return; var d = doc.date; if (typeof d === 'number' && isFinite(d)) { d = new Date(d).toISOString(); } if (typeof d !== 'string' || d.length === 0) return; var src = Array.isArray(doc.flags) ? doc.flags : [doc.flags]; var flags = []; for (var i = 0; i < src.length; i++) { if (typeof src[i] === 'string' && src[i].length > 0 && src[i].length <= 32) flags.push(src[i]); } if (flags.length === 0) flags.push('info'); emit([doc.owner, d], { date: d, message: (typeof doc.message === 'string') ? doc.message : String(doc.message), flags: flags }); }"
+    },
+    "audit_by_date": {
+      "map": "function (doc) { var d = doc.date; if (typeof d === 'number' && isFinite(d)) { d = new Date(d).toISOString(); } if (typeof d !== 'string' || d.length === 0) return; emit(d, doc._rev); }"
+    }
+  }
+}

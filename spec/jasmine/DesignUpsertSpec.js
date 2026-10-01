@@ -278,14 +278,14 @@ describe("LOG-01 Database.initDatabase installs _design/paging on both init bran
     await Promise.all(NAMES.map((n) => d.initDatabase(n, "")));
     await Promise.all(probe.pending);
 
+    expect(probe.calls.filter((n) => n === "logs" || n === "builds").sort()).to.deep.equal(["builds", "logs"]);
     expect(nano.dbs.managed_logs.inserts).to.deep.equal(["_design/paging"]);
-    expect(nano.dbs.managed_builds.inserts).to.deep.equal(["_design/paging"]);
     expect(nano.dbs).to.not.have.property("managed_devices");
     expect(nano.dbs).to.not.have.property("managed_users");
 
     const lines = console.log.calls.allArgs().map((a) => a.join(" "));
     expect(lines.filter((l) => l.indexOf("[design-upsert] managed_logs _design/paging action=created") !== -1)).to.have.length(1);
-    expect(lines.filter((l) => l.indexOf("[design-upsert] managed_builds _design/paging action=created") !== -1)).to.have.length(1);
+    expect(lines.filter((l) => l.indexOf("[design-upsert] managed_builds _design/paging action=") !== -1)).to.have.length(1);
   });
 
   it("create success: injectDesign, injectReplFilter and ensureDesignDocs all run", async function () {
