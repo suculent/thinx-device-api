@@ -26,7 +26,10 @@
  *     carry the upstream CSP plus the console CSP (D-19).
  *   - More than one server-level CSP add_header, an empty header value, a file with no
  *     server-level add_header, a missing or unreadable file, or an unparseable file all fail.
- * There is no allowlist, skip flag or exception table: drift is fixed in the mirrored files.
+ * There is no allowlist or skip flag: drift is fixed in the mirrored files. One exception (25-09):
+ * the Vue image config (EVAL_OPTIONAL) may omit 'unsafe-eval' from script-src, because its build
+ * asserts that token is absent (vue/tests/security/csp.cjs) while the canonical CSP keeps it for the
+ * classic console. Only that token, only in script-src, only in that file.
  *
  * Usage:
  *   node scripts/check-console-headers.js                      # default inputs
@@ -55,6 +58,10 @@ const DEFAULT_INPUTS = [
     "services/console/vue/default.conf",
     ".planning/runbooks/swarm-configs/rtm.thinx.cloud-server.post.nginx"
 ].map((relative) => path.join(REPO_ROOT, relative));
+
+// The one file allowed to drop 'unsafe-eval' from script-src (see the header comment).
+const EVAL_OPTIONAL = [path.join(REPO_ROOT, "services/console/vue/default.conf")];
+const UNSAFE_EVAL = "'unsafe-eval'";
 
 const CSP = "content-security-policy";
 const PERMISSIONS_POLICY = "permissions-policy";
@@ -308,7 +315,8 @@ function cspDifference(canonicalValue, otherValue) {
  * Compares two normalise() results.
  * Returns { drift: [{ header, canonical, other }], warnings: [{ header, canonical, other }] }.
  */
-function compare(canonical, other) {
+function compare(canonical, other, options) {
+    if (options && options.evalOptional) canonical = withoutOmittedEval(canonical, other);
     const drift = [];
     const warnings = [];
     const names = Array.from(new Set(Object.keys(canonical || {}).concat(Object.keys(other || {})))).sort();
@@ -332,6 +340,20 @@ function compare(canonical, other) {
         }
     }
     return { drift, warnings };
+}
+
+// The canonical headers with 'unsafe-eval' dropped from script-src when the other side's
+// script-src lacks it; unchanged otherwise.
+function withoutOmittedEval(canonical, other) {
+    const a = canonical && canonical[CSP];
+    const b = other && other[CSP];
+    if (!a || !b) return canonical;
+    const theirs = new Map(cspDirectives(b.value));
+    if (!theirs.has("script-src") || theirs.get("script-src").includes(UNSAFE_EVAL)) return canonical;
+    const value = cspDirectives(a.value)
+        .map(([d, sources]) => [d].concat(d === "script-src" ? sources.filter((x) => x !== UNSAFE_EVAL) : sources).join(" "))
+        .join("; ");
+    return Object.assign({}, canonical, { [CSP]: Object.assign({}, a, { value }) });
 }
 
 function display(file) {
@@ -375,7 +397,8 @@ function load(file, label, problems) {
  * Checks the canonical file and every compared file.
  * Returns { ok, files, problems: [line], warnings: [line] }.
  */
-function checkFiles(canonicalPath, otherPaths) {
+function checkFiles(canonicalPath, otherPaths, options) {
+    const evalOptional = new Set(((options && options.evalOptional) || EVAL_OPTIONAL).map((p) => path.resolve(p)));
     const problems = [];
     const warnings = [];
     const others = otherPaths || [];
@@ -387,7 +410,7 @@ function checkFiles(canonicalPath, otherPaths) {
         const label = display(file);
         const parsed = load(file, label, problems);
         if (!parsed || !canonicalHeaders || parsed.headers.length === 0) continue;
-        const result = compare(canonicalHeaders, normalise(parsed.headers));
+        const result = compare(canonicalHeaders, normalise(parsed.headers), { evalOptional: evalOptional.has(path.resolve(file)) });
         for (const d of result.drift) {
             problems.push("DRIFT " + label + " " + d.header + ": canonical=" + d.canonical + " other=" + d.other);
         }
@@ -447,7 +470,7 @@ function main(argv) {
     return 1;
 }
 
-module.exports = { parse, normalise, compare, checkFiles, parseArgs, DEFAULT_INPUTS };
+module.exports = { parse, normalise, compare, checkFiles, parseArgs, DEFAULT_INPUTS, EVAL_OPTIONAL };
 
 if (require.main === module) {
     process.exitCode = main(process.argv.slice(2));

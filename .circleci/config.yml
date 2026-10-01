@@ -672,6 +672,10 @@ jobs:
           sh ./get-tests.sh
 
     - run:
+        name: Console header parity (SEC-CSP-04)
+        command: node scripts/check-console-headers.js && node --test spec/node/ConsoleHeaderParity.test.js
+
+    - run:
         name: Create Circle CI Artifacts Folders
         command: |
           mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS

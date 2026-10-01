@@ -91,3 +91,54 @@ also lacks the production-only CloudFront and cdnjs hosts.
 
 Until step 3 lands, **any CSP change intended to reach production must edit the gluster file**, and
 any verification of SEC-CSP-01 must target it.
+
+## Phase 25 state (2026-10-01): hardened, mirrored, gated
+
+The table above is historical. Since 25-09 the gluster file is hardened, and both images mirror it.
+
+**Live on both hosts** (from the gluster file, swarm commit `9b7b055`):
+
+- `X-Permitted-Cross-Domain-Policies: none`, `Referrer-Policy: strict-origin-when-cross-origin` and
+  `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()`,
+  all `always` (D-13, D-14). Chrome logs "Unrecognized feature: 'interest-cohort'" for the last one.
+  That message is harmless and is not a CSP problem.
+- **Exactly one CSP per response, proxied paths included (D-19).** Each of the five proxy locations
+  (`/<64 hex>`, `/login`, `/logout`, `/api/`, `/device/`) sets `proxy_hide_header
+  Content-Security-Policy;`. The console's server-level CSP is therefore the only one on proxied
+  API responses; before this they carried two, the API's and nginx's.
+- The CSP value itself did not change.
+- `scripts/console-live-headers.sh` checks all of this against production and prints `LIVE-HEADERS OK`.
+
+**Mirrors and the gate.** `services/console/src/default.conf` and `services/console/vue/default.conf`
+carry the same header set, each with its build placeholder. `scripts/check-console-headers.js`
+compares them with `swarm-configs/console-default.conf.prod` and `rtm.thinx.cloud-server.post.nginx`.
+`pre.nginx` is historical and excluded (D-20). The CircleCI `test` job runs the check as the step
+"Console header parity (SEC-CSP-04)", so drift fails CI.
+
+**The one allowed difference.** The Vue image's `script-src` omits `'unsafe-eval'`. The Vue build
+asserts that token is absent (`vue/tests/security/csp.cjs`, run by `yarn test:csp:dist` in
+`vue/Dockerfile`), while the canonical CSP keeps it for the classic console. The parity check allows
+exactly that token, only in `script-src`, only in that file (`EVAL_OPTIONAL`). Because the bind mount
+decides production, `console.thinx.cloud` still serves `'unsafe-eval'`. Giving it its own stricter
+CSP is the **SEC-CSP-05** follow-up.
+
+**Edit procedure (D-15).** On `micro`, in `/mnt/gluster/deployment/swarm`:
+
+1. Commit the live `console/default.conf` as the rollback point.
+2. Build the new file elsewhere and validate it:
+   `docker run --rm --entrypoint nginx -v <new>:/etc/nginx/conf.d/default.conf:ro <thinx_vue image> -t`.
+3. Write it **in place** with `cat new > console/default.conf`. The single-file bind mount pins the
+   inode, so never `mv` or `cp` over it.
+4. `docker service update --force --no-resolve-image thinx_console`, then the same for `thinx_vue`.
+5. Run `bash scripts/console-live-headers.sh`, commit the file, then refresh `console-default.conf.prod`
+   and `rtm.thinx.cloud-server.post.nginx` and mirror both image configs.
+
+**Rollback.** Restore the previous file in place, then force both consoles:
+
+```bash
+git show 73d97be:console/default.conf > console/default.conf
+```
+
+`73d97be` is the pre-Phase-25 file; `9b7b055` is the hardened file.
+
+**Backlog.** `/nginx_status` is publicly reachable on both hosts.

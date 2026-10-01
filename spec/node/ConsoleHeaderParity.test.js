@@ -210,3 +210,29 @@ test("identical files pass with HEADER-PARITY OK semantics and the CLI defaults 
     assert.throws(() => parseArgs(["--skip", "x"]), /unknown argument/);
     assert.throws(() => parseArgs(["--live"]), /requires a path/);
 });
+
+// 25-09: the Vue image build asserts script-src has no 'unsafe-eval' (vue/tests/security/csp.cjs),
+// while the canonical gluster CSP keeps it for the classic console. The Vue image config alone may
+// omit that one token from script-src; every other difference there is still DRIFT.
+test("the Vue image config may omit 'unsafe-eval' from script-src, and nothing else", () => {
+    const canonical = tmpFile("eval-canonical.conf", BASE);
+    const strict = tmpFile("eval-vue-strict.conf", BASE.replace(" 'unsafe-eval'", ""));
+    const ok = checkFiles(canonical, [strict], { evalOptional: [strict] });
+    assert.equal(ok.ok, true, ok.problems.join("\n"));
+
+    const notVue = checkFiles(canonical, [strict]);
+    assert.ok(notVue.problems.some((line) => /^DRIFT .*eval-vue-strict\.conf content-security-policy: canonical=script-src 'unsafe-eval' other=\(none\)$/.test(line)), notVue.problems.join("\n"));
+
+    const alsoDrops = tmpFile("eval-vue-more.conf", BASE.replace(" 'unsafe-eval'", "").replace("script-src 'self' https://a.example", "script-src 'self'"));
+    const more = checkFiles(canonical, [alsoDrops], { evalOptional: [alsoDrops] });
+    assert.ok(more.problems.some((line) => /^DRIFT .*eval-vue-more\.conf content-security-policy: canonical=script-src https:\/\/a\.example other=\(none\)$/.test(line)), more.problems.join("\n"));
+
+    const elsewhere = tmpFile("eval-vue-elsewhere.conf", BASE.replace("default-src 'self'", "default-src 'self' 'unsafe-eval'"));
+    const added = checkFiles(canonical, [elsewhere], { evalOptional: [elsewhere] });
+    assert.equal(added.ok, false, "'unsafe-eval' outside script-src is still drift");
+});
+
+test("the default eval exception names only the Vue image config", () => {
+    const { EVAL_OPTIONAL } = require(path.join(__dirname, "../../scripts/check-console-headers.js"));
+    assert.deepEqual(EVAL_OPTIONAL.map((p) => path.relative(path.join(__dirname, "../.."), p)), ["services/console/vue/default.conf"]);
+});
