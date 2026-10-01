@@ -1,13 +1,12 @@
-# Captured: 2026-09-25T08:42Z (Phase 21 / Plan 21-05 runbook work; read-only)
-# Source: docker exec 230ffceddb73 nginx -T (inside thinx_vue.1.4r6rx1vh0lhl7clxija3b1ro0, node micro) -- conf.d/default.conf section only
+# Captured: 2026-10-01T11:08Z (Phase 25 / Plan 25-09, after header hardening; read-only)
+# Source: docker exec b4d47f890d8c nginx -T (inside thinx_vue.1.oakxu7yofondkcgdp6gugma9e, node micro) -- conf.d/default.conf section only
 # Live file: /etc/nginx/conf.d/default.conf in BOTH thinx_vue and thinx_console is a read-only bind mount of
-#   /mnt/gluster/deployment/swarm/console/default.conf (md5 f4e9fde797f43effa7a8104c387cf5b7, 4682 bytes, mtime 2026-09-24T15:07:50Z)
+#   /mnt/gluster/deployment/swarm/console/default.conf (md5 cf25f5486a472a280023c25ea20dfba4, 5147 bytes, mtime 2026-10-01T11:07:44Z)
 #   == .planning/runbooks/swarm-configs/console-default.conf.prod. See .planning/runbooks/console-csp-source-of-truth.md.
 # Routing: rtm.thinx.cloud -> thinx_console (:swarm, node core); console.thinx.cloud -> thinx_vue (:vue, node micro).
-#   One mounted file serves both; the live Content-Security-Policy header on both hosts matched this file at capture time.
-# Captured by: Claude (GSD 21-05 executor)
-# Note: pre and post are byte-identical by design -- the 21-05 CSRF enforce flip is API-side (thinx_api) and does not touch nginx.
-#   Replaces the 2026-06-05 (Phase 13) capture, which predated SEC-CSP-01 (2026-09-19) and the cdn.rollbar.com edit (2026-09-24).
+# Captured by: Claude (GSD 25-09)
+# Note: hardened per D-13/D-14/D-19 -- XPCDP none, Referrer-Policy, Permissions-Policy (all "always"), and
+#   proxy_hide_header Content-Security-Policy on the five proxy locations. Swarm commits: rollback 73d97be, harden 9b7b055.
 
 # configuration file /etc/nginx/conf.d/default.conf:
 server {
@@ -28,7 +27,9 @@ server {
     add_header "X-Content-Type-Options" "nosniff";
     add_header "Strict-Transport-Security" "max-age=31536000; includeSubDomains; preload" always;
     add_header "X-Download-Options" "noopen";
-    add_header "X-Permitted-Cross-Domain-Policies" "all";
+    add_header "X-Permitted-Cross-Domain-Policies" "none" always;
+    add_header "Referrer-Policy" "strict-origin-when-cross-origin" always;
+    add_header "Permissions-Policy" "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" always;
     add_header "Content-Security-Policy" "default-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com https://cdn.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com https://*.gravatar.com https://gravatar.com https://avatars.githubusercontent.com data: blob:; connect-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud wss://app.thinx.cloud wss://rtm.thinx.cloud wss://console.thinx.cloud https://*.crisp.chat wss://client.relay.crisp.chat https://www.google-analytics.com https://api.rollbar.com; frame-ancestors 'self'; form-action 'self' https://github.com; object-src 'none'; base-uri 'self'; script-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://www.google-analytics.com https://api.rollbar.com https://cdn.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com 'unsafe-eval'; script-src-attr 'none'; style-src 'self' https://app.thinx.cloud https://rtm.thinx.cloud https://console.thinx.cloud https://*.crisp.chat https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://api.rollbar.com https://d37gvrvc0wt4s1.cloudfront.net https://cdnjs.cloudflare.com https://*.gravatar.com https://gravatar.com https://avatars.githubusercontent.com data: blob: 'unsafe-inline'" always;
     
     charset utf-8;
@@ -43,6 +44,7 @@ server {
         resolver 127.0.0.11 valid=1s;
         set $endpoint "api";
         proxy_pass http://$endpoint:7442;
+        proxy_hide_header Content-Security-Policy;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade $http_upgrade;
@@ -62,6 +64,7 @@ server {
         set $endpoint "api";
         rewrite ^(.*) $1 break;
         proxy_pass http://$endpoint:7442;
+        proxy_hide_header Content-Security-Policy;
         proxy_buffering off;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -73,6 +76,7 @@ server {
         set $endpoint "api";
         rewrite ^(.*) $1 break;
         proxy_pass http://$endpoint:7442;
+        proxy_hide_header Content-Security-Policy;
         proxy_buffering off;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -84,6 +88,7 @@ server {
         set $endpoint "api";
         rewrite ^(.*) $1 break;
         proxy_pass http://$endpoint:7442;
+        proxy_hide_header Content-Security-Policy;
         proxy_buffering off;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -95,6 +100,7 @@ server {
         set $endpoint "api";
         rewrite ^(.*) $1 break;
         proxy_pass http://$endpoint:7442;
+        proxy_hide_header Content-Security-Policy;
         proxy_buffering off;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -113,3 +119,4 @@ server {
 
     error_log /var/log/nginx/error.log warn;
 }
+
