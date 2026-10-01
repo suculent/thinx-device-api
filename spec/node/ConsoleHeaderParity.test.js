@@ -50,18 +50,29 @@ test("CSP directive order, source order, header-name case, quote style and white
     assert.equal(compare(headersOf(BASE), headersOf(changed)).drift.length, 1);
 });
 
-test("`always` present on one side only is a WARN, not a failure", () => {
-    const noAlways = BASE.replace(/" always;/, '";');
-    const result = compare(headersOf(BASE), headersOf(noAlways));
+test("`always` present on one side only is a WARN for a non-CSP header", () => {
+    const withAlways = BASE.replace('"X-Frame-Options" "DENY";', '"X-Frame-Options" "DENY" always;');
+    const result = compare(headersOf(withAlways), headersOf(BASE));
     assert.deepEqual(result.drift, []);
     assert.equal(result.warnings.length, 1);
-    assert.equal(result.warnings[0].header, "content-security-policy");
+    assert.equal(result.warnings[0].header, "x-frame-options");
 
-    const canonical = tmpFile("always-canonical.conf", BASE);
-    const other = tmpFile("always-other.conf", noAlways);
-    const report = checkFiles(canonical, [other]);
+    const report = checkFiles(tmpFile("always-canonical.conf", withAlways), [tmpFile("always-other.conf", BASE)]);
     assert.equal(report.ok, true, report.problems.join("\n"));
-    assert.ok(report.warnings.some((line) => /^WARN always .*always-other\.conf content-security-policy/.test(line)), report.warnings.join("\n"));
+    assert.ok(report.warnings.some((line) => /^WARN always .*always-other\.conf x-frame-options/.test(line)), report.warnings.join("\n"));
+});
+
+// 25-REVIEW WR-01: every proxy location hides the API's CSP (D-19), so a console CSP
+// without `always` would leave proxied 4xx/5xx responses with no CSP at all.
+test("a CSP add_header without `always` is CSP-NOT-ALWAYS in any file, canonical included", () => {
+    const noAlways = BASE.replace(/" always;/, '";');
+    const asOther = checkFiles(tmpFile("csp-always-canonical.conf", BASE), [tmpFile("csp-noalways-other.conf", noAlways)]);
+    assert.equal(asOther.ok, false);
+    assert.ok(asOther.problems.some((line) => /^CSP-NOT-ALWAYS .*csp-noalways-other\.conf:\d+/.test(line)), asOther.problems.join("\n"));
+
+    const asCanonical = checkFiles(tmpFile("csp-noalways-canonical.conf", noAlways), [tmpFile("csp-always-other.conf", BASE)]);
+    assert.equal(asCanonical.ok, false);
+    assert.ok(asCanonical.problems.some((line) => /^CSP-NOT-ALWAYS .*csp-noalways-canonical\.conf:\d+/.test(line)), asCanonical.problems.join("\n"));
 });
 
 test("__WEB_HOSTNAME__ / __NGINX_HOST__ placeholder sources are dropped before comparison", () => {

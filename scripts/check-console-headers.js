@@ -18,7 +18,8 @@
  *     lower-cased; values unquoted with whitespace collapsed; Content-Security-Policy split into
  *     directives (names lower-cased, sources sorted, the __WEB_HOSTNAME__ / __NGINX_HOST__ build
  *     placeholders dropped, directives sorted); Permissions-Policy features compared as a set.
- *     `always` is ignored for equality and reported as a WARN when only one side has it.
+ *     `always` is ignored for equality and reported as a WARN when only one side has it,
+ *     except on the CSP: a CSP add_header without `always` fails (CSP-NOT-ALWAYS).
  *   - add_header inside a location (or any nested block) is a failure: nginx then drops every
  *     inherited server-level header, CSP included, on that path.
  *   - A block with proxy_pass whose effective proxy_hide_header set (its own, else inherited, as
@@ -39,7 +40,7 @@
  *                                                              # the live gluster file); repeatable
  *   const { checkFiles } = require('./scripts/check-console-headers');
  *
- * Output: one line per problem (DRIFT, LOCATION-ADD-HEADER, PROXY-CSP-NOT-HIDDEN, DUPLICATE-CSP,
+ * Output: one line per problem (DRIFT, LOCATION-ADD-HEADER, PROXY-CSP-NOT-HIDDEN, DUPLICATE-CSP, CSP-NOT-ALWAYS,
  * DUPLICATE-HEADER, EMPTY-VALUE, MALFORMED, NO-HEADERS, MISSING, UNPARSEABLE), WARN lines, then
  * `HEADER-PARITY OK files=N` (exit 0) or `HEADER-PARITY FAIL files=N problems=M` (exit 1).
  * Exit 2 on a usage error. Only node built-ins (fs, path) are used.
@@ -205,6 +206,11 @@ function parse(text) {
             if (args.length > 3 || (args.length === 3 && args[2] !== "always")) {
                 problems.push({ type: "MALFORMED", line, detail: "add_header " + args.join(" ") });
                 continue;
+            }
+            if ((String(args[0]).toLowerCase() === CSP) && (args.length !== 3)) {
+                // 25-REVIEW WR-01: proxy locations hide the upstream CSP (D-19), so without
+                // `always` a proxied 4xx/5xx response would carry no CSP at all.
+                problems.push({ type: "CSP-NOT-ALWAYS", line, detail: "add_header " + args[0] });
             }
             headers.push({ name: args[0], value: args[1], always: args.length === 3, line });
         } else if (name === "proxy_pass") {
