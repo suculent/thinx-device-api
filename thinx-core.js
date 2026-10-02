@@ -163,7 +163,9 @@ module.exports = class THiNX extends EventEmitter {
           var db = new Database();
           db.init((/* db_err, dbs */) => {
 
-            InfluxConnector.createDB('stats');
+            // D-03: converge the InfluxDB 2 `stats` bucket to 90-day retention
+            // (one log line, never rejects; a no-op without INFLUXDB_TOKEN).
+            InfluxConnector.ensureStatsBucket().catch(() => { /* never fatal */ });
 
             //
             // Log aggregator (needs DB)

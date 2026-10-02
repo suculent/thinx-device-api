@@ -34,6 +34,8 @@
     "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "1.35.0",
+    "@influxdata/influxdb-client-apis": "1.35.0",
     "@slack/rtm-api": "^7.0.4",
     "@slack/web-api": "^8.1.1",
     "axios": "1.20.0",
@@ -52,7 +54,6 @@
     "express-session": "^1.19.0",
     "fs-extra": "^11.3.6",
     "helmet": "^8.1.0",
-    "influx": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
     "mailgun.js": "^14.0.1",
     "md5": "^2.3.0",
