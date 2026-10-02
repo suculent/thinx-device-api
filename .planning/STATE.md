@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
 status: executing
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-10-02T16:59:28.508Z"
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-10-02T17:12:31.005Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 81c2a81a5b1bbefa457030a03e2c3fb2627e3c68
+state_head: 2151ebea39bcbcd0830304987440641b61514c65
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 36
-  percent: 84
+  completed_plans: 37
+  percent: 86
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([████████░░] 84% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 86% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -246,6 +246,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: A6 settled on Linux: uid 65532 cannot read a root-0700 1.8 copy, so the cutover chown -R 65532:65532 is required
 - [Phase 27]: Phase 27 backup p27_backup=influx-1.8-portable-20261002T1650Z (T 2026-10-02T16:50:14Z) held root-only on core and micro until 27-07 (D-02); restore and rehearsal counts equal (2379)
 - [Phase 27]: The stats rename to 90d is left to the API boot ensure (adopt) in 27-06; rehearsal proved one PATCH keeps bucket id and DBRP mapping
+- [Phase 27]: 27-02: InfluxDB client packages pinned exactly at 1.35.0 (T-27-SC)
+- [Phase 27]: 27-02: CI test compose uses DHI influxdb:2.9.1 with tmpfs uid 65532 form; A5 fallback not needed locally (Compose v5.5.1)
+- [Phase 27]: 27-02: host-side curl health waits against docker-published ports need --retry-all-errors (docker-proxy answers empty reply, exit 52)
 
 ### Todos
 
@@ -324,9 +327,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-02T16:59:28.342Z
+**Last session:** 2026-10-02T17:12:30.875Z
 
-**Stopped at:** Completed 27-01-PLAN.md
+**Stopped at:** Completed 27-02-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -383,3 +386,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 26 P08 | 21 min | 3 tasks | 1 files |
 | Phase 26 P10 | 15min | 3 tasks | 4 files |
 | Phase 27 P01 | 8 min | 2 tasks | 2 files |
+| Phase 27 P02 | 15 min | 2 tasks | 8 files |
