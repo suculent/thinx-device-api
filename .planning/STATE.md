@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
 status: executing
-stopped_at: Completed 27-02-PLAN.md
-last_updated: "2026-10-02T17:12:31.005Z"
+stopped_at: Completed 27-08-PLAN.md
+last_updated: "2026-10-02T17:18:27.385Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 2151ebea39bcbcd0830304987440641b61514c65
+state_head: 7d8256b081a2d7091e67c1d845f0fa69b1c54969
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 37
-  percent: 86
+  completed_plans: 38
+  percent: 88
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 86% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 88% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -249,6 +249,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-02: InfluxDB client packages pinned exactly at 1.35.0 (T-27-SC)
 - [Phase 27]: 27-02: CI test compose uses DHI influxdb:2.9.1 with tmpfs uid 65532 form; A5 fallback not needed locally (Compose v5.5.1)
 - [Phase 27]: 27-02: host-side curl health waits against docker-published ports need --retry-all-errors (docker-proxy answers empty reply, exit 52)
+- [Phase 27]: 27-08: the dhi.io login lives in CircleCI 'Starting Influx' (once per job, stdin), before the first DHI pull; 'Starting Support Services' no longer logs in
+- [Phase 27]: 27-08: dev influxdb-setup one-shot treats 'has already been set up' as success because the dev data dir persists
+- [Phase 27]: 27-08: setup one-shots create bucket stats without retention; ensureStatsBucket() at api boot alone sets 90 days
 
 ### Todos
 
@@ -327,9 +330,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-02T17:12:30.875Z
+**Last session:** 2026-10-02T17:18:27.246Z
 
-**Stopped at:** Completed 27-02-PLAN.md
+**Stopped at:** Completed 27-08-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -387,3 +390,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 26 P10 | 15min | 3 tasks | 4 files |
 | Phase 27 P01 | 8 min | 2 tasks | 2 files |
 | Phase 27 P02 | 15 min | 2 tasks | 8 files |
+| Phase 27 P08 | 6min | 2 tasks | 3 files |
