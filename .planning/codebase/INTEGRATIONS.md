@@ -94,17 +94,16 @@ Integrations consumed by the main backend API (`thinx-device-api`). The `service
   - Slack bot token: `__SLACK_BOT_TOKEN__`
   - Slack conversation id cache
 
-**Time-series — InfluxDB 1.8**
+**Time-series — InfluxDB 2 (Phase 27)**
 
-- Image: `influxdb:1.8` (`docker-compose.yml` L242)
-- Network alias: `influxdb`, port `8086`
-- Client: `influx` ^5.11.0 (`lib/thinx/influx.js` L1)
-- Connection: `host: 'influxdb', port: 8086, protocol: 'http'` — hardcoded in `lib/thinx/influx.js` L7-11 and L156-161
-- Database: `stats` (created at boot — `InfluxConnector.createDB('stats')` in `thinx-core.js` L156)
-- Retention policy: `31d` with replication 1 (L173)
-- Measurements: `APIKEY_INVALID`, `LOGIN_INVALID`, `DEVICE_NEW`, `DEVICE_CHECKIN`, `DEVICE_REVOCATION`, `BUILD_STARTED`, `BUILD_SUCCESS`, `BUILD_FAILED` (`lib/thinx/influx.js` L28-39)
-- Auth: env `INFLUXDB_USERNAME`, `INFLUXDB_PASSWORD` (compose-level — not currently passed into client config)
-- Optional companion: `chronograf:1.9` exposed on `8888` (`docker-compose.yml` L255)
+- Image: `dhi.io/influxdb:2.9.1` (Docker Hardened Image, Debian 13, uid 65532; `docker-compose.yml` L253, `docker-compose.test.yml`). DHI ships no `influx` CLI or shell, so CLI work (onboarding, backup, token creation, `influxd upgrade`) runs in one-shot official `influxdb:2.9.1` containers, e.g. the `influxdb-setup` service (`docker-compose.yml` L274).
+- Configuration: `INFLUXD_*` env only, no config file (D-16): `INFLUXD_BOLT_PATH`, `INFLUXD_ENGINE_PATH`, `INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE=256m`, `INFLUXD_STORAGE_MAX_CONCURRENT_COMPACTIONS=1`, `INFLUXD_LOG_LEVEL=error`, `INFLUXD_REPORTING_DISABLED=true`. Data dir `/var/lib/influxdb2`, bound from `/mnt/gluster/thinx/influxdb2` (owned by 65532).
+- Network alias: `influxdb`, port `8086`; the built-in InfluxDB 2 UI replaces Chronograf, which is retired (D-13).
+- Client: `@influxdata/influxdb-client` 1.35.0 plus `@influxdata/influxdb-client-apis` 1.35.0, pinned exactly (`lib/thinx/influx.js`). Queries are Flux built only with the `flux` tagged template; owner and measurement reach Flux as parameters.
+- Connection config: `INFLUXDB_URL` (env, default `http://influxdb:8086`), `INFLUXDB_ORG` (env, default `thinx`), `INFLUXDB_TOKEN` via `readSecret()` (Docker secret `/run/secrets/INFLUXDB_TOKEN`, else env). Without a token the connector logs one line and statistics stay disabled (writes are no-ops, queries return zeros).
+- Bucket: `stats` with 90-day retention (7776000 s), ensured at boot by `InfluxConnector.ensureStatsBucket()` in `thinx-core.js` (created / adopted from `stats/autogen` / updated / unchanged / skipped / failed; one `[influx] ensure bucket=` log line, never rejects).
+- Measurements (unchanged, from the event taxonomy via `InfluxConnector.measurements()`): `APIKEY_INVALID`, `LOGIN_INVALID`, `DEVICE_NEW`, `DEVICE_CHECKIN`, `DEVICE_REVOCATION`, `BUILD_STARTED`, `BUILD_SUCCESS`, `BUILD_FAILED`. Tag schema unchanged: `owner` and optional `data`; field `value` written as float 1.
+- Onboarding credentials: `INFLUXDB_USERNAME`, `INFLUXDB_PASSWORD`, `INFLUXDB_TOKEN` are read by name by the `influxdb-setup` one-shot (dev compose); the api itself only needs the token.
 
 **File Storage:**
 
@@ -172,7 +171,7 @@ Integrations consumed by the main backend API (`thinx-device-api`). The `service
 **CI: CircleCI** (`.circleci/config.yml`)
 
 Workflows / jobs:
-- `test` — boots full docker-compose stack (influxdb, redis, mosquitto, transformer, worker, couchdb, api) and runs jasmine inside the `api` container. Triggers on branches: `base`, `thinx-unit`, `thinx-class`, `thinx-staging`, `main`.
+- `test` — boots full docker-compose stack (influxdb, redis, mosquitto, transformer, worker, couchdb, api) and runs jasmine inside the `api` container. The "Starting Influx" step logs in to `dhi.io` once for the job (password on stdin, serves both DHI InfluxDB and DHI CouchDB), runs `docker compose up -d influxdb`, then `docker compose run --rm influxdb-setup` to onboard the ephemeral InfluxDB 2 (throwaway CI token) before the suite starts. Triggers on branches: `base`, `thinx-unit`, `thinx-class`, `thinx-staging`, `main`.
 - `build-api-cloud` — builds `thinxcloud/api:latest` Docker image, pushes to Docker Hub. Slack `basic_fail_1` template on failure. Only `thinx-staging` and `main`. Passes `COMMIT_SHA=$CIRCLE_SHA1` as build arg so `Notifier.notifyAppStart()` can surface it.
 - `build-vue-console` — builds the Vue console image from `services/console/vue` and pushes to `registry.thinx.cloud:5000/thinx/console:vue`. Triggers on `thinx-console`, `thinx-staging`, `main`. **Note:** the console submodule itself also pushes the same tag; the parent meta-repo trigger closes the May-21 staleness bug.
 - `build-console-classic` — currently disabled (commented out); previously pushed `thinx/console:swarm`.
@@ -282,7 +281,9 @@ Workflows / jobs:
 | `CORS_ALLOWED_ORIGINS` | Optional comma-sep allowlist | `lib/router.js` L50 |
 | `AQUA_SEC_TOKEN`, `SNYK_TOKEN`, `CODACY_PROJECT_TOKEN` | CI security scanners | Dockerfile build args only |
 | `GOOGLE_ANALYTICS_ID`, `CRISP_WEBSITE_ID`, `GOOGLE_MAPS_APIKEY` | Console only — not used by API | console build |
-| `INFLUXDB_USERNAME`, `INFLUXDB_PASSWORD` | Influx admin (compose) | `docker-compose.yml` L252-253 |
+| `INFLUXDB_URL`, `INFLUXDB_ORG` | InfluxDB 2 endpoint and org (defaults `http://influxdb:8086`, `thinx`) | `lib/thinx/influx.js` |
+| `INFLUXDB_TOKEN` | InfluxDB 2 API token (Docker secret, else env; absent = stats disabled) | `lib/thinx/influx.js`, `docker-compose.yml` api + `influxdb-setup` |
+| `INFLUXDB_USERNAME`, `INFLUXDB_PASSWORD` | InfluxDB 2 initial admin, read only by the `influxdb-setup` one-shot | `docker-compose.yml` `influxdb-setup` |
 
 **Secrets location:**
 - `.env` file in each Swarm node (NOT committed; `.env.dist` is the template)
