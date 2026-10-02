@@ -174,7 +174,6 @@ describe("Stats privacy (D-12)", function () {
             const logger = { warn: (m) => warns.push(String(m)) };
             const Influx = { statsLog: (...a) => { writes.push(a); return Promise.resolve(); } };
             const Util = { isDefined: (v) => (typeof v !== "undefined") && (v !== null) };
-            // eslint-disable-next-line no-new-func
             const auditLogError = new Function("Util", "logger", "InfluxConnector", "LOGIN_INVALID_REASONS", `${body}\nreturn auditLogError;`)(Util, logger, Influx, reasons);
 
             const owner = hex64();
