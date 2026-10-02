@@ -241,7 +241,7 @@ Plans:
   4. In the Vue Console, a user can page through the build list, and paging never prunes build records.
   5. The console submodule pointer that carries the Vue paging UI is bumped in this repo and deployed to the Vue console host.
 
-**Plans**: 9/9 plans executed
+**Plans**: 9/10 plans executed
 
 Plans:
 **Wave 1**
@@ -267,6 +267,10 @@ Plans:
 **Wave 5** *(blocked on 26-07)*
 
 - [x] 26-08-PLAN.md — Retention dry run per root → operator decision → real run, daily /etc/cron.d schedule (09:40 UTC), broken audit job retired
+
+**Gap closure** *(UAT G-26-1)*
+
+- [ ] 26-10-PLAN.md — Readable dark-theme warning/danger History rows: contrast check over the compiled theme (≥ 4.5:1) → `_overrides.scss` row override → operator push/hold → console + gitlink deploy, served `app.js` check, UAT test 1 re-run
 
 **Notes**: Order is backend, then Vue, then the pointer bump. Warm the new view index outside the 01:00–05:00 UTC compaction window.
 **Research**: Needed at planning: the `date` format across old `managed_logs` docs (collation), index build time on the production corpus, and the Vue store contract shared with `store/stats.js`.

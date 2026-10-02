@@ -3,7 +3,7 @@ status: partial
 phase: 26-vue-console-log-paging
 source: [26-VERIFICATION.md]
 started: 2026-10-02T12:50:00Z
-updated: 2026-10-02T12:53:25Z
+updated: 2026-10-02T12:54:02Z
 ---
 
 ## Current Test
@@ -62,5 +62,12 @@ blocked: 1
   reason: "User reported: Scrolling works well with long page, but the warning rows are hardly readable (the orange is too light)"
   severity: minor
   test: 1
-  artifacts: []
-  missing: []
+  root_cause: "History.vue rowClass() gives flagged rows Bootstrap 4 contextual classes table-warning / table-danger. Bootstrap only sets a very light background on them (theme-color-level -9) and no text color, so the dark theme's light $body-color text is inherited onto a pale background. Pre-existing (rowClass is unchanged since c58dd09); it shows more now that flags are real strings."
+  artifacts:
+    - path: "services/console/vue/src/pages/History/History.vue"
+      issue: "rowClass() returns table-warning / table-danger (lines ~297-301)"
+    - path: "services/console/vue/src/styles/_overrides.scss"
+      issue: "no dark-theme override for the .table-warning / .table-danger row variants"
+  missing:
+    - "Dark-theme row variants: tinted dark background (warning/danger at low alpha) with $text-color, in _overrides.scss, so text contrast meets WCAG AA (4.5:1)"
+  debug_session: ""
