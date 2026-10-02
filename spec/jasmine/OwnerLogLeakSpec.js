@@ -90,4 +90,45 @@ describe("Owner/Audit log leak guards (phase 26 deferred items)", function () {
     expect(lines.length, "the warning must still be logged").to.be.above(0);
     expect(leaked(lines, [OWNER_SENTINEL])).to.deep.equal([]);
   });
+
+  // IN-03 (phase 26 code review): success and fallback paths.
+
+  it("atomic() success does not print the owner id", async function () {
+    const lines = captureConsole();
+    const self = { userlib: { atomic: async () => ({ ok: true }) } };
+    const result = await new Promise((resolve) => {
+      Owner.prototype.atomic.call(self, OWNER_SENTINEL, { activation_date: "now" }, "activation", (ok, msg) => resolve({ ok, msg }));
+    });
+    expect(result).to.deep.equal({ ok: true, msg: "activation_successful" });
+    expect(lines.some((l) => l.indexOf("activation") !== -1), "success is still logged").to.equal(true);
+    expect(leaked(lines, [OWNER_SENTINEL])).to.deep.equal([]);
+  });
+
+  it("update() with an unsupported key does not print the request body", async function () {
+    const lines = captureConsole();
+    const self = { process_update: (_body, cb) => cb(null, null) };
+    const body = { unsupported_field: EMAIL_SENTINEL, password: HASH_SENTINEL };
+    const result = await new Promise((resolve) => {
+      Owner.prototype.update.call(self, OWNER_SENTINEL, body, (ok, msg) => resolve({ ok, msg }));
+    });
+    expect(result).to.deep.equal({ ok: false, msg: "invalid_protocol_update_key_missing" });
+    expect(lines.some((l) => l.indexOf("invalid_protocol_update_key_missing") !== -1), "still logged").to.equal(true);
+    expect(leaked(lines, [EMAIL_SENTINEL, HASH_SENTINEL, OWNER_SENTINEL])).to.deep.equal([]);
+  });
+
+  it("password_reset_init() value fallback does not print the users-view row", async function () {
+    const lines = captureConsole();
+    const row = { id: OWNER_SENTINEL, key: EMAIL_SENTINEL, value: { _id: OWNER_SENTINEL, email: EMAIL_SENTINEL, password: HASH_SENTINEL } };
+    let resetWith = null;
+    const self = {
+      userlib: { view: async () => ({ rows: [row] }) },
+      resetUserWithKey: (user, _email, _client, cb) => { resetWith = user; cb(true, "reset"); }
+    };
+    const result = await new Promise((resolve) => {
+      Owner.prototype.password_reset_init.call(self, EMAIL_SENTINEL, undefined, (ok, msg) => resolve({ ok, msg }));
+    });
+    expect(result).to.deep.equal({ ok: true, msg: "reset" });
+    expect(resetWith).to.equal(row.value);
+    expect(leaked(lines, [EMAIL_SENTINEL, HASH_SENTINEL, OWNER_SENTINEL])).to.deep.equal([]);
+  });
 });
