@@ -89,12 +89,18 @@ completed: 2026-10-02
 
 ## Task 1 (tracer): failing check, override, bundle, live baseline
 
-**RED.** `2c8ad4c` adds `vue/tests/unit/table-row-contrast.cjs` and wires it into `test:unit`. Against the pre-fix theme it exited 1, with FAIL on the warning and danger row text contrast and dark-tint checks, while the info and badge guards printed ok. The handoff did not keep the verbatim RED console lines. I recomputed the pre-fix values from the compiled Bootstrap rules the plan records (pale fill `rgb(247.44,225.04,183.6)` / `rgb(239.88,200.4,200.4)`, `.table` text `rgba(244,244,245,.6)`):
+**RED.** `2c8ad4c` adds `vue/tests/unit/table-row-contrast.cjs` and wires it into `test:unit`. Against the pre-fix theme it exited 1, with FAIL on the warning and danger row text contrast and dark-tint checks, while the info and badge guards printed ok. The verbatim RED run (`node services/console/vue/tests/unit/table-row-contrast.cjs`, rc=1, from the Task 1 checkpoint report, restored by the orchestrator):
 
-| Variant | Pre-fix text contrast | Pre-fix bg luminance | Check verdict |
-|---|---|---|---|
-| warning | 1.09:1 | 0.772 | FAIL (< 4.5, > 0.1) |
-| danger | 1.22:1 | 0.642 | FAIL (< 4.5, > 0.1) |
+```
+FAIL warning even row text contrast 1.09 >= 4.5 (text #f5ecdc on #f7e1b8, cell .table-warning>td, row .table-warning, colour .table)
+FAIL warning odd row text contrast 1.09 >= 4.5 (text #f5ecdc on #f7e1b8, cell .table-warning>td, row .table-striped tbody tr:nth-of-type(odd), colour .table)
+FAIL warning row background is a dark tint (bg #f7e1b8 luminance 0.772 <= 0.1, differs from panel #272b4e)
+FAIL danger even row text contrast 1.22 >= 4.5 (text #f2e3e3 on #f0c8c8, cell .table-danger>td, row .table-danger, colour .table)
+FAIL danger odd row text contrast 1.22 >= 4.5 (text #f2e3e3 on #f0c8c8, cell .table-danger>td, row .table-striped tbody tr:nth-of-type(odd), colour .table)
+FAIL danger row background is a dark tint (bg #f0c8c8 luminance 0.642 <= 0.1, differs from panel #272b4e)
+ok   info and default rows keep the Bootstrap variant rules (no tr.-qualified info or default variant)
+ok   flag badges keep their look (.badge-warning #e49400, .badge-danger #c93c3c, .badge color rgba(244,244,245,.9))
+```
 
 The pale fill is opaque on the cells, so the result is the same on odd and even rows.
 
@@ -197,7 +203,7 @@ Four-job line: `api-registry=success console-classic-registry=success test=succe
 
 - **commitlint warnings.** The console `commit-msg` hook printed footer-leading-blank warnings on the console commits. They are warnings, not rejections; both commits landed signed.
 - **Plan commit ledger missing.** Task 1 did not write `.git/gsd-plan-head-before-26-10`. The base is the parent HEAD recorded in the handoff (`0ebb82bc`); `git rev-list --count 0ebb82bc..a0a1e097` = 1. The two console commits live in the submodule and are not part of that count.
-- **RED lines not preserved.** See Task 1. I did not re-run the check against a temporary pre-fix copy of the theme, because that command was denied in this session. The ratios above are recomputed from the compiled values instead.
+- **RED lines restored.** The continuation executor did not have the RED output and could not re-run it (a temp-copy command was denied, not retried). The orchestrator restored the verbatim RED lines from the Task 1 checkpoint report (see Task 1).
 
 ## User Setup Required
 
