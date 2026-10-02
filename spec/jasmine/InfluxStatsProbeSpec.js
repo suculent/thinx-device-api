@@ -35,7 +35,10 @@ const secrets = require('../../lib/thinx/secrets');
 
 const ROOT = path.join(__dirname, "../..");
 const PROBE = "scripts/influx-stats-probe.js";
-const LINE = /^[a-z0-9_]+=\S*$/;
+// key=value; keys are lower-case, optionally ending in an upper-case taxonomy
+// name (count_7d_DEVICE_CHECKIN). The plan's literal `^[a-z0-9_]+=` cannot
+// match its own count_<period>_<KPI> keys.
+const LINE = /^[a-z0-9_]+(?:[A-Z][A-Z_]*)?=\S*$/;
 const FINAL = /^INFLUX-STATS-PROBE (OK|FAIL reason=[A-Za-z0-9_.-]+)$/;
 const HEX64 = /[0-9a-f]{64}/;
 
