@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
 status: executing
-stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-10-02T17:32:36.227Z"
+stopped_at: Completed 27-04-PLAN.md
+last_updated: "2026-10-02T19:04:47.859Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 5ba05c9fc4dfd01b34e1a978e17d0626a15e2504
+state_head: d005d4a314f2682b501dc124accf10451ca6230f
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 39
-  percent: 91
+  completed_plans: 40
+  percent: 93
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 91% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 93% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -254,6 +254,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-08: setup one-shots create bucket stats without retention; ensureStatsBucket() at api boot alone sets 90 days
 - [Phase 27]: 27-03 D-12: APIKEY_INVALID drops the rejected key (no hash: sha256(key) is THiNX's key id); LOGIN_INVALID limited to LOGIN_INVALID_REASONS or unlisted
 - [Phase 27]: 27-03: scripts/influx-stats-probe.js is the read-only aggregate evidence tool for 27-05..27-07 (exit 0/1/2, INFLUX-STATS-PROBE OK|FAIL reason=<token>)
+- [Phase 27]: 27-04: F-2 go-B — InfluxDB admin password random in an unmounted secret, UI via SSH tunnel, public route stays behind influx-auth
+- [Phase 27]: 27-04: stats points written at ns precision with strictly increasing per-process timestamps (fix-connector after CI #15564; same-ms identical writes collapsed)
 
 ### Todos
 
@@ -332,9 +334,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-02T17:32:36.050Z
+**Last session:** 2026-10-02T19:04:47.186Z
 
-**Stopped at:** Completed 27-03-PLAN.md
+**Stopped at:** Completed 27-04-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -394,3 +396,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P02 | 15 min | 2 tasks | 8 files |
 | Phase 27 P08 | 6min | 2 tasks | 3 files |
 | Phase 27 P03 | 11 min | 3 tasks | 9 files |
+| Phase 27 P04 | 1h 32m | 3 tasks | 3 files |
