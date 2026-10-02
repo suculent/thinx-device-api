@@ -9,37 +9,105 @@
   "total_tasks": 10,
   "status": "paused",
   "completed_tasks": [
-    {"id": "26-01..26-09", "name": "All 9 phase plans executed; Push 1 (355b19b7) and Push 2 (a1d65e0a) live; D-15 credential cleanup applied (apply-both); retention job live (all roots, /etc/cron.d 09:40 UTC)", "status": "done", "commit": "03c859e7"},
-    {"id": "26-review", "name": "Code review 0 critical / 4 warnings; WR-01, WR-02, WR-04, IN-03 fixed and live; WR-03 deferred; IN-01/02/04-08 open (26-REVIEW-DISPOSITION.md)", "status": "done", "commit": "66b78cce"},
-    {"id": "26-verify", "name": "26-VERIFICATION.md human_needed, no gaps (5/5 roadmap truths)", "status": "done", "commit": "753c0ff4"},
-    {"id": "26-10", "name": "Gap closure G-26-1: readable dark-theme warning/danger History rows; live (console 3153cac, gitlink a0a1e097)", "status": "done", "commit": "fa97115a"}
+    {
+      "id": "26-01..26-09",
+      "name": "All 9 phase plans executed; Push 1 (355b19b7) and Push 2 (a1d65e0a) live; D-15 credential cleanup applied (apply-both); retention job live (all roots, /etc/cron.d 09:40 UTC)",
+      "status": "done",
+      "commit": "03c859e7"
+    },
+    {
+      "id": "26-review",
+      "name": "Code review 0 critical / 4 warnings; WR-01, WR-02, WR-04, IN-03 fixed and live; WR-03 deferred; IN-01/02/04-08 open (26-REVIEW-DISPOSITION.md)",
+      "status": "done",
+      "commit": "66b78cce"
+    },
+    {
+      "id": "26-verify",
+      "name": "26-VERIFICATION.md human_needed, no gaps (5/5 roadmap truths)",
+      "status": "done",
+      "commit": "753c0ff4"
+    },
+    {
+      "id": "26-10",
+      "name": "Gap closure G-26-1: readable dark-theme warning/danger History rows; live (console 3153cac, gitlink a0a1e097)",
+      "status": "done",
+      "commit": "fa97115a"
+    },
+    {
+      "id": "uat-1",
+      "name": "UAT test 1 re-test passed after 26-10 (G-26-1 resolved)",
+      "status": "done"
+    }
   ],
   "remaining_tasks": [
-    {"id": "uat-1", "name": "Operator re-runs UAT test 1 (warning/danger rows readable after 26-10) via /gsd-verify-work 26", "status": "not_started"},
-    {"id": "uat-3", "name": "UAT test 3: first scheduled retention run after 2026-10-03 09:40 UTC ends LOG-RETENTION APPLY OK with small counts", "status": "not_started"},
-    {"id": "phase-complete", "name": "When UAT complete: canonicalize verification, transition Phase 26 complete (verify-work complete_session)", "status": "not_started"}
+    {
+      "id": "uat-3",
+      "name": "UAT test 3: first scheduled retention run after 2026-10-03 09:40 UTC ends LOG-RETENTION APPLY OK with small counts",
+      "status": "not_started"
+    },
+    {
+      "id": "phase-complete",
+      "name": "When UAT complete: canonicalize verification, transition Phase 26 complete (verify-work complete_session)",
+      "status": "not_started"
+    }
   ],
   "blockers": [
-    {"description": "UAT test 3 cannot run before the 2026-10-03 09:40 UTC cron run", "type": "external", "workaround": "none; wait"}
+    {
+      "description": "UAT test 3 cannot run before the 2026-10-03 09:40 UTC cron run",
+      "type": "external",
+      "workaround": "none; wait"
+    }
   ],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Hard-refresh console.thinx.cloud, open History from the sidebar, confirm warning/danger rows read easily and badges/info rows look unchanged; answer in /gsd-verify-work 26 (test 1)", "context": "closes G-26-1", "blocking": true},
-    {"action": "After 2026-10-03 09:40 UTC: confirm /var/log/thinx-log-retention.log on micro shows a new run ending LOG-RETENTION APPLY OK (test 3)", "context": "cron.d pickup is otherwise unconfirmed", "blocking": true},
-    {"action": "Before Phase 27: separate backup of /mnt/gluster/thinx/influx (DO VM snapshots of both nodes taken 2026-10-02 do not cover GlusterFS)", "context": "todo 2026-10-02-backup-gluster-influx-data-before-phase-27.md", "blocking": false}
+    {
+      "action": "After 2026-10-03 09:40 UTC: confirm /var/log/thinx-log-retention.log on micro shows a new run ending LOG-RETENTION APPLY OK (test 3)",
+      "context": "cron.d pickup is otherwise unconfirmed",
+      "blocking": true
+    },
+    {
+      "action": "Before Phase 27: separate backup of /mnt/gluster/thinx/influx (DO VM snapshots of both nodes taken 2026-10-02 do not cover GlusterFS)",
+      "context": "todo 2026-10-02-backup-gluster-influx-data-before-phase-27.md",
+      "blocking": false
+    }
   ],
   "decisions": [
-    {"decision": "D-15 apply-both (44 reset keys cleared, 197 audit docs redacted)", "rationale": "operator", "phase": "26"},
-    {"decision": "Retention scope all (--roots deploy,repos), daily 09:40 UTC; old couchdb-log-retention retired to /usr/local/sbin/retired/", "rationale": "operator", "phase": "26"},
-    {"decision": "Installer default for first deploy is --roots none (WR-02); production keeps deploy,repos", "rationale": "review", "phase": "26"},
-    {"decision": "WR-03 legacy audit fallback deferred; jasmine || true left as is (separate decision)", "rationale": "operator", "phase": "26"},
-    {"decision": "6 commits made unsigned while GPG was locked (operator authorized); not re-signed because SUMMARYs cite their hashes", "rationale": "operator away", "phase": "26"}
+    {
+      "decision": "D-15 apply-both (44 reset keys cleared, 197 audit docs redacted)",
+      "rationale": "operator",
+      "phase": "26"
+    },
+    {
+      "decision": "Retention scope all (--roots deploy,repos), daily 09:40 UTC; old couchdb-log-retention retired to /usr/local/sbin/retired/",
+      "rationale": "operator",
+      "phase": "26"
+    },
+    {
+      "decision": "Installer default for first deploy is --roots none (WR-02); production keeps deploy,repos",
+      "rationale": "review",
+      "phase": "26"
+    },
+    {
+      "decision": "WR-03 legacy audit fallback deferred; jasmine || true left as is (separate decision)",
+      "rationale": "operator",
+      "phase": "26"
+    },
+    {
+      "decision": "6 commits made unsigned while GPG was locked (operator authorized); not re-signed because SUMMARYs cite their hashes",
+      "rationale": "operator away",
+      "phase": "26"
+    }
   ],
   "uncommitted_files": [
-    "?? .claude/", "?? .gsd/", "?? .planning/milestone.lock",
+    "?? .claude/",
+    "?? .gsd/",
+    "?? .planning/milestone.lock",
     "?? .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW-FIX.iter2.md .. iter5.md and 23-REVIEW.iter2.md .. iter5.md (8 files, pre-existing, intentionally untracked)",
-    "?? .planning/state.json", "?? thinx-firmware-esp32-pio/", "?? thinx-firmware-esp8266-ino/", "?? thinx-firmware-esp8266-pio/"
+    "?? .planning/state.json",
+    "?? thinx-firmware-esp32-pio/",
+    "?? thinx-firmware-esp8266-ino/",
+    "?? thinx-firmware-esp8266-pio/"
   ],
-  "next_action": "/gsd-resume-work, then /gsd-verify-work 26: record UAT test 1 re-test; after 2026-10-03 09:40 UTC check the retention log for test 3; then complete the phase. Next phase: /gsd-discuss-phase 27 (InfluxDB 2) — first step is the gluster influx backup.",
-  "context_notes": "Production: thinx_api a39b646bbb0e, thinx_vue 0fe9a5a81a90 (micro), thinx_console 9420fec56980 (core), all from parent a0a1e097 / console 3153cac. origin/thinx-staging = a0a1e097; local is 2 docs commits ahead (22518946, fa97115a) — any push redeploys thinx_api, avoid 09:25-10:15 and 01:00-05:00 UTC. GPG was unlocked at 13:14 UTC. Phase 27 overview given to operator: influx.js uses v1-only `influx` npm client; docker-compose.yml already says dhi.io/influxdb:2 with v1 env vars (half-migrated); swarm and CI use influxdb:1.8."
+  "next_action": "/gsd-resume-work, then after 2026-10-03 09:40 UTC: /gsd-verify-work 26 to check the retention log for UAT test 3 and complete the phase. Next phase: /gsd-discuss-phase 27 (InfluxDB 2) \u2014 first step is the gluster influx backup.",
+  "context_notes": "Production: thinx_api a39b646bbb0e, thinx_vue 0fe9a5a81a90 (micro), thinx_console 9420fec56980 (core), all from parent a0a1e097 / console 3153cac. origin/thinx-staging = a0a1e097; local is 2 docs commits ahead (22518946, fa97115a) \u2014 any push redeploys thinx_api, avoid 09:25-10:15 and 01:00-05:00 UTC. GPG was unlocked at 13:14 UTC. Phase 27 overview given to operator: influx.js uses v1-only `influx` npm client; docker-compose.yml already says dhi.io/influxdb:2 with v1 env vars (half-migrated); swarm and CI use influxdb:1.8."
 }

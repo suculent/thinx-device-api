@@ -3,7 +3,7 @@ status: partial
 phase: 26-vue-console-log-paging
 source: [26-VERIFICATION.md]
 started: 2026-10-02T12:50:00Z
-updated: 2026-10-02T12:54:02Z
+updated: 2026-10-02T13:27:26Z
 ---
 
 ## Current Test
@@ -14,9 +14,10 @@ updated: 2026-10-02T12:54:02Z
 
 ### 1. History stays responsive with 1,000+ rows loaded
 expected: Load the audit table past about 1,000 entries; scrolling, filtering and "Load more" stay responsive.
-result: issue
+result: pass
 reported: "Scrolling works well with long page, but the warning rows are hardly readable (the orange is too light)"
 severity: minor
+retest: "warning-row readability UAT passed" (2026-10-02, after gap closure 26-10)
 
 ### 2. The paging footer wraps cleanly at 360px
 expected: At a 360px-wide viewport (device toolbar or phone), the "Load more" button and the filter hint under each History table wrap without overflow or overlapping text.
@@ -48,8 +49,8 @@ result: passed (operator, 2026-10-02)
 ## Summary
 
 total: 4
-passed: 2
-issues: 1
+passed: 3
+issues: 0
 pending: 0
 skipped: 0
 blocked: 1
@@ -58,7 +59,9 @@ blocked: 1
 
 - gap_id: G-26-1
   truth: "Audit log rows in the Vue History table are readable in every row state, including warning rows, in the dark theme"
-  status: failed
+  status: resolved
+  resolved_by: 26-10
+  resolved_at: 2026-10-02
   reason: "User reported: Scrolling works well with long page, but the warning rows are hardly readable (the orange is too light)"
   severity: minor
   test: 1
