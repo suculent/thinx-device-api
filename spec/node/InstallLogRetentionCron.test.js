@@ -56,18 +56,19 @@ function mode(file) {
     return (fs.statSync(file).mode & 0o777).toString(8);
 }
 
-test("fresh install writes the wrapper and one 09:40 deploy,repos schedule line", () => {
+test("fresh install writes the wrapper and one 09:40 audit-only (--roots none) schedule line (WR-02)", () => {
     const t = setup("fresh");
     const r = run(t);
     assert.equal(r.code, 0, r.out + r.err);
     assert.equal(r.lines[r.lines.length - 1], "LOG-RETENTION-CRON OK");
     assert.ok(r.lines.includes("wrapper=installed"));
     assert.ok(r.lines.includes("cron_d=installed"));
-    assert.ok(r.lines.includes("schedule=9:40 --roots deploy,repos"));
+    assert.ok(r.lines.includes("schedule=9:40 --roots none"));
     assert.equal(fs.readFileSync(t.wrapper, "utf8"), fs.readFileSync(WRAPPER_SRC, "utf8"));
     assert.equal(mode(t.wrapper), "755");
     assert.equal(mode(t.cronFile), "644");
-    assert.deepEqual(scheduleLines(t.cronFile), ["40 9 * * * root " + t.wrapper + " --apply --roots deploy,repos"]);
+    assert.deepEqual(scheduleLines(t.cronFile), ["40 9 * * * root " + t.wrapper + " --apply --roots none"]);
+    assert.ok(r.lines.some((l) => l.startsWith("note=folder deletion off")), "explains how to enable folder deletion");
     const body = fs.readFileSync(t.cronFile, "utf8");
     assert.match(body, /^SHELL=\/bin\/sh$/m);
     assert.match(body, /^PATH=\/usr\/local\/sbin:/m);
@@ -84,6 +85,14 @@ test("a second run keeps the existing schedule, even with other options", () => 
     assert.ok(r.lines.includes("wrapper=unchanged"));
     assert.ok(r.lines.includes("cron_d=kept"));
     assert.equal(fs.readFileSync(t.cronFile, "utf8"), before);
+});
+
+test("--roots deploy,repos must be asked for explicitly and is written as given", () => {
+    const t = setup("explicit");
+    const r = run(t, ["--roots", "deploy,repos"]);
+    assert.equal(r.code, 0, r.out + r.err);
+    assert.deepEqual(scheduleLines(t.cronFile), ["40 9 * * * root " + t.wrapper + " --apply --roots deploy,repos"]);
+    assert.ok(!r.lines.some((l) => l.startsWith("note=folder deletion off")));
 });
 
 test("--force rewrites the schedule with the given roots and time", () => {

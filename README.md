@@ -221,7 +221,16 @@ docker stack deploy -c ./docker-swarm.yml
 sudo ./scripts/install-log-retention-cron.sh
 ```
 
-The last step enables log retention. It installs `/usr/local/sbin/thinx-log-retention.sh` and a daily `/etc/cron.d/thinx-log-retention` entry (09:40 UTC). The entry removes audit logs, build records and their build folders older than 365 days. `./scripts/stack-deploy` runs this step for you. To keep build folders, use `--roots none`; for another time slot, use `--time HH:MM`. Run it again with `--force` to change an existing schedule. To disable the job, delete `/etc/cron.d/thinx-log-retention`.
+The last step enables log retention. It installs `/usr/local/sbin/thinx-log-retention.sh` and a daily `/etc/cron.d/thinx-log-retention` entry (09:40 UTC). By default the entry removes only audit logs and build records older than 365 days; build folders are kept. `./scripts/stack-deploy` runs this step for you.
+
+To delete old build folders as well, run a dry run first and check its counts. Then switch the schedule:
+
+``` bash
+sudo /usr/local/sbin/thinx-log-retention.sh
+sudo ./scripts/install-log-retention-cron.sh --force --roots deploy,repos
+```
+
+For another time slot, use `--time HH:MM`. Run the script again with `--force` to change an existing schedule. To disable the job, delete `/etc/cron.d/thinx-log-retention`.
 
 It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep in mind that in order to support legacy HTTP transport devices, you need to have THiNX API port set differently for each instance (e.g. 7442 for production, 7441 for staging) because Swarm does not allow exposing same port twice across different services in same swarm.
 

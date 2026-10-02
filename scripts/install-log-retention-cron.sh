@@ -15,12 +15,18 @@
 #      --roots <roots>`. An existing schedule is KEPT (the operator may have
 #      chosen other roots or another slot) unless --force is given.
 #
+# The default is --roots none: expired audit docs and build records only, no
+# folder deletion. Deleting build folders (--roots deploy,repos) is a one-way
+# step that needs a dry run first (D-10/D-16): run
+#   /usr/local/sbin/thinx-log-retention.sh
+# read its counts, then rerun this script with --force --roots deploy,repos.
+#
 # It never runs the job, never deletes anything and never touches the legacy
 # /etc/cron.daily/couchdb-log-retention job; if that job is present it only
 # prints a note (retire it as in .planning/runbooks/log-paging-retention.md).
 #
 # Options:
-#   --roots <deploy,repos|deploy|repos|none>   default: deploy,repos
+#   --roots <deploy,repos|deploy|repos|none>   default: none (no folder deletion)
 #   --time HH:MM (UTC)                         default: 09:40
 #   --force                                    rewrite an existing schedule
 #
@@ -49,7 +55,7 @@ TARGET_WRAPPER="$SBIN_DIR/thinx-log-retention.sh"
 CRON_FILE="$CRON_D_DIR/thinx-log-retention"
 trap 'rm -f "$TARGET_WRAPPER.new" "$CRON_FILE.new"' EXIT
 
-ROOTS="deploy,repos"
+ROOTS="none"
 TIME="09:40"
 FORCE=0
 
@@ -152,6 +158,10 @@ fi
 printf 'schedule=%s\n' "$(grep -vE '^[[:space:]]*(#|$)|^[A-Z_]+=' "$CRON_FILE" | awk '{print $2":"$1" --roots "$NF}')"
 
 # --- 3. Notes ------------------------------------------------------------------
+
+if [ "$ROOTS" = "none" ] && grep -qE -- '--roots none$' "$CRON_FILE"; then
+  echo "note=folder deletion off; dry-run /usr/local/sbin/thinx-log-retention.sh, then rerun with --force --roots deploy,repos"
+fi
 
 if [ -e "$LEGACY_JOB" ]; then
   echo "legacy_job=present (retire it: see .planning/runbooks/log-paging-retention.md)"
