@@ -10,6 +10,8 @@
  *
  *   - seeded counts come back per KPI, keyed by exactly EventTaxonomy.names();
  *   - another owner's points are never counted;
+ *   - identical writes inside one millisecond, or under a clock that repeats
+ *     or steps back, are all counted (27-04);
  *   - an invalid (quote-bearing) owner answers zeros, never throws;
  *   - with no INFLUXDB_TOKEN the answer is still success with all-zero KPIs.
  *
@@ -155,6 +157,61 @@ describe("Statistics V2 (InfluxDB 2)", function () {
         expectCounts(week.body, {});
         expectCounts(today.body, {});
     }, 15000);
+
+    // Same-millisecond writes (27-04 CI #15564). A point is identified by
+    // measurement + tags + timestamp; two identical writes that share a
+    // timestamp are one point, so a burst inside one clock tick used to be
+    // undercounted. The clock is frozen only around the synchronous part of
+    // statsLog (the point is built and timestamped before the flush starts)
+    // and restored before anything is awaited.
+    describe("same-millisecond writes", function () {
+
+        const RealDate = Date;
+
+        function freezeClock(ms) {
+            class FrozenDate extends RealDate {
+                constructor(...args) {
+                    if (args.length === 0) super(ms); else super(...args);
+                }
+                static now() { return ms; }
+            }
+            global.Date = FrozenDate;
+        }
+
+        function writeAt(ms, owner, n) {
+            const pending = [];
+            freezeClock(ms);
+            try {
+                for (let i = 0; i < n; i++) pending.push(InfluxConnector.statsLog(owner, "DEVICE_CHECKIN", "udid-synthetic"));
+            } finally {
+                global.Date = RealDate;
+            }
+            return pending;
+        }
+
+        afterEach(() => { global.Date = RealDate; });
+
+        it("counts every point of a burst written within one millisecond", async function () {
+            const owner = syntheticOwner();
+            const t = RealDate.now() - 50;
+            await quiet(() => Promise.all(writeAt(t, owner, 4)));
+            const { success, body } = await call(stats, "week_V2", owner);
+            expect(success).to.equal(true);
+            expectCounts(body, { DEVICE_CHECKIN: 4 });
+        }, 15000);
+
+        it("never overwrites an earlier point when the clock repeats or steps back", async function () {
+            const owner = syntheticOwner();
+            const t = RealDate.now() - 50;
+            await quiet(() => Promise.all([]
+                .concat(writeAt(t, owner, 2))
+                .concat(writeAt(t + 1, owner, 1))
+                .concat(writeAt(t, owner, 1))));
+            const { success, body } = await call(stats, "week_V2", owner);
+            expect(success).to.equal(true);
+            expectCounts(body, { DEVICE_CHECKIN: 4 });
+        }, 15000);
+    });
 
     describe("without INFLUXDB_TOKEN", function () {
 
