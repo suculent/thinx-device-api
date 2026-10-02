@@ -19,6 +19,9 @@ const OWNER_B = "b".repeat(64);
 const FLAT_ID = "3f1c2a9e-7b4d-4e21-9a0c-5d6e7f809a1b";
 const NESTED_ID = "0b8f6d1e-2c3a-4f5e-8a9b-1c2d3e4f5a6b";
 const LOG_SENTINEL = "log-line-sentinel-77aa";
+const DELETED_ID = "5a5a5a5a-1111-4222-8333-444444444444";
+const BROKEN_ID = "6b6b6b6b-1111-4222-8333-444444444444";
+const INTERNAL_URI = "http://couchdb-internal-host:5984/managed_builds/";
 
 const DOCS = {};
 DOCS[FLAT_ID] = { _id: FLAT_ID, owner: OWNER_A, udid: "u-1", build_id: FLAT_ID, log: [{ message: LOG_SENTINEL, udid: "u-1" }] };
@@ -28,6 +31,10 @@ function fakeCouch() {
   const db = {
     get(id, cb) {
       if (DOCS[id]) return cb(null, JSON.parse(JSON.stringify(DOCS[id])));
+      // nano 11 shapes: a deleted doc is a 404 with reason "deleted", not "missing";
+      // a socket failure has an errno code. Both carry the request URI.
+      if (id === DELETED_ID) return cb(Object.assign(new Error("deleted"), { statusCode: 404, reason: "deleted", request: { uri: INTERNAL_URI + id } }));
+      if (id === BROKEN_ID) return cb(Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED", request: { uri: INTERNAL_URI + id } }));
       cb(Object.assign(new Error("Error: missing"), { statusCode: 404 }));
     }
   };
@@ -98,6 +105,20 @@ describe("Buildlog#fetchOwned (owner-checked build log by id)", function () {
     const r = await fetchOwned(blog, FLAT_ID, undefined);
     expect(r.err).to.equal(true);
     expect(JSON.stringify(r.body)).to.not.contain(LOG_SENTINEL);
+  });
+
+  it("answers a deleted build and a CouchDB failure exactly like a missing build (WR-01)", async function () {
+    const lines = captureConsole();
+    const missing = await fetchOwned(blog, "9d9d9d9d-0000-4000-8000-000000000000", OWNER_A);
+    for (const id of [DELETED_ID, BROKEN_ID]) {
+      const r = await fetchOwned(blog, id, OWNER_A);
+      expect(r.err, id).to.equal(true);
+      expect(r.body).to.not.be.instanceOf(Error);
+      expect(Object.keys(r.body)).to.deep.equal(Object.keys(missing.body));
+      expect(r.body.log[0].message).to.equal("error_missing_build");
+      expect(JSON.stringify(r.body)).to.not.contain("couchdb-internal-host");
+    }
+    expect(lines.filter((l) => l.indexOf("couchdb-internal-host") !== -1)).to.deep.equal([]);
   });
 });
 
