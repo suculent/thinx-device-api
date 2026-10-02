@@ -754,7 +754,15 @@ jobs:
           if [ "$PUB" == '[]' ]; then docker network create traefik-public; fi
           NAT=$(docker network inspect nat)
           if [ "$NAT" == '[]' ]; then docker network create nat ; fi
+          # influxdb is dhi.io/influxdb:2.9.1 and couchdb (Starting Support
+          # Services) is dhi.io/couchdb:3; dhi.io rejects anonymous pulls for both.
+          # One login on this docker host serves both steps, so it happens here,
+          # before the first DHI pull. DOCKER_LOGIN holds the private-registry
+          # account, so use the Docker Hub pair that already authenticates this
+          # job's thinxcloud/base image. The password goes via stdin only.
+          echo "$DOCKER_PUBLIC_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dhi.io
           docker compose up -d influxdb
+          docker compose run --rm influxdb-setup
           docker compose logs influxdb
 
     - run:
@@ -768,10 +776,7 @@ jobs:
         command: |
           export ENVIRONMENT=test
           chmod -R 666 ./services/couchdb/*
-          # couchdb is dhi.io/couchdb:3, which rejects anonymous pulls. DOCKER_LOGIN
-          # here holds the private-registry account, so use the Docker Hub pair
-          # that already authenticates this job's thinxcloud/base image.
-          echo "$DOCKER_PUBLIC_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dhi.io
+          # couchdb is dhi.io/couchdb:3; the dhi.io login happened in Starting Influx.
           docker compose up -d mosquitto transformer worker couchdb
 
     - run:
