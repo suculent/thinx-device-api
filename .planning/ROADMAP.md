@@ -289,12 +289,12 @@ Plans:
   4. The bucket that holds `stats` data has a 90-day retention.
   5. `thinx_influxdb` no longer mounts anything from `/mnt/gluster/deployment/swarm/swarmpit/`; its config is re-homed to a thinx-owned path or dropped. A test push still autoredeploys within 5 minutes after the upgrade.
 
-**Plans**: 8 plans
+**Plans**: 1/8 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 27-01-PLAN.md — Verified 1.8 portable backup on two nodes, restore with equal counts, upgrade rehearsed on production hardware from the restored copy, full cutover runbook (OPS-INFLUX-01)
+- [x] 27-01-PLAN.md — Verified 1.8 portable backup on two nodes, restore with equal counts, upgrade rehearsed on production hardware from the restored copy, full cutover runbook (OPS-INFLUX-01)
 - [ ] 27-02-PLAN.md — v2 connector (`@influxdata/influxdb-client` + Flux), never-throwing boot ensure of `stats` at 90 d with the `stats/autogen` adopt path, CI compose pair on dhi.io/influxdb:2.9.1 + setup one-shot (OPS-INFLUX-02/03)
 
 **Wave 2** *(blocked on 27-02)*
@@ -317,6 +317,7 @@ Plans:
 **Wave 6** *(blocked on 27-06)*
 
 - [ ] 27-07-PLAN.md — Stack files mirrored, Chronograf retired, test push autoredeploys ≤ 5 min → D-07 evidence → decision → backup and 1.8 data deleted (checkpoint, one-way)
+
 **Notes**: Decide at plan time whether `influx.js` uses the v1-compat API with a DBRP mapping or a v2 client. Before upgrading, inventory everything that talks to `thinx_influxdb`: Chronograf, the Traefik `INFLUX_HOSTNAME` route, and the `swarmpit` database inside it (confirm whether Swarmpit writes there). `docker exec` is node-local and `name=influxdb` matches both InfluxDBs, so query placement first and target `thinx_influxdb` by name. Keep this upgrade out of the Swarmpit window.
 **Research**: Needed at planning: the 1.8 → 2 upgrade path and data migration, v1-compat auth/DBRP versus a v2 client, and the dependents of `thinx_influxdb`.
 
@@ -351,7 +352,7 @@ Plans:
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | In Progress|  |
-| 27. InfluxDB 2 Upgrade | v1.14 | 0/7 | Planned | - |
+| 27. InfluxDB 2 Upgrade | v1.14 | 1/8 | In Progress|  |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 
 ---
