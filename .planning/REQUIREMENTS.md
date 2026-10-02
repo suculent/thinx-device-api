@@ -41,8 +41,8 @@
 
 - [x] **LOG-01**: CouchDB design docs are upserted idempotently (rev-aware) at boot, so view changes reach production; new views live in a new design doc (`_design/logs` untouched)
 - [x] **LOG-02**: The legacy no-param audit-log call keeps its response shape and 200-item cap but returns the caller's own newest 200 entries with their real `flags` (owner-keyed view)
-- [ ] **LOG-03**: A Vue Console user can page through the audit log beyond 200 entries (opt-in `limit` / `cursor`; response keeps `response` as an array and adds `paging: {limit, has_more, next_cursor}`; cursor never carries the owner)
-- [ ] **LOG-04**: A Vue Console user can page through the build list; the paged path has no prune side effect; the console submodule pointer is bumped and deployed
+- [x] **LOG-03**: A Vue Console user can page through the audit log beyond 200 entries (opt-in `limit` / `cursor`; response keeps `response` as an array and adds `paging: {limit, has_more, next_cursor}`; cursor never carries the owner)
+- [x] **LOG-04**: A Vue Console user can page through the build list; the paged path has no prune side effect; the console submodule pointer is bumped and deployed
 
 ### Ops — InfluxDB
 
@@ -98,8 +98,8 @@
 | SEC-CSP-04 | Phase 25 | Complete |
 | LOG-01 | Phase 26 | Complete |
 | LOG-02 | Phase 26 | Complete |
-| LOG-03 | Phase 26 | Pending |
-| LOG-04 | Phase 26 | Pending |
+| LOG-03 | Phase 26 | Complete |
+| LOG-04 | Phase 26 | Complete |
 | OPS-INFLUX-01 | Phase 27 | Pending |
 | OPS-INFLUX-02 | Phase 27 | Pending |
 | OPS-INFLUX-03 | Phase 27 | Pending |
@@ -115,4 +115,4 @@
 
 ---
 *Requirements defined: 2026-09-25*
-*Last updated: 2026-10-01 after Phase 25 (SEC-CSRF-02..06, SEC-CSP-03/04 complete)*
+*Last updated: 2026-10-02 after Phase 26 plan 07 (LOG-01..LOG-04 complete; Vue paging UI deployed)*
