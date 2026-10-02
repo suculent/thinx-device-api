@@ -158,6 +158,332 @@ removed at its end.
 
 ---
 
+## Upgrade rehearsal
+
+The rehearsal runs the exact cutover data path on the manager's hardware, from a copy of the
+restored 1.8 data, with throwaway credentials and `--network none`. Nothing in it touches the live
+service, the gluster data or any swarm secret. Results are in the Annex row "rehearsal".
+
+```bash
+# on the node holding restore-v1 (the stopped p27-restore container's data)
+# 1. throwaway credentials, rehearsal only, never echoed
+umask 077; install -d -m 700 /dev/shm/p27r
+openssl rand -hex 32 > /dev/shm/p27r/tok; openssl rand -hex 24 > /dev/shm/p27r/pw
+printf 'INFLUXD_USERNAME=admin\nINFLUXD_PASSWORD=%s\nINFLUXD_TOKEN=%s\nINFLUXD_ORG=thinx\nINFLUXD_BUCKET=upgrade-primary\nINFLUXD_RETENTION=1h\n' \
+  "$(cat /dev/shm/p27r/pw)" "$(cat /dev/shm/p27r/tok)" > /dev/shm/p27r/upgrade.env
+printf 'INFLUX_HOST=http://localhost:8086\nINFLUX_ORG=thinx\nINFLUX_TOKEN=%s\n' "$(cat /dev/shm/p27r/tok)" > /dev/shm/p27r/cli.env
+
+# 2. source copy, owned by the DHI user
+cp -a /root/phase27/restore-v1 /root/phase27/rehearsal-v1src
+chown -R 65532:65532 /root/phase27/rehearsal-v1src
+install -d -o 65532 -g 65532 /root/phase27/rehearsal-v2
+
+# 3. upgrade (research Pattern 1); --influx-configs-path stays at its default inside the --rm container
+docker run --rm --network none --env-file /dev/shm/p27r/upgrade.env \
+  -v /root/phase27/rehearsal-v1src:/v1:ro -v /root/phase27/rehearsal-v2:/var/lib/influxdb2 \
+  dhi.io/influxdb:2.9.1 upgrade --force --v1-dir /v1 \
+  --engine-path /var/lib/influxdb2/engine --bolt-path /var/lib/influxdb2/influxd.bolt \
+  --continuous-query-export-path /var/lib/influxdb2/v1-continuous-queries.txt \
+  --log-path /var/lib/influxdb2/upgrade.log
+grep -cF -f /dev/shm/p27r/tok /root/phase27/rehearsal-v2/upgrade.log                  # expect 0
+grep -cF -f /dev/shm/p27r/tok /root/phase27/rehearsal-v2/v1-continuous-queries.txt    # expect 0
+find /root/phase27/rehearsal-v2 -name configs | wc -l                                 # expect 0
+
+# 4. scratch v2 server with the D-16 settings the cutover uses
+docker run -d --name p27-rehearsal-v2 --network none --memory 512m --cpus 0.5 \
+  -e INFLUXD_BOLT_PATH=/var/lib/influxdb2/influxd.bolt -e INFLUXD_ENGINE_PATH=/var/lib/influxdb2/engine \
+  -e INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE=256m -e INFLUXD_STORAGE_MAX_CONCURRENT_COMPACTIONS=1 \
+  -e INFLUXD_LOG_LEVEL=error -e INFLUXD_REPORTING_DISABLED=true \
+  -v /root/phase27/rehearsal-v2:/var/lib/influxdb2 dhi.io/influxdb:2.9.1
+
+# 5. checks via official CLI one-shots (the DHI image has no CLI and no shell)
+CLI="docker run --rm --network container:p27-rehearsal-v2 --env-file /dev/shm/p27r/cli.env --entrypoint influx influxdb:2.9.1"
+$CLI ping
+$CLI bucket list --json | jq -r 'sort_by(.name)|.[]|"\(.name)=\(.retentionRules[0].everySeconds // 0)"'
+$CLI v1 dbrp list --json      # reduce to database/rp -> bucket name, default flag
+$CLI query --raw 'from(bucket: "stats/autogen") |> range(start: 0, stop: {T+1s})
+  |> filter(fn: (r) => r._field == "value") |> group(columns: ["_measurement"]) |> count()
+  |> keep(columns: ["_measurement", "_value"])'   # reduce like backup step 3, P=v2_T_
+
+# 6. rename rehearsal (research Pattern 2): one PATCH keeps the bucket id, so the DBRP mapping survives
+$CLI bucket update --id {stats/autogen id} --name stats --retention 90d
+
+# 7. teardown: only the backup dir and its manifest stay
+docker rm -f p27-rehearsal-v2 p27-restore
+rm -rf /root/phase27/restore-v1 /root/phase27/rehearsal-v1src /root/phase27/rehearsal-v2
+shred -u /dev/shm/p27r/*; rmdir /dev/shm/p27r
+```
+
+What the rehearsal settled:
+
+- `dhi.io/influxdb:2.9.1` is the same digest as `dhi.io/influxdb:2` and runs as uid 65532.
+- `influxd upgrade` from the DHI image takes every credential from the env file, with nothing on
+  argv, and logs `Upgrade successfully completed`. The token appears in neither `upgrade.log` nor
+  the CQ export, and no `configs` file lands in the data directory.
+- The migrated bucket is `stats/autogen` with infinite retention and the default DBRP mapping. The
+  all-time counts equal the restored 1.8 counts.
+- Renaming it to `stats` with `--retention 90d` keeps the bucket id, so `stats`/`autogen` still maps
+  to it as the default. The 7-day shard-group duration is unchanged.
+- **A6:** uid 65532 cannot read the root-0700 data subdirectories of a 1.8 copy (`denied`) until the
+  copy is chowned to 65532 (`readable`). The cutover chown is required, not just harmless.
+- A portable restore does not carry continuous queries, so the rehearsal's CQ export had no
+  Swarmpit CQs. The cutover upgrades the real data directory and will export the four Swarmpit CQs
+  to `v1-continuous-queries.txt`. They are not migrated, which is fine: Swarmpit writes to its own
+  InfluxDB.
+
+---
+
+## Cutover runbook
+
+The cutover spans four plans. Each one-way step has a ⛔ operator decision checkpoint in front of it.
+Credentials follow the Conventions: `/dev/shm/p27` with `umask 077`, `--env-file`, secrets created
+from stdin, never echoed. The live staging directory is `/dev/shm/p27`; the rehearsal's
+`/dev/shm/p27r` no longer exists.
+
+**Pre-requisites.**
+- The verified backup exists on both nodes (Annex rows "backup" and "restore").
+- CI is green on the v2 connector commit.
+- No `INFLUXDB_TOKEN`, `INFLUXDB_OPERATOR_TOKEN` or `INFLUXDB_ADMIN_PASSWORD` swarm secret exists yet.
+- The window is valid (Conventions). Phase 26 UAT test 3 runs after 2026-10-03 09:40 UTC; do not overlap it.
+
+### 27-04: ship the connector dormant
+
+1. Read-only release gate and production pre-flight: the backup manifest still checks on both nodes,
+   no stale InfluxDB secrets, the window is valid.
+2. ⛔ **Decision: cutover GO**, and the F-2 option (see "F-2 edge and UI credentials"). Pushing
+   starts the stats write gap (D-06), because the new connector has no token yet.
+3. Push `thinx-staging`. CI runs the influx specs on InfluxDB 2 (success criterion 3). `thinx_api`
+   rolls with stats disabled; its log shows `INFLUXDB_TOKEN not set, statistics disabled`.
+
+### 27-05: upgrade storage (runs straight after 27-04)
+
+4. Save the pre-change spec for rollback. It holds the v1 admin password env, so never `cat` it:
+   ```bash
+   # on the manager
+   umask 077; docker service inspect thinx_influxdb > /root/phase27/thinx_influxdb.pre.json
+   ```
+5. Record the 1.8 reference counts at the stop time `S` (backup step 3 with `S` instead of `T`),
+   then stop 1.8:
+   ```bash
+   docker service scale thinx_influxdb=0
+   # poll until no task is running (bounded loop)
+   ```
+6. Copy the data and prepare the target, both owned by the DHI user (A6: the chown is required):
+   ```bash
+   # on a node with gluster mounted
+   cp -a /mnt/gluster/thinx/influx /mnt/gluster/thinx/influx-v1-upgrade-src
+   chown -R 65532:65532 /mnt/gluster/thinx/influx-v1-upgrade-src
+   install -d -o 65532 -g 65532 /mnt/gluster/thinx/influxdb2
+   ```
+7. Stage the credentials in `/dev/shm/p27` (`umask 077`): `op_token` from `openssl rand -hex 32`;
+   `admin_pw` from `openssl rand -hex 24`, or under F-2 option A the existing edge password, which
+   the operator types into the file. Build `upgrade.env` with printf exactly as in the rehearsal (org
+   `thinx`, primary bucket `upgrade-primary`, retention `1h`). Create the two operator secrets
+   (D-11), which no service mounts:
+   ```bash
+   docker secret create INFLUXDB_OPERATOR_TOKEN /dev/shm/p27/op_token
+   docker secret create INFLUXDB_ADMIN_PASSWORD /dev/shm/p27/admin_pw
+   ```
+8. Run the upgrade on the manager (logged in to dhi.io), exactly as rehearsal step 3, with
+   `/mnt/gluster/thinx/influx-v1-upgrade-src:/v1:ro` and `/mnt/gluster/thinx/influxdb2:/var/lib/influxdb2`.
+   Check `upgrade.log` for `Upgrade successfully completed`, the token greps at 0 and no `configs` file.
+9. One combined service update, so that `docker service rollback` has a single step to undo:
+   ```bash
+   # on the manager
+   docker service update --with-registry-auth \
+     --image dhi.io/influxdb:2.9.1 \
+     --mount-rm /var/lib/influxdb --mount-rm /etc/influxdb/influxdb.conf \
+     --mount-add type=bind,source=/mnt/gluster/thinx/influxdb2,target=/var/lib/influxdb2 \
+     --env-rm INFLUXDB_DB --env-rm INFLUXDB_ADMIN_USER --env-rm INFLUXDB_ADMIN_PASSWORD \
+     --env-add INFLUXD_BOLT_PATH=/var/lib/influxdb2/influxd.bolt \
+     --env-add INFLUXD_ENGINE_PATH=/var/lib/influxdb2/engine \
+     --env-add INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE=256m \
+     --env-add INFLUXD_STORAGE_MAX_CONCURRENT_COMPACTIONS=1 \
+     --env-add INFLUXD_LOG_LEVEL=error --env-add INFLUXD_REPORTING_DISABLED=true \
+     --label-add traefik.http.routers.thinx-influx-http.middlewares=https-redirect \
+     --replicas 1 \
+     thinx_influxdb
+   ```
+   The label fixes D-14: the HTTP router only redirects to HTTPS.
+10. Verify with official CLI one-shots on the attachable `thinx_internal` overlay. `cli.env` holds
+    `INFLUX_HOST=http://thinx_influxdb:8086`, `INFLUX_ORG=thinx` and `INFLUX_TOKEN` from `op_token`:
+    ```bash
+    CLI="docker run --rm --network thinx_internal --env-file /dev/shm/p27/cli.env --entrypoint influx influxdb:2.9.1"
+    $CLI ping; $CLI bucket list --json | jq -r '.[]|"\(.name)=\(.retentionRules[0].everySeconds // 0)"'
+    $CLI v1 dbrp list --json    # stats/autogen -> stats/autogen, default=true
+    # Flux counts on stats/autogen bounded by S + 1s must equal the 1.8 counts at S
+    ```
+11. Mint the API token straight into the swarm secret. It is never printed and never stored anywhere else:
+    ```bash
+    $CLI auth create --all-access --org thinx --description "thinx-api INFLUXDB_TOKEN" --json \
+      | jq -j .token | docker secret create INFLUXDB_TOKEN -
+    ```
+    The secret is **not mounted yet**. Check that `INFLUXDB_OPERATOR_TOKEN` and
+    `INFLUXDB_ADMIN_PASSWORD` are mounted on no service, that the HTTP route redirects to HTTPS
+    (D-14), and that `swarmpit_resolves` is still `swarmpit_influxdb` (Pitfall 5).
+
+### 27-06: enable stats, arm the trim, drop the empty buckets
+
+12. Read-only: the production API image reads the migrated history through the v2 client with equal
+    counts, and the drop candidates have had no writes since the cutover.
+13. ⛔ **Decision (blocking-human): enable stats and the 90-day trim; drop the empty buckets; approve
+    the Chronograf retirement.** See "Enable and 90-day trim" and "Bucket drops (D-15)".
+
+### 27-07: close
+
+14. Mirror the live state into `docker-swarm.yml` and the gluster `thinx.yml` (influxdb block, removed
+    http-override label line, `INFLUXDB_TOKEN` on api plus a top-level `secrets:` entry). Commit only
+    the Phase 27 hunks in the gluster swarm repo; it carries unrelated uncommitted changes.
+15. Retire Chronograf if approved (see "Chronograf retirement (D-13)").
+16. Success criterion 5: a test push to `thinx-staging` must produce a new `thinx_api` task within
+    5 minutes of the CircleCI image push.
+17. ⛔ **Decision (blocking-human): delete the 1.8 safety net.** See "Deletion after verification (D-02, D-07)".
+
+---
+
+## Rollback
+
+Valid until the deletion step. Stats written to v2 after the cutover are lost in a rollback (D-05,
+accepted).
+
+- **InfluxDB only.** `docker service rollback thinx_influxdb` returns to the previous spec. Because
+  the stop in step 5 was itself a spec update, that is **1.8 with replicas 0**. Follow it with
+  `docker service scale thinx_influxdb=1`. The untouched `/mnt/gluster/thinx/influx` is the data.
+- **Explicit-spec fallback.** If more than one update ran after the stop, rebuild the 1.8 spec from
+  `/root/phase27/thinx_influxdb.pre.json` (read with `jq` on the fields you need, never `cat`):
+  `docker service update --image influxdb:1.8 --mount-rm /var/lib/influxdb2`, plus `--mount-add` for
+  `/mnt/gluster/thinx/influx` → `/var/lib/influxdb` and for the `swarmpit/influxdb.conf` file →
+  `/etc/influxdb/influxdb.conf`, `--env-rm` each `INFLUXD_*` variable, `--env-add INFLUXDB_DB=db0`
+  and the v1 admin variables. Pass the v1 admin password by name, read from the saved spec into an
+  exported variable, never on argv.
+- **API.** `docker service update --secret-rm INFLUXDB_TOKEN thinx_api` makes stats dormant again.
+  Nothing else is affected. The v2 connector against 1.8 would only log failed writes; reverting
+  the code needs a revert push to `thinx-staging`.
+- **Worst case.** If both the 1.8 directory and the upgrade copy are unusable, restore the portable
+  backup into a fresh 1.8 data directory with `influxd restore -portable`, as in backup step 5.
+
+---
+
+## Tokens and secrets
+
+| Secret | Holds | Mounted on | Created |
+|---|---|---|---|
+| `INFLUXDB_TOKEN` | org all-access token for the API (D-04, D-10) | `thinx_api` only, from 27-06 | 27-05, piped from `influx auth create … --json \| jq -j .token` |
+| `INFLUXDB_OPERATOR_TOKEN` | the upgrade's operator token | nothing (D-11) | 27-05, from `/dev/shm/p27/op_token` |
+| `INFLUXDB_ADMIN_PASSWORD` | the InfluxDB UI user's password | nothing (D-11) | 27-05, from `/dev/shm/p27/admin_pw` |
+
+- InfluxDB 2.9 stores tokens **hashed** by default. `influx auth list` shows an empty token field, so
+  a token is captured at creation or never. To use the operator token later, read the secret through
+  a one-shot service or recreate it by rotation; never print it.
+- `thinx_api` reads `INFLUXDB_TOKEN` through `readSecret()` (`/run/secrets/INFLUXDB_TOKEN` first, then
+  env). Without it, stats are disabled with one log line and the dashboard shows zero (D-10).
+- The production gluster `thinx.yml` carries **no top-level `secrets:` block**. Like the Phase 24
+  secrets, `INFLUXDB_TOKEN` lives only on the live `thinx_api` spec, so a `restart.sh` run or a stack
+  deploy drops the mount. Re-add it with `docker service update --secret-add INFLUXDB_TOKEN thinx_api`.
+- The old v1 env (`INFLUXDB_ADMIN_USER`, `INFLUXDB_ADMIN_PASSWORD`) is removed from `thinx_influxdb` at
+  the cutover. `thinx_chronograf` still carries it until it is retired.
+- Shred `/dev/shm/p27/*` once the secrets exist and the checks are done.
+
+---
+
+## F-2 edge and UI credentials
+
+The public InfluxDB route keeps the `influx-auth` Traefik basic-auth middleware, over HTTPS only
+(D-14). The InfluxDB 2 UI signs in with `POST /api/v2/signin`, which carries its own
+`Authorization: Basic` header, and Traefik validates that same header. The UI login therefore only
+works when the edge credentials **equal** the InfluxDB user's credentials (rehearsed in research:
+different credentials give 401, equal ones give 204 and then 200 on `/api/v2/me`). Token-header
+clients can never pass the edge, so all automation uses the internal network.
+
+The edge user is `admin`. Its password comes from `restart.sh` and is shared by `couch-auth`,
+`influx-auth` and `chrono-auth`.
+
+- **Option A (recommended).** The InfluxDB UI user is `admin` with the **same password as the edge**.
+  At step 7 the operator types the edge password into `/dev/shm/p27/admin_pw`, which becomes
+  `INFLUXD_PASSWORD` for the upgrade and the `INFLUXDB_ADMIN_PASSWORD` secret. Any later `restart.sh`
+  password change needs a matching `influx user password` update.
+- **Option B.** Keep the edge as is and use the InfluxDB UI only through an SSH tunnel to the
+  internal port. The InfluxDB user gets a random password.
+
+Dropping `influx-auth` is not offered, because it contradicts D-14.
+
+---
+
+## Enable and 90-day trim
+
+This is the one-way step (D-01): within about 30 minutes of the 90-day retention taking effect,
+InfluxDB starts deleting whole shard groups older than 90 days. The only remaining copy of older
+history is the 1.8 backup, until the deletion step.
+
+1. ⛔ Decision (27-06), then:
+   ```bash
+   # on the manager
+   docker service update --secret-add INFLUXDB_TOKEN thinx_api
+   ```
+2. At boot the API's ensure step adopts `stats/autogen` as `stats` with 90 days in one PATCH, which
+   keeps the bucket id and the DBRP mapping (the rehearsal proved this). The log shows one
+   `[influx] ensure` line with `action=adopted`. If the operator already renamed the bucket with the
+   CLI (`influx bucket update --id {id} --name stats --retention 90d`), the line says `unchanged`.
+3. Verify: the bucket list shows `stats` at 7776000 seconds (2160h); the Flux counts over the last
+   90 days equal the pre-cutover 90-day counts; a deliberate test event raises the matching count in
+   `range(start: -10m)`.
+4. Retention deletes whole shard groups (7 days each), so points 90–97 days old can linger until
+   their group ends. Verify the setting, not exact cut-off counts.
+
+---
+
+## Bucket drops (D-15)
+
+The upgrade turns every 1.8 database and retention policy into a bucket. Only `stats` is used.
+
+1. Re-check that the candidates had no writes since the cutover (Flux `count()` over
+   `range(start: {cutover})` per bucket must be empty), and that `swarmpit_resolves` is still
+   `swarmpit_influxdb`.
+2. ⛔ Decision (27-06), then delete by name, one at a time. Deleting a bucket also deletes its DBRP mapping:
+   ```bash
+   for b in stats/31d db0/autogen swarmpit/an_hour swarmpit/a_day swarmpit/autogen upgrade-primary; do
+     $CLI bucket delete --name "$b"
+   done
+   ```
+3. Afterwards the bucket list shows only `stats`, `_monitoring` and `_tasks`.
+
+1.x `_internal` monitoring is not migrated and has no v2 equivalent.
+
+---
+
+## Chronograf retirement (D-13)
+
+InfluxDB 2's built-in UI replaces Chronograf 1.9.
+
+1. ⛔ Approved at the 27-06 decision; executed in 27-07.
+2. `docker service rm thinx_chronograf` on the manager. Remove the `chronograf` service from
+   `docker-swarm.yml` and from the gluster `thinx.yml`, together with its Traefik routers and
+   the `chrono-auth` middleware if nothing else uses it.
+3. Keep its volume `/mnt/gluster/thinx/chronograf` until the deletion step.
+4. Side effect: `restart.sh` no longer needs to reset a Chronograf password.
+
+---
+
+## Deletion after verification (D-02, D-07)
+
+Only after Phase 27 verification passes: the dashboard shows non-zero figures, check-ins flow, CI is
+green and the `stats` bucket is confirmed at 90 days.
+
+1. ⛔ Decision (blocking-human, 27-07). This removes the last copy of history older than 90 days.
+2. Delete by exact path, never by glob on a shared root:
+   ```bash
+   # on both nodes
+   rm -rf /root/phase27/influx-1.8-portable-{ts} /root/phase27/influx-1.8-portable-{ts}.sha256 \
+          /root/phase27/thinx_influxdb.pre.json
+   # once, on a node with gluster mounted
+   rm -rf /mnt/gluster/thinx/influx /mnt/gluster/thinx/influx-v1-upgrade-src /mnt/gluster/thinx/chronograf
+   ```
+   `thinx_influxdb.pre.json` exists only on the manager where step 4 ran.
+3. Prove InfluxDB 2 is unaffected: `influx ping`, bucket list, and the 90-day counts unchanged.
+4. After this point there is no rollback to 1.8.
+
+---
+
 ## Annex
 
 All rows are aggregates. Times are UTC.
@@ -167,3 +493,4 @@ All rows are aggregates. Times are UTC.
 | pre-flight | 2026-10-02 16:49–16:50 | `thinx_influxdb` runs `influxdb:1.8`, 1 replica, Running 34 h, on node **core** (N). `swarmpit_resolves=swarmpit_influxdb`. Cron mentions of influx: core 0, micro 0 (research A3 settled). Free space: core `/root` 17.6 GB, micro `/root` 18.5 GB, `/mnt/gluster` 17.2 GB, micro `/dev/shm` 1.0 GB. All above the 1 GB stop line. |
 | backup | 2026-10-02 16:50 | `p27_backup=influx-1.8-portable-20261002T1650Z`, `p27_backup_T=2026-10-02T16:50:14Z`. `influxd backup -portable` (all databases) took 15 s. 86 files, 4,228 KB (shard files: `_internal` 8, `stats` 76; `db0` and `swarmpit` are meta-only). Copies under `/root/phase27` (dir mode 700, root-only) on **core** and **micro**; micro's copy streamed through an ssh pipe (no direct node-to-node ssh). The sha256 manifest (86 lines) checks OK on both nodes. Retained until plan 27-07 (D-02). |
 | restore | 2026-10-02 16:51 | Fresh `influxdb:1.8` (digest `sha256:299ebda2c7e3`) container `p27-restore` on micro, `--network none`, 512 MB / 0.5 CPU; `influxd restore -portable` exit 0. Counts bounded by T, production vs restore: total 2379 = 2379; `v1_T_APIKEY_INVALID=4`, `v1_T_LOGIN_INVALID=1785`, `v1_T_DEVICE_NEW=8`, `v1_T_DEVICE_CHECKIN=539`, `v1_T_DEVICE_REVOCATION=3`, `v1_T_BUILD_STARTED=21`, `v1_T_BUILD_SUCCESS=9`, `v1_T_BUILD_FAILED=0`, other measurements 10 with 10 points; every `restore_T_*` equal. `restore_equal=1`. Container stopped and kept for the rehearsal. |
+| rehearsal | 2026-10-02 16:54–16:56 | On micro, from a copy of the restored data. Images: `dhi.io/influxdb:2.9.1` digest `sha256:3d49ee8ee9a0` (same digest as `dhi.io/influxdb:2`, user 65532); `influxdb:2.9.1` (CLI) digest `sha256:db0bdab1e5ad`. Source modes before the copy: `meta` and `data` root 755, `wal`, `data/_internal` and `data/stats` root 700. **A6:** uid 65532 got `denied` on the un-chowned copy and `readable` after `chown -R 65532:65532`, so the cutover chown is required. `influxd upgrade --force` (env-file credentials, `--network none`) exit 0 in 3 s; `upgrade.log` says `Upgrade successfully completed. Start the influxd service now, then log in` and "no users in 1.x". Token and password greps: stdout 0, `upgrade.log` 0, CQ export 0; `configs` files in the data dir: 0. CQ export has 9 non-blank lines and no Swarmpit CQs (a portable restore carries none). Buckets: `_monitoring=604800`, `_tasks=259200`, `db0/autogen=7776000`, `stats/31d=2678400`, `stats/autogen=0` (infinite), `swarmpit/a_day=86400`, `swarmpit/an_hour=3600`, `swarmpit/autogen=0`, `upgrade-primary=3600`. DBRP before: `stats/autogen` → bucket `stats/autogen`, default=true. Flux counts on `stats/autogen` with stop T+1s (and T+1ns): total 2379; `v2_T_APIKEY_INVALID=4`, `v2_T_LOGIN_INVALID=1785`, `v2_T_DEVICE_NEW=8`, `v2_T_DEVICE_CHECKIN=539`, `v2_T_DEVICE_REVOCATION=3`, `v2_T_BUILD_STARTED=21`, `v2_T_BUILD_SUCCESS=9`, `v2_T_BUILD_FAILED=0`, other measurements 10 with 10 points; all equal to `restore_T_*`. `rehearsal_equal=1`. Rename `bucket update --name stats --retention 90d`: `stats=7776000`, shard-group duration 604800 unchanged, same bucket id; DBRP after: `stats/autogen` → bucket `stats`, default=true, same bucket id. `rehearsal_dbrp_kept=1`. Teardown: scratch containers 0, scratch dirs 0, `/dev/shm/p27r` shredded and removed; `/root/phase27` on both nodes holds only the backup dir and its manifest. Live `thinx_influxdb` still `influxdb:1.8` on core; no gluster path created. |
