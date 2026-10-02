@@ -25,3 +25,7 @@ As the first step of Phase 27, before anything touches `thinx_influxdb`:
 - Verify the backup restores into a throwaway 1.8 container: the `stats` measurement counts match the
   live ones (counts only).
 - Record the location, size and verification in the Phase 27 runbook annex. Record no credentials.
+
+## Resolution
+
+Done 2026-10-02 in plan 27-01: portable backup of every 1.8 database on both nodes, sha256 manifest OK on both, restore into a throwaway 1.8 container gave equal `stats` counts at the backup reference time (`restore_equal=1`). See the "backup" and "restore" rows of the Annex in `.planning/runbooks/influxdb2-upgrade.md`. The backup is retained per D-02 until plan 27-07.
