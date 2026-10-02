@@ -40,11 +40,17 @@ async function reset() {
     secrets._resetCacheForTests();
 }
 
-// statsLog prints the owner; this spec never echoes owners.
+// statsLog prints the owner; this spec never echoes owners. Connector
+// diagnostics (`[influx] …` lines: short reason tokens, no owner, no URL) are
+// kept in `influxLines` so a failed assertion can say why a write was lost.
+const influxLines = [];
 async function quiet(fn) {
     const saved = { log: console.log, warn: console.warn, error: console.error };
-    const drop = () => { };
-    console.log = drop; console.warn = drop; console.error = drop;
+    const keep = (...args) => {
+        const line = args.map((a) => String(a)).join(" ");
+        if (line.indexOf("[influx]") !== -1 && line.indexOf("[OID:") === -1) influxLines.push(line);
+    };
+    console.log = keep; console.warn = keep; console.error = keep;
     try {
         return await fn();
     } finally {
@@ -72,7 +78,7 @@ function expectCounts(body, expected) {
     expect(Object.keys(body)).to.deep.equal(EventTaxonomy.names());
     EventTaxonomy.names().forEach((k) => {
         const n = Object.prototype.hasOwnProperty.call(expected, k) ? expected[k] : 0;
-        expect(body[k], k).to.deep.equal([n]);
+        expect(body[k], `${k} (connector: ${influxLines.join(" | ") || "-"})`).to.deep.equal([n]);
     });
 }
 
