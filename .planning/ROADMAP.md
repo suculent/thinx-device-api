@@ -241,7 +241,7 @@ Plans:
   4. In the Vue Console, a user can page through the build list, and paging never prunes build records.
   5. The console submodule pointer that carries the Vue paging UI is bumped in this repo and deployed to the Vue console host.
 
-**Plans**: 6/9 plans executed
+**Plans**: 7/9 plans executed
 
 Plans:
 **Wave 1**
@@ -258,7 +258,7 @@ Plans:
 
 **Wave 3** *(blocked on Waves 1–2)*
 
-- [ ] 26-06-PLAN.md — Push 1 (backend), index warm-up timed, production probe, D-15 dry run → operator decision → one-way cleanup
+- [x] 26-06-PLAN.md — Push 1 (backend), index warm-up timed, production probe, D-15 dry run → operator decision → one-way cleanup
 
 **Wave 4** *(blocked on 26-05, 26-06, 26-09)*
 
@@ -319,7 +319,7 @@ Plans:
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
-| 26. Vue Console Log Paging | v1.14 | 6/9 | In Progress|  |
+| 26. Vue Console Log Paging | v1.14 | 7/9 | In Progress|  |
 | 27. InfluxDB 2 Upgrade | v1.14 | 0/TBD | Not started | - |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 

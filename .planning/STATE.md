@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: executing
-stopped_at: Completed 26-09-PLAN.md
-last_updated: "2026-10-01T16:01:56.694Z"
+stopped_at: Completed 26-06-PLAN.md (Push 1 live, D-15 applied; 2 unpushed doc commits ride Push 2)
+last_updated: "2026-10-02T11:19:45.684Z"
 last_activity: 2026-10-01
 last_activity_desc: Phase 26 execution started
-state_head: 082584b014030645c0acd5352cd55cb4afb6beb3
+state_head: fe4ef6e99b94eb0f455d50ef775f24945526a7dd
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 34
-  completed_plans: 31
-  percent: 91
+  completed_plans: 32
+  percent: 94
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 26 (Vue Console Log Paging) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 Status: Ready to execute
 Last activity: 2026-10-01 — Phase 26 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 91% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 94% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -237,6 +237,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 26]: 26-02: the log-paging probe FAILs when Audit.fetch used its legacy fallback; ZZ-LogPagingCouchSpec does not run in CI today (split-tests deletes ZZ*.js on node 0), see deferred-items 26-02 item 1
 - [Phase 26]: 26-09: Cypress stubbed sessions stub POST /api/v2/session/token in visitApp (tokens are memory-only); cy.visitAppRoute enters via the dashboard to bypass the pre-existing App.vue deep-link redirect, which stays a recorded follow-up
 - [Phase 26]: 26-09: Paged-intercept Load more requests are asserted from @alias.all filtered by cursor, not cy.wait, because the dashboard on the entry path already sent first-page requests
+- [Phase 26]: 26-06: D-15 applied with reset-keys,audit-flags (operator apply-both); 44 reset keys cleared, 197 audit docs redacted, post-apply 0/0; one-way, no snapshot
+- [Phase 26]: 26-06: _design/logs map sha12 is 41de3686cde2 (exact string); plan's 925f3cee0cc4 hashed a trailing newline
 
 ### Todos
 
@@ -315,9 +317,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-01T16:04:46Z
+**Last session:** 2026-10-02T11:19:45.574Z
 
-**Stopped at:** Waves 1-2 complete (6/9) + deferred log-leak fixes (1b7dfc74); paused before 26-06 (Push 1) for operator — pending decision on CI split-tests change for ZZ-LogPagingCouchSpec
+**Stopped at:** Completed 26-06-PLAN.md (Push 1 live, D-15 applied; 2 unpushed doc commits ride Push 2)
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -369,3 +371,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 26 P05 | 10min | 3 tasks | 7 files |
 | Phase 26 P02 | 17 min | 3 tasks | 10 files |
 | Phase 26 P09 | 9min | 2 tasks | 7 files |
+| Phase 26 P06 | 35min | 3 tasks | 1 files |
