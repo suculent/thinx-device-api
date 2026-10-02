@@ -289,7 +289,7 @@ Plans:
   4. The bucket that holds `stats` data has a 90-day retention.
   5. `thinx_influxdb` no longer mounts anything from `/mnt/gluster/deployment/swarm/swarmpit/`; its config is re-homed to a thinx-owned path or dropped. A test push still autoredeploys within 5 minutes after the upgrade.
 
-**Plans**: 3/8 plans executed
+**Plans**: 4/8 plans executed
 
 Plans:
 **Wave 1**
@@ -299,7 +299,7 @@ Plans:
 
 **Wave 2** *(blocked on 27-02)*
 
-- [ ] 27-03-PLAN.md — Dashboard/Visits KPIs fixed (`week_V2`/`today_V2` forward the body), D-12 APIKEY_INVALID/LOGIN_INVALID hardening, read-only aggregate probe `scripts/influx-stats-probe.js` (OPS-INFLUX-02)
+- [x] 27-03-PLAN.md — Dashboard/Visits KPIs fixed (`week_V2`/`today_V2` forward the body), D-12 APIKEY_INVALID/LOGIN_INVALID hardening, read-only aggregate probe `scripts/influx-stats-probe.js` (OPS-INFLUX-02)
 - [x] 27-08-PLAN.md — CircleCI "Starting Influx" logs in to dhi.io and onboards the CI InfluxDB 2 pair (step text run end to end locally), dev compose on v2 without Chronograf, integrations map updated (OPS-INFLUX-02; split from 27-02 for context budget)
 
 **Wave 3** *(blocked on Waves 1–2)*
@@ -352,7 +352,7 @@ Plans:
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | In Progress|  |
-| 27. InfluxDB 2 Upgrade | v1.14 | 3/8 | In Progress|  |
+| 27. InfluxDB 2 Upgrade | v1.14 | 4/8 | In Progress|  |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 
 ---

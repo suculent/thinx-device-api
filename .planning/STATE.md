@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
 status: executing
-stopped_at: Completed 27-08-PLAN.md
-last_updated: "2026-10-02T17:18:27.385Z"
+stopped_at: Completed 27-03-PLAN.md
+last_updated: "2026-10-02T17:32:36.227Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 7d8256b081a2d7091e67c1d845f0fa69b1c54969
+state_head: 5ba05c9fc4dfd01b34e1a978e17d0626a15e2504
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 38
-  percent: 88
+  completed_plans: 39
+  percent: 91
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 88% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 91% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -252,6 +252,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-08: the dhi.io login lives in CircleCI 'Starting Influx' (once per job, stdin), before the first DHI pull; 'Starting Support Services' no longer logs in
 - [Phase 27]: 27-08: dev influxdb-setup one-shot treats 'has already been set up' as success because the dev data dir persists
 - [Phase 27]: 27-08: setup one-shots create bucket stats without retention; ensureStatsBucket() at api boot alone sets 90 days
+- [Phase 27]: 27-03 D-12: APIKEY_INVALID drops the rejected key (no hash: sha256(key) is THiNX's key id); LOGIN_INVALID limited to LOGIN_INVALID_REASONS or unlisted
+- [Phase 27]: 27-03: scripts/influx-stats-probe.js is the read-only aggregate evidence tool for 27-05..27-07 (exit 0/1/2, INFLUX-STATS-PROBE OK|FAIL reason=<token>)
 
 ### Todos
 
@@ -330,9 +332,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-02T17:18:27.246Z
+**Last session:** 2026-10-02T17:32:36.050Z
 
-**Stopped at:** Completed 27-08-PLAN.md
+**Stopped at:** Completed 27-03-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -391,3 +393,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P01 | 8 min | 2 tasks | 2 files |
 | Phase 27 P02 | 15 min | 2 tasks | 8 files |
 | Phase 27 P08 | 6min | 2 tasks | 3 files |
+| Phase 27 P03 | 11 min | 3 tasks | 9 files |
