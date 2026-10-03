@@ -10,6 +10,14 @@ chai.use(chaiHttp);
 let thx;
 
 var envi = require("../_envi.json");
+const crypto = require("crypto");
+
+const NOT_FOUND = '{"success":false,"response":"no_such_device"}';
+
+// Six random colon-separated upper-case hex pairs, so registration never hits the MAC fallback.
+function randomMac() {
+    return crypto.randomBytes(6).toString("hex").toUpperCase().match(/.{2}/g).join(":");
+}
 
 describe("Device Ownership Transfer (noauth)", function () {
 
@@ -81,6 +89,7 @@ describe("Transfer (JWT)", function () {
     let agent;
     let jwt;
     let transfer_id;
+    let transfer_udid = null; // a dynamic-owned fixture device, registered below (261003-t29)
   
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Transfer (JWT) spec`);
@@ -131,12 +140,45 @@ describe("Transfer (JWT)", function () {
             });
     }, 30000);
 
-    // migrate from dynamic owner to cimrman
+    it("registers a dynamic-owned device for the transfer (261003-t29)", function (done) {
+        chai.request(thx.app)
+            .post('/api/user/apikey')
+            .set('Authorization', jwt)
+            .send({ alias: "t29-transfer-apikey" })
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(j.response.hash).to.be.a('string');
+                chai.request(thx.app)
+                    .post('/device/register')
+                    .set('Authentication', j.response.hash)
+                    .send({
+                        registration: {
+                            mac: randomMac(),
+                            firmware: "ZZ-RouterTransferSpec.js",
+                            version: "1.0.0",
+                            alias: "t29-transfer-device",
+                            owner: envi.dynamic.owner,
+                            platform: "arduino"
+                        }
+                    })
+                    .end((_err2, res2) => {
+                        expect(res2.status).to.equal(200);
+                        let r = JSON.parse(res2.text);
+                        transfer_udid = r.registration.udid;
+                        expect(transfer_udid).to.be.a('string');
+                        done();
+                    });
+            });
+    }, 30000);
+
+    // migrate the dynamic owner's own fixture device to cimrman (261003-t29)
     it("POST /api/transfer/request (jwt, valid)", function (done) {
         chai.request(thx.app)
             .post('/api/transfer/request')
             .set('Authorization', jwt)
-            .send({ to: "cimrman@thinx.cloud", udids: [envi.udid], mig_sources: false, mig_apikeys: false })
+            .send({ to: "cimrman@thinx.cloud", udids: [transfer_udid], mig_sources: false, mig_apikeys: false })
             .end((_err, res) => {
                 console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
                 expect(res.status).to.equal(200);
@@ -145,6 +187,26 @@ describe("Transfer (JWT)", function () {
                 transfer_id = j.response;
                 expect(j.success).to.equal(true);
                 done();
+            });
+    }, 30000);
+
+    it("POST /api/transfer/request (jwt, another owner's udid) answers like an unknown udid (261003-t29)", function (done) {
+        chai.request(thx.app)
+            .post('/api/transfer/request')
+            .set('Authorization', jwt)
+            .send({ to: "cimrman@thinx.cloud", udids: [envi.udid], mig_sources: false, mig_apikeys: false })
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(NOT_FOUND);
+                chai.request(thx.app)
+                    .post('/api/transfer/request')
+                    .set('Authorization', jwt)
+                    .send({ to: "cimrman@thinx.cloud", udids: ["00000000-0000-1000-8000-000000000000"], mig_sources: false, mig_apikeys: false })
+                    .end((_err2, res2) => {
+                        expect(res2.status).to.equal(200);
+                        expect(res2.text).to.equal(NOT_FOUND);
+                        done();
+                    });
             });
     }, 30000);
 
@@ -324,11 +386,23 @@ describe("Transfer (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/v2/transfer/accept III", function (done) {
+    it("POST /api/v2/transfer/accept (jwt, udid outside the transfer) is refused (261003-t29)", function (done) {
         chai.request(thx.app)
             .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
-            .send({ udids: [envi.dynamic.udid], transfer_id: transfer_id, owner: envi.dynamic.owner }) // will probably need real device using GET /api/device
+            .send({ udids: [envi.udid], transfer_id: transfer_id, owner: envi.dynamic.owner })
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(NOT_FOUND);
+                done();
+            });
+    }, 30000);
+
+    it("POST /api/v2/transfer/accept III (261003-t29)", function (done) {
+        chai.request(thx.app)
+            .post('/api/v2/transfer/accept')
+            .set('Authorization', jwt)
+            .send({ udids: [transfer_udid], transfer_id: transfer_id, owner: envi.dynamic.owner })
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
                 expect(res.text).to.be.a('string');
