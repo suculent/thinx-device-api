@@ -25,7 +25,10 @@
  *   THiNXLib retries the same URL);
  * - a FIRMWARE_UPDATE check-in stores {owner: the checked-in device's owner, udid: the
  *   checked-in udid}, never the registration body; a failed store answers status OK;
- * - no console line of the OTT issue/redeem paths contains a full token.
+ * - no console line of the OTT issue/redeem paths contains a full token;
+ * - (quick 261004-22b) a successful redemption answers the raw firmware bytes as
+ *   application/octet-stream with Content-Length, x-MD5 and Content-Disposition, never a
+ *   JSON-wrapped Buffer; OTT_MISSING and the failed-redemption reason codes keep their answers.
  *
  * Nothing here prints a key, a token or a stored record; assertions compare booleans,
  * counts, exact strings and udids only.
@@ -37,6 +40,7 @@ if (typeof (process.env.ENVIRONMENT) === "undefined") {
 
 const express = require("express");
 const http = require("http");
+const net = require("net");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
@@ -476,6 +480,40 @@ function send(method, urlPath, opts) {
     });
 }
 
+// GET urlPath and collect the body as raw bytes (quick 261004-22b). A broken response
+// resolves with the client error code and whatever bytes arrived, never rejects.
+function fetchBytes(urlPath) {
+    return new Promise((resolve) => {
+        const req = http.request({
+            host: "127.0.0.1",
+            port: server.address().port,
+            method: "GET",
+            path: urlPath,
+            agent: false
+        }, (res) => {
+            const chunks = [];
+            res.on("data", (chunk) => { chunks.push(chunk); });
+            res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+            res.on("error", (e) => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks), error: e.code }));
+        });
+        req.on("error", (e) => resolve({ status: null, headers: {}, body: Buffer.alloc(0), error: e.code }));
+        req.end();
+    });
+}
+
+// Raw HTTP/1.1 GET over a socket; resolves with every byte the server wrote before closing.
+function rawGet(urlPath) {
+    return new Promise((resolve) => {
+        const chunks = [];
+        const sock = net.connect(server.address().port, "127.0.0.1", () => {
+            sock.write("GET " + urlPath + " HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        });
+        sock.on("data", (chunk) => { chunks.push(chunk); });
+        sock.on("close", () => resolve(Buffer.concat(chunks)));
+        sock.on("error", () => { /* resolved on close */ });
+    });
+}
+
 function firmwareBlob(marker) {
     const buf = Buffer.alloc(2048, 0x2e);
     buf.write(marker, 0, "latin1");
@@ -872,6 +910,90 @@ describe("DeviceOttSpec (quick 261003-v9x)", function () {
             const res = await send("GET", "/device/firmware?ott=" + parsed.ott, { headOnly: true });
             expect(res.status).to.equal(200);
             expect(res.headers["x-md5"] === FW_B.md5, "x-md5 is B's firmware md5").to.equal(true);
+        }, TIMEOUT);
+    });
+
+    // -----------------------------------------------------------------------
+    // quick 261004-22b (operator-approved 2026-10-04): a successful redemption answers the
+    // raw firmware bytes as application/octet-stream again. fee22323 (2022) passed the Buffer
+    // to Util.responder, which JSON-wrapped it ({"success":{"type":"Buffer",...}}) under a
+    // JSON Content-Type and the binary's Content-Length, so ESPhttpUpdate could not flash it.
+    // v9x (261003) deliberately left that line unchanged pending this decision.
+    describe("OTT redemption binary (quick 261004-22b)", function () {
+
+        // Not valid UTF-8 (0xFF, a lone 0xE9, 0x80 continuation byte) and contains NULs,
+        // so any string round-trip or JSON wrapping changes the bytes.
+        const BIN = Buffer.from([0x00, 0xff, 0xe9, 0x00, 0x80, 0xc3, 0x28, 0x7b, 0x22, 0xe9, 0xff, 0x00, 0x01, 0xfe]);
+        const OK_TOKEN = "e".repeat(64);
+
+        function stubRedemption(ok, response) {
+            return spyOn(device, "ott_update").and.callFake((_ott, cb) => setImmediate(() => cb(ok, response)));
+        }
+
+        it("B1. a successful redemption answers the exact firmware bytes as application/octet-stream", async function () {
+            const spy = stubRedemption(true, { md5: md5(BIN), filesize: BIN.length, payload: BIN });
+            const res = await fetchBytes("/device/firmware?ott=" + OK_TOKEN);
+            expect(spy.calls.count(), "ott_update called once").to.equal(1);
+            expect(typeof (res.error), "client error").to.equal("undefined");
+            expect(res.status).to.equal(200);
+            expect(res.body.equals(BIN), "body bytes equal the firmware Buffer").to.equal(true);
+            expect(res.headers["content-type"]).to.equal("application/octet-stream");
+            expect(res.headers["content-length"]).to.equal(String(BIN.length));
+            expect(res.headers["x-md5"]).to.equal(md5(BIN));
+            expect(res.headers["content-disposition"]).to.equal("attachment; filename=firmware.bin");
+        }, TIMEOUT);
+
+        it("B2. a successful redemption is never JSON-wrapped on the wire", async function () {
+            stubRedemption(true, { md5: md5(BIN), filesize: BIN.length, payload: BIN });
+            // Raw socket: no HTTP client parsing, so a body longer than Content-Length is seen whole.
+            const wire = await rawGet("/device/firmware?ott=" + OK_TOKEN);
+            const split = wire.indexOf("\r\n\r\n");
+            expect(split > 0, "response has a header block").to.equal(true);
+            const head = wire.subarray(0, split).toString("latin1").toLowerCase();
+            const body = wire.subarray(split + 4);
+            expect(body.toString("latin1").indexOf("\"type\":\"Buffer\""), "Buffer JSON serialization").to.equal(-1);
+            expect(body.toString("latin1").indexOf("\"success\""), "responder envelope").to.equal(-1);
+            expect(head.indexOf("application/json"), "JSON content type").to.equal(-1);
+            expect(body.length, "body length on the wire").to.equal(BIN.length);
+        }, TIMEOUT);
+
+        it("B3. a token issued over POST redeems over GET to B's firmware file byte for byte", async function () {
+            const issued = await send("POST", "/device/firmware", { key: KEY_B, body: { use: "ott", owner: OWNER_B, udid: UDID_B } });
+            let parsed = {};
+            try { parsed = JSON.parse(issued.text); } catch (_e) { parsed = {}; }
+            expect(HEX64.test(parsed.ott), "token issued").to.equal(true);
+            const res = await fetchBytes("/device/firmware?ott=" + parsed.ott);
+            const onDisk = fs.readFileSync(FW_B.path);
+            expect(typeof (res.error), "client error").to.equal("undefined");
+            expect(res.status).to.equal(200);
+            expect(res.body.equals(onDisk), "body is B's firmware.bin").to.equal(true);
+            expect(md5(res.body) === FW_B.md5, "body md5 is B's firmware md5").to.equal(true);
+            expect(res.headers["x-md5"] === FW_B.md5, "x-md5 is B's firmware md5").to.equal(true);
+            expect(res.headers["content-length"]).to.equal(String(onDisk.length));
+            expect(res.headers["content-type"]).to.equal("application/octet-stream");
+        }, TIMEOUT);
+
+        it("B4. GET without ott keeps the OTT_MISSING JSON answer", async function () {
+            const spy = stubRedemption(true, { md5: md5(BIN), filesize: BIN.length, payload: BIN });
+            const res = await fetchBytes("/device/firmware");
+            expect(spy.calls.count(), "ott_update not called").to.equal(0);
+            expect(res.status).to.equal(200);
+            expect(res.headers["content-type"]).to.equal("application/json; charset=utf-8");
+            expect(res.body.toString("utf8")).to.equal(JSON.stringify({ success: false, response: "OTT_MISSING" }));
+        }, TIMEOUT);
+
+        it("B5. a failed redemption keeps its reason-code answer and serves no firmware headers", async function () {
+            const spy = stubRedemption(false, "unset");
+            for (const reason of ["OTT_UPDATE_NOT_FOUND", "OTT_INFO_NOT_FOUND", "OTT_UPDATE_NOT_AVAILABLE"]) {
+                spy.and.callFake((_ott, cb) => setImmediate(() => cb(false, reason)));
+                const res = await fetchBytes("/device/firmware?ott=" + OK_TOKEN);
+                expect(res.status, reason + " status").to.equal(200);
+                expect(res.body.toString("utf8"), reason + " body").to.equal(reason);
+                expect(typeof (res.headers["x-md5"]), reason + " x-md5").to.equal("undefined");
+                expect(typeof (res.headers["content-disposition"]), reason + " content-disposition").to.equal("undefined");
+                expect(res.headers["content-type"] === "application/octet-stream", reason + " octet-stream").to.equal(false);
+            }
+            expect(spy.calls.count(), "ott_update calls").to.equal(3);
         }, TIMEOUT);
     });
 
