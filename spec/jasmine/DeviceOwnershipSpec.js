@@ -103,7 +103,7 @@ function notFound() {
 function seedCouch() {
     couch.devices = {};
     couch.devices[UDID_A] = {
-        _id: UDID_A, _rev: "1-a", udid: UDID_A, owner: OWNER_A, alias: ALIAS_A,
+        _id: UDID_A, _rev: "1-a", udid: UDID_A, owner: OWNER_A, alias: ALIAS_A, lastkey: HASH_A,
         source: "t29-src-a", mesh_ids: [], environment: { ssid: "t29-ssid", pass: ENV_SENTINEL }
     };
     couch.devices[UDID_A2] = { _id: UDID_A2, _rev: "1-a2", udid: UDID_A2, owner: OWNER_A, alias: "t29-second", mesh_ids: [] };
@@ -164,6 +164,23 @@ const deviceDb = {
         couch.writes.push({ op: "insert", id: docId });
         couch.devices[docId] = copy(doc);
         return answer(cb, null, { ok: true, id: docId });
+    },
+    // Mango _find on lastkey (quick 261003-u86 transfer key check): selector.lastkey.$in,
+    // limit and fields.
+    find(query, cb) {
+        const sel = (query && query.selector && query.selector.lastkey) ? query.selector.lastkey : {};
+        const list = Array.isArray(sel.$in) ? sel.$in : [];
+        let docs = Object.keys(couch.devices).map((k) => couch.devices[k])
+            .filter((d) => (typeof (d.lastkey) === "string") && (list.indexOf(d.lastkey) !== -1));
+        if (typeof (query.limit) === "number") docs = docs.slice(0, query.limit);
+        const fields = Array.isArray(query.fields) ? query.fields : null;
+        docs = docs.map((d) => {
+            if (fields === null) return copy(d);
+            const out = {};
+            for (const f of fields) if (Object.prototype.hasOwnProperty.call(d, f)) out[f] = d[f];
+            return out;
+        });
+        return answer(cb, null, { docs: docs });
     }
 };
 
@@ -237,6 +254,34 @@ function makeRedisStub() {
         },
         keys(pattern, ...rest) {
             later(lastCallback(rest), null, []);
+        },
+        // EVAL <script> <n> <n keys> <n expected> <n next>: the multi-key compare-and-swap
+        // the API-key move uses (quick 261003-u86). Absent reads as ""; all equal -> write
+        // next ("" = DEL) and answer 1, else 0.
+        sendCommand(...args) {
+            let cb = null;
+            if (typeof (args[args.length - 1]) === "function") cb = args.pop();
+            const flat = [];
+            (function flatten(list) {
+                for (const a of list) {
+                    if (Array.isArray(a)) flatten(a);
+                    else flat.push((typeof (a) === "number") ? String(a) : a);
+                }
+            })(args);
+            if (String(flat[0]).toUpperCase() !== "EVAL") return later(cb, new Error("unsupported command"));
+            const n = parseInt(flat[2], 10);
+            const keys = flat.slice(3, 3 + n);
+            const expected = flat.slice(3 + n, 3 + 2 * n);
+            const next = flat.slice(3 + 2 * n, 3 + 3 * n);
+            for (let i = 0; i < n; i++) {
+                const current = store.has(keys[i]) ? store.get(keys[i]) : "";
+                if (current !== String(expected[i])) return later(cb, null, 0);
+            }
+            for (let i = 0; i < n; i++) {
+                if (String(next[i]) === "") store.delete(keys[i]);
+                else store.set(keys[i], String(next[i]));
+            }
+            later(cb, null, 1);
         },
         on() { }
     };
@@ -765,6 +810,10 @@ describe("DeviceOwnershipSpec (quick 261003-t29)", function () {
 
         beforeEach(() => {
             for (const k of dtKeys()) redis.store.delete(k);
+            // An accepted transfer moves the device's API key (quick 261003-u86).
+            redis.store.set("ak:" + OWNER_A, JSON.stringify([{ key: KEY_A, hash: HASH_A, alias: "t29-a" }]));
+            redis.store.set("ak:" + OWNER_B, JSON.stringify([{ key: KEY_B, hash: HASH_B, alias: "t29-b" }]));
+            redis.store.delete("ak:" + OWNER_R);
         });
 
         it("a request naming any udid the sender does not own is refused before anything is stored or mailed", async function () {

@@ -56,6 +56,14 @@ const OWNER_B = sha256(PREFIX + "tv5-owner-b@example.com");
 const KEY_A = sha256("tv5-key-a");
 const KEY_B = sha256("tv5-key-b");
 
+// quick 261003-u86: a key moved from A to B with UDID_B's transfer (KEY_T), an unmoved key
+// of A (KEY_U) and a third owner id that never owned UDID_B (OWNER_C).
+const HASH_B = sha256(KEY_B);
+const KEY_T = sha256("u86-key-transferred");
+const HASH_T = sha256(KEY_T);
+const KEY_U = sha256("u86-key-unmoved");
+const OWNER_C = sha256(PREFIX + "u86-owner-c@example.com");
+
 const MAC_A_PAIR = "7E:50:00:00:00:A2";
 const MAC_A_ONE = "7E:50:00:00:00:A3";
 const MAC_MIXED = "7E:50:00:00:00:AB";
@@ -205,17 +213,27 @@ function fakeCouch() {
     return { use: useDb, db: { use: useDb } };
 }
 
+// Records owner ids only (quick 261003-u86 continuity cases); otherwise a no-op.
+let auditOwners = [];
 class AuditStub {
-    log() { /* no-op */ }
+    log(owner) { auditOwners.push(owner); }
 }
 
-// Keeps mkdirp and the filesystem out of the spec.
+// Keeps mkdirp and the filesystem out of the spec. latestFirmwarePath records the owner it
+// was asked for and answers "no firmware" (quick 261003-u86); `envelope` is what
+// latestFirmwareEnvelope answers (undefined unless a case sets it).
+let firmwarePathOwners = [];
 class DeploymentStub {
     initWithOwner() { /* no-op */ }
     initWithDevice() { /* no-op */ }
-    latestFirmwareEnvelope() { return undefined; }
+    latestFirmwareEnvelope() { return DeploymentStub.envelope; }
     hasUpdateAvailable() { return false; }
+    latestFirmwarePath(owner, udid, callback) {
+        firmwarePathOwners.push(owner);
+        callback(false);
+    }
 }
+DeploymentStub.envelope = undefined;
 
 // ---------------------------------------------------------------------------
 // Redis stub
@@ -223,10 +241,11 @@ class DeploymentStub {
 
 // Map-backed stand-in for the legacy redis client. Values are stored synchronously;
 // callbacks are deferred with setImmediate. `sets` records every set key (MQTT
-// credentials), `sadds` every sAdd key (ACL topics).
+// credentials), `sadds` every sAdd key (ACL topics). `evals` records every EVAL
+// compare-and-swap (quick 261003-u86), never in `sets`; `getErrorKeys` makes get fail.
 function makeRedisStub() {
     const store = new Map();
-    const stub = { store: store, sets: [], sadds: [] };
+    const stub = { store: store, sets: [], sadds: [], evals: [], getErrorKeys: new Set() };
     function lastCallback(args) {
         for (let i = args.length - 1; i >= 0; i--) {
             if (typeof (args[i]) === "function") return args[i];
@@ -237,6 +256,7 @@ function makeRedisStub() {
         if (cb) setImmediate(() => cb(err, value));
     }
     stub.get = function (key, ...rest) {
+        if (stub.getErrorKeys.has(key)) return later(lastCallback(rest), new Error("u86 redis get failure"));
         later(lastCallback(rest), null, store.has(key) ? store.get(key) : null);
     };
     stub.set = function (key, value, ...rest) {
@@ -261,6 +281,34 @@ function makeRedisStub() {
         stub.sadds.push({ key: key });
         later(cb, null, Array.isArray(members) ? members.length : 1);
     };
+    // EVAL <script> <n> <n keys> <n expected> <n next>: absent reads as ""; all equal ->
+    // write next ("" = DEL) and answer 1, else 0.
+    stub.sendCommand = function (...args) {
+        let cb = null;
+        if (typeof (args[args.length - 1]) === "function") cb = args.pop();
+        const flat = [];
+        (function flatten(list) {
+            for (const a of list) {
+                if (Array.isArray(a)) flatten(a);
+                else flat.push((typeof (a) === "number") ? String(a) : a);
+            }
+        })(args);
+        if (String(flat[0]).toUpperCase() !== "EVAL") return later(cb, new Error("unsupported command"));
+        const n = parseInt(flat[2], 10);
+        const keys = flat.slice(3, 3 + n);
+        const expected = flat.slice(3 + n, 3 + 2 * n);
+        const next = flat.slice(3 + 2 * n, 3 + 3 * n);
+        stub.evals.push({ keys: keys });
+        for (let i = 0; i < n; i++) {
+            const current = store.has(keys[i]) ? store.get(keys[i]) : "";
+            if (current !== String(expected[i])) return later(cb, null, 0);
+        }
+        for (let i = 0; i < n; i++) {
+            if (String(next[i]) === "") store.delete(keys[i]);
+            else store.set(keys[i], String(next[i]));
+        }
+        later(cb, null, 1);
+    };
     stub.on = function () { /* no-op */ };
     return stub;
 }
@@ -273,6 +321,11 @@ function seedRedis(redis) {
     redis.store.set("ak:" + OWNER_B, JSON.stringify([{ key: KEY_B, hash: sha256(KEY_B), alias: "tv5-key-b" }]));
     redis.sets = [];
     redis.sadds = [];
+    redis.evals = [];
+    redis.getErrorKeys = new Set();
+    auditOwners = [];
+    firmwarePathOwners = [];
+    DeploymentStub.envelope = undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -708,6 +761,230 @@ describe("DeviceRegisterOwnerSpec (quick 261003-tv5)", function () {
             expect(await waitMqtt(reg.udid), "MQTT credential and ACL for the new udid").to.equal(true);
             expectNoLeak(r.text);
             expectAUntouched();
+        }, TIMEOUT);
+    });
+
+    // -----------------------------------------------------------------------
+    describe("REG u86: check-in records the verifying key", function () {
+
+        it("18. a check-in refreshes lastkey with sha256 of the presented key or hash", async function () {
+            couch.devices[UDID_B].lastkey = sha256("u86-stale");
+            const r1 = await register(REG(OWNER_B, MAC_FREE, { udid: UDID_B }), KEY_B);
+            expect(r1.success).to.equal(true);
+            expect(regOf(r1).udid).to.equal(UDID_B);
+            expect(couch.devices[UDID_B].lastkey === sha256(KEY_B), "lastkey is sha256(key)").to.equal(true);
+            await quiesce();
+            const r2 = await register(REG(OWNER_B, MAC_FREE, { udid: UDID_B }), HASH_B);
+            expect(r2.success).to.equal(true);
+            expect(couch.devices[UDID_B].lastkey === sha256(HASH_B), "lastkey is sha256(hash)").to.equal(true);
+        }, TIMEOUT);
+
+        it("19. a device with transformers persists lastkey while the transformer job never carries it", async function () {
+            const appConfig = Globals.app_config();
+            const savedLambda = appConfig.lambda;
+            const savedOwner = device.owner;
+            const captured = [];
+            const capture = http.createServer((req) => {
+                let text = "";
+                req.on("data", (chunk) => { text += chunk; });
+                req.on("end", () => {
+                    captured.push(text);
+                    req.socket.destroy();
+                });
+            });
+            await new Promise((resolve) => capture.listen(0, "127.0.0.1", resolve));
+            try {
+                appConfig.lambda = capture.address().port;
+                device.owner = {
+                    profile: (o, cb) => cb(true, {
+                        info: {
+                            goals: [],
+                            transformers: [{ utid: "u86-t", alias: "u86-t", body: Buffer.from("var transformer = function(status, device) { return status; };").toString("base64") }]
+                        }
+                    })
+                };
+                couch.devices[UDID_B].lastkey = sha256("u86-stale");
+                couch.devices[UDID_B].transformers = ["u86-t"];
+                const r = await register(REG(OWNER_B, MAC_FREE, { udid: UDID_B, status: "u86-status" }), KEY_B);
+                expect(r.success).to.equal(true);
+                expect(couch.devices[UDID_B].lastkey === sha256(KEY_B), "persisted lastkey is sha256(key)").to.equal(true);
+                expect(captured.length, "transformer jobs posted").to.equal(1);
+                expect(captured[0].indexOf("lastkey") === -1, "job carries lastkey").to.equal(true);
+                expect(captured[0].indexOf(KEY_B) === -1, "job carries the key").to.equal(true);
+                expect(captured[0].indexOf(HASH_B) === -1, "job carries the key hash").to.equal(true);
+            } finally {
+                appConfig.lambda = savedLambda;
+                device.owner = savedOwner;
+                await new Promise((resolve) => capture.close(() => resolve()));
+            }
+        }, TIMEOUT);
+    });
+
+    // -----------------------------------------------------------------------
+    describe("REG u86: transferred device continuity", function () {
+
+        const InfluxConnector = require("../../lib/thinx/influx");
+        let savedStatsLog = null;
+        let statsOwners = [];
+        let seededB = null;
+
+        function seedBinding(from, udid) {
+            const list = [
+                { key: KEY_B, hash: HASH_B, alias: "tv5-key-b" },
+                { key: KEY_T, hash: HASH_T, alias: "u86-moved", transfer: { udid: udid || UDID_B, from: from || [OWNER_A], at: "2026-10-03T00:00:00.000Z" } }
+            ];
+            seededB = JSON.stringify(list);
+            redis.store.set("ak:" + OWNER_B, seededB);
+        }
+
+        function expectRefused(r, label) {
+            expect(r.success, (label || "") + " refused").to.equal(false);
+            expect(r.response, label).to.equal("owner_found_but_no_key");
+            expect(couch.writes.length, (label || "") + " couch write attempts").to.equal(0);
+            expect(redis.sets.length, (label || "") + " credential writes").to.equal(0);
+            expect(redis.sadds.length, (label || "") + " ACL writes").to.equal(0);
+            expect(redis.evals.length, (label || "") + " key store writes").to.equal(0);
+        }
+
+        function firmware(owner, udid, key) {
+            return new Promise((resolve) => {
+                let done = false;
+                device.firmware({ headers: { authentication: key }, body: { registration: { mac: MAC_FREE, udid: udid, owner: owner } } }, (success, response) => {
+                    if (done) return;
+                    done = true;
+                    resolve({ success: success, response: response });
+                });
+            });
+        }
+
+        beforeEach(() => {
+            seedBinding();
+            statsOwners = [];
+            savedStatsLog = InfluxConnector.statsLog;
+            InfluxConnector.statsLog = function (owner) { statsOwners.push(owner); };
+        });
+
+        afterEach(() => {
+            InfluxConnector.statsLog = savedStatsLog;
+        });
+
+        it("20. the previous owner id with the moved key and the device's own udid checks in as the current owner", async function () {
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_T);
+            const reg = regOf(r);
+            expect(r.success).to.equal(true);
+            expectOwnerB(reg);
+            expect(reg.udid).to.equal(UDID_B);
+            expect(reg.status).to.equal("OK");
+            expect(await waitMqtt(UDID_B), "MQTT credential and ACL for UDID_B").to.equal(true);
+            expect(writesFor(UDID_B, "atomic").length, "atomic writes for UDID_B").to.equal(1);
+            expect(inserts().length, "inserts").to.equal(0);
+            expect((couch.devices[UDID_B] || {}).owner === OWNER_B, "stored owner is B").to.equal(true);
+            expect(auditOwners.indexOf(OWNER_A) === -1, "audit entry for the previous owner").to.equal(true);
+            expect(statsOwners.indexOf(OWNER_A) === -1, "stats event for the previous owner").to.equal(true);
+            expect(redis.store.get("ak:" + OWNER_B) === seededB, "B's key store unchanged").to.equal(true);
+            expectAUntouched();
+            expectNoLeak(r.response);
+        }, TIMEOUT);
+
+        it("21. the moved key's hash works the same way", async function () {
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), HASH_T);
+            const reg = regOf(r);
+            expect(r.success).to.equal(true);
+            expectOwnerB(reg);
+            expect(reg.udid).to.equal(UDID_B);
+            expect(await waitMqtt(UDID_B), "MQTT credential and ACL for UDID_B").to.equal(true);
+            expect(inserts().length, "inserts").to.equal(0);
+            expect(auditOwners.indexOf(OWNER_A) === -1, "audit entry for the previous owner").to.equal(true);
+        }, TIMEOUT);
+
+        it("22. another udid of the current owner is refused", async function () {
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B2 }), KEY_T);
+            expectRefused(r);
+        }, TIMEOUT);
+
+        it("23. a MAC-only registration never redirects and never looks up a device", async function () {
+            const r = await register(REG(OWNER_A, MAC_B_ONE), KEY_T);
+            expectRefused(r);
+            expect(couch.gets, "device gets").to.equal(0);
+            expect(couch.views, "views").to.equal(0);
+        }, TIMEOUT);
+
+        it("24. a key the previous owner still holds registers as that owner and never redirects", async function () {
+            redis.store.set("ak:" + OWNER_A, JSON.stringify([
+                { key: KEY_A, hash: sha256(KEY_A), alias: "tv5-key-a" },
+                { key: KEY_U, hash: sha256(KEY_U), alias: "u86-unmoved" }
+            ]));
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_U);
+            const reg = regOf(r);
+            expect(r.success).to.equal(true);
+            expect(reg.owner === OWNER_A, "registration.owner is A").to.equal(true);
+            expect(isFresh(reg.udid), "fresh registration.udid").to.equal(true);
+            expect(await waitMqtt(reg.udid), "MQTT credential and ACL for the new udid").to.equal(true);
+            expect(writesFor(UDID_B).length, "writes for UDID_B").to.equal(0);
+            await quiesce();
+
+            const m = marks();
+            const own = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_A }), KEY_A);
+            const ownReg = regOf(own);
+            expect(own.success).to.equal(true);
+            expect(ownReg.udid).to.equal(UDID_A);
+            expect(ownReg.owner === OWNER_A, "registration.owner is A").to.equal(true);
+            expect(await waitMqtt(UDID_A, m), "MQTT credential and ACL for UDID_A").to.equal(true);
+        }, TIMEOUT);
+
+        it("25. the current owner's own unbound key with the previous owner id is refused", async function () {
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_B);
+            expectRefused(r);
+        }, TIMEOUT);
+
+        it("26. a binding that does not list the presented owner is refused", async function () {
+            seedBinding([OWNER_C]);
+            const r = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_T);
+            expectRefused(r);
+        }, TIMEOUT);
+
+        it("27. a Redis or CouchDB error during the lookup is refused", async function () {
+            redis.getErrorKeys.add("ak:" + OWNER_B);
+            const r1 = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_T);
+            expectRefused(r1, "redis error:");
+            redis.getErrorKeys.clear();
+
+            seedBinding([OWNER_A], UDID_BROKEN);
+            const r2 = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_BROKEN }), KEY_T);
+            expectRefused(r2, "couch error:");
+        }, TIMEOUT);
+
+        it("28. after a registration with the new owner, the old triple still redirects to the new owner", async function () {
+            const own = await register(REG(OWNER_B, MAC_FREE, { udid: UDID_B }), KEY_T);
+            expect(own.success).to.equal(true);
+            expect(regOf(own).udid).to.equal(UDID_B);
+            expect(await waitMqtt(UDID_B), "MQTT credential and ACL for UDID_B").to.equal(true);
+            expect(redis.store.get("ak:" + OWNER_B) === seededB, "B's key store unchanged (binding kept)").to.equal(true);
+            expect(redis.evals.length, "key store writes").to.equal(0);
+            await quiesce();
+
+            const m = marks();
+            const old = await register(REG(OWNER_A, MAC_FREE, { udid: UDID_B }), KEY_T);
+            const reg = regOf(old);
+            expect(old.success).to.equal(true);
+            expectOwnerB(reg);
+            expect(reg.udid).to.equal(UDID_B);
+            expect(await waitMqtt(UDID_B, m), "MQTT credential and ACL for UDID_B").to.equal(true);
+        }, TIMEOUT);
+
+        it("29. a firmware request with the previous owner id is answered for the current owner", async function () {
+            DeploymentStub.envelope = {};
+            const r = await firmware(OWNER_A, UDID_B, KEY_T);
+            const response = ((typeof (r.response) === "object") && (r.response !== null)) ? r.response : {};
+            expect(response.response === "owner_found_but_no_key", "answer is the authentication refusal").to.equal(false);
+            expect(firmwarePathOwners.length, "latestFirmwarePath calls").to.equal(1);
+            expect(firmwarePathOwners[0] === OWNER_B, "firmware looked up for B").to.equal(true);
+            expect(auditOwners.indexOf(OWNER_A) === -1, "audit entry for the previous owner").to.equal(true);
+
+            const other = await firmware(OWNER_A, UDID_B2, KEY_T);
+            expect(other.success).to.equal(false);
+            expect((other.response || {}).response).to.equal("owner_found_but_no_key");
+            expect(firmwarePathOwners.length, "latestFirmwarePath calls").to.equal(1);
         }, TIMEOUT);
     });
 });
