@@ -44,7 +44,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - ✓ **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step *(shipped Phase 22, CI-02)*
 - ✓ **Vue hostname var** — separate Vue console hostname build var so footer links point at itself *(shipped Phase 22, CI-03)*
 - **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
-- **InfluxDB 2** — upgrade `thinx_influxdb` 1.8 → 2 in production (added 2026-09-25), with `influx.js` moved to v2 and a 90-day retention on `stats` (default `autogen` is infinite today)
+- ✓ **InfluxDB 2** — `thinx_influxdb` runs `dhi.io/influxdb:2.9.1` in production, upgraded in place from a verified backup; `influx.js` is on the v2 client (Flux); `stats` has 90-day bucket retention *(shipped Phase 27, OPS-INFLUX-01/02/03)*
 - **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
 
 **Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
@@ -60,6 +60,8 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - ✓ **SEC-CFG-02** — v1.14 (Phase 24) — `SLACK_BOT_TOKEN`, `SLACK_CLIENT_SECRET`, `SLACK_WEBHOOK`, `GITHUB_CLIENT_SECRET`, `GOOGLE_OAUTH_SECRET`, `MAILGUN_API_KEY`, `ROLLBAR_SERVER_TOKEN` (falling back to `ROLLBAR_ACCESS_TOKEN`), `WORKER_SECRET` and `GIT_KEY_PASSPHRASE` all load through `readSecret()`, secret file first, then env. When both are absent the integration is switched off, and `SecretsSweepSpec` covers that.
   - Production: each service was switched with its own `docker service update --secret-add`. `thinx_api` mounts 9 secrets, including the new `CSRF_SECRET`. `thinx_worker` mounts `WORKER_SECRET` and `ROLLBAR_SERVER_TOKEN`; `thinx_transformer` mounts `ROLLBAR_SERVER_TOKEN`.
   - `WORKER_SECRET` was rotated, and a real build on the new value succeeded. `docker-swarm.yml` mirrors the live stack. There was no outage.
+- ✓ **OPS-INFLUX-01/02/03** — v1.14 (Phase 27) — `thinx_influxdb` upgraded 1.8 → `dhi.io/influxdb:2.9.1` in place (2026-10-02 22:43–22:45 UTC, ~2 min down) after a verified, rehearsed backup; all 2402 points migrated, the 80-day window (501) proven equal after the trim. `lib/thinx/influx.js` uses `@influxdata/influxdb-client` 1.35.0 with Flux and strictly increasing ns timestamps; a boot ensure adopts `stats/autogen` as `stats` with 90-day retention. Stats re-enabled 2026-10-03 12:05 UTC; dashboard/Visits and a test-device check-in confirmed in UAT. CI runs the influx specs on InfluxDB 2.9.1 (1018 specs, 0 failures). Chronograf retired; 1.8 data and backups deleted.
+  - `INFLUXDB_TOKEN` is mounted only on the live `thinx_api` spec (not in gluster `thinx.yml`) — `restart.sh`/stack deploy turns stats off until re-added.
 - ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
 - ✓ **SEC-EXEC-01** — v1.14 (Phase 23) — `lib/thinx/git.js` runs git argv-only (`runGit` is a detached `spawn`, `shell:false`; `ls-files` uses `execFileSync`). No shell string, no `ssh-agent sh -c`. Constant `GIT_SSH_COMMAND` + askpass, passphrase in env, publickey-only ssh. Private builds proven in production (43c748d0, 17d30770).
 - ✓ **SEC-EXEC-02** — v1.14 (Phase 23) — Remote jobs carry `argv` (arguments only), and the worker spawns its constant builder program with `shell:false`. `shell-escape` is gone from `package.json` and the lockfile. The legacy `cmd` shell path is retained for now (removal is a pending todo).
@@ -215,6 +217,10 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 | Secrets added one service at a time with `docker service update`, never `restart.sh`/stack deploy | A stack deploy would also re-read `.env` and re-apply the yml, e.g. mount the unmounted DB/Redis secrets (WR-02) | ✓ Good — every step had a checkpoint and a one-command rollback |
 | WORKER_SECRET rotated as a paired api+worker update, proven by a manual console Build | The value in env had leaked into logs (Phase 23), and the production build-queue cron loop does not dispatch | ✓ Good — the Fridge build succeeded on the new value. The queue defect is deferred |
 | Critical review finding CR-01 (GitHub OAuth cross-user token) fixed and deployed inside Phase 24 | Pre-existing but live; the operator asked for it ASAP | ✓ Good — per-request token handling, isolation spec, CI and live logins green |
+| Phase 27 upgraded InfluxDB in place (`influxd upgrade` on a copy, one `docker service update`), not a side-by-side migration | Small data (~4 MB backup); keeps the bucket id and DBRP mapping; one-step `docker service rollback` until the D-07 deletion | ✓ Good — ~2 min write gap, history equal; rollback window closed by operator `delete-all` 2026-10-03 |
+| Dormant connector shipped before the cutover (stats off without `INFLUXDB_TOKEN`) | Decouples the code deploy from the irreversible storage upgrade | ✓ Good — the first push caught a ms-timestamp collision bug in CI (#15564) before any data moved |
+| InfluxDB UI credentials: go-B (random admin password as an unmounted secret, UI via SSH tunnel) | Keeps edge basic-auth and InfluxDB credentials independent; no password-sync duty | ✓ Good |
+| 27 review CR-01 (API-key substring match, pre-existing) split out as quick task 261003-s59 | Outside the phase goal but a live auth bypass | — Pending |
 
 ## Evolution
 
@@ -235,4 +241,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-29 after Phase 24 (Secrets Sweep)*
+*Last updated: 2026-10-03 after Phase 27 (InfluxDB 2 Upgrade)*
