@@ -1,113 +1,57 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-02T13:25:57.129Z",
-  "phase": "26",
-  "phase_name": "Vue Console Log Paging",
-  "phase_dir": ".planning/phases/26-vue-console-log-paging",
-  "plan": 10,
-  "task": 0,
-  "total_tasks": 10,
+  "timestamp": "2026-10-03T21:29:15.589Z",
+  "phase": "quick",
+  "phase_name": "Security quick-task chain 2026-10-03",
+  "phase_dir": ".planning/quick",
+  "plan": null,
+  "task": 7,
+  "total_tasks": 14,
   "status": "paused",
   "completed_tasks": [
-    {
-      "id": "26-01..26-09",
-      "name": "All 9 phase plans executed; Push 1 (355b19b7) and Push 2 (a1d65e0a) live; D-15 credential cleanup applied (apply-both); retention job live (all roots, /etc/cron.d 09:40 UTC)",
-      "status": "done",
-      "commit": "03c859e7"
-    },
-    {
-      "id": "26-review",
-      "name": "Code review 0 critical / 4 warnings; WR-01, WR-02, WR-04, IN-03 fixed and live; WR-03 deferred; IN-01/02/04-08 open (26-REVIEW-DISPOSITION.md)",
-      "status": "done",
-      "commit": "66b78cce"
-    },
-    {
-      "id": "26-verify",
-      "name": "26-VERIFICATION.md human_needed, no gaps (5/5 roadmap truths)",
-      "status": "done",
-      "commit": "753c0ff4"
-    },
-    {
-      "id": "26-10",
-      "name": "Gap closure G-26-1: readable dark-theme warning/danger History rows; live (console 3153cac, gitlink a0a1e097)",
-      "status": "done",
-      "commit": "fa97115a"
-    },
-    {
-      "id": "uat-1",
-      "name": "UAT test 1 re-test passed after 26-10 (G-26-1 resolved)",
-      "status": "done"
-    }
+    {"id": 1, "name": "CI: jasmine failures fail the build", "status": "done", "commit": "715b38b9"},
+    {"id": 2, "name": "261003-s59 CR-01 API key exact match", "status": "done", "commit": "9d567610"},
+    {"id": 3, "name": "261003-skk mesh validateSession bypass", "status": "done", "commit": "05ebbd85"},
+    {"id": 4, "name": "261003-t29 device udid ownership", "status": "done", "commit": "5ef392e6"},
+    {"id": 5, "name": "261003-tv5 register MAC fallback owner binding", "status": "done", "commit": "c9305716"},
+    {"id": 6, "name": "261003-u86 transfer carries API key + continuity", "status": "done", "commit": "16bde50a"},
+    {"id": 7, "name": "261003-v05 logs tail + websocket owner gate", "status": "done", "commit": "51c5b100"},
+    {"id": 8, "name": "261003-v9x OTT owner binding", "status": "done", "commit": "6c0ae6b2"},
+    {"id": 9, "name": "Push thinx-staging ddc42dd4..05f9d260", "status": "in_progress", "progress": "pushed 21:25:46Z; CI test #15591 success; api-registry #15592 queued; rollout not yet verified"}
   ],
   "remaining_tasks": [
-    {
-      "id": "uat-3",
-      "name": "UAT test 3: first scheduled retention run after 2026-10-03 09:40 UTC ends LOG-RETENTION APPLY OK with small counts",
-      "status": "not_started"
-    },
-    {
-      "id": "phase-complete",
-      "name": "When UAT complete: canonicalize verification, transition Phase 26 complete (verify-work complete_session)",
-      "status": "not_started"
-    }
+    {"id": 10, "name": "261003-v9d /device/addpush key check", "status": "not_started"},
+    {"id": 11, "name": "261003-vbg MQTT status owner check (accept via transfer binding)", "status": "not_started"},
+    {"id": 12, "name": "261003-vn3 messenger per-owner websocket", "status": "not_started"},
+    {"id": 13, "name": "261003-w0c MQTT forwardNonNotification crash", "status": "not_started"},
+    {"id": 14, "name": "261003-vd4 firmware owner compare", "status": "not_started"},
+    {"id": 15, "name": "261003-vep builder masked API key", "status": "not_started"},
+    {"id": 16, "name": "261003-w13 API key cleartext exposure", "status": "not_started"}
   ],
-  "blockers": [
-    {
-      "description": "UAT test 3 cannot run before the 2026-10-03 09:40 UTC cron run",
-      "type": "external",
-      "workaround": "none; wait"
-    }
+  "blockers": [],
+  "async_jobs": [
+    {"manifest": null, "job_id": "circleci thinx-staging 05f9d260", "backend": "circleci", "status": "running", "submit_command": "git push origin thinx-staging", "submitted_at": "2026-10-03T21:25:46Z", "expected_artifacts": ["api-registry image -> Swarmpit autoredeploy of thinx_api"], "verification_command": "curl -s 'https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/tree/thinx-staging?limit=10' | jq -r '.[] | select(.vcs_revision|startswith(\"05f9d260\")) | \"\\(.build_num) \\(.status)\"'; ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service ps thinx_api --no-trunc | head -3'", "resume_command": "verify, then continue the quick-task queue"}
   ],
-  "async_jobs": [],
   "human_actions_pending": [
-    {
-      "action": "After 2026-10-03 09:40 UTC: confirm /var/log/thinx-log-retention.log on micro shows a new run ending LOG-RETENTION APPLY OK (test 3)",
-      "context": "cron.d pickup is otherwise unconfirmed",
-      "blocking": true
-    },
-    {
-      "action": "Before Phase 27: separate backup of /mnt/gluster/thinx/influx (DO VM snapshots of both nodes taken 2026-10-02 do not cover GlusterFS)",
-      "context": "todo 2026-10-02-backup-gluster-influx-data-before-phase-27.md",
-      "blocking": false
-    }
+    {"action": "Post-deploy checks: build log streams in classic console; mesh create/delete in classic and Vue; device last-connected advances", "context": "push 05f9d260 changes websocket, CSRF on mesh, device ownership", "blocking": false},
+    {"action": "Decide OTT redemption JSON-vs-binary (fleet-wide OTA resume)", "context": ".planning/todos/pending/2026-10-03-ott-redemption-serves-json-not-binary.md", "blocking": false},
+    {"action": "Say 'push' to deploy the next batch", "context": "operator controls pushes", "blocking": true}
   ],
   "decisions": [
-    {
-      "decision": "D-15 apply-both (44 reset keys cleared, 197 audit docs redacted)",
-      "rationale": "operator",
-      "phase": "26"
-    },
-    {
-      "decision": "Retention scope all (--roots deploy,repos), daily 09:40 UTC; old couchdb-log-retention retired to /usr/local/sbin/retired/",
-      "rationale": "operator",
-      "phase": "26"
-    },
-    {
-      "decision": "Installer default for first deploy is --roots none (WR-02); production keeps deploy,repos",
-      "rationale": "review",
-      "phase": "26"
-    },
-    {
-      "decision": "WR-03 legacy audit fallback deferred; jasmine || true left as is (separate decision)",
-      "rationale": "operator",
-      "phase": "26"
-    },
-    {
-      "decision": "6 commits made unsigned while GPG was locked (operator authorized); not re-signed because SUMMARYs cite their hashes",
-      "rationale": "operator away",
-      "phase": "26"
-    }
+    {"decision": "Unsigned commits allowed while GPG is locked; push only thinx-staging when operator says", "rationale": "operator standing exception", "phase": "quick"},
+    {"decision": "Transfer redirect never consumed; MQTT old-owner topic accepted via binding", "rationale": "seamless continuity for EEPROM/compiled-owner builds; operator accepted sender-forgery residual risk", "phase": "quick"},
+    {"decision": "Keep CSRF on mesh writes; Default MQTT key transfers refused", "rationale": "operator choice", "phase": "quick"}
   ],
   "uncommitted_files": [
-    "?? .claude/",
-    "?? .gsd/",
-    "?? .planning/milestone.lock",
-    "?? .planning/phases/23-build-pipeline-sink-hardening/23-REVIEW-FIX.iter2.md .. iter5.md and 23-REVIEW.iter2.md .. iter5.md (8 files, pre-existing, intentionally untracked)",
-    "?? .planning/state.json",
-    "?? thinx-firmware-esp32-pio/",
-    "?? thinx-firmware-esp8266-ino/",
-    "?? thinx-firmware-esp8266-pio/"
+    "?? .planning/quick/261003-v9d-fix-device-addpush-key-check/ (committed with this handoff)",
+    "?? .planning/quick/261003-vbg-fix-mqtt-status-owner-check/ (committed with this handoff)",
+    "?? .planning/quick/261003-vd4-fix-firmware-owner-compare/ (committed with this handoff)",
+    "?? .planning/quick/261003-vep-fix-builder-masked-api-key/ (committed with this handoff)",
+    "?? .planning/quick/261003-vn3-fix-messenger-process-wide-websocket/ (committed with this handoff)",
+    "?? .planning/quick/261003-w13-fix-api-key-cleartext-exposure/ (committed with this handoff)",
+    "?? .planning/state.json (pre-existing, left untracked)",
+    "?? .claude/ .gsd/ .planning/milestone.lock .planning/phases/23-*iter* thinx-firmware-* (pre-existing, left untracked)"
   ],
-  "next_action": "/gsd-resume-work, then after 2026-10-03 09:40 UTC: /gsd-verify-work 26 to check the retention log for UAT test 3 and complete the phase. Next phase: /gsd-discuss-phase 27 (InfluxDB 2) \u2014 first step is the gluster influx backup.",
-  "context_notes": "Production: thinx_api a39b646bbb0e, thinx_vue 0fe9a5a81a90 (micro), thinx_console 9420fec56980 (core), all from parent a0a1e097 / console 3153cac. origin/thinx-staging = a0a1e097; local is 2 docs commits ahead (22518946, fa97115a) \u2014 any push redeploys thinx_api, avoid 09:25-10:15 and 01:00-05:00 UTC. GPG was unlocked at 13:14 UTC. Phase 27 overview given to operator: influx.js uses v1-only `influx` npm client; docker-compose.yml already says dhi.io/influxdb:2 with v1 env vars (half-migrated); swarm and CI use influxdb:1.8."
+  "next_action": "Verify CI api-registry #15592 and thinx_api rollout for 05f9d260, then re-pin isolation and execute 261003-v9d",
+  "context_notes": "Sequential executors on main tree; ZZ specs don't run in CI; ask operator before adding behaviour-changing rules."
 }
