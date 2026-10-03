@@ -1374,7 +1374,11 @@ paths:
   /device/addpush:
     post:
       summary: Add push notification token
-      description: Add or update a push notification token for a device
+      description: >-
+        Add or update the push notification token of a device. The Authentication header
+        must hold an API key (or API key hash) of `owner`, and the push token is written
+        only when `udid` is a device of that owner. Only the push token is written; other
+        body fields are ignored.
       tags:
         - Device API
       security:
@@ -1386,13 +1390,28 @@ paths:
               type: object
               required:
                 - push
+                - udid
+                - owner
               properties:
                 push:
                   type: string
                   description: Push notification token
+                udid:
+                  type: string
+                  description: The device's udid
+                owner:
+                  type: string
+                  description: >-
+                    The owner id the API key belongs to; the device must belong to that
+                    owner
       responses:
         '200':
-          description: Push token added
+          description: >-
+            Push token registered (`push_token_registered`). Refusals are also HTTP 200
+            with success false - `authentication` (missing or invalid owner, or a key that
+            does not verify for it) and `push_device_not_found` (malformed, unknown or
+            another owner's udid, answered identically); `push_token_not_registered` when
+            the write fails.
           content:
             application/json:
               schema:
@@ -1401,11 +1420,11 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  status:
+                  response:
                     type: string
-                    example: "OK"
+                    example: "push_token_registered"
         '403':
-          description: Unauthorized
+          description: Unauthorized - missing or malformed Authentication header
 
   # Spec endpoint
   /spec:

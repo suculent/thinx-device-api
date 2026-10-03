@@ -329,6 +329,95 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 30000);
 
+    // quick 261003-v9d: /device/addpush writes the push token only when the body names an
+    // owner, the Authentication key verifies for that owner and the udid is that owner's
+    // device. Unknown and foreign udids answer identically. `ak` is dynamic's key hash.
+    const V9D_PUSH_1 = "9d0000000000000000000000000000000000000000000000000000000000a001";
+    const V9D_PUSH_2 = "9d0000000000000000000000000000000000000000000000000000000000a002";
+    const V9D_UNKNOWN_UDID = "0e9d0000-0000-4000-8000-000000000009";
+    const V9D_NOT_FOUND = JSON.stringify({ success: false, response: "push_device_not_found" });
+    const V9D_AUTH = JSON.stringify({ success: false, response: "authentication" });
+
+    it("POST /device/addpush (ak, own device) registers the push token (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/device/addpush')
+            .set('Authentication', ak)
+            .send({ push: V9D_PUSH_1, udid: JRS6.udid, owner: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(JSON.stringify({ success: true, response: "push_token_registered" }));
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/addpush (ak, another owner's udid) answers like an unknown udid (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/device/addpush')
+            .set('Authentication', ak)
+            .send({ push: V9D_PUSH_2, udid: envi.udid, owner: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(V9D_NOT_FOUND);
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/addpush (ak, unknown udid) answers the same (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/device/addpush')
+            .set('Authentication', ak)
+            .send({ push: V9D_PUSH_2, udid: V9D_UNKNOWN_UDID, owner: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(V9D_NOT_FOUND);
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/addpush (ak, no owner or another owner named) is refused (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/device/addpush')
+            .set('Authentication', ak)
+            .send({ push: V9D_PUSH_2, udid: JRS6.udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(V9D_AUTH);
+                chai.request(thx.app)
+                    .post('/device/addpush')
+                    .set('Authentication', ak)
+                    .send({ push: V9D_PUSH_2, udid: JRS6.udid, owner: envi.oid })
+                    .end((err2, res2) => {
+                        expect(res2.status).to.equal(200);
+                        expect(res2.text).to.equal(V9D_AUTH);
+                        done();
+                    });
+            });
+    }, 30000);
+
+    it("POST /device/addpush (unknown key) is refused (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/device/addpush')
+            .set('Authentication', "0".repeat(64))
+            .send({ push: V9D_PUSH_2, udid: JRS6.udid, owner: envi.dynamic.owner })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(V9D_AUTH);
+                done();
+            });
+    }, 30000);
+
+    it("POST /api/device/detail (jwt) shows only the owner's push token stored (261003-v9d)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/detail')
+            .set('Authorization', jwt)
+            .send({ udid: JRS6.udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(JSON.parse(res.text).push === V9D_PUSH_1).to.equal(true);
+                done();
+            });
+    }, 30000);
+
     it("GET /device/firmware (ak, invalid)", function (done) {
         chai.request(thx.app)
             .get('/device/firmware?ott=foo')
