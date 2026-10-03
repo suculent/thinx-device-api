@@ -482,8 +482,8 @@ describe("MessengerFailSafeSpec (quick 261003-w0c)", function () {
       expect(() => m.messageResponder(topic, json({ status: "online" }))).to.not.throw();
       await flush();
       expect(rec.edits).to.deep.equal([
-        { udid: UDID_A, status: { status: "online" } },
-        { udid: UDID_A, status: { status: "online" } }
+        { udid: UDID_A, status: "online" }, // quick 261004-25u: the status string, not the message
+        { udid: UDID_A, status: "online" }
       ]);
       expect(rec.profiles.length, "profile loads").to.equal(0);
       expect(rec.transformers.length, "transformer runs").to.equal(0);

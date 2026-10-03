@@ -274,7 +274,7 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
     it("(1) the owner's own status topic edits the device as the owner (transformers disabled by quick 261003-w0c)", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_A), payload({ status: "online" }));
-      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: { status: "online" } }]);
+      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: "online" }]); // quick 261004-25u: the status string, not the message
       // quick 261003-w0c: MQTT-triggered transformers disabled
       expect(fx.rec.profiles.length).to.equal(0);
       expect(fx.rec.transformers.length).to.equal(0);
@@ -284,7 +284,7 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
     it("(2) the same with a plain-object payload", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_A), { status: "online" });
-      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: { status: "online" } }]);
+      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: "online" }]); // quick 261004-25u: the status string, not the message
       // quick 261003-w0c: MQTT-triggered transformers disabled
       expect(fx.rec.profiles.length).to.equal(0);
       expect(fx.rec.transformers.length).to.equal(0);
@@ -501,7 +501,7 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
     it("T1: the previous owner's topic, bound by the transfer, applies the status as the current owner", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_T), payload({ status: "online" }));
-      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: { status: "online" } }]);
+      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: "online" }]); // quick 261004-25u: the status string, not the message
       // quick 261003-w0c: MQTT-triggered transformers disabled
       expect(fx.rec.profiles.length, "profiles").to.equal(0);
       expect(fx.rec.profiles.indexOf(OWNER_A), "profile never loaded for OWNER_A").to.equal(-1);
@@ -511,7 +511,7 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
     it("T2: the current owner's topic applies as the current owner without an ak: read", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_B, UDID_T), payload({ status: "online" }));
-      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: { status: "online" } }]);
+      expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: "online" }]); // quick 261004-25u: the status string, not the message
       // quick 261003-w0c: MQTT-triggered transformers disabled
       expect(fx.rec.profiles.length, "profiles").to.equal(0);
       expect(akReads(fx.rec), "ak: reads").to.equal(0);
