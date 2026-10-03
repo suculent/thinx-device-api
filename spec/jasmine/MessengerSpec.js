@@ -161,6 +161,61 @@ describe("Messenger", function () {
     messenger.messageResponder(topic, message);
   });
 
+  // quick 261003-vbg: status topics act only on the topic owner's devices (or a transferred
+  // device bound to the topic owner; that branch is pinned locally in MessengerOwnershipSpec).
+  // Device#edit and #runDeviceTransformers are wrapped with recording pass-throughs set as own
+  // properties and restored by deleting them, so the prototype methods are never replaced.
+  function recordDeviceCalls(dev) {
+    const calls = { edits: [], runs: [] };
+    const edit = dev.edit;
+    const run = dev.runDeviceTransformers;
+    dev.edit = function (changes, callback) {
+      calls.edits.push(changes && changes.udid);
+      return edit.call(dev, changes, callback);
+    };
+    dev.runDeviceTransformers = function (profile, doc, ...rest) {
+      calls.runs.push(doc && doc.udid);
+      return run.call(dev, profile, doc, ...rest);
+    };
+    return calls;
+  }
+
+  function restoreDeviceCalls(dev) {
+    delete dev.edit;
+    delete dev.runDeviceTransformers;
+  }
+
+  it("261003-vbg: another owner's status topic never reaches Device#edit", async function () {
+    const foreign = require("crypto").createHash("sha256").update("261003-vbg-ci-foreign-owner").digest("hex");
+    const dev = messenger.device;
+    const calls = recordDeviceCalls(dev);
+    try {
+      messenger.messageResponder("/" + foreign + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-foreign" })));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      expect(calls.edits.indexOf(TEST_DEVICE_6.udid), "edit of the foreign-topic device").to.equal(-1);
+      expect(calls.runs.indexOf(TEST_DEVICE_6.udid), "transformer run of the foreign-topic device").to.equal(-1);
+    } finally {
+      restoreDeviceCalls(dev);
+    }
+  }, 20000);
+
+  it("261003-vbg: the owner's own status topic reaches Device#edit (real CouchDB lookup)", async function () {
+    const dev = messenger.device;
+    const calls = recordDeviceCalls(dev);
+    try {
+      expect(TEST_DEVICE_6.udid).to.be.a('string');
+      messenger.messageResponder("/" + test_owner + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-own" })));
+      const deadline = Date.now() + 10000;
+      while ((calls.edits.indexOf(TEST_DEVICE_6.udid) === -1) && (Date.now() < deadline)) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      // Only the edit call is asserted, never the stored document (transformer write-back race).
+      expect(calls.edits.indexOf(TEST_DEVICE_6.udid), "edit of the owner's device").to.not.equal(-1);
+    } finally {
+      restoreDeviceCalls(dev);
+    }
+  }, 20000);
+
   it("should be able to process actionable notification", function () {
     let topic = "/07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c/d6ff2bb0-df34-11e7-b351-eb37822aa172/status";
     let message = {
