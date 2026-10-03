@@ -5,7 +5,8 @@
  *
  * Pinned behaviour:
  * - /<owner>/<udid>/status for the owner's own device edits the device ({udid, status}) and
- *   runs its transformers with that owner's profile, exactly as before, and reads no ak: store;
+ *   reads no ak: store (quick 261003-w0c: MQTT-triggered transformers are disabled, so no
+ *   profile load and no transformer run);
  * - operator decision 2026-10-03: a transferred device's previous-owner topic is ACCEPTED when
  *   the entry the device's lastkey identifies in ak:<doc.owner> carries a transfer binding for
  *   exactly this udid listing the topic owner (APIKey#checkTransferBinding, which reuses u86's
@@ -26,8 +27,11 @@
  * Redis, so the real u86 statics and checkTransferBinding are exercised.
  *
  * Fixture notes:
- * - forwardNonNotification is replaced by a no-op: with createInstance's state (rtm = null,
- *   channel = null) it throws whenever ENVIRONMENT is not "test" (todo finding (a)).
+ * - forwardNonNotification is replaced by a no-op. Its throw with createInstance's state
+ *   (rtm = null, channel = null, ENVIRONMENT not "test"; todo finding (a)) is fixed in quick
+ *   261003-w0c; the no-op stays, to isolate the owner gate.
+ * - THINX_MQTT_DEVICE_WRITES is set to "1" for every case (quick 261003-w0c gates MQTT device
+ *   writes behind it, default off) and restored afterwards.
  * - one recording console socket is subscribed per owner (quick 261003-vn3 replaced the single
  *   `_socket` with per-owner subscriptions; todo finding (d) is gone with it).
  *
@@ -251,22 +255,29 @@ function binding(fx, current, udid, lk, presented) {
 describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
 
   let lines;
+  let savedDeviceWrites;
 
   beforeEach(() => {
     lines = captureConsole();
+    // quick 261003-w0c: MQTT device writes are gated off unless THINX_MQTT_DEVICE_WRITES=1.
+    savedDeviceWrites = process.env.THINX_MQTT_DEVICE_WRITES;
+    process.env.THINX_MQTT_DEVICE_WRITES = "1";
+  });
+
+  afterEach(() => {
+    if (typeof (savedDeviceWrites) === "undefined") delete process.env.THINX_MQTT_DEVICE_WRITES;
+    else process.env.THINX_MQTT_DEVICE_WRITES = savedDeviceWrites;
   });
 
   describe("VBG status", function () {
 
-    it("(1) the owner's own status topic edits the device and runs its transformers as the owner", async () => {
+    it("(1) the owner's own status topic edits the device as the owner (transformers disabled by quick 261003-w0c)", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_A), payload({ status: "online" }));
       expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: { status: "online" } }]);
-      expect(fx.rec.profiles.length).to.equal(1);
-      expect(fx.rec.profiles[0] === OWNER_A, "profile loaded for OWNER_A").to.equal(true);
-      expect(fx.rec.transformers.length).to.equal(1);
-      expect(fx.rec.transformers[0].owner === OWNER_A, "transformers as OWNER_A").to.equal(true);
-      expect(fx.rec.transformers[0].udid).to.equal(UDID_A);
+      // quick 261003-w0c: MQTT-triggered transformers disabled
+      expect(fx.rec.profiles.length).to.equal(0);
+      expect(fx.rec.transformers.length).to.equal(0);
       expect(akReads(fx.rec), "ak: reads").to.equal(0);
     });
 
@@ -274,9 +285,9 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_A), { status: "online" });
       expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: { status: "online" } }]);
-      expect(fx.rec.profiles.length).to.equal(1);
-      expect(fx.rec.profiles[0] === OWNER_A, "profile loaded for OWNER_A").to.equal(true);
-      expect(fx.rec.transformers.length).to.equal(1);
+      // quick 261003-w0c: MQTT-triggered transformers disabled
+      expect(fx.rec.profiles.length).to.equal(0);
+      expect(fx.rec.transformers.length).to.equal(0);
       expect(akReads(fx.rec), "ak: reads").to.equal(0);
     });
 
@@ -491,20 +502,18 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_A, UDID_T), payload({ status: "online" }));
       expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: { status: "online" } }]);
-      expect(fx.rec.profiles.length, "profiles").to.equal(1);
-      expect(fx.rec.profiles[0] === OWNER_B, "profile loaded for OWNER_B").to.equal(true);
+      // quick 261003-w0c: MQTT-triggered transformers disabled
+      expect(fx.rec.profiles.length, "profiles").to.equal(0);
       expect(fx.rec.profiles.indexOf(OWNER_A), "profile never loaded for OWNER_A").to.equal(-1);
-      expect(fx.rec.transformers.length).to.equal(1);
-      expect(fx.rec.transformers[0].owner === OWNER_B, "transformers as OWNER_B").to.equal(true);
-      expect(fx.rec.transformers[0].udid).to.equal(UDID_T);
+      expect(fx.rec.transformers.length).to.equal(0);
     });
 
     it("T2: the current owner's topic applies as the current owner without an ak: read", async () => {
       const fx = makeMessenger();
       await send(fx, statusTopic(OWNER_B, UDID_T), payload({ status: "online" }));
       expect(fx.rec.edits).to.deep.equal([{ udid: UDID_T, status: { status: "online" } }]);
-      expect(fx.rec.profiles.length, "profiles").to.equal(1);
-      expect(fx.rec.profiles[0] === OWNER_B, "profile loaded for OWNER_B").to.equal(true);
+      // quick 261003-w0c: MQTT-triggered transformers disabled
+      expect(fx.rec.profiles.length, "profiles").to.equal(0);
       expect(akReads(fx.rec), "ak: reads").to.equal(0);
     });
 

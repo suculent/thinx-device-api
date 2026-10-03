@@ -189,6 +189,9 @@ describe("Messenger", function () {
     const foreign = require("crypto").createHash("sha256").update("261003-vbg-ci-foreign-owner").digest("hex");
     const dev = messenger.device;
     const calls = recordDeviceCalls(dev);
+    // quick 261003-w0c: MQTT device writes are gated off unless THINX_MQTT_DEVICE_WRITES=1.
+    const savedDeviceWrites = process.env.THINX_MQTT_DEVICE_WRITES;
+    process.env.THINX_MQTT_DEVICE_WRITES = "1";
     try {
       messenger.messageResponder("/" + foreign + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-foreign" })));
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -196,12 +199,17 @@ describe("Messenger", function () {
       expect(calls.runs.indexOf(TEST_DEVICE_6.udid), "transformer run of the foreign-topic device").to.equal(-1);
     } finally {
       restoreDeviceCalls(dev);
+      if (typeof (savedDeviceWrites) === "undefined") delete process.env.THINX_MQTT_DEVICE_WRITES;
+      else process.env.THINX_MQTT_DEVICE_WRITES = savedDeviceWrites;
     }
   }, 20000);
 
   it("261003-vbg: the owner's own status topic reaches Device#edit (real CouchDB lookup)", async function () {
     const dev = messenger.device;
     const calls = recordDeviceCalls(dev);
+    // quick 261003-w0c: MQTT device writes are gated off unless THINX_MQTT_DEVICE_WRITES=1.
+    const savedDeviceWrites = process.env.THINX_MQTT_DEVICE_WRITES;
+    process.env.THINX_MQTT_DEVICE_WRITES = "1";
     try {
       expect(TEST_DEVICE_6.udid).to.be.a('string');
       messenger.messageResponder("/" + test_owner + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-own" })));
@@ -213,6 +221,8 @@ describe("Messenger", function () {
       expect(calls.edits.indexOf(TEST_DEVICE_6.udid), "edit of the owner's device").to.not.equal(-1);
     } finally {
       restoreDeviceCalls(dev);
+      if (typeof (savedDeviceWrites) === "undefined") delete process.env.THINX_MQTT_DEVICE_WRITES;
+      else process.env.THINX_MQTT_DEVICE_WRITES = savedDeviceWrites;
     }
   }, 20000);
 
