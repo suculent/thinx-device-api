@@ -90,6 +90,55 @@ describe("Transfer (JWT)", function () {
     let jwt;
     let transfer_id;
     let transfer_udid = null; // a dynamic-owned fixture device, registered below (261003-t29)
+    let transfer_key_hash = null; // hash of the fixture device's own API key (261003-u86)
+    let transfer_mac = null; // the fixture device's MAC (261003-u86)
+    let shared_udids = []; // two dynamic devices on one API key (261003-u86)
+    let shared_macs = [];
+    let revoked_udid = null; // a dynamic device whose API key was revoked (261003-u86)
+
+    // Promise helpers for the 261003-u86 cases.
+    function createKey(alias) {
+        return new Promise((resolve) => {
+            chai.request(thx.app)
+                .post('/api/user/apikey')
+                .set('Authorization', jwt)
+                .send({ alias: alias })
+                .end((_err, res) => {
+                    expect(res.status).to.equal(200);
+                    let j = JSON.parse(res.text);
+                    expect(j.success).to.equal(true);
+                    expect(j.response.hash).to.be.a('string');
+                    resolve(j.response.hash);
+                });
+        });
+    }
+
+    function registerDevice(key, registration) {
+        return new Promise((resolve) => {
+            chai.request(thx.app)
+                .post('/device/register')
+                .set('Authentication', key)
+                .send({
+                    registration: Object.assign({
+                        firmware: "ZZ-RouterTransferSpec.js",
+                        version: "1.0.0",
+                        alias: "u86-transfer-device",
+                        platform: "arduino"
+                    }, registration)
+                })
+                .end((_err, res) => resolve(res));
+        });
+    }
+
+    function requestTransfer(udids) {
+        return new Promise((resolve) => {
+            chai.request(thx.app)
+                .post('/api/transfer/request')
+                .set('Authorization', jwt)
+                .send({ to: "cimrman@thinx.cloud", udids: udids, mig_sources: false, mig_apikeys: false })
+                .end((_err, res) => resolve(res));
+        });
+    }
   
     beforeAll((done) => {
         console.log(`🚸 [chai] >>> running Transfer (JWT) spec`);
@@ -150,12 +199,14 @@ describe("Transfer (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.response.hash).to.be.a('string');
+                transfer_key_hash = j.response.hash;
+                transfer_mac = randomMac();
                 chai.request(thx.app)
                     .post('/device/register')
                     .set('Authentication', j.response.hash)
                     .send({
                         registration: {
-                            mac: randomMac(),
+                            mac: transfer_mac,
                             firmware: "ZZ-RouterTransferSpec.js",
                             version: "1.0.0",
                             alias: "t29-transfer-device",
@@ -171,6 +222,42 @@ describe("Transfer (JWT)", function () {
                         done();
                     });
             });
+    }, 30000);
+
+    it("POST /api/transfer/request (jwt, shared API key) is refused (261003-u86)", async function () {
+        const hash = await createKey("u86-shared-apikey");
+        for (let i = 0; i < 2; i++) {
+            const mac = randomMac();
+            const res = await registerDevice(hash, { mac: mac, owner: envi.dynamic.owner, alias: "u86-shared-" + i });
+            expect(res.status).to.equal(200);
+            const udid = JSON.parse(res.text).registration.udid;
+            expect(udid).to.be.a('string');
+            shared_udids.push(udid);
+            shared_macs.push(mac);
+        }
+        const res = await requestTransfer([shared_udids[0]]);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal('{"success":false,"response":"apikey_shared"}');
+    }, 30000);
+
+    it("POST /api/transfer/request (jwt, revoked API key) is refused (261003-u86)", async function () {
+        const hash = await createKey("u86-revoked-apikey");
+        const reg = await registerDevice(hash, { mac: randomMac(), owner: envi.dynamic.owner, alias: "u86-revoked" });
+        expect(reg.status).to.equal(200);
+        revoked_udid = JSON.parse(reg.text).registration.udid;
+        expect(revoked_udid).to.be.a('string');
+        const revoked = await new Promise((resolve) => {
+            chai.request(thx.app)
+                .post('/api/user/apikey/revoke')
+                .set('Authorization', jwt)
+                .send({ fingerprint: hash })
+                .end((_err, res) => resolve(res));
+        });
+        expect(revoked.status).to.equal(200);
+        expect(JSON.parse(revoked.text).success).to.equal(true);
+        const res = await requestTransfer([revoked_udid]);
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal('{"success":false,"response":"apikey_not_identified"}');
     }, 30000);
 
     // migrate the dynamic owner's own fixture device to cimrman (261003-t29)
@@ -461,5 +548,16 @@ describe("Transfer (JWT)", function () {
                 done();
             });
     }, 30000);
-                
+
+    it("removes the u86 fixture devices still owned by dynamic (261003-u86)", function (done) {
+        const udids = shared_udids.concat(revoked_udid ? [revoked_udid] : []);
+        chai.request(thx.app)
+            .post('/api/device/revoke')
+            .set('Authorization', jwt)
+            .send({ udids: udids })
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                done();
+            });
+    }, 30000);
 });
