@@ -367,6 +367,70 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 30000);
 
+    // quick 261003-v9x: OTT issuance is bound to the verified key owner's device; redemption
+    // re-checks the binding.
+    let v9x_ott = null;
+
+    it("POST /device/firmware use=ott (ak, own device) issues a 64-hex token (261003-v9x)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send({ use: "ott", owner: envi.dynamic.owner, udid: JRS6.udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                const j = JSON.parse(res.text);
+                expect(Object.keys(j)).to.deep.equal(["ott"]);
+                expect(/^[a-f0-9]{64}$/.test(j.ott)).to.equal(true);
+                v9x_ott = j.ott;
+                done();
+            });
+    }, 30000);
+
+    it("GET /device/firmware?ott= (issued, no build) answers OTT_UPDATE_NOT_AVAILABLE (261003-v9x)", function (done) {
+        expect(v9x_ott).to.be.a('string');
+        chai.request(thx.app)
+            .get('/device/firmware?ott=' + v9x_ott)
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('OTT_UPDATE_NOT_AVAILABLE');
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/firmware use=ott (ak, another owner's udid) answers no_such_device (261003-v9x)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send({ use: "ott", owner: envi.dynamic.owner, udid: envi.udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('no_such_device');
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/firmware use=ott (ak, another owner named) answers OTT_API_KEY_NOT_VALID (261003-v9x)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send({ use: "ott", owner: envi.oid, udid: envi.udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('OTT_API_KEY_NOT_VALID');
+                done();
+            });
+    }, 30000);
+
+    it("GET /device/firmware?ott=<64 zeros> answers OTT_UPDATE_NOT_FOUND (261003-v9x)", function (done) {
+        chai.request(thx.app)
+            .get('/device/firmware?ott=' + "0".repeat(64))
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal('OTT_UPDATE_NOT_FOUND');
+                done();
+            });
+    }, 30000);
+
     // Device Control API
 
     it("POST /api/device/envs (jwt, invalid)", function (done) {

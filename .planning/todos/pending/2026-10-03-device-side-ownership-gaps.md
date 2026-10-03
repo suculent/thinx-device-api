@@ -8,7 +8,7 @@ files:
   - lib/thinx/device.js:415 (checkinExistingDevice -> authorize_mqtt with the caller's key) — resolved by quick 261003-tv5
   - lib/router.deviceapi.js:97-127 (/device/addpush never verifies the Authentication key)
   - lib/thinx/device.js:704-740 (push writes the push token of any udid)
-  - lib/thinx/device.js:1153-1154 (ott_request reads req.owner, always undefined)
+  - lib/thinx/device.js:1153-1154 (ott_request reads req.owner, always undefined) — resolved by quick 261003-v9x
   - lib/thinx/messenger.js:377-398 (updateAndTransformDeviceStatus edits by topic udid)
   - lib/thinx/device.js:1209,1285 (firmware loads the device by udid without a compare)
 ---
@@ -30,7 +30,7 @@ findings remain:
    `lib/thinx/device.js:704-740`). The `Authentication` header is sanitized but never verified.
    `device.push` looks the device up by the body udid and writes its push token, so anyone can
    set the push token of any udid.
-3. **`device.ott_request`** (`lib/thinx/device.js:1153-1154`). It reads `req.owner`, which is
+3. **Resolved 2026-10-03 (quick 261003-v9x).** **`device.ott_request`** (`lib/thinx/device.js:1153-1154`). It reads `req.owner`, which is
    always undefined, so `sanitka.owner` throws and the request answers 500. The OTT flow is dead
    (it fails closed).
 4. **`messenger.updateAndTransformDeviceStatus`** (`lib/thinx/messenger.js:377-398`). It edits the
@@ -46,7 +46,7 @@ findings remain:
    (the same compare the udid branch already does), and fix the `> 1` comparison.
 2. Verify the API key against the device owner (`apikey.verify(doc.owner, key)`) before writing
    the push token.
-3. Take the owner from the registration body, verify the key for it, and only then store the OTT.
+3. **Resolved 2026-10-03 (quick 261003-v9x).** Take the owner from the registration body, verify the key for it, and only then store the OTT.
 4. Compare `doc.owner` with the topic owner `oid` (`Device.isOwnedBy`) before editing or running
    transformers.
 5. Add the same `Device.isOwnedBy(device, firmware_owner)` compare for consistency.
@@ -131,3 +131,75 @@ Residual risk:
   owner/key corrected.
 - Items 2-5 above (`/device/addpush`, `ott_request`, `updateAndTransformDeviceStatus`, firmware
   compare) stay open.
+
+## Resolution — item 3 (quick 261003-v9x)
+
+Commits: `189269ff` (RED spec `spec/jasmine/DeviceOttSpec.js`), `360a77ca` (`lib/thinx/device.js`
+fix), `0a47639c` (`lib/router.deviceapi.js` log redaction), and the commit
+"test(quick-261003-v9x): CI OTT owner-binding regressions; resolve device-side todo item 3"
+(ZZ cases, this section, the new redemption todo).
+
+Correction to the Problem text: `sanitka.owner(undefined)` returns null rather than throwing, so
+`ott_request` answered `OTT_API_KEY_NOT_VALID` (HTTP 200), not 500. The flow was still dead.
+
+**The rule (same as check-in after tv5/u86 and addpush in v9d).** The owner comes from the request
+body (`body.registration` unwrapped, as `device.firmware` does). The `Authentication` key must
+verify for that owner with `APIKey#verify` in its 4-argument form: exact, fail-closed since s59, no
+u86 transfer redirect. The body udid must then be that owner's device (`Device#fetchOwned`). The
+key does not also have to be the device's own key (`lastkey`): u86 records `lastkey` at check-in
+but no device path enforces it, and enforcing it only here would make OTT stricter than the
+firmware path it duplicates. A per-device-key rule would have to cover register, firmware, addpush
+and OTT together.
+
+**What is stored.** Exactly `{owner, udid}`: the verified owner and the owned document's udid
+(`ott_request`), or the checked-in device's owner and udid (register `FIRMWARE_UPDATE` branch).
+Before, the whole request or registration body sat in Redis for 24 h (push token, location,
+environment hashes).
+
+**Redemption re-validates.** `GET /device/firmware?ott=` refuses a token that is not 64 lowercase
+hex before Redis is touched. The record must parse, its owner and udid must pass `sanitka`, and
+the udid must still be owned by that owner, so a transfer or revoke after issuance kills the
+token. A failing record is deleted (`OTT_INFO_NOT_FOUND`). Only the sanitized, owned owner/udid
+reach `deploy.latestFirmwarePath`. Tokens issued before the deploy (full-body records) keep
+working when their owner/udid are valid and owned.
+
+**Token properties.** 32 random bytes from `crypto`, hex (the same 64-char shape, so firmware
+URLs are unchanged), written with one `SET ... EX 86400`. Before, the token was
+`sha256(new Date().toString())`: one-second resolution, enumerable, and two tokens issued in the
+same second collided. Lifetime: 24 h unredeemed, then at most 3600 s after the first redemption,
+never extended. Before, `update_binary` re-set 3600 s on every redemption (a token redeemed hourly
+never expired) and the forced firmware path did the same for any body-supplied `ott`.
+Reuse inside the ≤1 h window is deliberate: THiNXLib keeps `deferred_update_url` after
+`HTTP_UPDATE_FAILED` and retries the same URL from `loop()`
+(`thinx-firmware-esp8266-ino/lib/thinx-firmware-esp8266/src/THiNXLib.cpp:1020-1045`, `:1666-1730`,
+`:2174-2180`). A replay only re-serves the same owner's firmware for the same udid.
+
+**Live cross-owner read closed (register path).** Since tv5, a registration whose body udid is
+malformed (for example `../<ownerA>/<udidA>`) falls back by MAC to the key owner's own device and
+checks in, but `storeOTT(reg)` stored the raw body udid. `ott_update` passed it to
+`latestFirmwarePath`, which sanitizes the owner but not the udid, and `Filez.deployPathForDevice`
+concatenates `<deploy_root>/<owner>/<udid>`. Preconditions: owner B's own key, an own auto-update
+device with a pending build, and knowledge of A's owner id and udid. Result: B redeemed a token
+serving A's latest firmware (which can embed environment values such as Wi-Fi credentials). The
+register path now stores the checked-in binding, and redemption rejects such a record anyway.
+
+**Who is affected:**
+- (a) `POST /device/firmware` `{use: "ott"}`: no known firmware caller. It works again for key
+  holders on their own devices (it always answered `OTT_API_KEY_NOT_VALID` before).
+- (b) `FIRMWARE_UPDATE` check-ins: tokens are random and bound to the checked-in device. A failed
+  Redis write now answers status `OK` without an ott (before: an unredeemable token).
+- (c) Tokens issued before the deploy: honoured only when owner/udid are valid and owned, else
+  refused and deleted.
+- (d) OTA behaviour on devices is unchanged, because the redemption serialization is untouched
+  (see the new todo below).
+- (e) Logs no longer carry full tokens (router GET/POST, `ott_update`, `registration_response`).
+
+**Residual risk:** tokens are bearer secrets readable by anyone who can read Redis or sniff the
+plaintext port 7442 (`__DISABLE_HTTPS__` builds); the replay window is ≤1 h; per-device key binding
+is not enforced; `device.firmware` with a body `ott` uses the same 4-argument verify, so a
+transferred device presenting its previous owner id gets `OTT_API_KEY_NOT_VALID` there (no known
+firmware sends it).
+
+Follow-ups: `.planning/todos/pending/2026-10-03-ott-redemption-serves-json-not-binary.md`
+(redemption serialization since `fee22323`, strict one-time redemption, plaintext port, sink-level
+udid guard). Items 2, 4 and 5 above stay open.
