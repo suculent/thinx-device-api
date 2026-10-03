@@ -240,6 +240,23 @@ describe("Transfer (JWT)", function () {
         expect(res.text).to.equal('{"success":false,"response":"apikey_shared"}');
     }, 30000);
 
+    // Re-key remedy: once the other device checks in with its own key, the first one's key
+    // is no longer shared and the transfer can be requested. The request stays pending: the
+    // GET decline link answers twice for a live transfer (pre-existing, see the 261003-u86
+    // leftovers todo), so it is not used here.
+    it("POST /api/transfer/request (jwt) succeeds after the other device is re-keyed (261003-u86)", async function () {
+        expect(shared_udids.length).to.equal(2);
+        const hash = await createKey("u86-rekey-apikey");
+        const reg = await registerDevice(hash, { mac: shared_macs[1], udid: shared_udids[1], owner: envi.dynamic.owner, alias: "u86-shared-1" });
+        expect(reg.status).to.equal(200);
+        expect(JSON.parse(reg.text).registration.udid).to.equal(shared_udids[1]);
+        const res = await requestTransfer([shared_udids[0]]);
+        expect(res.status).to.equal(200);
+        const j = JSON.parse(res.text);
+        expect(j.success).to.equal(true);
+        expect(j.response).to.be.a('string');
+    }, 30000);
+
     it("POST /api/transfer/request (jwt, revoked API key) is refused (261003-u86)", async function () {
         const hash = await createKey("u86-revoked-apikey");
         const reg = await registerDevice(hash, { mac: randomMac(), owner: envi.dynamic.owner, alias: "u86-revoked" });
@@ -495,6 +512,54 @@ describe("Transfer (JWT)", function () {
                 expect(res.text).to.be.a('string');
                 done();
             });
+    }, 30000);
+
+    it("the accepted device's API key left the sender's key list (261003-u86)", function (done) {
+        chai.request(thx.app)
+            .get('/api/user/apikey/list')
+            .set('Authorization', jwt)
+            .end((_err, res) => {
+                expect(res.status).to.equal(200);
+                const j = JSON.parse(res.text);
+                expect(j.success).to.equal(true);
+                expect(Array.isArray(j.response)).to.equal(true);
+                expect(j.response.filter((k) => k.hash === transfer_key_hash).length).to.equal(0);
+                done();
+            });
+    }, 30000);
+
+    it("the transferred device registers with its previous owner id as its new owner's device (261003-u86)", async function () {
+        const res = await registerDevice(transfer_key_hash, { mac: transfer_mac, udid: transfer_udid, owner: envi.dynamic.owner, alias: "t29-transfer-device" });
+        expect(res.status).to.equal(200);
+        const reg = JSON.parse(res.text).registration;
+        expect(reg.owner === envi.oid, "registration.owner is the recipient").to.equal(true);
+        expect(reg.udid).to.equal(transfer_udid);
+    }, 30000);
+
+    it("the moved key with the previous owner id and another udid is refused (261003-u86)", async function () {
+        const res = await registerDevice(transfer_key_hash, { mac: transfer_mac, udid: shared_udids[1], owner: envi.dynamic.owner });
+        expect(res.text).to.equal('{"success":false,"response":"owner_found_but_no_key"}');
+    }, 30000);
+
+    it("the moved key with the previous owner id and no udid (MAC only) is refused (261003-u86)", async function () {
+        const res = await registerDevice(transfer_key_hash, { mac: transfer_mac, owner: envi.dynamic.owner });
+        expect(res.text).to.equal('{"success":false,"response":"owner_found_but_no_key"}');
+    }, 30000);
+
+    it("the transferred device registers with its new owner id (261003-u86)", async function () {
+        const res = await registerDevice(transfer_key_hash, { mac: transfer_mac, udid: transfer_udid, owner: envi.oid, alias: "t29-transfer-device" });
+        expect(res.status).to.equal(200);
+        const reg = JSON.parse(res.text).registration;
+        expect(reg.udid).to.equal(transfer_udid);
+        expect(reg.owner === envi.oid, "registration.owner is the recipient").to.equal(true);
+    }, 30000);
+
+    it("afterwards the previous owner id still redirects to the new owner (261003-u86)", async function () {
+        const res = await registerDevice(transfer_key_hash, { mac: transfer_mac, udid: transfer_udid, owner: envi.dynamic.owner, alias: "t29-transfer-device" });
+        expect(res.status).to.equal(200);
+        const reg = JSON.parse(res.text).registration;
+        expect(reg.owner === envi.oid, "registration.owner is the recipient").to.equal(true);
+        expect(reg.udid).to.equal(transfer_udid);
     }, 30000);
 
     it("POST /api/v2/transfer/decline IV", function (done) {

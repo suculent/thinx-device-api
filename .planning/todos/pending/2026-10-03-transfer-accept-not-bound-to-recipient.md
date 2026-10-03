@@ -48,3 +48,15 @@ that the sender still owns. So this is a consent problem, not a device-takeover 
   `dtr:<index>` key counts as "in progress". It is also racy (`:354`, evaluated before the
   callbacks run) and keyed by array index rather than udid. See item 3 of
   `.planning/todos/pending/2026-09-29-resolve-legacy-fixmes-owner-transfer.md`.
+
+## Status after 261003-u86
+
+- No item above is fixed. Line numbers in `lib/thinx/transfer.js` have moved: the
+  migration is now `migrate_owned_device` plus `finish_migration`.
+- The legacy opt-in key migration (`migrate_api_keys`, behind `body.api_keys`) was removed.
+  It is replaced by the always-on move: the device's API key entry moves to the recipient
+  with a transfer binding, and `mig_apikeys` is ignored.
+- The `mig_sources` block (with its undefined `device` read) is unchanged, and now runs only
+  after both the key and the owner have moved.
+- Because accept is still not bound to the recipient, a sender who accepts their own transfer
+  now also pushes the device's API key into the recipient's account.
