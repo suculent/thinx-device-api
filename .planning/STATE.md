@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T22:00:05.786Z"
-last_activity: 2026-10-03
+last_updated: "2026-10-03T22:06:19.109Z"
+last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 84f23c20e0c1a64c5a4b912e08afd095a7b693ac
+state_head: 971284b87e6f5b03966e91a5afbcaa265747540c
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261003-vbg: MQTT status owner check with transfer binding (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261003-x9z: Google OAuth state bound to the initiating browser; pentest XALG-1..4 triage (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -336,6 +336,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-v9x | OTT owner binding: closes live cross-owner firmware read (traversal udid in stored OTT); tokens 32 random bytes, SET EX 86400, TTL capped at 3600 s on first redemption, never extended; ott_request owner from body + exact verify + fetchOwned; redemption re-checks owner/udid; tokens no longer logged. JSON-vs-binary redemption left for operator. Not pushed. | 2026-10-03 | 6c0ae6b2 | [261003-v9x-fix-ott-request-owner](./quick/261003-v9x-fix-ott-request-owner/) |
 | 261003-v9d | /device/addpush owner-bound push token | 2026-10-03 | 81cc0fb6 | [261003-v9d-fix-device-addpush-key-check](./quick/261003-v9d-fix-device-addpush-key-check/) |
 | 261003-vbg | MQTT status owner check with transfer binding | 2026-10-03 | 84f23c20 | [261003-vbg-fix-mqtt-status-owner-check](./quick/261003-vbg-fix-mqtt-status-owner-check/) |
+| 261003-x9z | Google OAuth state bound to the initiating browser; pentest XALG-1..4 triage | 2026-10-03 | 971284b8 | [261003-x9z-bind-google-oauth-state-to-the-initiatin](./quick/261003-x9z-bind-google-oauth-state-to-the-initiatin/) |
 
 ## Cross-Project Touchpoints
 
