@@ -157,7 +157,12 @@ describe("Owner Default MQTT API Key reuse (quick 261003-w13)", function () {
     const calls = await collect((cb) => owner.create({ email: email, owner: "odk-survivor" }, false, {}, (...args) => cb(...args)), 300);
     expect(calls.length, "callbacks").to.equal(1);
     expect(calls[0][1], "create succeeded").to.equal(true);
-    expect(calls[0][2]).to.equal("account_created");
+    // CI runs with ENVIRONMENT=test, where Owner#create answers the activation token instead.
+    if (process.env.ENVIRONMENT === "test") {
+      expect((typeof (calls[0][2]) === "string") && /^[0-9a-f]{64}$/.test(calls[0][2]), "activation token").to.equal(true);
+    } else {
+      expect(calls[0][2]).to.equal("account_created");
+    }
     expect(inserted.length, "user documents inserted").to.equal(1);
     expect(store.rec.sets.length, "store writes").to.equal(0);
     expect(rec.added.length, "MQTT credentials added").to.equal(0);
