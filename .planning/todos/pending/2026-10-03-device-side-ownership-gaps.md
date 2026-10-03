@@ -9,7 +9,7 @@ files:
   - lib/router.deviceapi.js:97-127 (/device/addpush never verifies the Authentication key) — resolved by quick 261003-v9d
   - lib/thinx/device.js:704-740 (push writes the push token of any udid) — resolved by quick 261003-v9d
   - lib/thinx/device.js:1153-1154 (ott_request reads req.owner, always undefined) — resolved by quick 261003-v9x
-  - lib/thinx/messenger.js:377-398 (updateAndTransformDeviceStatus edits by topic udid)
+  - lib/thinx/messenger.js:377-398 (updateAndTransformDeviceStatus edits by topic udid) — resolved by quick 261003-vbg
   - lib/thinx/device.js:1209,1285 (firmware loads the device by udid without a compare)
 ---
 
@@ -33,7 +33,7 @@ findings remain:
 3. **Resolved 2026-10-03 (quick 261003-v9x).** **`device.ott_request`** (`lib/thinx/device.js:1153-1154`). It reads `req.owner`, which is
    always undefined, so `sanitka.owner` throws and the request answers 500. The OTT flow is dead
    (it fails closed).
-4. **`messenger.updateAndTransformDeviceStatus`** (`lib/thinx/messenger.js:377-398`). It edits the
+4. **Resolved 2026-10-03 (quick 261003-vbg).** **`messenger.updateAndTransformDeviceStatus`** (`lib/thinx/messenger.js:377-398`). It edits the
    device named by the topic udid without comparing `doc.owner` with the topic owner, and relies on
    the broker ACL alone.
 5. **`device.firmware`** (`lib/thinx/device.js:1209`, `:1285`, informational). It verifies the key
@@ -47,7 +47,7 @@ findings remain:
 2. **Resolved 2026-10-03 (quick 261003-v9d).** Verify the API key against the device owner (`apikey.verify(doc.owner, key)`) before writing
    the push token.
 3. **Resolved 2026-10-03 (quick 261003-v9x).** Take the owner from the registration body, verify the key for it, and only then store the OTT.
-4. Compare `doc.owner` with the topic owner `oid` (`Device.isOwnedBy`) before editing or running
+4. **Resolved 2026-10-03 (quick 261003-vbg).** Compare `doc.owner` with the topic owner `oid` (`Device.isOwnedBy`) before editing or running
    transformers.
 5. Add the same `Device.isOwnedBy(device, firmware_owner)` compare for consistency.
 
@@ -297,3 +297,170 @@ Post-deploy: count `[push] refused` lines.
   millisecond window; the field has no consumer.
 
 Items 3-5 are not touched by this task.
+
+## Resolution — item 4 (quick 261003-vbg)
+
+Commits (thinx-staging, not pushed):
+- `ffe6e32e` test: failing spec `spec/jasmine/MessengerOwnershipSpec.js` (RED: 39 specs, 31 failures,
+  all assertion failures)
+- `e6367b80` fix: owner-checked MQTT status path in `lib/thinx/messenger.js`
+- `11605dfc` fix: `APIKey#checkTransferBinding` in `lib/thinx/apikey.js`; transfer-binding branch
+  and owner-checked actionable notifications in `lib/thinx/messenger.js`
+- `a314d54d` test: two CI cases in `spec/jasmine/MessengerSpec.js`
+- `84f23c20` test: spec (8)'s `Date.now` spy stays inside a synchronous body
+This section is committed with the quick task's docs.
+
+**The accept rule as implemented.** For a status, check-in or actionable message on
+`/<topicOwner>/<udid>/…` (`Messenger#withAcceptedDevice`):
+1. `topicOwner` must pass `Sanitka.strictOwner` (exactly 64 `[a-z0-9]`) and `udid` a silent
+   `^[a-fA-F0-9-]{36}$` test plus `Sanitka.udid`; otherwise `malformed_topic`, before CouchDB or Redis.
+   `messageResponder` already drops a topic whose first segment is not empty or whose owner segment
+   is invalid, before MQTT registration, the status edit or any notification.
+2. One `this.devicelib.get(udid)`; an error or no document → `unknown_device`.
+3. `Device.isOwnedBy(doc, topicOwner)` → accepted as `doc.owner`, with no `ak:` read.
+4. Otherwise `current = Sanitka.strictOwner(doc.owner)` (invalid → `foreign_owner`), then
+   `this.akey.checkTransferBinding(current, udid, doc.lastkey, topicOwner)`: one GET of
+   `ak:<current>`, `parseKeyStore`, `APIKey.findDeviceKey(entries, doc.lastkey)` (the device's own
+   key entry, exactly one match), then `APIKey.findTransferBinding(entries, <that entry's hash, else
+   key>, udid, topicOwner)`. Error or malformed store → `binding_lookup_failed`; false →
+   `foreign_owner`; true → accepted as `current`. It never searches other owners' stores, logs
+   nothing and writes no audit entry.
+5. Accepted handlers act as `doc.owner`: `Device#edit({udid, status})`, `Owner#profile(doc.owner)`
+   and `runDeviceTransformers(profile, doc, null, null, null)` — the same calls as before, except that
+   the profile owner is now `doc.owner` instead of the topic owner.
+
+Gated handlers: `updateAndTransformDeviceStatus` (only for exactly `/<owner>/<udid>/status`: 4
+segments, the first empty, the last `status`), `processStatus` (returns before any read unless the
+status is `connected`/`disconnected`) and `processActionableNotification` (both branches, and its
+payload log line, run only inside the accepted callback). Unchanged: `mqttDeviceRegistration`
+(key-verified `Device#register`, now only ever given a valid owner), `processConnectionChange` and
+`processUnknownNotification` (socket relay), `message_callback` (dormant, see (g)).
+
+Drop logging: `⚠️ [warning] [messenger] dropped MQTT device message: <reason>, udid <sanitized udid or ->`,
+at most one line per message, at most 5 lines per fixed 60 s window (`Date.now()`), and the first line
+of a window carries ` (<n> suppressed in the previous window)` when n > 0. Reasons:
+`malformed_topic`, `unknown_device`, `foreign_owner`, `binding_lookup_failed`. No line carries a
+payload, the raw topic, an owner id, a key, a hash or a lastkey. Accepted messages log nothing new.
+
+**Operator decision (2026-10-03):** a transferred device's previous-owner topic is ACCEPTED through
+the u86 transfer binding, by the operator's choice, after being told the trade-off. Firmware that keeps
+the previous owner id (EEPROM builds, builds passing an owner id to the constructor; continuity
+leftovers item 2) keeps publishing `/<previous owner>/<udid>/status`, and that traffic keeps working.
+
+**Accepted residual risk:** the sender's owner credential may publish `/<sender>/#`, so for as long as
+the binding lives (until key revoke, owner purge or the next transfer; never consumed, u86 decision 3)
+it can forge the transferred device's status, run the recipient's transformers on forged input, send
+check-in/actionable notifications and write `nid:<udid>`. The scope is narrowed to: exactly this udid;
+the topic owner listed in `from`; the entry `doc.lastkey` identifies; applied as `doc.owner`. Remedy for
+a recipient: re-key the device (create a key, reprovision, let it check in once so `lastkey` identifies
+an unbound entry) or revoke the moved key.
+
+**Follow-up ideas (not planned):**
+- A per-device MQTT topic namespace or a publisher-identity check: accept old-topic status only when the
+  device's own credential published it (MQTT 5 user properties set by a broker plugin, or a
+  `/d/<udid>/status` namespace whose ACL only the udid user holds).
+- ACL cleanup on transfer (`2026-10-03-transfer-continuity-leftovers.md` item 1). It must be reconciled
+  with this rule: removing the sender's topics from the udid's ACL stops the device itself from
+  publishing on the old topic, but the sender's owner credential (`/<sender>/#`) still can.
+- A messenger-side marker: once a status arrives on `/<recipient>/<udid>/status`, stop accepting the old
+  topic for that udid, without consuming the HTTP binding (u86 decision 3 stays intact).
+- Delivery limitation: old-topic messages reach the API only through a per-owner messenger client of
+  the previous owner (subscribed to `/<sender>/#`); the recipient's client never sees them, so
+  acceptance happens only while such a client is connected.
+
+**Broker ACL analysis.** mosquitto-go-auth, Redis backend, superuser disabled
+(`services/broker/config/mosquitto.conf:49`, `:71`); ACL sets `<user>:racls|wacls|rwacls|sacls` are
+written by `lib/thinx/acl.js` `commit_redis` (`sAdd` only, `:151-178`).
+- Device user (username udid; `Device#authorize_mqtt`, `lib/thinx/device.js:792-813`): readwrite on
+  `/<owner>/<udid>`, `/<owner>/<udid>/status`, `/<owner>/shared/#`, `/<owner>/<mesh>`, for every owner
+  it registered under.
+- Owner user (`Owner#create_default_acl`, `lib/thinx/owner.js:740-752`): readwrite on `/<owner>`,
+  `/<owner>/#`, `/<owner>/shared/#`. Every user also gets subscribe `/#`.
+Why the server-side check is still needed:
+1. The ACL is prefix-based, not ownership-based: owner A's credential may publish
+   `/A/<B's udid>/status`.
+2. ACL drift is built in: `commit_redis` only adds, nothing removes on transfer, and `addTopic`
+   de-duplicates by substring (`lib/thinx/acl.js:85`, `:106`).
+3. MQTT 3.1.1 delivers no publisher identity to subscribers.
+4. Broker and Redis configuration drift independently of CouchDB.
+The binding rule narrows point 1 to the one case the operator accepted.
+
+**What changes for real users:**
+1. Status, check-in and actionable messages for another owner's udid are ignored, with one
+   rate-limited warning line each.
+2. A transferred device still publishing on its previous owner's topic keeps working (operator
+   decision); its updates land as the current owner's device with the current owner's transformers,
+   while the moved key keeps its binding and stays the device's key. Re-keying the device or revoking
+   the moved key ends it.
+3. Only the exact `/<owner>/<udid>/status` topic edits device status. Topics whose owner segment is not
+   a valid owner id are ignored entirely, including MQTT registration and the socket relay.
+4. Production caveat: because of (a) below, none of this message processing is believed to run in
+   production today. The gate is in place for CI and for whenever (a) is fixed.
+
+**Post-deploy checks (operator, read-only):** on the node running the `thinx_api` task (placement
+floats; node-local `docker logs`, not `docker service logs`), count `[messenger] dropped MQTT device message`
+lines by reason (`malformed_topic`, `unknown_device`, `foreign_owner`, `binding_lookup_failed`) and
+`suppressed in the previous window` lines. Given (a), zero lines is the expected outcome today.
+
+**Residual risks beyond the accepted one:**
+- TOCTOU of one round trip between the ownership/binding read and the atomic modify (same window t29
+  accepted).
+- The broker ACL itself is not cleaned (continuity leftovers item 1).
+- An owner can publish status for its own devices, by design.
+
+Items 2, 3 and 5 are not touched by this task (2 and 3 resolved by v9d/v9x; 5 stays open).
+
+## Found during item 4 (quick 261003-vbg), not fixed
+
+Each claim was re-verified against the tree after the vbg commits (line numbers are post-vbg).
+
+- **(a) `forwardNonNotification` most likely crashes the API process on every non-notification MQTT
+  message outside `ENVIRONMENT=test` — severity high.**
+  - Operator read-only check first: `thinx_api` task restart count (`docker service ps thinx_api`), and
+    on the node running it, node-local `docker logs <container> 2>&1 | grep -c "reading 'sendMessage'"`.
+  - Evidence: `createInstance` sets `this.rtm = null` and `this.channel = null`
+    (`lib/thinx/messenger.js:58`, `:61`) and `DISABLE_SLACK = true` (`:73`), so `initSlack` returns
+    before it ever assigns `this.rtm` (`:145`, `:160`). `forwardNonNotification` (`:349-360`) tests
+    `typeof (this.rtm) !== "undefined"` — `typeof null` is `"object"` — and calls
+    `this.rtm.sendMessage` whenever `ENVIRONMENT !== "test"`: a TypeError. It runs in
+    `messageResponder` before any status processing. mqtt.js 5.16.0 emits `message` without a
+    try/catch (`node_modules/mqtt/build/lib/handlers/publish.js:109`, `:121`) and no
+    `uncaughtException` handler exists in `thinx.js`, `thinx-core.js` or `lib/`.
+  - CI runs `ENVIRONMENT=test`, so CI never sees it. Not fixed: fixing it activates the transformer path
+    below in production, which is an operator decision.
+- **(b) The transformer path reached from MQTT is broken in three ways — severity medium**
+  (`lib/thinx/device.js`, `runDeviceTransformers` `:522-722`), called from the messenger with
+  `reg = null`, `callback = null`:
+  - `typeof (reg) !== "undefined"` is true for null, so `transformedStatus = reg.status` (`:562`)
+    throws a TypeError as soon as a transformer matches; the lambda error handler reads `reg.status`
+    too (`:693`).
+  - `transformers: []` (the default) calls `update_device_and_respond(device.udid, device, …)` (`:533`)
+    with the pre-update document read before `Device#edit`, racing the status edit and possibly writing
+    the old status back.
+  - The lambda response handler calls `devicelib.get(udid, …)` (`:652`) where no `udid` is declared in
+    that function's scope (the `let udid` at `:495` belongs to another method): a ReferenceError when a
+    lambda answers.
+- **(c) Notifications go to the wrong owner's console — severity medium.** `initWithOwner` stores one
+  process-wide `this._socket = websocket` (`lib/thinx/messenger.js:978`), even on the
+  `client_already_exists` path. Correction to the plan: the caller is `lib/thinx/socket_session.js:94`
+  with the verified session owner (`ws.owner`), not the owner named in the WS `init` frame; the
+  singleton remains, so notifications go to whichever owner's socket initialized last. Already tracked
+  in `.planning/todos/pending/2026-10-03-messenger-websocket-is-process-wide.md`; not duplicated here.
+- **(d) `this.socket` is never set — severity low.** It is null after `createInstance` (`:57`) and
+  never assigned, so `sendWithValidSocket` (`:333`), `processActionableNotification` (`:569`) and
+  `processUnknownNotification` (`:628`) throw on `this.socket.OPEN` whenever `_socket` is non-null.
+  Before any `initWithOwner`, `this._socket` is `undefined` (createInstance only sets
+  `this._private._socket`), so `undefined !== null` passes and `this._socket.readyState` throws first.
+- **(e) `processActionableNotification`'s response branch — severity low.** It copies `nid:<nid>`
+  (the nid comes from the payload and is not owner-bound) into `nid:<did>` (`:599-611`), and throws on
+  `JSON.parse(null).length` (`:601-602`) when that key is absent (`redis.get` answers `(null, null)`, and
+  only `error` is checked).
+- **(f) Device-bound MQTT publishes never happen — severity low.** `publish()` returns immediately
+  while `DISABLE_SLACK` (`:215`), so configuration pushes and notification replies never reach
+  devices. Separately, `registerDevice` dereferences `registration_response.registration.udid` even
+  when registration failed (`:328`).
+- **(g) Master-client callbacks are attached unbound — severity low.** `attach_callbacks`
+  (`:866-868`) passes `this.connect_callback` / `this.message_callback` unbound, so they run with
+  `this` = the MQTT client: `this.master` is undefined and the master never subscribes `#` (`:808`),
+  which keeps `message_callback` dormant. Separately, `data(owner, udid)` builds the KEYS glob
+  `"/*" + owner + "/" + udid + "*"` (`:956`), whose leading `*` also matches other prefixes.
