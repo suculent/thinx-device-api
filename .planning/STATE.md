@@ -6,10 +6,10 @@ current_phase: 26
 current_phase_name: Vue Console Log Paging
 status: verifying
 stopped_at: Phase 27 complete; Phase 26 UAT partial (test 3 now checkable)
-last_updated: "2026-10-03T18:17:51.621Z"
+last_updated: "2026-10-03T18:34:58.576Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 27 complete, transitioned to Phase 26
-state_head: 9bba25604bac57e4c21181d36c97d03b846011be
+state_head: cec69545845229840908365f1727c0c60144ef83
 progress:
   total_phases: 7
   completed_phases: 11
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 26 — Vue Console Log Paging
 Plan: 10 of 10 executed
 Status: UAT partial — test 3 (first scheduled log-retention run, after 2026-10-03 09:40 UTC) is now checkable: /gsd-verify-work 26
-Last activity: 2026-10-03 — Phase 27 complete (UAT 2/2, security 40/40 closed); next: finish Phase 26 UAT, then Phase 28
+Last activity: 2026-10-03 - Completed quick task 261003-s59: CR-01 API-key substring authentication bypass (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 85% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -327,6 +327,7 @@ Decided at plan time, not blocking the roadmap:
 | 260605-inf | Influx stats fix (v1.10 OBS addition): dashboard check-in numbers read 0/stale + API log spammed `error parsing query: found BADSTRING`. Fixed `lib/thinx/influx.js` — tag mismatch (write `owner` vs read `owner_id`), malformed time predicates (stray `'`, Date/number → `'<ISO>'` / `now() - 7d`), `mean`→`count`, `${measurement}`→`${kpi}` loop index, removed malformed helper queries. Return shape preserved (statistics.js + Visits.vue compatible). CI green (pipeline 5266). Live in prod (autoredeployed). | 2026-06-05 | 9b6d931c | (loose commit — folded into v1.10, no quick-task dir) |
 | 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./archive/quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
 | 6 | Vue console Dockerfile: run nginx as non-root (Aikido USER root finding) — console 7c6f90c | 2026-09-30 | 056d313d | — |
+| 261003-s59 | CR-01 API-key auth bypass: exact constant-time key/hash match (Util.safeEqual), empty/non-string rejected, device paths fail closed (log_invalid_key), firmware ott guard, router body api_key normalized, login hash compare constant-time. Not pushed — device OTA with wrong/revoked keys stops working once deployed. | 2026-10-03 | cec69545 | [261003-s59-fix-cr-01-api-key-substring-authenticati](./quick/261003-s59-fix-cr-01-api-key-substring-authenticati/) |
 
 ## Cross-Project Touchpoints
 
