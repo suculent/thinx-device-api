@@ -211,8 +211,8 @@ describe("Builder", function () {
     }, transmit_key);
   }, 30000);
 
-  it("should fetch last apikey", function (done) {
-    builder.getLastAPIKey("nonexistent", function (success/* , result */) {
+  it("should refuse a device API key for an owner without keys", function (done) {
+    builder.getDeviceAPIKey("nonexistent", { udid: envi.udid }, function (success/* , result */) {
       expect(success).to.equal(false);
       done();
     });
