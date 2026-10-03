@@ -324,7 +324,9 @@ describe("LogTailOwnerSpec (quick 261003-v05)", function () {
       expect(r.socket.sent.filter((f) => f.indexOf(SENTINEL_A) !== -1)).to.deep.equal([]);
       expect(r.calls.length).to.equal(1);
       expect(r.calls[0][0]).to.equal(false);
-      expect(fs.existsSync(path.join(TMP, "deploy", OWNER_B))).to.equal(false);
+      // <TMP>/deploy/<B> already holds B's own fixture build; the path a foreign
+      // tail would have created is B's directory for A's device.
+      expect(fs.existsSync(path.join(TMP, "deploy", OWNER_B, UDID_A))).to.equal(false);
       expect(listTree(TMP)).to.deep.equal(before);
     }, 15000);
 
