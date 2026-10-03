@@ -374,17 +374,20 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
       expectNoEffects(fx.rec);
     });
 
-    it("(8) the window resets after 60 s and reports the suppressed count", async () => {
+    // Synchronous on purpose: the Date.now spy is active only inside this body and is
+    // released before it returns, so no other timer in the CI process sees the skewed clock.
+    it("(8) the window resets after 60 s and reports the suppressed count", () => {
       const fx = makeMessenger();
-      const T = 1790000000000;
+      const T = Date.now();
       let now = T;
-      spyOn(Date, "now").and.callFake(() => now);
+      const clock = spyOn(Date, "now").and.callFake(() => now);
       for (let i = 0; i < 7; i++) {
         fx.m.messageResponder("/NOT-AN-OWNER/" + UDID_A + "/status", payload({ status: "connected" }));
       }
       expect(lines.filter((l) => DROP_LINE.test(l)).length, "drop lines in the first window").to.equal(DROP_LINES_PER_WINDOW);
       now = T + DROP_WINDOW_MS + 1000;
       fx.m.messageResponder("/NOT-AN-OWNER/" + UDID_A + "/status", payload({ status: "connected" }));
+      clock.and.callThrough();
       const drops = lines.filter((l) => DROP_LINE.test(l));
       expect(drops.length, "drop lines after the window").to.equal(DROP_LINES_PER_WINDOW + 1);
       expect(/2 suppressed/.test(drops[DROP_LINES_PER_WINDOW]), "suppressed count on the new window's first line").to.equal(true);
