@@ -96,7 +96,7 @@ describe("Util", function () {
         expect(result).to.equal(false);
     });
 
-    it("should validate session with valid body", function () {
+    it("should reject an unverified owner_id + api_key body (261003-skk)", function () {
         let req = {
             headers: { },
             session: { },
@@ -109,7 +109,7 @@ describe("Util", function () {
             console.log(`🚸 [chai] validateSession destroy called (6)...`);
         };
         let result = Util.validateSession(req);
-        expect(result).to.equal(true);
+        expect(result).to.equal(false);
     });
 
     it("should respond with buffer", function (done) {
