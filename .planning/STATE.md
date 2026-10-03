@@ -4,18 +4,18 @@ milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
-status: executing
-stopped_at: Completed 27-06-PLAN.md
-last_updated: "2026-10-03T12:10:30.169Z"
+status: verifying
+stopped_at: Completed 27-07-PLAN.md
+last_updated: "2026-10-03T14:40:58.757Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 841f85d827e36ee046eb8a39950ab3213f3d0a7c
+state_head: b39f849d09390bad7154c0119b7a595093c24292
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 42
-  percent: 98
+  completed_plans: 43
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -36,10 +36,10 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 98% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([██████████] 100% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -259,6 +259,8 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-05: thinx_influxdb spec keeps dhi.io/influxdb:2.9.1 unpinned (swarm records no dhi.io digest); running task digest sha256:3d49ee8ee9a0 verified; pin by digest in 27-07 mirror
 - [Phase 27]: 27-05: operator window override at ~22:41 UTC (no production traffic expected) replaced the 22:30 cut-off for this run only
 - [Phase 27]: 27-06: operator answered enable-all; stats enabled on InfluxDB 2 at 2026-10-03T12:05:27Z, stats bucket 90 d with id kept, six empty upgrade buckets dropped, Chronograf retirement approved for 27-07
+- [Phase 27]: 27-07: operator answered delete-all at the D-07 gate despite count_24h_DEVICE_CHECKIN=0 and an unconfirmed dashboard check; the 1.8 data, upgrade copy, Chronograf volume and /root/phase27 on both nodes are deleted, no rollback to 1.8; dashboard/check-in stays an end-of-phase UAT item
+- [Phase 27]: 27-07: Chronograf retired (D-13); stack files mirror InfluxDB 2.9.1; the INFLUXDB_TOKEN mount lives only on the live thinx_api spec (gluster thinx.yml has no top-level secrets block), so a stack deploy would drop it
 
 ### Todos
 
@@ -337,9 +339,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-03T12:10:29.993Z
+**Last session:** 2026-10-03T14:40:58.635Z
 
-**Stopped at:** Completed 27-06-PLAN.md
+**Stopped at:** Completed 27-07-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -402,3 +404,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P04 | 1h 32m | 3 tasks | 3 files |
 | Phase 27 P05 | 7 min | 2 tasks | 1 files |
 | Phase 27 P06 | 5min | 3 tasks | 1 files |
+| Phase 27 P07 | 74min | 3 tasks | 2 files |

@@ -46,9 +46,9 @@
 
 ### Ops — InfluxDB
 
-- [ ] **OPS-INFLUX-01**: `thinx_influxdb` runs InfluxDB 2 in production, upgraded from a verified backup, with existing `stats` data migrated
-- [ ] **OPS-INFLUX-02**: `lib/thinx/influx.js` reads and writes against InfluxDB 2 and the dashboard / Visits statistics still render; CI runs the influx specs against InfluxDB 2
-- [ ] **OPS-INFLUX-03**: `stats` data has a finite 90-day retention (bucket retention)
+- [x] **OPS-INFLUX-01**: `thinx_influxdb` runs InfluxDB 2 in production, upgraded from a verified backup, with existing `stats` data migrated
+- [x] **OPS-INFLUX-02**: `lib/thinx/influx.js` reads and writes against InfluxDB 2 and the dashboard / Visits statistics still render; CI runs the influx specs against InfluxDB 2
+- [x] **OPS-INFLUX-03**: `stats` data has a finite 90-day retention (bucket retention)
 
 ### Ops — Swarmpit
 
@@ -100,9 +100,9 @@
 | LOG-02 | Phase 26 | Complete |
 | LOG-03 | Phase 26 | Complete |
 | LOG-04 | Phase 26 | Complete |
-| OPS-INFLUX-01 | Phase 27 | Pending |
-| OPS-INFLUX-02 | Phase 27 | Pending |
-| OPS-INFLUX-03 | Phase 27 | Pending |
+| OPS-INFLUX-01 | Phase 27 | Complete |
+| OPS-INFLUX-02 | Phase 27 | Complete |
+| OPS-INFLUX-03 | Phase 27 | Complete |
 | OPS-SWARM-01 | Phase 28 | Pending |
 | OPS-SWARM-02 | Phase 28 | Pending |
 | OPS-SWARM-03 | Phase 28 | Pending |
