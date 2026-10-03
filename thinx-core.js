@@ -44,7 +44,6 @@ module.exports = class THiNX extends EventEmitter {
     let start_timestamp = new Date().getTime();
 
     const Globals = require("./lib/thinx/globals.js"); // static only!
-    const Sanitka = require("./lib/thinx/sanitka.js"); let sanitka = new Sanitka();
 
     // App
     const express = require("express");
@@ -379,8 +378,8 @@ module.exports = class THiNX extends EventEmitter {
               limit: "1mb"
             }));
 
-            // API v1 global all-in-one router
-            const router = require('./lib/router.js')(app); // only validateSession and initLogTail is used here. is this feature envy?
+            // API v1 global router: the auth/API-key middleware. Must mount before the other routers.
+            require('./lib/router.js')(app);
 
             // API v2 partial routers with new calls (needs additional coverage)
             require('./lib/router.device.js')(app);
@@ -571,24 +570,6 @@ module.exports = class THiNX extends EventEmitter {
 
             app._ws = {}; // list of all owner websockets
 
-            function initLogTail() {
-
-              function logTailImpl(req2, res) {
-                if (!(router.validateSession(req2, res))) return;
-                if (typeof (req2.body.build_id) === "undefined") return router.respond(res, false, "missing_build_id");
-                console.log(`Tailing build log for ${sanitka.udid(req2.body.build_id)}`);
-              }
-
-              app.post("/api/user/logs/tail", (req2, res) => {
-                logTailImpl(req2, res);
-              });
-
-              app.post("/api/v2/logs/tail", (req2, res) => {
-                logTailImpl(req2, res);
-              });
-
-            }
-
             // Frames are dispatched by SocketSession (lib/thinx/socket_session.js),
             // attached in SocketSession.accept for verified sockets only.
             function initSocket(ws) {
@@ -640,8 +621,6 @@ module.exports = class THiNX extends EventEmitter {
 
               socketMap.set(socketKey, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
-              /* Returns specific build log for owner */
-              initLogTail();
               initSocket(ws);
 
             }).on("error", function (err) {
