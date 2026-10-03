@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 26-vue-console-log-paging
 source: [26-VERIFICATION.md]
 started: 2026-10-02T12:50:00Z
-updated: 2026-10-03T18:29:08Z
+updated: 2026-10-03T18:32:18Z
 ---
 
 ## Current Test
 
-number: 5
-name: Sign-off on the 26-10 process prohibitions (added after test 4)
-expected: |
-  The 26-10 judgment-tier prohibitions (and 26-10 truth 7) held: no push before the operator's push answer; no force push, push to main, restart.sh, stack deploy or manual service update; no unsigned commit or hook bypass; no login.spec, full Cypress or live-API test; no secrets or identifiers recorded; no file changed outside the plan's list. Verifier (non-authoritative): held — 3 new commits good signatures, both pushes fast-forward, console diff = the 3 planned files, a0a1e097 changes only the gitlink, SUMMARY has no 64-hex or emails; files cannot show that restart.sh / manual service update were not run.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -47,7 +43,7 @@ result: pass
 
 ### 5. Sign-off on the 26-10 process prohibitions (added after test 4)
 expected: The 26-10 judgment-tier prohibitions (and 26-10 truth 7) held: no push before the operator's push answer; no force push, push to main, restart.sh, stack deploy or manual service update; no unsigned commit or hook bypass; no login.spec, full Cypress or live-API test; no secrets or identifiers recorded; no file changed outside the plan's list. Verifier (non-authoritative): held — 3 new commits good signatures, both pushes fast-forward, console diff = the 3 planned files, a0a1e097 changes only the gitlink, SUMMARY has no 64-hex or emails; files cannot show that restart.sh / manual service update were not run.
-result: [pending]
+result: pass
 
 ### 0. (done) "Load more" pages each History table (26-07 browser check)
 expected: Opened from the sidebar, "Load more" appends the next page on each table, and the two tables page independently.
@@ -56,9 +52,9 @@ result: passed (operator, 2026-10-02)
 ## Summary
 
 total: 5
-passed: 4
+passed: 5
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
