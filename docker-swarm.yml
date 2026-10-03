@@ -26,9 +26,19 @@ networks:
 #
 #   api          CSRF_SECRET, SLACK_BOT_TOKEN, SLACK_WEBHOOK,
 #                GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY,
-#                GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET
+#                GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET,
+#                INFLUXDB_TOKEN (Phase 27, mounted 2026-10-03)
 #   worker       WORKER_SECRET, ROLLBAR_SERVER_TOKEN
 #   transformer  ROLLBAR_SERVER_TOKEN
+#
+# INFLUXDB_TOKEN (Phase 27) is the InfluxDB 2 org all-access token the API
+# uses for statistics. It was minted inside the swarm by
+# `influx auth create --all-access`, its JSON piped through `jq -j .token`
+# straight into `docker secret create INFLUXDB_TOKEN -`; it was never printed
+# or stored anywhere else. InfluxDB 2.9 keeps tokens hashed, so rotating it
+# means minting a new one the same way. INFLUXDB_OPERATOR_TOKEN and
+# INFLUXDB_ADMIN_PASSWORD also exist in the swarm but are mounted on NO service
+# and are not declared here (D-11): they are operator-only.
 #
 # Every secret below is declared `external: true`, so it MUST exist in the
 # swarm before any `docker stack deploy`, or the deploy is rejected with
@@ -77,6 +87,8 @@ secrets:
   GIT_KEY_PASSPHRASE:
     external: true
   CSRF_SECRET:
+    external: true
+  INFLUXDB_TOKEN:
     external: true
 
 services:
@@ -270,6 +282,7 @@ services:
       - WORKER_SECRET
       - GIT_KEY_PASSPHRASE
       - CSRF_SECRET
+      - INFLUXDB_TOKEN
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
@@ -503,18 +516,20 @@ services:
         - "swarmpit.service.deployment.autoredeploy=true"
 
   influxdb:
-    image: influxdb:1.8
+    image: dhi.io/influxdb:2.9.1
     networks:
       - internal
       - traefik-public
 # public is for development only but last deployment shows it has been not found
     volumes:
-      - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
-      - '/mnt/gluster/deployment/swarm/swarmpit/influxdb.conf:/etc/influxdb/influxdb.conf'
+      - '/mnt/gluster/thinx/influxdb2:/var/lib/influxdb2'
     environment:
-      - INFLUXDB_DB=db0
-      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
-      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+      - INFLUXD_BOLT_PATH=/var/lib/influxdb2/influxd.bolt
+      - INFLUXD_ENGINE_PATH=/var/lib/influxdb2/engine
+      - INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE=256m
+      - INFLUXD_STORAGE_MAX_CONCURRENT_COMPACTIONS=1
+      - INFLUXD_LOG_LEVEL=error
+      - INFLUXD_REPORTING_DISABLED=true
     deploy:
       resources:
         reservations:
@@ -542,47 +557,3 @@ services:
 
         - traefik.http.middlewares.influx-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
         - traefik.http.routers.thinx-influx-https.middlewares=influx-auth,error-pages-middleware
-        - traefik.http.routers.thinx-influx-http.middlewares=influx-auth,error-pages-middleware
-
-  chronograf:
-    image: chronograf:1.9
-    networks:
-      - internal
-      - traefik-public
-    volumes:
-      - '/mnt/gluster/thinx/chronograf:/var/lib/chronograf'
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
-      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
-    deploy:
-      resources:
-        reservations:
-          memory: 32M
-          cpus: '0.1'
-        limits:
-          cpus: '0.1'
-          memory: 64M
-      labels:
-        - "traefik.http.services.thinx-chronograf.loadbalancer.server.port=8888"
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
-        - "traefik.constraint-label=traefik-public"
-
-#        - "traefik.http.routers.thinx-chronograf-http.rule=Host(`${CHRONOGRAF_HOSTNAME}`)"
-#        - "traefik.http.routers.thinx-chronograf-http.entrypoints=http"
-#        - "traefik.http.routers.thinx-chronograf-http.middlewares=chrono-auth,https-redirect"
-#        - "traefik.http.routers.thinx-chronograf-http.middlewares=chrono-auth,error-pages-middleware"
-
-        - "traefik.http.routers.thinx-chronograf-https.rule=Host(`${CHRONOGRAF_HOSTNAME}`)"
-        - "traefik.http.routers.thinx-chronograf-https.middlewares=chrono-auth"
-        - "traefik.http.routers.thinx-chronograf-https.entrypoints=https"
-        - "traefik.http.routers.thinx-chronograf-https.tls=true"
-        - "traefik.http.routers.thinx-chronograf-https.tls.certresolver=le"
-
-        - swarmpit.service.deployment.autoredeploy=true
-
-        - traefik.http.middlewares.chrono-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
-        - traefik.http.routers.thinx-chronograf-https.middlewares=chrono-auth,error-pages-middleware
