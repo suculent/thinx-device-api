@@ -32,3 +32,26 @@ Either verify the key in the body branch (`apikey.verify(sanitka.owner(owner_id)
 sanitka.apiKey(api_key), true, ...)`, which makes `validateSession` async), or drop the body
 branch and let callers authenticate through the session/JWT or the router.js `owner` body path.
 Add a spec: an unauthenticated mesh create/delete with a fake `api_key` must answer 401.
+
+## Resolution
+
+Done 2026-10-03 in quick 261003-skk: failing spec `e88e8e61`, core fix `e7b76d47` (Task 1), CSRF
+inventory spec `22713f55` and mesh CSRF guard `660d0e1b` (Task 2).
+
+The bypass was wider than mesh. Every `Util.validateSession` route accepted the unverified
+`{owner_id, api_key}` body, and the router's key check ran only on POST bodies naming `owner`. So
+non-POST methods, any request sent with `Origin: device` (which skips the check), and the
+udid-keyed device routes (edit, detail, envs, detach source) were reachable unauthenticated.
+
+- `Util.validateSession` and `Util.ownerFromRequest` now trust only router-verified identities: the
+  verified-Bearer marker, the session owner, or `req.thx_auth = "apikey"` with the recorded
+  `req.thx_apikey_owner`. The body branch and the raw Authorization-header check are gone, and
+  `ownerFromRequest` lost its body-owner fallback.
+- `lib/router.js` verifies POST bodies naming `owner`, else `owner_id`, with the exact
+  `APIKey.verify` against that owner, so a key acts only for the owner it is stored under.
+  Non-string owner/api_key answers 401.
+- The mesh handlers act on `Util.ownerFromRequest(req)` only, and the four mesh mutations are
+  CSRF-guarded (D-21 lifted for `lib/router.mesh.js`). `attachMesh` was aligned in Task 3.
+
+Spec: `spec/jasmine/MeshSessionAuthSpec.js` (local, no Redis/CouchDB) plus four 401 cases in
+`spec/jasmine/ZZ-RouterMeshesSpec.js` (CI).
