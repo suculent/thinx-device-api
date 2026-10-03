@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T23:35:45.664Z"
+last_updated: "2026-10-03T23:46:15.117Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 2836f579ff46364eb98de684ae5de5803df7f520
+state_head: 71c45c57ff4395fb03af3a2d5ca7b81aa0fdfc1e
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-22d: Vue one-time API key dialog reads api_key (console 7d8098e) (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261004-25u: MQTT device writes safe to enable (string status, stale-LWT guard, no double registration) (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -345,6 +345,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-w13 | API key list without cleartext keys; Default MQTT key lookup arity fix | 2026-10-03 | 7e3c8645 | [261003-w13-fix-api-key-cleartext-exposure](./quick/261003-w13-fix-api-key-cleartext-exposure/) |
 | 261004-22b | OTT redemption serves the firmware binary; specs stop printing key material | 2026-10-03 | 40a5bd60 | [261004-22b-ott-redemption-serves-the-firmware-binar](./quick/261004-22b-ott-redemption-serves-the-firmware-binar/) |
 | 261004-22d | Vue one-time API key dialog reads api_key (console 7d8098e) | 2026-10-03 | 2836f579 | [261004-22d-vue-console-copy-key-dialog-reads-api-ke](./quick/261004-22d-vue-console-copy-key-dialog-reads-api-ke/) |
+| 261004-25u | MQTT device writes safe to enable (string status, stale-LWT guard, no double registration) | 2026-10-03 | 71c45c57 | [261004-25u-mqtt-device-writes-safe-to-enable](./quick/261004-25u-mqtt-device-writes-safe-to-enable/) |
 
 ## Cross-Project Touchpoints
 

@@ -61,16 +61,23 @@ If the Rollbar token is absent, every such message crashes the API process inste
 
 ## (3) Prerequisites before setting THINX_MQTT_DEVICE_WRITES=1
 
-1. **`Device#runDeviceTransformers` with a null `reg`/`callback`** (`lib/thinx/device.js` `runDeviceTransformers` ~:522-722). It must handle the MQTT call shape before transformers can be re-enabled from MQTT:
+**Status 2026-10-04 (quick 261004-25u, commits `d3e196e1`, `71c45c57`):** prerequisites 2, 3 and 4 are
+**resolved**; 1 (transformers, still hard off) and 5 (replies never reach the device) stay **open**. The
+operator decided (2026-10-04) to enable the flag after 25u is deployed, with 1 and 5 left out of
+scope: transformers stay hard off from MQTT (no flag), and MQTT registration replies are still never
+published. The `registration.udid` dereference on a failed registration noted in 5 was already fixed
+by 261003-vep. Post-enable checks: see `.planning/quick/261004-25u-mqtt-device-writes-safe-to-enable/261004-25u-SUMMARY.md`.
+
+1. **OPEN.** **`Device#runDeviceTransformers` with a null `reg`/`callback`** (`lib/thinx/device.js` `runDeviceTransformers` ~:522-722). It must handle the MQTT call shape before transformers can be re-enabled from MQTT:
    - no transformers: `update_device_and_respond(device.udid, device, …)` (~:533) writes the document read before `Device#edit` back (stale write-back racing the status edit);
    - a matching transformer reads `reg.status` on null (~:562), and the lambda error path reads `reg.status` too (~:693);
    - the lambda response handler calls `devicelib.get(udid, …)` (~:652) with no `udid` declared in that scope;
    - the lambda request goes to `hostname: 'localhost'` (~:605), which is not where the transformer service runs in the swarm (verify the port/host before relying on it).
    Transformers stay hard off from MQTT until this is fixed; re-enabling them is a code change, not the flag.
-2. **The status edit writes the parsed object.** `updateAndTransformDeviceStatus` sets `status: message` (an object such as `{status: "disconnected"}`), while `services/console/src/html/app/views/devices.html` ~:131-134 treats `device.status` as a string (`.length`, `limitTo: 22`, `.toLowerCase()`). Decide what string (if any) an MQTT status should write.
-3. **THiNXLib's connect message is the registration body.** `THiNXLib.cpp` ~:2068-2071 publishes `generate_checkin_body()` (`{"registration": {...}}`, wrapper ~:457) on every MQTT connect. With writes on, every connect re-registers the device (vep's path, duplicating the HTTP check-in) and writes that whole body into `status`.
-4. **LWT semantics.** The LWT `{ "status" : "disconnected" }` (~:57) arrives whenever the broker drops the device; decide how it interacts with later HTTP check-ins (which set status/lastupdate) so a stale "disconnected" never overrides a newer check-in, or vice versa.
-5. **Replies never reach the device.** `publish()` returns at once while `DISABLE_SLACK` (`lib/thinx/messenger.js` `publish`), so MQTT registration replies (and configuration pushes) are never sent. `registerDevice` also dereferences `registration_response.registration.udid` even when registration failed.
+2. **RESOLVED (261004-25u).** The edit now writes `{udid, status}` with `message.status` as a plain string (control characters stripped, max 64 characters); objects, numbers, arrays and messages without a string status write nothing (`status_not_string`). Original finding: **The status edit writes the parsed object.** `updateAndTransformDeviceStatus` sets `status: message` (an object such as `{status: "disconnected"}`), while `services/console/src/html/app/views/devices.html` ~:131-134 treats `device.status` as a string (`.length`, `limitTo: 22`, `.toLowerCase()`). Decide what string (if any) an MQTT status should write.
+3. **RESOLVED (261004-25u).** A message carrying `registration` never edits status, and MQTT registration is skipped (`registration_recent_checkin`) when `doc.lastupdate` is less than 5 minutes old, so the boot check-in plus MQTT connect no longer double-registers. Original finding: **THiNXLib's connect message is the registration body.** `THiNXLib.cpp` ~:2068-2071 publishes `generate_checkin_body()` (`{"registration": {...}}`, wrapper ~:457) on every MQTT connect. With writes on, every connect re-registers the device (vep's path, duplicating the HTTP check-in) and writes that whole body into `status`.
+4. **RESOLVED (261004-25u).** A `"disconnected"` status arriving less than 60 s after `doc.lastupdate` is ignored (`status_stale_disconnect`); later ones are written. The MQTT edit never touches `lastupdate`, so an MQTT status never makes a check-in look newer. Original finding: **LWT semantics.** The LWT `{ "status" : "disconnected" }` (~:57) arrives whenever the broker drops the device; decide how it interacts with later HTTP check-ins (which set status/lastupdate) so a stale "disconnected" never overrides a newer check-in, or vice versa.
+5. **OPEN.** **Replies never reach the device.** `publish()` returns at once while `DISABLE_SLACK` (`lib/thinx/messenger.js` `publish`), so MQTT registration replies (and configuration pushes) are never sent. `registerDevice` also dereferences `registration_response.registration.udid` even when registration failed.
 
 ## (4) processUnknownNotification has no MQTT caller
 
