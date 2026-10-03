@@ -1140,6 +1140,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 fs.writeFileSync(path.join(XBUILD_PATH, "main.ino"), "void setup() {}\n");
                 builder.buildPathFor = () => BUILD_PATH;
                 builder.getLastAPIKey = (owner, cb) => cb(true, "spec-api-key");
+                builder.getDeviceAPIKey = (owner, device, cb) => cb(true, "spec-api-key");
                 builder.createBuildPath = () => { };
                 builder.prefetchPublic = async () => true;
                 builder.prefetchPrivate = async () => true;
