@@ -43,7 +43,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - ✓ **CodeQL workflow** — trigger on `main`, current action majors *(shipped Phase 22, CI-01)*
 - ✓ **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step *(shipped Phase 22, CI-02)*
 - ✓ **Vue hostname var** — separate Vue console hostname build var so footer links point at itself *(shipped Phase 22, CI-03)*
-- **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
+- ✓ **Log paging** — opt-in owner-bound cursor paging (`limit`/`cursor`, `paging:{limit,has_more,next_cursor}`) for audit and build logs in the Vue Console; the Legacy console keeps its 200-item call (now owner-keyed, string flags); daily log-retention cron on micro *(shipped Phase 26, LOG-01..04)*
 - ✓ **InfluxDB 2** — `thinx_influxdb` runs `dhi.io/influxdb:2.9.1` in production, upgraded in place from a verified backup; `influx.js` is on the v2 client (Flux); `stats` has 90-day bucket retention *(shipped Phase 27, OPS-INFLUX-01/02/03)*
 - **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
 
@@ -241,4 +241,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-03 after Phase 27 (InfluxDB 2 Upgrade)*
+*Last updated: 2026-10-03 after Phases 26 (Vue Console Log Paging) and 27 (InfluxDB 2 Upgrade)*
