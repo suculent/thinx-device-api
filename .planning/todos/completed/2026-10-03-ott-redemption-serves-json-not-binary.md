@@ -67,3 +67,25 @@ is pending).
   `Filez.deployPathForDevice` concatenates `<deploy_root>/<owner>/<udid>`. v9x validates every OTT
   record before it gets there; making `latestFirmwarePath` refuse a udid that fails `sanitka.udid`
   would protect any future caller too.
+
+## Resolution (quick 261004-22b, 2026-10-04)
+
+Operator decision 2026-10-04: resume OTA for auto-update devices with pending builds. The
+fleet-count step under "Fix options" was waived by that decision.
+
+- `85baff98` test: `DeviceOttSpec` B1-B5. B1 stubs `ott_update` with a non-UTF-8 Buffer and
+  asserts 200, exact body bytes, `application/octet-stream`, Content-Length, x-MD5 and
+  Content-Disposition. B2 reads the raw socket and asserts no `{"type":"Buffer"}` /
+  `"success"` envelope and no JSON content type. B3 redeems a POST-issued token against the
+  fixture `firmware.bin` byte for byte. B4/B5 pin OTT_MISSING (JSON) and the failure reason codes.
+  RED: `39 specs, 3 failures` (B1-B3).
+- `71493527` fix: `lib/router.deviceapi.js` GET success branch is back to
+  `Util.respond(res, response.payload)`. Headers, `ott_update`, token handling and logging
+  are unchanged. GREEN: `39 specs, 0 failures`.
+- `POST /device/firmware` (direct, non-OTT) was not changed. It calls
+  `Util.respond(res, {md5, filesize, payload})` and always has, so it JSON-serializes the
+  envelope. That is a different path, not the fee22323 bug, and no shipping firmware calls it.
+
+Still open (see Follow-ups above): strict one-time redemption, plaintext port 7442, the
+sink-level udid guard in `latestFirmwarePath`, and THiNXLib's retry loop on
+`HTTP_UPDATE_FAILED`.

@@ -61,3 +61,9 @@ with grep on 2026-10-04.
 9. **CI spec prints the owner's broker password.** `spec/jasmine/MessengerSpec.js` [mm] logs
    `JSON.stringify(apikey)` of `mqtt_key`'s result, i.e. the test owner's Default MQTT API Key, into
    the CI log. Pre-existing and out of w13's scope; log only `typeof`/success there.
+
+## Operator decision 2026-10-04
+
+The API-key `hash` was expected to work as a login credential, but this is **not needed**. Track for later (no work scheduled):
+- retire hash-as-credential in `APIKey#verify` (accept only the key itself), after confirming no device/firmware sends the hash;
+- then stop returning `hash` from the list (the consoles' delete flow needs a non-secret fingerprint instead).
