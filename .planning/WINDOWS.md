@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 5
 waived_count: 0
 fixed_count: 1
-total_count: 5
-last_updated: 2026-10-03T20:58:20.367Z
+total_count: 6
+last_updated: 2026-10-03T21:10:46.596Z
 ---
 
 # Broken Windows Ledger
@@ -20,6 +20,7 @@ last_updated: 2026-10-03T20:58:20.367Z
 | 3 | 26 | deviation | lib/router.logs.js |  | Pre-existing: GET /api/v2/logs/build/:bid (fetchBuildLogID) has no owner check; out of scope for 26-02 | open |  | 2026-10-01T15:48:34.570Z |  |
 | 4 | quick-261003-u86 | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261003-u86 CI cases (shared/revoked refusals, re-key remedy, continuity after accept III) and TransferSpec (00) not run locally: they need real Redis/CouchDB and run only in CI after the operator's push | open |  | 2026-10-03T20:58:20.142Z |  |
 | 5 | quick-261003-u86 | deviation | lib/thinx/transfer.js |  | Pre-existing: Transfer#decline answers its callback twice for a live transfer (GET/POST decline -> headers already sent, unhandled rejection); the u86 re-key CI case leaves its transfer pending instead of declining it | open |  | 2026-10-03T20:58:20.367Z |  |
+| 6 | quick-261003-v05 | unrun-verify | spec/jasmine/ZZ-LogTailWebSocketSpec.js |  | ZZ-LogTailWebSocketSpec (C1-C6, real session cookie) cannot run locally and is deleted by docker-entrypoint.sh before the CI run; runs only when the ZZ tier is re-enabled | open |  | 2026-10-03T21:10:46.596Z |  |
 
 ````json
 [
@@ -85,6 +86,19 @@ last_updated: 2026-10-03T20:58:20.367Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T20:58:20.367Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 6,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-v05",
+    "file": "spec/jasmine/ZZ-LogTailWebSocketSpec.js",
+    "line": null,
+    "description": "ZZ-LogTailWebSocketSpec (C1-C6, real session cookie) cannot run locally and is deleted by docker-entrypoint.sh before the CI run; runs only when the ZZ tier is re-enabled",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T21:10:46.596Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }

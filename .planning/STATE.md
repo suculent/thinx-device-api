@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T21:00:40.885Z"
+last_updated: "2026-10-03T21:12:18.182Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 16bde50a96dc0ebfcd6ab956325749057d077557
+state_head: 51c5b100bac01135626a9ec63aaf8436c5f2c8c7
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-03 - Completed quick task 261003-u86: transfer carries its API key (not pushed)
+Last activity: 2026-10-03 - Completed quick task 261003-v05: logs tail + websocket owner gate (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -332,6 +332,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-t29 | Device udid ownership (IDOR): Device#fetchOwned/filterOwned/isOwnedBy and a withOwnedDevice gate on all 10 udid-keyed device routes (owner from authenticated identity only; foreign = unknown = 200 no_such_device); push filtered to owned udids; edit cannot write owner/previous_owner; transfer request requires sender ownership, accept moves only stored udids, migrate_device re-checks owner. Not pushed. | 2026-10-03 | 5ef392e6 | [261003-t29-fix-device-udid-ownership-check](./quick/261003-t29-fix-device-udid-ownership-check/) |
 | 261003-tv5 | /device/register owner binding: Device#resolveRegistration — key owner's own udid checks in; unknown udid (404) kept; foreign/malformed udid gets a fresh uuid; MAC fallback filtered to the key owner's devices (Device.isOwnedBy), else new device for the key owner; MQTT credentials only for the resolved udid. Not pushed. | 2026-10-03 | c9305716 | [261003-tv5-fix-device-register-mac-fallback-owner-b](./quick/261003-tv5-fix-device-register-mac-fallback-owner-b/) |
 | 261003-u86 | Transfer carries the device's API key: atomic Redis EVAL moves the key with the owner change; refuses shared/unidentifiable/Default-MQTT keys at request and accept (apikey_shared, apikey_not_identified, apikey_ambiguous, apikey_owner_mqtt_key, apikey_check_failed, apikey_move_failed, device_move_failed); seamless continuity — old owner id + moved key + own udid redirects to the new owner (never consumed); check-ins record lastkey. Not pushed. | 2026-10-03 | 16bde50a | [261003-u86-device-transfer-carries-its-api-key](./quick/261003-u86-device-transfer-carries-its-api-key/) |
+| 261003-v05 | WebSocket log tail: non-JSON frame no longer crashes the API (live crash); sockets bound to the verified session owner (else close 1008); logtail only for the owner's own builds, no fs side effects on miss; dead HTTP /api/user/logs/tail and /api/v2/logs/tail removed. Not pushed. | 2026-10-03 | 51c5b100 | [261003-v05-fix-logs-tail-handler](./quick/261003-v05-fix-logs-tail-handler/) |
 
 ## Cross-Project Touchpoints
 
