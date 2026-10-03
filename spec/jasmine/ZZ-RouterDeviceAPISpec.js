@@ -304,6 +304,62 @@ describe("Device + API (JWT+Key)", function () {
             });
     }, 30000);
 
+    // quick 261003-vd4: firmware loads only the device of the owner whose key it verified;
+    // another owner's udid answers like an unknown one (plain body no_such_device).
+    // `ak` is dynamic's key; JRS6 is dynamic's device; envi.udid is cimrman's device from
+    // DeviceSpec (02), or absent.
+    function vd4Firmware(extra) {
+        return {
+            registration: Object.assign({
+                mac: "66:66:66:66:66:66",
+                firmware: "ZZ-RouterDeviceApiSpec.js",
+                version: "1.0.0",
+                platform: "arduino",
+                alias: "test-device-6-dynamic",
+                owner: envi.dynamic.owner
+            }, extra)
+        };
+    }
+
+    it("POST /device/firmware (ak, own udid) reaches the envelope path (261003-vd4)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send(vd4Firmware({ udid: JRS6.udid }))
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.not.equal("no_such_device");
+                let j = JSON.parse(res.text);
+                expect(j.success).to.equal(false);
+                expect(["UPDATE_NOT_FOUND", "OK"]).to.include(j.status);
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/firmware (ak, another owner's udid) answers no_such_device (261003-vd4)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send(vd4Firmware({ udid: envi.udid, mac: envi.mac }))
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal("no_such_device");
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/firmware (ak, unknown udid) answers no_such_device (261003-vd4)", function (done) {
+        chai.request(thx.app)
+            .post('/device/firmware')
+            .set('Authentication', ak)
+            .send(vd4Firmware({ udid: "d4d4d4d4-0000-4000-8000-0000000000d4" }))
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal("no_such_device");
+                done();
+            });
+    }, 30000);
+
     it("POST /device/addpush (jwt, invalid)", function (done) {
         chai.request(thx.app)
             .post('/device/addpush')
