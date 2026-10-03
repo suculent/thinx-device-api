@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 27
 current_phase_name: InfluxDB 2 Upgrade
 status: executing
-stopped_at: Completed 27-05-PLAN.md
-last_updated: "2026-10-02T22:49:37.984Z"
+stopped_at: Completed 27-06-PLAN.md
+last_updated: "2026-10-03T12:10:30.169Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 27 execution started
-state_head: 746c520cd5035f52ed8fd52a417abfc9fcb9c786
+state_head: 841f85d827e36ee046eb8a39950ab3213f3d0a7c
 progress:
   total_phases: 7
   completed_phases: 10
   total_plans: 43
-  completed_plans: 41
-  percent: 95
+  completed_plans: 42
+  percent: 98
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 27 (InfluxDB 2 Upgrade) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 27 execution started
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 95% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████████] 15/15 plans ([█████████░] 98% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
 ## Milestones
 
@@ -258,6 +258,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-04: stats points written at ns precision with strictly increasing per-process timestamps (fix-connector after CI #15564; same-ms identical writes collapsed)
 - [Phase 27]: 27-05: thinx_influxdb spec keeps dhi.io/influxdb:2.9.1 unpinned (swarm records no dhi.io digest); running task digest sha256:3d49ee8ee9a0 verified; pin by digest in 27-07 mirror
 - [Phase 27]: 27-05: operator window override at ~22:41 UTC (no production traffic expected) replaced the 22:30 cut-off for this run only
+- [Phase 27]: 27-06: operator answered enable-all; stats enabled on InfluxDB 2 at 2026-10-03T12:05:27Z, stats bucket 90 d with id kept, six empty upgrade buckets dropped, Chronograf retirement approved for 27-07
 
 ### Todos
 
@@ -336,9 +337,9 @@ Decided at plan time, not blocking the roadmap:
 
 **Resume file:** None
 
-**Last session:** 2026-10-02T22:49:37.833Z
+**Last session:** 2026-10-03T12:10:29.993Z
 
-**Stopped at:** Completed 27-05-PLAN.md
+**Stopped at:** Completed 27-06-PLAN.md
 
 **Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
 
@@ -400,3 +401,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P03 | 11 min | 3 tasks | 9 files |
 | Phase 27 P04 | 1h 32m | 3 tasks | 3 files |
 | Phase 27 P05 | 7 min | 2 tasks | 1 files |
+| Phase 27 P06 | 5min | 3 tasks | 1 files |

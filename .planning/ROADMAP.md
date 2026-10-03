@@ -289,7 +289,7 @@ Plans:
   4. The bucket that holds `stats` data has a 90-day retention.
   5. `thinx_influxdb` no longer mounts anything from `/mnt/gluster/deployment/swarm/swarmpit/`; its config is re-homed to a thinx-owned path or dropped. A test push still autoredeploys within 5 minutes after the upgrade.
 
-**Plans**: 6/8 plans executed
+**Plans**: 7/8 plans executed
 
 Plans:
 **Wave 1**
@@ -312,7 +312,7 @@ Plans:
 
 **Wave 5** *(blocked on 27-05)*
 
-- [ ] 27-06-PLAN.md — Read-only API-image rehearsal → decision → `INFLUXDB_TOKEN` mounted, boot adopts `stats` at 90 d, history and a live write proven, empty buckets dropped (checkpoint, one-way)
+- [x] 27-06-PLAN.md — Read-only API-image rehearsal → decision → `INFLUXDB_TOKEN` mounted, boot adopts `stats` at 90 d, history and a live write proven, empty buckets dropped (checkpoint, one-way)
 
 **Wave 6** *(blocked on 27-06)*
 
@@ -352,7 +352,7 @@ Plans:
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | In Progress|  |
-| 27. InfluxDB 2 Upgrade | v1.14 | 6/8 | In Progress|  |
+| 27. InfluxDB 2 Upgrade | v1.14 | 7/8 | In Progress|  |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 
 ---
