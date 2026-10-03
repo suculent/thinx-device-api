@@ -79,19 +79,23 @@ describe("API Key", function () {
     );
   });
 
-  it("(01b) should be able to generate Default MQTT API Key", function (done) {
+  // 02-OwnerSpec usually created this owner's Default MQTT API Key already, and create()
+  // refuses a duplicate alias since quick 261003-vep: both outcomes are valid here.
+  it("(01b) should have a Default MQTT API Key", function (done) {
     apikey.create(
       owner,
       "Default MQTT API Key",
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
+          expect(array_or_error[array_or_error.length - 1].alias).to.equal("Default MQTT API Key");
         } else {
-          console.log("[spec] APIKey failed: ", { array_or_error });
+          expect(array_or_error).to.equal("alias_already_exists");
         }
-        expect(success).to.equal(true);
-        expect(array_or_error[0].key).to.be.a('string');
-        done();
+        apikey.list(owner, (keys) => {
+          expect(keys.filter((k) => k.alias === "Default MQTT API Key").length).to.be.at.least(1);
+          done();
+        });
       }
     );
   });
