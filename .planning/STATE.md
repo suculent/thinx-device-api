@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T21:25:25.436Z"
+last_updated: "2026-10-03T21:47:38.491Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 6c0ae6b2ef5015aa7cc7f0009268e91d4fc53c22
+state_head: 81cc0fb671e519b66c5a418f6ffe24f4d4527403
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-03 - Completed quick task 261003-v9x: OTT owner binding (not pushed)
+Last activity: 2026-10-03 - Completed quick task 261003-v9d: /device/addpush owner-bound push token (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -334,6 +334,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-u86 | Transfer carries the device's API key: atomic Redis EVAL moves the key with the owner change; refuses shared/unidentifiable/Default-MQTT keys at request and accept (apikey_shared, apikey_not_identified, apikey_ambiguous, apikey_owner_mqtt_key, apikey_check_failed, apikey_move_failed, device_move_failed); seamless continuity — old owner id + moved key + own udid redirects to the new owner (never consumed); check-ins record lastkey. Not pushed. | 2026-10-03 | 16bde50a | [261003-u86-device-transfer-carries-its-api-key](./quick/261003-u86-device-transfer-carries-its-api-key/) |
 | 261003-v05 | WebSocket log tail: non-JSON frame no longer crashes the API (live crash); sockets bound to the verified session owner (else close 1008); logtail only for the owner's own builds, no fs side effects on miss; dead HTTP /api/user/logs/tail and /api/v2/logs/tail removed. Not pushed. | 2026-10-03 | 51c5b100 | [261003-v05-fix-logs-tail-handler](./quick/261003-v05-fix-logs-tail-handler/) |
 | 261003-v9x | OTT owner binding: closes live cross-owner firmware read (traversal udid in stored OTT); tokens 32 random bytes, SET EX 86400, TTL capped at 3600 s on first redemption, never extended; ott_request owner from body + exact verify + fetchOwned; redemption re-checks owner/udid; tokens no longer logged. JSON-vs-binary redemption left for operator. Not pushed. | 2026-10-03 | 6c0ae6b2 | [261003-v9x-fix-ott-request-owner](./quick/261003-v9x-fix-ott-request-owner/) |
+| 261003-v9d | /device/addpush owner-bound push token | 2026-10-03 | 81cc0fb6 | [261003-v9d-fix-device-addpush-key-check](./quick/261003-v9d-fix-device-addpush-key-check/) |
 
 ## Cross-Project Touchpoints
 

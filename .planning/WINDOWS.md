@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 6
+open_count: 7
 waived_count: 0
 fixed_count: 1
-total_count: 7
-last_updated: 2026-10-03T21:23:40.618Z
+total_count: 8
+last_updated: 2026-10-03T21:46:12.516Z
 ---
 
 # Broken Windows Ledger
@@ -22,6 +22,7 @@ last_updated: 2026-10-03T21:23:40.618Z
 | 5 | quick-261003-u86 | deviation | lib/thinx/transfer.js |  | Pre-existing: Transfer#decline answers its callback twice for a live transfer (GET/POST decline -> headers already sent, unhandled rejection); the u86 re-key CI case leaves its transfer pending instead of declining it | open |  | 2026-10-03T20:58:20.367Z |  |
 | 6 | quick-261003-v05 | unrun-verify | spec/jasmine/ZZ-LogTailWebSocketSpec.js |  | ZZ-LogTailWebSocketSpec (C1-C6, real session cookie) cannot run locally and is deleted by docker-entrypoint.sh before the CI run; runs only when the ZZ tier is re-enabled | open |  | 2026-10-03T21:10:46.596Z |  |
 | 7 | quick-261003-v9x | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Five 261003-v9x OTT ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DeviceOttSpec | open |  | 2026-10-03T21:23:40.618Z |  |
+| 8 | quick-261003-v9d | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Six 261003-v9d addpush ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DevicePushOwnerSpec | open |  | 2026-10-03T21:46:12.516Z |  |
 
 ````json
 [
@@ -113,6 +114,19 @@ last_updated: 2026-10-03T21:23:40.618Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T21:23:40.618Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 8,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-v9d",
+    "file": "spec/jasmine/ZZ-RouterDeviceAPISpec.js",
+    "line": null,
+    "description": "Six 261003-v9d addpush ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DevicePushOwnerSpec",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T21:46:12.516Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }

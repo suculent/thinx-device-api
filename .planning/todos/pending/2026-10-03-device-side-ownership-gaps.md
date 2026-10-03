@@ -6,8 +6,8 @@ severity: high
 files:
   - lib/thinx/device.js:982-1004 (register MAC fallback, devices_by_mac rows[0] of any owner) — resolved by quick 261003-tv5
   - lib/thinx/device.js:415 (checkinExistingDevice -> authorize_mqtt with the caller's key) — resolved by quick 261003-tv5
-  - lib/router.deviceapi.js:97-127 (/device/addpush never verifies the Authentication key)
-  - lib/thinx/device.js:704-740 (push writes the push token of any udid)
+  - lib/router.deviceapi.js:97-127 (/device/addpush never verifies the Authentication key) — resolved by quick 261003-v9d
+  - lib/thinx/device.js:704-740 (push writes the push token of any udid) — resolved by quick 261003-v9d
   - lib/thinx/device.js:1153-1154 (ott_request reads req.owner, always undefined) — resolved by quick 261003-v9x
   - lib/thinx/messenger.js:377-398 (updateAndTransformDeviceStatus edits by topic udid)
   - lib/thinx/device.js:1209,1285 (firmware loads the device by udid without a compare)
@@ -26,7 +26,7 @@ findings remain:
    credential. A key holder who knows a MAC shared by two devices can take over another owner's
    device on MQTT. The `> 1` comparison also looks like an off-by-one: a single match is treated
    as "new device".
-2. **`/device/addpush`** (`lib/router.deviceapi.js:97-127` → `device.push`,
+2. **Resolved 2026-10-03 (quick 261003-v9d).** **`/device/addpush`** (`lib/router.deviceapi.js:97-127` → `device.push`,
    `lib/thinx/device.js:704-740`). The `Authentication` header is sanitized but never verified.
    `device.push` looks the device up by the body udid and writes its push token, so anyone can
    set the push token of any udid.
@@ -44,7 +44,7 @@ findings remain:
 
 1. **Resolved 2026-10-03 (quick 261003-tv5).** On the MAC-fallback branch, compare `existing.owner` with the verified registration owner
    (the same compare the udid branch already does), and fix the `> 1` comparison.
-2. Verify the API key against the device owner (`apikey.verify(doc.owner, key)`) before writing
+2. **Resolved 2026-10-03 (quick 261003-v9d).** Verify the API key against the device owner (`apikey.verify(doc.owner, key)`) before writing
    the push token.
 3. **Resolved 2026-10-03 (quick 261003-v9x).** Take the owner from the registration body, verify the key for it, and only then store the OTT.
 4. Compare `doc.owner` with the topic owner `oid` (`Device.isOwnedBy`) before editing or running
@@ -203,3 +203,97 @@ firmware sends it).
 Follow-ups: `.planning/todos/pending/2026-10-03-ott-redemption-serves-json-not-binary.md`
 (redemption serialization since `fee22323`, strict one-time redemption, plaintext port, sink-level
 udid guard). Items 2, 4 and 5 above stay open.
+
+## Resolution — item 2 (quick 261003-v9d)
+
+Commits: `1b0fa6bc` (RED spec `spec/jasmine/DevicePushOwnerSpec.js`: 19 specs, 13 failures on
+the unfixed code), `25a4ecfd` (`Device#push` in `lib/thinx/device.js`, addpush route comment in
+`lib/router.deviceapi.js`), and the commit "test(quick-261003-v9d): CI addpush owner regressions;
+OpenAPI addpush contract" (six ZZ cases, the OpenAPI `/device/addpush` entry). This section is
+committed with the quick task's docs.
+
+**The rule (same as check-in after tv5/u86 and OTT in v9x).** A push token is written only when:
+1. the body names an owner: `owner` is a string accepted by `sanitka.owner` (absent, null,
+   non-string or malformed counts as not named);
+2. the `Authentication` key verifies for that owner with `APIKey#verify` in its 4-argument form
+   (exact, constant-time, fail-closed since s59);
+3. the udid is that owner's device (`Device#fetchOwned`: a malformed udid never reaches CouchDB,
+   strict `Device.isOwnedBy`, lookup errors fail closed).
+Then `edit({udid, push})` writes the `push` field and nothing else (alias, lastkey, owner and
+any other body field are ignored).
+
+**Owner field — what does the client send?** Evidence recorded while planning:
+- The router is the only server caller of `device.push`. A repo-wide grep (excluding
+  node_modules) finds `addpush` only in the router, `spec/jasmine/ZZ-RouterDeviceAPISpec.js`, a
+  comment list in `docs/APIs.md` and `thinx-api-openapi.yaml`.
+- THiNXLib never calls addpush (`thinx-firmware-esp8266-ino/.../THiNXLib.cpp`,
+  `thinx-firmware-esp8266-pio/.../THiNXLib.cpp`, the `spec/test_repositories/thinx-firmware-esp8266`
+  submodule): they only POST `/device/register` and GET `/device/firmware?ott=`.
+  `thinx-firmware-esp32-pio/lib/thinx-firmware-esp32` is an empty submodule directory here.
+- A public GitHub code search for `"device/addpush"` finds only this server and its mirror.
+  Private repositories are unknown.
+- The accepted token formats (64-hex APNs, FCM) point at a mobile client that never shipped.
+  Nothing in the server reads `device.push` (the FCM loop in `lib/thinx/notifier.js` is
+  commented out).
+- So no client names an owner today. The request names it in a top-level `owner` field, the name
+  THiNXLib uses in `registration.owner` and `device.firmware` reads from its body.
+
+**Answers** (all HTTP 200 through `Util.responder`, the device-API failure convention):
+- `authentication`: absent/empty key, absent/invalid owner, a key that does not verify for the
+  named owner. Decided before any device lookup and from (owner, key) only; verify's internal
+  messages (`owner_found_but_no_key` / `apikey_not_found`) are collapsed into it.
+- `push_device_not_found`: malformed, absent or non-string udid, unknown udid, another owner's
+  udid, lookup error. Unknown and foreign udids answer byte-identically after the same work (one
+  verify, one `devicelib.get`), so the route is no udid-existence oracle. `fetchOwned`'s
+  `no_such_device` is mapped to the endpoint's established not-found answer.
+- `push_token_not_registered`: the write failed (it answered success before).
+- Unchanged: the router's 403 for a missing/malformed Authentication header, `no_body`,
+  `no_token`, `invalid_type_*`, success `push_token_registered`.
+- Logs: the line that printed the whole request body (push token included) is gone. The new lines
+  (`• Push Registration for udid …`, `[push] refused <category> for udid …`) name only the
+  sanitized udid.
+
+**No lastkey binding.** Any key of the owner (its key or its hash) is accepted, as on check-in,
+which never compares the presented key with the device's `lastkey`. Requiring the device's own key
+would make addpush stricter than check-in (which re-issues the MQTT credential), break after every
+re-key until the next check-in, and fail for devices with no or a legacy `lastkey`. addpush never
+writes `lastkey`, so check-in stays its only writer and u86's transfer key identification is
+unaffected.
+
+**No transfer continuity on addpush.** `push()` calls `verify` with exactly four arguments and
+never builds u86's device context, so a request naming the previous owner of a transferred device
+is refused with `authentication` (register and firmware check-in would redirect it). A request
+naming the current owner works directly. The transfer binding in the current owner's store is
+never read through or modified by this path (spec P19: `ak:<current owner>` stays byte-identical).
+Correction to the plan's rationale: the plan argued that passing the context would let a
+push-token call consume the binding before the device re-registered. u86 as landed has no
+consumption at all (operator decision 3: the binding ends on key revoke, owner purge or the next
+transfer), so that risk does not exist; the decision stands because no firmware calls addpush and
+the OTT path (v9x) also uses the 4-argument form.
+
+**Who is affected in production:**
+- (a) A caller writing the push token of a device that is not its key owner's: refused. Nothing
+  consumed that field, so no delivery changes.
+- (b) A caller naming no owner, which is every request shape documented or tested so far: now
+  `authentication`. No known client exists. If one appears, it must add `owner`, its key's owner
+  id.
+- (c) The owner's key plus `owner` plus its own udid: unchanged success. A failed write now answers
+  `push_token_not_registered`.
+
+Pre-deploy, read-only (operator, optional), on the node running the `thinx_api` task (placement
+floats; node-local `docker logs`, not `docker service logs`) — count only, never print matching
+lines (they contain push tokens and bodies):
+- `• Push Registration` lines: whether anything calls addpush at all;
+- of those, lines containing `"owner":`: whether that client already names an owner.
+Post-deploy: count `[push] refused` lines.
+
+**Residual risk:**
+- Push tokens overwritten by foreign callers before the fix are not reverted (no consumer reads
+  them).
+- An unauthenticated but well-formed request still costs one Redis GET; a verify failure writes an
+  audit and a stats entry for the named owner, as `/device/register` does. No CouchDB access
+  happens before authentication (before the fix every request read CouchDB).
+- TOCTOU between `fetchOwned` and the atomic write if the device is transferred in that
+  millisecond window; the field has no consumer.
+
+Items 3-5 are not touched by this task.
