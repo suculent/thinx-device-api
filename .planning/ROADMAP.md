@@ -76,7 +76,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
 - [x] **Phase 23: Build-Pipeline Sink Hardening** - git and remote-builder commands run via argv; repo-controlled file access is contained and refuses symlinks (completed 2026-09-29)
 - [x] **Phase 24: Secrets Sweep** - the 9 `lib/` credentials plus a new `CSRF_SECRET` load from swarm secrets, provisioned one service at a time (completed 2026-09-29)
 - [x] **Phase 25: Session-Bound CSRF + Console Edge Headers** - HMAC session-bound CSRF token with login rotation, WR-04 and mutation routes covered, hardened console headers mirrored into the images (completed 2026-10-01)
-- [ ] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept
+- [x] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept (completed 2026-10-03)
 - [x] **Phase 27: InfluxDB 2 Upgrade** - `thinx_influxdb` 1.8 → 2 from a verified backup, `influx.js` on v2, 90-day bucket retention on `stats` (completed 2026-10-03)
 - [ ] **Phase 28: Swarmpit Upgrade & Trim** - Swarmpit 1.10, then stats/`swarmpit_influxdb` and `swarmpit_agent` removed, each step gated by a push-to-redeploy test
 
@@ -241,7 +241,7 @@ Plans:
   4. In the Vue Console, a user can page through the build list, and paging never prunes build records.
   5. The console submodule pointer that carries the Vue paging UI is bumped in this repo and deployed to the Vue console host.
 
-**Plans**: 10/10 plans executed
+**Plans**: 10/10 plans complete
 
 Plans:
 **Wave 1**
@@ -351,7 +351,7 @@ Plans:
 | 23. Build-Pipeline Sink Hardening | v1.14 | 5/5 | Complete    | 2026-09-29 |
 | 24. Secrets Sweep | v1.14 | 6/6 | Complete    | 2026-09-29 |
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
-| 26. Vue Console Log Paging | v1.14 | 10/10 | In Progress|  |
+| 26. Vue Console Log Paging | v1.14 | 10/10 | Complete    | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete    | 2026-10-03 |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
 
