@@ -28,7 +28,8 @@
  * Fixture notes:
  * - forwardNonNotification is replaced by a no-op: with createInstance's state (rtm = null,
  *   channel = null) it throws whenever ENVIRONMENT is not "test" (todo finding (a)).
- * - `socket` is set to {OPEN: 1} because createInstance leaves it null (todo finding (d)).
+ * - one recording console socket is subscribed per owner (quick 261003-vn3 replaced the single
+ *   `_socket` with per-owner subscriptions; todo finding (d) is gone with it).
  *
  * Nothing here prints a payload, an owner id, a key, a hash or a lastkey: failures report counts,
  * booleans or which sentinel leaked, never the captured log text.
@@ -208,8 +209,11 @@ function makeMessenger(opts) {
     }
   };
 
-  m._socket = { readyState: 1, send: (s) => rec.sent.push(s) };
-  m.socket = { OPEN: 1 };
+  // One subscribed console socket per owner (quick 261003-vn3 routes frames per owner); all
+  // record into rec.sent, so these cases count frames regardless of which owner received them.
+  for (const owner of [OWNER_A, OWNER_B, OWNER_C]) {
+    m.subscribeSocket(owner, { owner: owner, readyState: 1, send: (s) => rec.sent.push(s), on() {} });
+  }
 
   // Finding (a): throws whenever ENVIRONMENT !== "test" with createInstance's state.
   m.forwardNonNotification = () => {};
