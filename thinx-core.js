@@ -309,6 +309,7 @@ module.exports = class THiNX extends EventEmitter {
 
             const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
             const blog = new Buildlog();
+            const SocketSession = require("./lib/thinx/socket_session"); // WebSocket owner binding and frame dispatch
 
 
             // DI
@@ -588,46 +589,9 @@ module.exports = class THiNX extends EventEmitter {
 
             }
 
-            function initSocket(ws, msgr, logsocket) {
-
-              ws.on("message", (message) => {
-                console.log(`ℹ️ [info] [ws] incoming message: ${message}`);
-                if (message.indexOf("{}") == 0) return; // skip empty messages
-                var object = JSON.parse(message);
-
-                // Type: logtail socket
-                if (typeof (object.logtail) !== "undefined") {
-                  var build_id = object.logtail.build_id;
-                  var owner_id = object.logtail.owner_id;
-                  if ((typeof (build_id) !== "undefined") && (typeof (owner_id) !== "undefined")) {
-                    // `logsocket` is only set when the message arrives on a
-                    // dedicated log connection (/<owner>/<id>). The console
-                    // sends wsstailLog() over the OWNER connection (/<owner>),
-                    // where logsocket is null -- so app._ws[null] was undefined
-                    // and logtail() streamed the build log nowhere, leaving the
-                    // log window empty. Fall back to the connection the request
-                    // arrived on; both console log handlers render lines from
-                    // either connection.
-                    let log_ws = app._ws[logsocket];
-                    if (typeof (log_ws) === "undefined" || log_ws === null) log_ws = ws;
-                    blog.logtail(build_id, owner_id, log_ws, logtail_callback);
-                  }
-
-                  // Type: initial socket 
-                } else if (typeof (object.init) !== "undefined") {
-                  if (typeof (msgr) !== "undefined") {
-                    var owner = object.init;
-                    let socket = app._ws[owner];
-                    msgr.initWithOwner(owner, socket, (success, message_z) => {
-                      if (!success) {
-                        console.log(`ℹ️ [error] [ws] Messenger init on WS message failed: ${message_z}`);
-                      } else {
-                        console.log(`ℹ️ [info] Messenger successfully initialized for ${owner}`);
-                      }
-                    });
-                  }
-                }
-              });
+            // Frames are dispatched by SocketSession (lib/thinx/socket_session.js),
+            // attached in SocketSession.accept for verified sockets only.
+            function initSocket(ws) {
 
               function heartbeat() {
                 if (typeof(this.clientId) !== "undefined") {
@@ -656,42 +620,29 @@ module.exports = class THiNX extends EventEmitter {
                 return;
               }
 
-              // extract socket id and owner_id from pathname, also removing slashes (path element 0 is caused by the leading slash)
-              let path_elements = req.url.split('/');
               let socketKey = req.url.replace(/^\/+/, "");
-              let owner = path_elements[1];
-              let logsocket = path_elements[2] || null;
 
-              var cookies = req.headers.cookie;
-
-              if (typeof (cookies) !== "undefined") {
-                if (cookies.indexOf("x-thx") === -1) {
-                  console.log(`🚫  [critical] No thx-session found in WS: ${Util.redactCookieHeader(cookies)}`);
-                  return;
-                }
-              } else {
-                console.log("ℹ️ [info] DEPRECATED WS has no cookie headers, exiting!");
-                return;
-              }
+              // Quick 261003-v05: the socket owner is the session owner parsed at
+              // upgrade and must equal the first path segment. Anything else is
+              // closed with 1008 by accept() and gets no listener or registry entry.
+              // Owner connections register as app._ws[<owner>], log connections
+              // as app._ws[<owner>/<id>].
+              const owner = SocketSession.accept(ws, req, {
+                registry: app._ws,
+                blog: blog,
+                messenger: app.messenger,
+                callback: logtail_callback
+              });
+              if (owner === null) return;
 
               ws.isAlive = true;
-
-              ws.owner = owner;
               ws.socketKey = socketKey;
-
-              if ((typeof (logsocket) === "undefined") || (logsocket === null)) {
-                console.log("ℹ️ [info] Owner socket", owner, "started...");
-                app._ws[owner] = ws;
-              } else {
-                console.log("ℹ️ [info] Log socket", owner, "started...");
-                app._ws[logsocket] = ws; // public websocket stored in app, needs to be set to builder/buildlog!
-              }
 
               socketMap.set(socketKey, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
               /* Returns specific build log for owner */
               initLogTail();
-              initSocket(ws, app.messenger, logsocket);
+              initSocket(ws);
 
             }).on("error", function (err) {
 
