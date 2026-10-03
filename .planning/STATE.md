@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T19:57:24.699Z"
+last_updated: "2026-10-03T21:00:40.885Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: c9305716d768d2f005cf8b2d28e6b4df0e4e8e6e
+state_head: 16bde50a96dc0ebfcd6ab956325749057d077557
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-03 - Completed quick task 261003-tv5: register MAC fallback owner binding (not pushed)
+Last activity: 2026-10-03 - Completed quick task 261003-u86: transfer carries its API key (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -331,6 +331,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-skk | Mesh/validateSession auth bypass: validateSession trusts only router-verified Bearer/API-key identity or the session owner (no unverified owner_id+api_key body); router verifies the key against the body owner; mesh handlers and attachMesh act on the authenticated owner; CSRF on the four mesh write routes (D-21 lifted for mesh). Not pushed. PUT/DELETE /api/v2/mesh with an API key now 401 (use Bearer or v1 POST). | 2026-10-03 | 05ebbd85 | [261003-skk-fix-mesh-validatesession-auth-bypass](./quick/261003-skk-fix-mesh-validatesession-auth-bypass/) |
 | 261003-t29 | Device udid ownership (IDOR): Device#fetchOwned/filterOwned/isOwnedBy and a withOwnedDevice gate on all 10 udid-keyed device routes (owner from authenticated identity only; foreign = unknown = 200 no_such_device); push filtered to owned udids; edit cannot write owner/previous_owner; transfer request requires sender ownership, accept moves only stored udids, migrate_device re-checks owner. Not pushed. | 2026-10-03 | 5ef392e6 | [261003-t29-fix-device-udid-ownership-check](./quick/261003-t29-fix-device-udid-ownership-check/) |
 | 261003-tv5 | /device/register owner binding: Device#resolveRegistration — key owner's own udid checks in; unknown udid (404) kept; foreign/malformed udid gets a fresh uuid; MAC fallback filtered to the key owner's devices (Device.isOwnedBy), else new device for the key owner; MQTT credentials only for the resolved udid. Not pushed. | 2026-10-03 | c9305716 | [261003-tv5-fix-device-register-mac-fallback-owner-b](./quick/261003-tv5-fix-device-register-mac-fallback-owner-b/) |
+| 261003-u86 | Transfer carries the device's API key: atomic Redis EVAL moves the key with the owner change; refuses shared/unidentifiable/Default-MQTT keys at request and accept (apikey_shared, apikey_not_identified, apikey_ambiguous, apikey_owner_mqtt_key, apikey_check_failed, apikey_move_failed, device_move_failed); seamless continuity — old owner id + moved key + own udid redirects to the new owner (never consumed); check-ins record lastkey. Not pushed. | 2026-10-03 | 16bde50a | [261003-u86-device-transfer-carries-its-api-key](./quick/261003-u86-device-transfer-carries-its-api-key/) |
 
 ## Cross-Project Touchpoints
 

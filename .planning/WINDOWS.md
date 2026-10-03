@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 4
 waived_count: 0
 fixed_count: 1
-total_count: 3
-last_updated: 2026-10-01T15:48:34.570Z
+total_count: 5
+last_updated: 2026-10-03T20:58:20.367Z
 ---
 
 # Broken Windows Ledger
@@ -18,6 +18,8 @@ last_updated: 2026-10-01T15:48:34.570Z
 | 1 | 22 | unrun-verify | .planning/phases/22-ci-sast-baseline/22-02-PLAN.md |  | 22-02 Task 3 (D-13) gluster thinx.yml line + live thinx_console --env-rm not applied: auto-mode permission denial; operator commands in 22-02-SUMMARY Open Items | fixed |  | 2026-09-25T12:59:05.006Z | 2026-09-25T13:09:46.556Z |
 | 2 | 26 | unrun-verify | spec/jasmine/ZZ-LogPagingCouchSpec.js |  | ZZ-LogPagingCouchSpec (real-CouchDB LOG-01..04 proof) not run: no local CouchDB, and CI split-tests deletes ZZ*.js on node 0 (parallelism 1), so it will not run on the 26-06 push either | open |  | 2026-10-01T15:48:34.227Z |  |
 | 3 | 26 | deviation | lib/router.logs.js |  | Pre-existing: GET /api/v2/logs/build/:bid (fetchBuildLogID) has no owner check; out of scope for 26-02 | open |  | 2026-10-01T15:48:34.570Z |  |
+| 4 | quick-261003-u86 | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261003-u86 CI cases (shared/revoked refusals, re-key remedy, continuity after accept III) and TransferSpec (00) not run locally: they need real Redis/CouchDB and run only in CI after the operator's push | open |  | 2026-10-03T20:58:20.142Z |  |
+| 5 | quick-261003-u86 | deviation | lib/thinx/transfer.js |  | Pre-existing: Transfer#decline answers its callback twice for a live transfer (GET/POST decline -> headers already sent, unhandled rejection); the u86 re-key CI case leaves its transfer pending instead of declining it | open |  | 2026-10-03T20:58:20.367Z |  |
 
 ````json
 [
@@ -57,6 +59,32 @@ last_updated: 2026-10-01T15:48:34.570Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-01T15:48:34.570Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 4,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-u86",
+    "file": "spec/jasmine/ZZ-RouterTransferSpec.js",
+    "line": null,
+    "description": "261003-u86 CI cases (shared/revoked refusals, re-key remedy, continuity after accept III) and TransferSpec (00) not run locally: they need real Redis/CouchDB and run only in CI after the operator's push",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T20:58:20.142Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 5,
+    "kind": "deviation",
+    "phase": "quick-261003-u86",
+    "file": "lib/thinx/transfer.js",
+    "line": null,
+    "description": "Pre-existing: Transfer#decline answers its callback twice for a live transfer (GET/POST decline -> headers already sent, unhandled rejection); the u86 re-key CI case leaves its transfer pending instead of declining it",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T20:58:20.367Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }
