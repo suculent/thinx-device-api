@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T22:17:25.850Z"
+last_updated: "2026-10-03T22:28:51.104Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 63716bae7bed85e1df28f382253ec8486fb8fc97
+state_head: d46bb756df6354c9d1448acaf5b138d877630cf4
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261003-vn3: messenger per-owner websocket routing (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261003-w0c: MQTT handler never throws; device writes gated (THINX_MQTT_DEVICE_WRITES off) (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -338,6 +338,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-vbg | MQTT status owner check with transfer binding | 2026-10-03 | 84f23c20 | [261003-vbg-fix-mqtt-status-owner-check](./quick/261003-vbg-fix-mqtt-status-owner-check/) |
 | 261003-x9z | Google OAuth state bound to the initiating browser; pentest XALG-1..4 triage | 2026-10-03 | 971284b8 | [261003-x9z-bind-google-oauth-state-to-the-initiatin](./quick/261003-x9z-bind-google-oauth-state-to-the-initiatin/) |
 | 261003-vn3 | messenger per-owner websocket routing | 2026-10-03 | 63716bae | [261003-vn3-fix-messenger-process-wide-websocket](./quick/261003-vn3-fix-messenger-process-wide-websocket/) |
+| 261003-w0c | MQTT handler never throws; device writes gated (THINX_MQTT_DEVICE_WRITES off) | 2026-10-03 | d46bb756 | [261003-w0c-fix-mqtt-forwardnonnotification-crash](./quick/261003-w0c-fix-mqtt-forwardnonnotification-crash/) |
 
 ## Cross-Project Touchpoints
 

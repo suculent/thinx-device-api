@@ -15,7 +15,8 @@ files:
 Quick 261003-vn3 routes every messenger console frame to the sockets of its owner. These gaps
 remain; none of them is a cross-owner leak.
 
-1. **forwardNonNotification throws on every non-notification MQTT message in production.**
+1. **Resolved 2026-10-03 (quick 261003-w0c).** The handler no longer throws, and the newly reachable paths are gated; see `.planning/todos/pending/2026-10-03-mqtt-device-writes-gated.md`.
+   **forwardNonNotification throws on every non-notification MQTT message in production.**
    `rtm` stays null because `DISABLE_SLACK` is hard-coded true, and `channel` is null. With
    `ENVIRONMENT !== "test"` the guard `typeof (this.rtm) !== "undefined"` passes for null, so
    `this.rtm.sendMessage(...)` throws `TypeError: Cannot read properties of null (reading

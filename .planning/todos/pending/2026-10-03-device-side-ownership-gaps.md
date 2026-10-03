@@ -414,7 +414,7 @@ Items 2, 3 and 5 are not touched by this task (2 and 3 resolved by v9d/v9x; 5 st
 
 Each claim was re-verified against the tree after the vbg commits (line numbers are post-vbg).
 
-- **(a) `forwardNonNotification` most likely crashes the API process on every non-notification MQTT
+- **Resolved 2026-10-03 (quick 261003-w0c).** **(a) `forwardNonNotification` most likely crashes the API process on every non-notification MQTT
   message outside `ENVIRONMENT=test` — severity high.**
   - Operator read-only check first: `thinx_api` task restart count (`docker service ps thinx_api`), and
     on the node running it, node-local `docker logs <container> 2>&1 | grep -c "reading 'sendMessage'"`.
@@ -428,7 +428,7 @@ Each claim was re-verified against the tree after the vbg commits (line numbers 
     `uncaughtException` handler exists in `thinx.js`, `thinx-core.js` or `lib/`.
   - CI runs `ENVIRONMENT=test`, so CI never sees it. Not fixed: fixing it activates the transformer path
     below in production, which is an operator decision.
-- **(b) The transformer path reached from MQTT is broken in three ways — severity medium**
+- **Gated 2026-10-03 (quick 261003-w0c): MQTT-triggered transformers disabled.** **(b) The transformer path reached from MQTT is broken in three ways — severity medium**
   (`lib/thinx/device.js`, `runDeviceTransformers` `:522-722`), called from the messenger with
   `reg = null`, `callback = null`:
   - `typeof (reg) !== "undefined"` is true for null, so `transformedStatus = reg.status` (`:562`)
@@ -451,7 +451,7 @@ Each claim was re-verified against the tree after the vbg commits (line numbers 
   `processUnknownNotification` (`:628`) throw on `this.socket.OPEN` whenever `_socket` is non-null.
   Before any `initWithOwner`, `this._socket` is `undefined` (createInstance only sets
   `this._private._socket`), so `undefined !== null` passes and `this._socket.readyState` throws first.
-- **(e) `processActionableNotification`'s response branch — severity low.** It copies `nid:<nid>`
+- **Partly fixed 2026-10-03 (quick 261003-w0c): no throw on an unknown nid; the cross-nid copy remains.** **(e) `processActionableNotification`'s response branch — severity low.** It copies `nid:<nid>`
   (the nid comes from the payload and is not owner-bound) into `nid:<did>` (`:599-611`), and throws on
   `JSON.parse(null).length` (`:601-602`) when that key is absent (`redis.get` answers `(null, null)`, and
   only `error` is checked).
