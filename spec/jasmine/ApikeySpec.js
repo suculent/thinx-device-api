@@ -109,6 +109,23 @@ describe("API Key", function () {
       });
   });
 
+  // quick 261003-w13: the console list never carries the cleartext key (never print items).
+  it("(02b) should list API Keys without the cleartext key", function (done) {
+    apikey.list(
+      owner,
+      (keys) => {
+        expect(Array.isArray(keys)).to.equal(true);
+        expect(keys.length).to.be.above(0);
+        keys.forEach((item, i) => {
+          expect(Object.prototype.hasOwnProperty.call(item, "key"), "item " + i + " has a key property").to.equal(false);
+          expect((typeof (item.name) === "string") && item.name.startsWith("*".repeat(30)), "item " + i + " name is masked").to.equal(true);
+          expect((typeof (item.hash) === "string") && /^[0-9a-f]{64}$/.test(item.hash), "item " + i + " hash is 64 hex").to.equal(true);
+          expect(Object.prototype.hasOwnProperty.call(item, "alias"), "item " + i + " has an alias").to.equal(true);
+        });
+        done();
+      });
+  });
+
   //verify: function(owner, apikey, callback)
   it("(03) should be able to verify invalid API Keys", function (done) {
     apikey.verify(
