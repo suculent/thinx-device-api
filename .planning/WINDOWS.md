@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 7
+open_count: 9
 waived_count: 0
 fixed_count: 1
-total_count: 8
-last_updated: 2026-10-03T21:46:12.516Z
+total_count: 10
+last_updated: 2026-10-03T22:15:16.260Z
 ---
 
 # Broken Windows Ledger
@@ -23,6 +23,8 @@ last_updated: 2026-10-03T21:46:12.516Z
 | 6 | quick-261003-v05 | unrun-verify | spec/jasmine/ZZ-LogTailWebSocketSpec.js |  | ZZ-LogTailWebSocketSpec (C1-C6, real session cookie) cannot run locally and is deleted by docker-entrypoint.sh before the CI run; runs only when the ZZ tier is re-enabled | open |  | 2026-10-03T21:10:46.596Z |  |
 | 7 | quick-261003-v9x | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Five 261003-v9x OTT ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DeviceOttSpec | open |  | 2026-10-03T21:23:40.618Z |  |
 | 8 | quick-261003-v9d | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Six 261003-v9d addpush ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DevicePushOwnerSpec | open |  | 2026-10-03T21:46:12.516Z |  |
+| 9 | quick-261003-vn3 | unrun-verify | spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js |  | 261003-vn3: ZZ-WebSocketHandshakeRtmSpec, ZZ-WebSocketLifecycleSpec and ZZ-LogTailWebSocketSpec (real server, real session) not run: no local Redis/CouchDB and docker-entrypoint.sh deletes ZZ specs before CI; per-owner routing and registry cleanup are pinned by MessengerOwnerSocketSpec | open |  | 2026-10-03T22:15:16.000Z |  |
+| 10 | quick-261003-vn3 | deviation | services/console/src/html/app/js/controllers/LogviewController.js | 219 | 261003-vn3 made actionable frames deliverable: the classic console renders the device-supplied notification.body as HTML in toastr (no escaping); any accepted publisher on /<owner>/<udid> (incl. a vbg transfer-bound previous owner) can inject HTML into the device owner's console; CSP blocks inline script; operator decision needed | open |  | 2026-10-03T22:15:16.260Z |  |
 
 ````json
 [
@@ -127,6 +129,32 @@ last_updated: 2026-10-03T21:46:12.516Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T21:46:12.516Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 9,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-vn3",
+    "file": "spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js",
+    "line": null,
+    "description": "261003-vn3: ZZ-WebSocketHandshakeRtmSpec, ZZ-WebSocketLifecycleSpec and ZZ-LogTailWebSocketSpec (real server, real session) not run: no local Redis/CouchDB and docker-entrypoint.sh deletes ZZ specs before CI; per-owner routing and registry cleanup are pinned by MessengerOwnerSocketSpec",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T22:15:16.000Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 10,
+    "kind": "deviation",
+    "phase": "quick-261003-vn3",
+    "file": "services/console/src/html/app/js/controllers/LogviewController.js",
+    "line": 219,
+    "description": "261003-vn3 made actionable frames deliverable: the classic console renders the device-supplied notification.body as HTML in toastr (no escaping); any accepted publisher on /<owner>/<udid> (incl. a vbg transfer-bound previous owner) can inject HTML into the device owner's console; CSP blocks inline script; operator decision needed",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T22:15:16.260Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }
