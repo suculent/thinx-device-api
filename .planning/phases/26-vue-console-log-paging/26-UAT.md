@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 26-vue-console-log-paging
 source: [26-VERIFICATION.md]
 started: 2026-10-02T12:50:00Z
-updated: 2026-10-02T13:27:26Z
+updated: 2026-10-03T18:23:09Z
 ---
 
 ## Current Test
 
-[testing paused — 1 item outstanding (test 3 blocked until the 2026-10-03 09:40 UTC retention run)]
+[testing complete]
 
 ## Tests
 
@@ -25,9 +25,8 @@ result: pass
 
 ### 3. The first scheduled retention run succeeds
 expected: After 2026-10-03 09:40 UTC, `/var/log/thinx-log-retention.log` on micro has a new run that ends with `LOG-RETENTION APPLY OK`, and the run's expired and orphan counts are 0 or small (one day's worth).
-result: blocked
-blocked_by: other
-reason: "blocked: run is tomorrow"
+result: pass
+evidence: "2026-10-03T09:40:18Z run --apply --roots deploy,repos ended LOG-RETENTION APPLY OK; audit_deleted=0, build_records_deleted=0, deploy/repos folders and orphans deleted 0, delete_failed 0, untracked_after 0"
 
 ### 4. Sign-off on the 11 process prohibitions
 expected: |
@@ -49,11 +48,11 @@ result: passed (operator, 2026-10-02)
 ## Summary
 
 total: 4
-passed: 3
+passed: 4
 issues: 0
 pending: 0
 skipped: 0
-blocked: 1
+blocked: 0
 
 ## Gaps
 
