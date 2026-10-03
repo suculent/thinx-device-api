@@ -214,6 +214,82 @@ describe("Device + API (JWT+Key)", function () {
           });
       }, 30000);
 
+    // quick 261003-tv5: /device/register is bound to the owner whose API key
+    // authenticated it ("when it falls back to matching by MAC, should check in as a
+    // device of the api key's owner"). `ak` is dynamic's key; envi.udid / envi.mac is
+    // cimrman's device from DeviceSpec (02).
+
+    let tv5_udid = null;
+
+    function tv5Registration(extra) {
+        return Object.assign({
+            firmware: "ZZ-RouterDeviceApiSpec.js",
+            version: "1.0.0",
+            platform: "arduino",
+            owner: envi.dynamic.owner
+        }, extra);
+    }
+
+    it("POST /device/register (ak, own MAC, no udid) reattaches to JRS6 (261003-tv5)", function (done) {
+        chai.request(thx.app)
+            .post('/device/register')
+            .set('Authentication', ak)
+            .send({ registration: tv5Registration({ mac: "66:66:66:66:66:66", alias: "test-device-6-dynamic" }) })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let r = JSON.parse(res.text);
+                expect(r.registration.udid).to.equal(JRS6.udid);
+                expect(r.registration.owner).to.equal(envi.dynamic.owner);
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/register (ak, another owner's MAC) registers a device of the key owner (261003-tv5)", function (done) {
+        chai.request(thx.app)
+            .post('/device/register')
+            .set('Authentication', ak)
+            .send({ registration: tv5Registration({ mac: envi.mac, alias: "tv5-cross-owner-mac" }) })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let r = JSON.parse(res.text);
+                expect(r.registration.owner).to.equal(envi.dynamic.owner);
+                expect(r.registration.udid).to.be.a('string');
+                expect(r.registration.udid).to.not.equal(envi.udid);
+                tv5_udid = r.registration.udid;
+                done();
+            });
+    }, 30000);
+
+    it("POST /device/register (ak, another owner's udid) never checks in as that device (261003-tv5)", function (done) {
+        // Holds whether envi.udid is cimrman's device (foreign: a fresh udid, then the
+        // owner-scoped MAC step reattaches to dynamic's tv5 device) or absent (404: kept,
+        // then the same MAC reattach wins).
+        chai.request(thx.app)
+            .post('/device/register')
+            .set('Authentication', ak)
+            .send({ registration: tv5Registration({ mac: envi.mac, alias: "tv5-cross-owner-mac", udid: envi.udid }) })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                let r = JSON.parse(res.text);
+                expect(r.registration.owner).to.equal(envi.dynamic.owner);
+                expect(r.registration.udid).to.not.equal(envi.udid);
+                expect(r.registration.udid).to.equal(tv5_udid);
+                done();
+            });
+    }, 30000);
+
+    it("POST /api/device/revoke (jwt, tv5 device) cleans up (261003-tv5)", function (done) {
+        chai.request(thx.app)
+            .post('/api/device/revoke')
+            .set('Authorization', jwt)
+            .send({ udid: tv5_udid })
+            .end((err, res) => {
+                expect(res.status).to.equal(200);
+                expect(res.text).to.equal(JSON.stringify({ success: true, response: tv5_udid }));
+                done();
+            });
+    }, 30000);
+
     // must be fully mocked or run after build completes
     it("POST /device/firmware (jwt, invalid)", function (done) {
         chai.request(thx.app)
