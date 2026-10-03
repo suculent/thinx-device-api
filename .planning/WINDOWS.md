@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 9
+open_count: 10
 waived_count: 0
 fixed_count: 1
-total_count: 10
-last_updated: 2026-10-03T22:15:16.260Z
+total_count: 11
+last_updated: 2026-10-03T22:35:35.762Z
 ---
 
 # Broken Windows Ledger
@@ -25,6 +25,7 @@ last_updated: 2026-10-03T22:15:16.260Z
 | 8 | quick-261003-v9d | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Six 261003-v9d addpush ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DevicePushOwnerSpec | open |  | 2026-10-03T21:46:12.516Z |  |
 | 9 | quick-261003-vn3 | unrun-verify | spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js |  | 261003-vn3: ZZ-WebSocketHandshakeRtmSpec, ZZ-WebSocketLifecycleSpec and ZZ-LogTailWebSocketSpec (real server, real session) not run: no local Redis/CouchDB and docker-entrypoint.sh deletes ZZ specs before CI; per-owner routing and registry cleanup are pinned by MessengerOwnerSocketSpec | open |  | 2026-10-03T22:15:16.000Z |  |
 | 10 | quick-261003-vn3 | deviation | services/console/src/html/app/js/controllers/LogviewController.js | 219 | 261003-vn3 made actionable frames deliverable: the classic console renders the device-supplied notification.body as HTML in toastr (no escaping); any accepted publisher on /<owner>/<udid> (incl. a vbg transfer-bound previous owner) can inject HTML into the device owner's console; CSP blocks inline script; operator decision needed | open |  | 2026-10-03T22:15:16.260Z |  |
+| 11 | quick-261003-vd4 | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js | 324 | 261003-vd4 CI cases (own udid reaches the envelope path; another owner's udid and an unknown udid answer no_such_device) not run: ZZ specs need real Redis/CouchDB and docker-entrypoint deletes them before CI; protection pinned locally by DeviceFirmwareOwnerSpec | open |  | 2026-10-03T22:35:35.762Z |  |
 
 ````json
 [
@@ -155,6 +156,19 @@ last_updated: 2026-10-03T22:15:16.260Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T22:15:16.260Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 11,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-vd4",
+    "file": "spec/jasmine/ZZ-RouterDeviceAPISpec.js",
+    "line": 324,
+    "description": "261003-vd4 CI cases (own udid reaches the envelope path; another owner's udid and an unknown udid answer no_such_device) not run: ZZ specs need real Redis/CouchDB and docker-entrypoint deletes them before CI; protection pinned locally by DeviceFirmwareOwnerSpec",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T22:35:35.762Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }

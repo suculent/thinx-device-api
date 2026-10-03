@@ -10,7 +10,7 @@ files:
   - lib/thinx/device.js:704-740 (push writes the push token of any udid) — resolved by quick 261003-v9d
   - lib/thinx/device.js:1153-1154 (ott_request reads req.owner, always undefined) — resolved by quick 261003-v9x
   - lib/thinx/messenger.js:377-398 (updateAndTransformDeviceStatus edits by topic udid) — resolved by quick 261003-vbg
-  - lib/thinx/device.js:1209,1285 (firmware loads the device by udid without a compare)
+  - lib/thinx/device.js:1209,1285 (firmware loads the device by udid without a compare) — resolved by quick 261003-vd4
 ---
 
 ## Problem
@@ -36,7 +36,7 @@ findings remain:
 4. **Resolved 2026-10-03 (quick 261003-vbg).** **`messenger.updateAndTransformDeviceStatus`** (`lib/thinx/messenger.js:377-398`). It edits the
    device named by the topic udid without comparing `doc.owner` with the topic owner, and relies on
    the broker ACL alone.
-5. **`device.firmware`** (`lib/thinx/device.js:1209`, `:1285`, informational). It verifies the key
+5. **Resolved 2026-10-03 (quick 261003-vd4).** **`device.firmware`** (`lib/thinx/device.js:1209`, `:1285`, informational). It verifies the key
    for the body owner, then loads the device by udid without a compare. The envelope path belongs
    to the verified owner, so no cross-owner firmware is served.
 
@@ -49,7 +49,7 @@ findings remain:
 3. **Resolved 2026-10-03 (quick 261003-v9x).** Take the owner from the registration body, verify the key for it, and only then store the OTT.
 4. **Resolved 2026-10-03 (quick 261003-vbg).** Compare `doc.owner` with the topic owner `oid` (`Device.isOwnedBy`) before editing or running
    transformers.
-5. Add the same `Device.isOwnedBy(device, firmware_owner)` compare for consistency.
+5. **Resolved 2026-10-03 (quick 261003-vd4).** Add the same `Device.isOwnedBy(device, firmware_owner)` compare for consistency.
 
 Each change needs a firmware check-in regression spec (ZZ-RouterDeviceAPISpec) before it ships,
 because these paths are what deployed devices call.
@@ -464,3 +464,87 @@ Each claim was re-verified against the tree after the vbg commits (line numbers 
   `this` = the MQTT client: `this.master` is undefined and the master never subscribes `#` (`:808`),
   which keeps `message_callback` dormant. Separately, `data(owner, udid)` builds the KEYS glob
   `"/*" + owner + "/" + udid + "*"` (`:956`), whose leading `*` also matches other prefixes.
+
+## Resolution — item 5 (quick 261003-vd4)
+
+Commits (thinx-staging, not pushed):
+- `ca43af7a` test: failing spec `spec/jasmine/DeviceFirmwareOwnerSpec.js` (RED: 10 specs, 5 failures,
+  all assertion failures)
+- `151d799b` fix: `Device#firmware` in `lib/thinx/device.js` loads the device through `Device#fetchOwned`
+- `561bc65e` test: three `(261003-vd4)` CI cases in `spec/jasmine/ZZ-RouterDeviceAPISpec.js`
+This section is committed with the quick task's docs.
+
+**What changed.** Inside the `apikey.verify` callback, after the s59 `success !== true` guard,
+u86's transfer-redirect owner swap and the existing "Attempt to register device" audit line
+(written to the verified owner's log), the raw CouchDB lookup by udid is replaced by
+`this.fetchOwned(udid, firmware_owner, …)`, the t29 single ownership check. It answers the
+device only when `doc.owner` is exactly `firmware_owner`. A foreign, absent, malformed or
+erroring lookup keeps firmware's existing unknown-device answer byte for byte: the
+`[error] no such device` console line and `callback(false, "no_such_device")`. A malformed or
+missing udid never reaches CouchDB. Everything downstream (the LFE descriptor log,
+`deploy.initWithDevice`, the envelope/MAC lines, `hasUpdateAvailable`, both `nid:` reads, the
+done-`nid:` delete, `latestFirmwarePath` and the forced/OTT/normal branches) is unchanged but
+runs only for the verified owner's own device.
+
+**The key rule (same as check-in after tv5/u86, addpush in v9d and OTT in v9x).** A
+device-originated request may act on udid U only when the presented `Authentication` value is
+exactly a key or key hash in `ak:<doc.owner>`, the store of U's current owner (s59 exact
+constant-time match). firmware verifies `(body owner, key)` first, then `fetchOwned(U, owner)`
+enforces `owner === doc.owner`; together that is "the key verifies for doc.owner". firmware
+neither reads nor writes `lastkey` (no path enforces it; gating on it would refuse a re-keyed
+device until its next registration). The CI-only `TEST_ENV_APIKEY` bypass verifies for any
+owner, but `fetchOwned` still binds U to the body owner, so it never crosses owners here.
+
+Rule consistency: u86 landed a transfer redirect on register and firmware. A key that moved
+with U by a transfer, presented together with the previous owner id listed in that binding,
+verifies as U's current owner and `firmware_owner` becomes the current owner before the
+lookup, so `fetchOwned(U, current owner)` succeeds. The accepted key set is unchanged (the
+moved key lives in `ak:<doc.owner>`); only the accepted body owner id is wider for bound
+transfers. addpush (v9d) and `ott_request` (v9x) use the 4-argument verify and do not
+redirect. vd4 keeps u86's redirect as landed (pinned by DeviceRegisterOwnerSpec 29).
+
+**OTT branch.** firmware() reaches its OTT branch (body `ott`) only for the verified owner's
+own device and calls v9x's entry point `Device#ott_request(req, callback)` with the same
+request object, answering exactly what it answers. v9x's entry point re-verifies the body
+owner with the 4-argument verify, runs `fetchOwned` again and stores exactly `{owner, udid}`.
+v9x handed nothing over to this task. A transferred device presenting its previous owner id
+passes firmware's redirect but gets `OTT_API_KEY_NOT_VALID` from `ott_request` (v9x's
+documented behaviour, unchanged; no known firmware sends a body `ott`).
+
+**Response shape for firmware (read-only check).** The refusal is the existing unknown-device
+answer: `lib/router.deviceapi.js` passes the string to `Util.respond`, which writes the plain
+body `no_such_device` with HTTP 200 (DeviceSpec (07) pins that string). THiNXLib for ESP8266
+(`thinx-firmware-esp8266-pio/lib/THiNX/src/THiNXLib.cpp` and the `-ino` copy) never POSTs
+`/device/firmware`: it takes the `FIRMWARE_UPDATE` `url`/`ott` from the registration response
+and fetches it with `ESPhttpUpdate.update` (a GET). The ESP32 checkout has no THiNXLib
+sources. Callers of POST `/device/firmware` already receive this exact string for an unknown
+udid, so no device-visible shape changes.
+
+**What changes for real users:**
+1. Another owner's udid: a firmware request authenticated for owner B that names a udid owned
+   by A (or anyone but B) now answers `no_such_device`. Before, it was answered from A's
+   device document: update/no-update, a forced or normal binary from B's stale deploy dir if
+   one existed, an OTT attempt. It could also delete A's done `nid:` notification and mkdir
+   A's deploy dir. Realistic sources: a device transferred before u86 that still carries the
+   sender's owner id and key, a cloned config image, scripts.
+2. Malformed or missing udid: the same `no_such_device` as before, without a CouchDB read.
+3. Unchanged: a device's own udid under its own owner and key gets the same envelope and the
+   same answer; u86's transfer redirect keeps working.
+
+**Post-deploy checks (operator, read-only).** On the node running the `thinx_api` task
+(placement floats; node-local `docker logs`, not `docker service logs`), compare the rate of
+`[error] no such device` lines next to `Responding to Firmware request` before and after the
+deploy. A jump marks devices that used to be answered from another owner's document. The
+`Getting LFE descriptor` rate should stay roughly unchanged.
+
+**Residual risk:**
+- firmware still accepts any body owner whose key verifies (by design; the owner is the key's).
+- The MAC fallback inside firmware() is dead code: `mac` is always null, so
+  `envelope.mac || mac` is never `undefined` and the `missing_mac` guard after it can never
+  fire; the normalized value is never used afterwards. Pre-existing, out of scope.
+- TOCTOU of one round trip between the ownership read and the deploy lookup if the device is
+  transferred in that window (the same window t29 accepted).
+- The three ZZ cases do not run in CI (docker-entrypoint deletes ZZ specs); the protection is
+  pinned by DeviceFirmwareOwnerSpec.
+
+All five items are resolved (tv5, v9d, v9x, vbg, vd4); moved to completed.
