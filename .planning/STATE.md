@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T18:41:30.322Z"
+last_updated: "2026-10-03T19:03:58.485Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 5114f3cd93540aa6d077f7a1abfda61a18c834ac
+state_head: 05ebbd85896e723d8d1fb1a33b57ca45ad122636
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-03 — Phase 26 complete, transitioned to Phase 28
+Last activity: 2026-10-03 - Completed quick task 261003-skk: mesh validateSession auth bypass (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -328,6 +328,7 @@ Decided at plan time, not blocking the roadmap:
 | 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./archive/quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
 | 6 | Vue console Dockerfile: run nginx as non-root (Aikido USER root finding) — console 7c6f90c | 2026-09-30 | 056d313d | — |
 | 261003-s59 | CR-01 API-key auth bypass: exact constant-time key/hash match (Util.safeEqual), empty/non-string rejected, device paths fail closed (log_invalid_key), firmware ott guard, router body api_key normalized, login hash compare constant-time. Not pushed — device OTA with wrong/revoked keys stops working once deployed. | 2026-10-03 | 9d567610 | [261003-s59-fix-cr-01-api-key-substring-authenticati](./quick/261003-s59-fix-cr-01-api-key-substring-authenticati/) |
+| 261003-skk | Mesh/validateSession auth bypass: validateSession trusts only router-verified Bearer/API-key identity or the session owner (no unverified owner_id+api_key body); router verifies the key against the body owner; mesh handlers and attachMesh act on the authenticated owner; CSRF on the four mesh write routes (D-21 lifted for mesh). Not pushed. PUT/DELETE /api/v2/mesh with an API key now 401 (use Bearer or v1 POST). | 2026-10-03 | 05ebbd85 | [261003-skk-fix-mesh-validatesession-auth-bypass](./quick/261003-skk-fix-mesh-validatesession-auth-bypass/) |
 
 ## Cross-Project Touchpoints
 
