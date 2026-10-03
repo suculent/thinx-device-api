@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-03T19:35:19.588Z"
+last_updated: "2026-10-03T19:57:24.699Z"
 last_activity: 2026-10-03
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 5ef392e6ef39a8cd9c5734e193835353f504a257
+state_head: c9305716d768d2f005cf8b2d28e6b4df0e4e8e6e
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-03 - Completed quick task 261003-t29: device udid ownership check (not pushed)
+Last activity: 2026-10-03 - Completed quick task 261003-tv5: register MAC fallback owner binding (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -330,6 +330,7 @@ Decided at plan time, not blocking the roadmap:
 | 261003-s59 | CR-01 API-key auth bypass: exact constant-time key/hash match (Util.safeEqual), empty/non-string rejected, device paths fail closed (log_invalid_key), firmware ott guard, router body api_key normalized, login hash compare constant-time. Not pushed — device OTA with wrong/revoked keys stops working once deployed. | 2026-10-03 | 9d567610 | [261003-s59-fix-cr-01-api-key-substring-authenticati](./quick/261003-s59-fix-cr-01-api-key-substring-authenticati/) |
 | 261003-skk | Mesh/validateSession auth bypass: validateSession trusts only router-verified Bearer/API-key identity or the session owner (no unverified owner_id+api_key body); router verifies the key against the body owner; mesh handlers and attachMesh act on the authenticated owner; CSRF on the four mesh write routes (D-21 lifted for mesh). Not pushed. PUT/DELETE /api/v2/mesh with an API key now 401 (use Bearer or v1 POST). | 2026-10-03 | 05ebbd85 | [261003-skk-fix-mesh-validatesession-auth-bypass](./quick/261003-skk-fix-mesh-validatesession-auth-bypass/) |
 | 261003-t29 | Device udid ownership (IDOR): Device#fetchOwned/filterOwned/isOwnedBy and a withOwnedDevice gate on all 10 udid-keyed device routes (owner from authenticated identity only; foreign = unknown = 200 no_such_device); push filtered to owned udids; edit cannot write owner/previous_owner; transfer request requires sender ownership, accept moves only stored udids, migrate_device re-checks owner. Not pushed. | 2026-10-03 | 5ef392e6 | [261003-t29-fix-device-udid-ownership-check](./quick/261003-t29-fix-device-udid-ownership-check/) |
+| 261003-tv5 | /device/register owner binding: Device#resolveRegistration — key owner's own udid checks in; unknown udid (404) kept; foreign/malformed udid gets a fresh uuid; MAC fallback filtered to the key owner's devices (Device.isOwnedBy), else new device for the key owner; MQTT credentials only for the resolved udid. Not pushed. | 2026-10-03 | c9305716 | [261003-tv5-fix-device-register-mac-fallback-owner-b](./quick/261003-tv5-fix-device-register-mac-fallback-owner-b/) |
 
 ## Cross-Project Touchpoints
 
