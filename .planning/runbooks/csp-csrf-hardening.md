@@ -635,9 +635,31 @@ twins (same array registration). The transfer accept/decline GETs are e-mail cap
 | GET | `/api/oauth/google` | `lib/router.google.js:186` | OAuth redirect flow |
 | GET | `/api/oauth/google/callback` | `lib/router.google.js:241` | OAuth redirect flow |
 
-**Deferred by D-21 (Tier 3 resource mutations):** devices, sources, mesh, build and chat. These
-cookie-authenticated resource edits are not guarded in Phase 25 and move to a follow-up requirement;
-the chat rows above are the ones the inventory records. The device-ownership transfer POSTs are not
+#### Mesh routes (quick 261003-skk)
+
+The mesh mutations in `lib/router.mesh.js` take the session-bound CSRF check, which lifts D-21 for
+that file only. Bearer calls and cookieless calls with a router-verified API key stay exempt (D-09);
+the classic console sends `X-XSRF-TOKEN` on its `/api/mesh/create` and `/api/mesh/delete` calls
+through the D-18 `$.ajaxSetup` seam, and Vue calls `/api/v2/mesh` with Bearer. With these rows the
+inventory totals become **42 guarded routes and 32 recorded exclusions**.
+
+| Method | Path | File:line | Source |
+|---|---|---|---|
+| POST | `/api/mesh/create` | `lib/router.mesh.js:105` | quick 261003-skk (D-21 lifted for mesh) |
+| POST | `/api/mesh/delete` | `lib/router.mesh.js:109` | quick 261003-skk (D-21 lifted for mesh) |
+| PUT | `/api/v2/mesh` | `lib/router.mesh.js:83` | quick 261003-skk (D-21 lifted for mesh) |
+| DELETE | `/api/v2/mesh` | `lib/router.mesh.js:87` | quick 261003-skk (D-21 lifted for mesh) |
+
+| Method | Path | File:line | Reason |
+|---|---|---|---|
+| GET | `/api/mesh/list` | `lib/router.mesh.js:96` | GET read |
+| POST | `/api/mesh/list` | `lib/router.mesh.js:101` | read carried as POST |
+| GET | `/api/v2/mesh` | `lib/router.mesh.js:79` | GET read |
+
+**Deferred by D-21 (Tier 3 resource mutations):** devices, sources, build and chat (mesh was lifted
+by quick 261003-skk, above). The device mesh attach/detach routes in `lib/router.device.js` stay
+deferred with the device routes. These cookie-authenticated resource edits are not guarded in Phase 25
+and move to a follow-up requirement; the chat rows above are the ones the inventory records. The device-ownership transfer POSTs are not
 Tier 3: they move devices between owner accounts, which is account state (D-11).
 
 ### Phase 25 Execution Annex
