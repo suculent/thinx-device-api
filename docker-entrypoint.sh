@@ -104,7 +104,8 @@ if [[ ${ENVIRONMENT} == "test" ]]; then
   #
   # One exception is kept on node 0: ZZ-LogPagingCouchSpec.js (phase 26, LOG-03/04
   # paging against real CouchDB; scratch DBs, no bootstrap app). split-tests deletes
-  # every other ZZ spec. `npm run test` is `jasmine || true`, so read the job log.
+  # every other ZZ spec. `npm run test` exits with jasmine's status and is the
+  # last command here, so the container exit code is the suite result (CI checks it).
   npm run split-tests
   npm run test
 else

@@ -15,7 +15,7 @@
     "sonar": "./scripts/99-sonar.sh",
     "snyk": "snyk test",
     "jasmine": "nyc jasmine",
-    "test": "mkdir -p coverage; if [ -n \"$COVERALLS_REPO_TOKEN\" ]; then nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info || true; else jasmine || true; fi",
+    "test": "mkdir -p coverage; if [ -n \"$COVERALLS_REPO_TOKEN\" ]; then nyc --check-coverage=false jasmine; status=$?; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info || true; exit $status; else jasmine; fi",
     "dev": "source ./.env && echo $ENVIRONMENT && nyc jasmine; nyc report --reporter=text-lcov > coverage/lcov.info; coveralls < coverage/lcov.info",
     "metrics-coverage": "node scripts/metrics-coverage.js",
     "logging-audit": "node scripts/logging-quality-audit.js",
@@ -31,7 +31,7 @@
     "postpublish": "git push origin --tags",
     "split-tests": "if [ \"$CIRCLE_NODE_INDEX\" = \"0\" ]; then for f in ./spec/jasmine/ZZ*.js; do [ \"$f\" = ./spec/jasmine/ZZ-LogPagingCouchSpec.js ] || rm -f \"$f\"; done; fi; if [ \"$CIRCLE_NODE_INDEX\" = \"1\" ]; then ls ./spec/jasmine/*.js | grep -v 'ZZ' | xargs rm -f; fi",
     "test:csp": "node --test spec/node/StaticCsp.test.js",
-    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js"
+    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js"
   },
   "dependencies": {
     "@influxdata/influxdb-client": "1.35.0",

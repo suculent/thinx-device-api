@@ -25,7 +25,16 @@ function runTestScript(jasmineExit, withCoverallsToken) {
   fs.mkdirSync(bin);
   stubBin(bin, "jasmine", `exit ${jasmineExit}`);
   // nyc runs its arguments (nyc jasmine) or, for `nyc report`, prints nothing.
-  stubBin(bin, "nyc", 'if [ "$1" = "report" ]; then exit 0; fi; "$@"');
+  // Like the real nyc with .nycrc `check-coverage: true` and coverage below the
+  // threshold, it exits 1 after a passing run unless --check-coverage=false is given.
+  stubBin(bin, "nyc", [
+    'if [ "$1" = "report" ]; then exit 0; fi',
+    'check=1',
+    'if [ "$1" = "--check-coverage=false" ]; then check=0; shift; fi',
+    '"$@"; rc=$?',
+    'if [ $rc -eq 0 ] && [ $check -eq 1 ]; then exit 1; fi',
+    'exit $rc',
+  ].join("\n"));
   stubBin(bin, "coveralls", "cat >/dev/null; exit 0");
   const env = { PATH: `${bin}:/usr/bin:/bin` };
   if (withCoverallsToken) env.COVERALLS_REPO_TOKEN = "stub";
@@ -46,7 +55,7 @@ for (const withToken of [false, true]) {
     assert.strictEqual(runTestScript(2, withToken), 2);
   });
 
-  test(`npm test exits 0 when jasmine passes (${label})`, () => {
+  test(`npm test exits 0 when jasmine passes, even below the coverage threshold (${label})`, () => {
     assert.strictEqual(runTestScript(0, withToken), 0);
   });
 }

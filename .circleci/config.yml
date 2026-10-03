@@ -790,7 +790,15 @@ jobs:
           # where `[[` is not a builtin. The old `if [[ ! $(grep ...) ]]` errored
           # with "sh: |: unknown operand" instead of evaluating, so `exit 1` was
           # unreachable and a failing suite could still report success.
-          if ! grep -q "specs, 0 failures" ./test.log; then
+          # `npm test` exits with jasmine's own status (a failure, or 2 for an
+          # incomplete run such as fit/fdescribe or no specs), and it is the last
+          # command in the entrypoint, so the api container's exit code is the
+          # suite result. The log check stays as a second gate and requires at
+          # least one spec to have run.
+          API_CID=$(docker ps -aq --filter label=com.docker.compose.service=api | head -n 1)
+          API_EXIT=$(docker inspect -f '{{.State.ExitCode}}' "$API_CID" 2>/dev/null || echo missing)
+          echo "api test container exit code: $API_EXIT"
+          if [ "$API_EXIT" != "0" ] || ! grep -Eq "[1-9][0-9]* specs, 0 failures" ./test.log; then
             echo "» TEST failed. Should not deploy this commit."
             grep "Failures:" ./test.log || true
             exit 1
