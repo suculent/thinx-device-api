@@ -9,38 +9,147 @@
   "total_tasks": 14,
   "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "CI: jasmine failures fail the build", "status": "done", "commit": "715b38b9"},
-    {"id": 2, "name": "261003-s59 CR-01 API key exact match", "status": "done", "commit": "9d567610"},
-    {"id": 3, "name": "261003-skk mesh validateSession bypass", "status": "done", "commit": "05ebbd85"},
-    {"id": 4, "name": "261003-t29 device udid ownership", "status": "done", "commit": "5ef392e6"},
-    {"id": 5, "name": "261003-tv5 register MAC fallback owner binding", "status": "done", "commit": "c9305716"},
-    {"id": 6, "name": "261003-u86 transfer carries API key + continuity", "status": "done", "commit": "16bde50a"},
-    {"id": 7, "name": "261003-v05 logs tail + websocket owner gate", "status": "done", "commit": "51c5b100"},
-    {"id": 8, "name": "261003-v9x OTT owner binding", "status": "done", "commit": "6c0ae6b2"},
-    {"id": 9, "name": "Push thinx-staging ddc42dd4..05f9d260", "status": "in_progress", "progress": "pushed 21:25:46Z; CI test #15591 success; api-registry #15592 queued; rollout not yet verified"}
+    {
+      "id": 1,
+      "name": "CI: jasmine failures fail the build",
+      "status": "done",
+      "commit": "715b38b9"
+    },
+    {
+      "id": 2,
+      "name": "261003-s59 CR-01 API key exact match",
+      "status": "done",
+      "commit": "9d567610"
+    },
+    {
+      "id": 3,
+      "name": "261003-skk mesh validateSession bypass",
+      "status": "done",
+      "commit": "05ebbd85"
+    },
+    {
+      "id": 4,
+      "name": "261003-t29 device udid ownership",
+      "status": "done",
+      "commit": "5ef392e6"
+    },
+    {
+      "id": 5,
+      "name": "261003-tv5 register MAC fallback owner binding",
+      "status": "done",
+      "commit": "c9305716"
+    },
+    {
+      "id": 6,
+      "name": "261003-u86 transfer carries API key + continuity",
+      "status": "done",
+      "commit": "16bde50a"
+    },
+    {
+      "id": 7,
+      "name": "261003-v05 logs tail + websocket owner gate",
+      "status": "done",
+      "commit": "51c5b100"
+    },
+    {
+      "id": 8,
+      "name": "261003-v9x OTT owner binding",
+      "status": "done",
+      "commit": "6c0ae6b2"
+    },
+    {
+      "id": 9,
+      "name": "Push thinx-staging ddc42dd4..05f9d260",
+      "status": "done",
+      "progress": "verified 21:38Z: all 8 CI jobs green; thinx_api sha256:127665dd running on micro, restarts=0; logs/tail POST 404"
+    }
   ],
   "remaining_tasks": [
-    {"id": 10, "name": "261003-v9d /device/addpush key check", "status": "not_started"},
-    {"id": 11, "name": "261003-vbg MQTT status owner check (accept via transfer binding)", "status": "not_started"},
-    {"id": 12, "name": "261003-vn3 messenger per-owner websocket", "status": "not_started"},
-    {"id": 13, "name": "261003-w0c MQTT forwardNonNotification crash", "status": "not_started"},
-    {"id": 14, "name": "261003-vd4 firmware owner compare", "status": "not_started"},
-    {"id": 15, "name": "261003-vep builder masked API key", "status": "not_started"},
-    {"id": 16, "name": "261003-w13 API key cleartext exposure", "status": "not_started"}
+    {
+      "id": 10,
+      "name": "261003-v9d /device/addpush key check",
+      "status": "not_started"
+    },
+    {
+      "id": 11,
+      "name": "261003-vbg MQTT status owner check (accept via transfer binding)",
+      "status": "not_started"
+    },
+    {
+      "id": 12,
+      "name": "261003-vn3 messenger per-owner websocket",
+      "status": "not_started"
+    },
+    {
+      "id": 13,
+      "name": "261003-w0c MQTT forwardNonNotification crash",
+      "status": "not_started"
+    },
+    {
+      "id": 14,
+      "name": "261003-vd4 firmware owner compare",
+      "status": "not_started"
+    },
+    {
+      "id": 15,
+      "name": "261003-vep builder masked API key",
+      "status": "not_started"
+    },
+    {
+      "id": 16,
+      "name": "261003-w13 API key cleartext exposure",
+      "status": "not_started"
+    }
   ],
   "blockers": [],
   "async_jobs": [
-    {"manifest": null, "job_id": "circleci thinx-staging 05f9d260", "backend": "circleci", "status": "running", "submit_command": "git push origin thinx-staging", "submitted_at": "2026-10-03T21:25:46Z", "expected_artifacts": ["api-registry image -> Swarmpit autoredeploy of thinx_api"], "verification_command": "curl -s 'https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/tree/thinx-staging?limit=10' | jq -r '.[] | select(.vcs_revision|startswith(\"05f9d260\")) | \"\\(.build_num) \\(.status)\"'; ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service ps thinx_api --no-trunc | head -3'", "resume_command": "verify, then continue the quick-task queue"}
+    {
+      "manifest": null,
+      "job_id": "circleci thinx-staging 05f9d260",
+      "backend": "circleci",
+      "status": "completed-verified",
+      "submit_command": "git push origin thinx-staging",
+      "submitted_at": "2026-10-03T21:25:46Z",
+      "expected_artifacts": [
+        "api-registry image -> Swarmpit autoredeploy of thinx_api"
+      ],
+      "verification_command": "curl -s 'https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/tree/thinx-staging?limit=10' | jq -r '.[] | select(.vcs_revision|startswith(\"05f9d260\")) | \"\\(.build_num) \\(.status)\"'; ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'docker service ps thinx_api --no-trunc | head -3'",
+      "resume_command": "verify, then continue the quick-task queue"
+    }
   ],
   "human_actions_pending": [
-    {"action": "Post-deploy checks: build log streams in classic console; mesh create/delete in classic and Vue; device last-connected advances", "context": "push 05f9d260 changes websocket, CSRF on mesh, device ownership", "blocking": false},
-    {"action": "Decide OTT redemption JSON-vs-binary (fleet-wide OTA resume)", "context": ".planning/todos/pending/2026-10-03-ott-redemption-serves-json-not-binary.md", "blocking": false},
-    {"action": "Say 'push' to deploy the next batch", "context": "operator controls pushes", "blocking": true}
+    {
+      "action": "Post-deploy checks: build log streams in classic console; mesh create/delete in classic and Vue; device last-connected advances",
+      "context": "push 05f9d260 changes websocket, CSRF on mesh, device ownership",
+      "blocking": false
+    },
+    {
+      "action": "Decide OTT redemption JSON-vs-binary (fleet-wide OTA resume)",
+      "context": ".planning/todos/pending/2026-10-03-ott-redemption-serves-json-not-binary.md",
+      "blocking": false
+    },
+    {
+      "action": "Say 'push' to deploy the next batch",
+      "context": "operator controls pushes",
+      "blocking": true
+    }
   ],
   "decisions": [
-    {"decision": "Unsigned commits allowed while GPG is locked; push only thinx-staging when operator says", "rationale": "operator standing exception", "phase": "quick"},
-    {"decision": "Transfer redirect never consumed; MQTT old-owner topic accepted via binding", "rationale": "seamless continuity for EEPROM/compiled-owner builds; operator accepted sender-forgery residual risk", "phase": "quick"},
-    {"decision": "Keep CSRF on mesh writes; Default MQTT key transfers refused", "rationale": "operator choice", "phase": "quick"}
+    {
+      "decision": "Unsigned commits allowed while GPG is locked; push only thinx-staging when operator says",
+      "rationale": "operator standing exception",
+      "phase": "quick"
+    },
+    {
+      "decision": "Transfer redirect never consumed; MQTT old-owner topic accepted via binding",
+      "rationale": "seamless continuity for EEPROM/compiled-owner builds; operator accepted sender-forgery residual risk",
+      "phase": "quick"
+    },
+    {
+      "decision": "Keep CSRF on mesh writes; Default MQTT key transfers refused",
+      "rationale": "operator choice",
+      "phase": "quick"
+    }
   ],
   "uncommitted_files": [
     "?? .planning/quick/261003-v9d-fix-device-addpush-key-check/ (committed with this handoff)",
@@ -52,6 +161,6 @@
     "?? .planning/state.json (pre-existing, left untracked)",
     "?? .claude/ .gsd/ .planning/milestone.lock .planning/phases/23-*iter* thinx-firmware-* (pre-existing, left untracked)"
   ],
-  "next_action": "Verify CI api-registry #15592 and thinx_api rollout for 05f9d260, then re-pin isolation and execute 261003-v9d",
+  "next_action": "Execute 261003-v9d (re-pin isolation first)",
   "context_notes": "Sequential executors on main tree; ZZ specs don't run in CI; ask operator before adding behaviour-changing rules."
 }

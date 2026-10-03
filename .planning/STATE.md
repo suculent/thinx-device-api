@@ -344,13 +344,13 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Resume file:** None
+**Resume file:** `.planning/.continue-here.md` (+ `.planning/HANDOFF.json`)
 
-**Last session:** 2026-10-03T14:40:58.635Z
+**Last session:** 2026-10-03T21:38:00Z
 
-**Stopped at:** Phase 26 complete, ready to plan Phase 28
+**Stopped at:** Session resumed; push 05f9d260 verified deployed (api-registry #15592 green, thinx_api on sha256:127665dd…, restarts=0, `POST /api/user/logs/tail` → 404). Quick-task queue paused before 261003-v9d.
 
-**Next action:** `/gsd-autonomous --from 25` (smart discuss first; Phase 25 has no CONTEXT.md yet)
+**Next action:** execute 261003-v9d (then vbg, vn3, w0c, vd4, vep, w13 — one at a time, re-pin isolation before each)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
