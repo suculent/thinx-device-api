@@ -192,7 +192,7 @@ describe("Devices (JWT)", function () {
         expect(j.response.api_key).to.be.a('string');
         expect(j.response.hash).to.be.a('string');
         created_api_key = j.response.hash;
-        console.log("[spec] saving apikey (D)", j.response.api_key);
+        console.log("[spec] saving apikey (D), hash present:", typeof (j.response.hash) === "string");
         done();
       });
   }, 30000);

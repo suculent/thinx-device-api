@@ -145,7 +145,7 @@ describe("API Key", function () {
       "sample-key-for-revocation",
       (success, array_or_error) => {
         expect(success).to.equal(true);
-        console.log("[spec] APIKey revoking: sample-key-for-revocation from", { array_or_error });
+        console.log("[spec] APIKey revoking: sample-key-for-revocation, keys listed:", Array.isArray(array_or_error) ? array_or_error.length : typeof (array_or_error));
         for (let index in array_or_error) {
           let item = array_or_error[index];
           if (item.alias.indexOf("sample-key-for-revocation") !== -1) {

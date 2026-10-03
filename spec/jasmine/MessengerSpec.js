@@ -92,13 +92,14 @@ describe("Messenger", function () {
     const Globals = require("../../lib/thinx/globals.js");
     const app_config = Globals.app_config();
 
-    console.log(`[spec] [mm] [debug] getting apikey with config ${JSON.stringify(app_config.mqtt)} for ${test_owner}`);
+    console.log(`[spec] [mm] [debug] getting MQTT key for ${test_owner}, mqtt config present: ${typeof (app_config.mqtt) === 'object'}`);
 
     user.mqtt_key(test_owner, (key_success, apikey) => {
 
       // to debug Default MQTT API Key creation: 
 
-      console.log(`[spec] [mm] fetched mqtt key? ${key_success} with apikey ${JSON.stringify(apikey, null, '\t')}`);
+      // Never print the key object or the client options: both carry the MQTT key (quick 261004-22b).
+      console.log(`[spec] [mm] fetched mqtt key? ${key_success}, key type: ${typeof (apikey)}`);
 
       expect(key_success).to.equal(true);
       expect(apikey).to.be.a('object');
@@ -110,7 +111,7 @@ describe("Messenger", function () {
         password: apikey.key
       };
 
-      console.log(`[spec] [mm] setting up client for owner ${test_owner} with options ${JSON.stringify(mqtt_options)}`);
+      console.log(`[spec] [mm] setting up client for owner ${test_owner}, password set: ${typeof (mqtt_options.password) === 'string'}`);
 
       messenger.setupMqttClient(test_owner, mqtt_options, (result) => {
         console.log(`[spec] [mm] [spec] setup mqtt result ${result}`);

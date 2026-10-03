@@ -161,7 +161,7 @@ describe("Device + API (JWT+Key)", function () {
                         expect(j.response.api_key).to.be.a('string');
                         expect(j.response.hash).to.be.a('string');
                         ak = j.response.hash;
-                        console.log("[spec] saving apikey's hash (3) for device testing", j.response.hash);
+                        console.log("[spec] saving apikey's hash (3) for device testing, present:", typeof (j.response.hash) === "string");
                         done();
                     });
             })
