@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 0
 fixed_count: 1
-total_count: 6
-last_updated: 2026-10-03T21:10:46.596Z
+total_count: 7
+last_updated: 2026-10-03T21:23:40.618Z
 ---
 
 # Broken Windows Ledger
@@ -21,6 +21,7 @@ last_updated: 2026-10-03T21:10:46.596Z
 | 4 | quick-261003-u86 | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261003-u86 CI cases (shared/revoked refusals, re-key remedy, continuity after accept III) and TransferSpec (00) not run locally: they need real Redis/CouchDB and run only in CI after the operator's push | open |  | 2026-10-03T20:58:20.142Z |  |
 | 5 | quick-261003-u86 | deviation | lib/thinx/transfer.js |  | Pre-existing: Transfer#decline answers its callback twice for a live transfer (GET/POST decline -> headers already sent, unhandled rejection); the u86 re-key CI case leaves its transfer pending instead of declining it | open |  | 2026-10-03T20:58:20.367Z |  |
 | 6 | quick-261003-v05 | unrun-verify | spec/jasmine/ZZ-LogTailWebSocketSpec.js |  | ZZ-LogTailWebSocketSpec (C1-C6, real session cookie) cannot run locally and is deleted by docker-entrypoint.sh before the CI run; runs only when the ZZ tier is re-enabled | open |  | 2026-10-03T21:10:46.596Z |  |
+| 7 | quick-261003-v9x | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js |  | Five 261003-v9x OTT ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DeviceOttSpec | open |  | 2026-10-03T21:23:40.618Z |  |
 
 ````json
 [
@@ -99,6 +100,19 @@ last_updated: 2026-10-03T21:10:46.596Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T21:10:46.596Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 7,
+    "kind": "unrun-verify",
+    "phase": "quick-261003-v9x",
+    "file": "spec/jasmine/ZZ-RouterDeviceAPISpec.js",
+    "line": null,
+    "description": "Five 261003-v9x OTT ZZ cases (real CouchDB/Redis) are deleted by docker-entrypoint split-tests before CI and cannot run locally; protection is pinned by DeviceOttSpec",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-03T21:23:40.618Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }
