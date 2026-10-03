@@ -12,6 +12,9 @@
  *
  * Plan 25-07 added the remaining D-11 account routes (credentials, GitHub token
  * link, admin mutations, device-ownership transfer POSTs) and their exclusions.
+ * Quick 261003-skk added the lib/router.mesh.js rows: the four mesh mutations are
+ * guarded (D-21 lifted for that file only) and the three mesh list reads are
+ * recorded exclusions.
  * The runbook's "Phase 25 guarded-route inventory" mirrors these tables.
  */
 
@@ -68,7 +71,12 @@ const GUARDED = [
     ["router.transfer.js", "post", "/api/v2/transfer/accept"],
     ["router.transfer.js", "post", "/api/transfer/request"],
     ["router.transfer.js", "post", "/api/transfer/decline"],
-    ["router.transfer.js", "post", "/api/transfer/accept"]
+    ["router.transfer.js", "post", "/api/transfer/accept"],
+    // quick 261003-skk: mesh mutations, D-21 lifted for lib/router.mesh.js only
+    ["router.mesh.js", "post", "/api/mesh/create"],
+    ["router.mesh.js", "post", "/api/mesh/delete"],
+    ["router.mesh.js", "put", "/api/v2/mesh"],
+    ["router.mesh.js", "delete", "/api/v2/mesh"]
 ];
 
 // [file, method, path, reason]
@@ -101,7 +109,11 @@ const NOT_GUARDED = [
     ["router.github.js", "get", "/api/oauth/github", "OAuth redirect flow"],
     ["router.github.js", "get", "/api/oauth/github/callback", "OAuth redirect flow"],
     ["router.google.js", "get", "/api/oauth/google", "OAuth redirect flow"],
-    ["router.google.js", "get", "/api/oauth/google/callback", "OAuth redirect flow"]
+    ["router.google.js", "get", "/api/oauth/google/callback", "OAuth redirect flow"],
+    // quick 261003-skk: mesh list reads (D-21 lifted for lib/router.mesh.js mutations only)
+    ["router.mesh.js", "get", "/api/mesh/list", "GET read"],
+    ["router.mesh.js", "post", "/api/mesh/list", "read carried as POST"],
+    ["router.mesh.js", "get", "/api/v2/mesh", "GET read"]
 ];
 
 const sources = {};
