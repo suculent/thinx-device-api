@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-04T18:38:28.604Z"
+last_updated: "2026-10-04T19:18:03.668Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: "0bea70cc2aa0df935987c096ce1d69e86e42450a"
+state_head: 711f3e5cb2f7ccd8c3325cab34ccf6fdb30d48a2
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-seq: transformer service logs no sensitive data; honest /do results (transformer b28185c, 2.2.0) (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261004-tgg: check-in path crash and hang bugs fixed (markUserBuildGoal, SigFox insert, envs, validateHasUpdateAvailable, no_mac) (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -360,6 +360,7 @@ Decided at plan time, not blocking the roadmap:
 | 261004-rdf | API reaches the transformer service; runDeviceTransformers null-safe | 2026-10-04 | 9d7e4f66 | [261004-rdf-api-reaches-the-transformer-service-and-](./quick/261004-rdf-api-reaches-the-transformer-service-and-/) |
 | 261004-sdv | check-in never logs the registration body or device documents | 2026-10-04 | 043e3bda | [261004-sdv-check-in-never-logs-the-registration-bod](./quick/261004-sdv-check-in-never-logs-the-registration-bod/) |
 | 261004-seq | transformer service logs no sensitive data; honest /do results (transformer b28185c, 2.2.0) | 2026-10-04 | 0bea70cc | [261004-seq-transformer-service-logging-and-honest-r](./quick/261004-seq-transformer-service-logging-and-honest-r/) |
+| 261004-tgg | check-in path crash and hang bugs fixed (markUserBuildGoal, SigFox insert, envs, validateHasUpdateAvailable, no_mac) | 2026-10-04 | 711f3e5c | [261004-tgg-check-in-path-crash-and-hang-bugs](./quick/261004-tgg-check-in-path-crash-and-hang-bugs/) |
 
 ## Cross-Project Touchpoints
 
