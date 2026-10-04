@@ -561,14 +561,22 @@ curl -s -o /dev/null -w '%{http_code}\n' https://rtm.thinx.cloud/api/v2/csrf-tok
 | A6 | Core has no `swarmpit_influx-data` volume (placement was micro-only since 2026-06-11, and `swarmpit.influx-data` is labelled only on micro) | D-14 | A leftover volume on core stays. Check it in Step C via the core alias |
 | A7 | docker/cli `deployServices` semantics at v29.0.0 are unchanged in 29.8.1 | Stack deploy semantics | Low. Post-deploy task-ID assertions catch any deviation |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All six were resolved during planning. Each item names the plan that adopts its recommendation.
 
 1. **Re-measure after rung 1 (D-11).** The SLA clock starts at a registry push, so a meaningful re-measure needs a **new gate push** after rung-1 readiness. Recommendation: rung 1 → readiness → a second evidence commit (recording the failure and rung 1) → measure. Note that if the first push's digest is still pending, rung 1 alone makes autoredeploy fire on its first poll; record that as well.
+   **RESOLVED:** adopted. 28-01 Task 1 writes it into the runbook § Gate procedure (D-11 on FAIL). 28-02 Task 1 and 28-03 Task 1 run it as one rung 1, readiness, then a second evidence commit measured as `p28_gateA2` / `p28_gateB2`, and they record whether the pending digest landed on the first poll.
 2. **Baseline gate on 1.9 before Step A?** Not required by D-08. Recommendation: measure the last pre-window planning push passively and record it in Step 0 evidence. It is free and proves the measurement pipeline.
+   **RESOLVED:** adopted, in stronger form. 28-01 Task 1 pushes the planning commits before the window opens and measures that push exactly like a gate, as gate 0 (`p28_gate0`) on unchanged 1.9.
 3. **`swarmpit/influxdb.conf.bak.20260521200918`.** D-13 names only `influxdb.conf`. Recommendation: delete it too, with a copy in `/root/phase28/`, since nothing references it. Otherwise record it as kept.
+   **RESOLVED:** adopted. 28-02 Task 2 deletes it alongside `influxdb.conf` after the union mount scan finds 0 references. Copies are kept in `/root/phase28` and in the committed snapshot.
 4. **Gluster git repo commit.** Phase 27 made an index-only commit there (author `micro`, unsigned). It is not required by D-17. Recommendation: skip it, because the working tree carries unrelated uncommitted edits. The `.planning` snapshots are the audit trail.
+   **RESOLVED:** adopted. 28-01 Task 2 makes no gluster git commit in this phase; the working file is the truth.
 5. **Lifetime of `/root/phase28` (dump + saved conf)** after the phase. Recommendation: shred at phase close (after Gate B and Step C), as Phase 27 did with its backups. Record the deletion.
+   **RESOLVED:** adopted. 28-04 Task 2 runs `shred -u` on each file in `/root/phase28`, removes the directory and records the removal.
 6. **Out-of-scope follow-ups to record (no action):** the double `swarmpit.db-data` label; autoredeploy labels on `thinx_couchdb`/`thinx_influxdb` (dhi.io 401 every minute; thinx stack, so D-17 excludes it); the stale `swarmpit.influx-data` label on micro.
+   **RESOLVED:** adopted. 28-04 Task 2 records them in the runbook's "Follow-ups (recorded, not fixed)" list, and a 28-04 must-have forbids fixing them in this phase.
 
 ## Environment Availability
 
