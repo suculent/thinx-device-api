@@ -77,7 +77,7 @@ function stubHandler(req, res) {
     req.on("end", () => {
         const raw = Buffer.concat(chunks).toString("utf8");
         let body = null;
-        try { body = JSON.parse(raw); } catch (e) { body = null; }
+        try { body = JSON.parse(raw); } catch (_e) { body = null; }
         stub.requests.push({ method: req.method, url: req.url, headers: req.headers, raw, body });
         switch (stub.mode) {
             case "ok":
@@ -288,7 +288,7 @@ describe("Device transformers (quick 261004-rdf)", function () {
         for (const p of SWAPPED) {
             if (saved[p]) require.cache[p] = saved[p]; else delete require.cache[p];
         }
-        for (const res of stub.held) { try { res.destroy(); } catch (e) { /* closed */ } }
+        for (const res of stub.held) { try { res.destroy(); } catch (_e) { /* closed */ } }
         if (typeof (server.closeAllConnections) === "function") server.closeAllConnections();
         await new Promise((resolve) => server.close(() => resolve()));
     });
@@ -309,7 +309,7 @@ describe("Device transformers (quick 261004-rdf)", function () {
 
     afterEach(() => {
         Device.transformerTimeoutMs = savedTimeout;
-        for (const res of stub.held) { try { res.destroy(); } catch (e) { /* closed */ } }
+        for (const res of stub.held) { try { res.destroy(); } catch (_e) { /* closed */ } }
         stub.held = [];
     });
 

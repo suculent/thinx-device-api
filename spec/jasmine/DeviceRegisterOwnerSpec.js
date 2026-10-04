@@ -780,8 +780,6 @@ describe("DeviceRegisterOwnerSpec (quick 261003-tv5)", function () {
         }, TIMEOUT);
 
         it("19. a device with transformers persists lastkey while the transformer job never carries it", async function () {
-            const appConfig = Globals.app_config();
-            const savedLambda = appConfig.lambda;
             const savedOwner = device.owner;
             const captured = [];
             const capture = http.createServer((req) => {
@@ -794,7 +792,11 @@ describe("DeviceRegisterOwnerSpec (quick 261003-tv5)", function () {
             });
             await new Promise((resolve) => capture.listen(0, "127.0.0.1", resolve));
             try {
-                appConfig.lambda = capture.address().port;
+                // The transformer target is parsed once at load (quick 261004-rdf), so the
+                // request is pointed at the capture server here instead of via app_config.lambda.
+                const port = capture.address().port;
+                const realRequest = http.request.bind(http);
+                spyOn(http, "request").and.callFake((options, cb) => realRequest(Object.assign({}, options, { protocol: "http:", hostname: "127.0.0.1", port: port }), cb));
                 device.owner = {
                     profile: (o, cb) => cb(true, {
                         info: {
@@ -813,7 +815,6 @@ describe("DeviceRegisterOwnerSpec (quick 261003-tv5)", function () {
                 expect(captured[0].indexOf(KEY_B) === -1, "job carries the key").to.equal(true);
                 expect(captured[0].indexOf(HASH_B) === -1, "job carries the key hash").to.equal(true);
             } finally {
-                appConfig.lambda = savedLambda;
                 device.owner = savedOwner;
                 await new Promise((resolve) => capture.close(() => resolve()));
             }
