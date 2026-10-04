@@ -61,7 +61,7 @@ is pending).
 - **Strict one-time redemption** (`GETDEL`): only after the firmware stops retrying the same URL
   after a failure, or the server re-issues a token on retry. Today the token lives ≤1 h after the
   first redemption and is reusable inside that window (v9x).
-- **Plaintext port 7442**: `__DISABLE_HTTPS__` builds fetch the token and the binary over HTTP, so
+- **Plaintext port 7442** — KEEP (operator 2026-10-04, see AGENTS.md "Legacy plaintext device port"): `__DISABLE_HTTPS__` builds fetch the token and the binary over HTTP, so
   both can be sniffed.
 - **Sink-level guard**: `deploy.latestFirmwarePath` sanitizes the owner but not the udid, and
   `Filez.deployPathForDevice` concatenates `<deploy_root>/<owner>/<udid>`. v9x validates every OTT
@@ -86,6 +86,6 @@ fleet-count step under "Fix options" was waived by that decision.
   `Util.respond(res, {md5, filesize, payload})` and always has, so it JSON-serializes the
   envelope. That is a different path, not the fee22323 bug, and no shipping firmware calls it.
 
-Still open (see Follow-ups above): strict one-time redemption, plaintext port 7442, the
+Still open (see Follow-ups above): strict one-time redemption, the
 sink-level udid guard in `latestFirmwarePath`, and THiNXLib's retry loop on
 `HTTP_UPDATE_FAILED`.

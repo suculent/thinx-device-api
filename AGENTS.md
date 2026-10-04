@@ -13,6 +13,14 @@
   - `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
   - Swarm path: `/mnt/gluster/deployment/swarm`
 
+## Legacy plaintext device port — keep 7442
+
+The plaintext HTTP device port **7442** (next to HTTPS 7443) and plain (non-TLS) MQTT are
+**required**: legacy devices that cannot do HTTPS/MQTTS (`__DISABLE_HTTPS__` THiNXLib builds) check
+in, redeem OTT tokens and download firmware over them. Operator decision 2026-10-04. Do not close,
+redirect or TLS-enforce them as a "hardening" fix; any hardening on these paths must keep plaintext
+clients working.
+
 ## Local Verification
 - Build command:
   - `npm run build:test`
