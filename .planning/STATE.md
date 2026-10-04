@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-04T14:45:21.273Z"
+last_updated: "2026-10-04T15:21:08.489Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 345b3babb001cde871fff92add9f9b79c5bd59d2
+state_head: 37a60e8549446d92b3379aa4a88cb82d18f73b7e
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-n5a: build containers never get docker.sock (worker 27fff67) (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261004-n65: builder images never eval thinx.yml (arduino 7841df0, platformio 5cdabaf, nodemcu 711aa42, micropython c2487e6) (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -353,6 +353,7 @@ Decided at plan time, not blocking the roadmap:
 | 261004-m46 | worker never evals repository thinx.yml (T-23-14; worker 192521b) | 2026-10-04 | 08270caf | [261004-m46-worker-never-evals-repository-thinx-yml](./quick/261004-m46-worker-never-evals-repository-thinx-yml/) |
 | 261004-l9f | failed Bearer verification answers 401 | 2026-10-04 | 85a25236 | [261004-l9f-failed-bearer-verification-answers-401](./quick/261004-l9f-failed-bearer-verification-answers-401/) |
 | 261004-n5a | build containers never get docker.sock (worker 27fff67) | 2026-10-04 | 345b3bab | [261004-n5a-build-containers-never-get-docker-sock](./quick/261004-n5a-build-containers-never-get-docker-sock/) |
+| 261004-n65 | builder images never eval thinx.yml (arduino 7841df0, platformio 5cdabaf, nodemcu 711aa42, micropython c2487e6) | 2026-10-04 | 37a60e85 | [261004-n65-builder-images-never-eval-thinx-yml](./quick/261004-n65-builder-images-never-eval-thinx-yml/) |
 
 ## Cross-Project Touchpoints
 

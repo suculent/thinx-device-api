@@ -64,3 +64,42 @@ Re-grep each cmd.sh before you rely on this list.
   `$(touch PWNED)` in a temp dir, assert that no file appears).
 - Separately, consider whether build services need docker.sock at all. Removing that mount
   would contain any future injection inside the build container.
+
+## Resolution
+
+Fixed by quick 261004-n65 on 2026-10-04 (see
+`.planning/quick/261004-n65-builder-images-never-eval-thinx-yml/261004-n65-SUMMARY.md`). The commits
+are in each builder repo and are **not pushed**. The parent gitlinks have not been bumped.
+
+| Repo (branch) | test (RED) | fix |
+|---|---|---|
+| arduino-docker-build (master) | 65d55e6 | 7841df0 |
+| platformio-docker-build (main) | 3cb2c19 | 5cdabaf |
+| nodemcu-docker-build (master) | 78b4fe4 | 711aa42 |
+| micropython-docker-build (master) | e50117b | c2487e6 |
+
+- Each cmd.sh now loads thinx.yml with `thinx_yml_load`, the worker's awk grammar. The awk program is
+  byte-identical in all four images. Each image has a fixed `case` allowlist of the names it reads:
+  - arduino: the 11 listed above;
+  - platformio: 3;
+  - nodemcu: `nodemcu_modules_c nodemcu_modules_lua`;
+  - micropython: `micropython_platform micropython_modules`.
+  `nodemcu_build_float` is not on the list: cmd.sh compares the literal string, never the variable.
+- Values are literal, multi-line and control-character values are rejected, and nothing is printed or
+  exported. micropython's `parse_yaml thinx.yml` print is gone.
+- The `arduino_libs` note above was wrong for the images. Their parse_yaml made list items
+  `name+=("item")`, a bash array, and cmd.sh reads `${arduino_libs}`, its **first** element, so only
+  the first listed library was ever installed. That behaviour is kept and documented.
+- `${name[@]}` readers (nodemcu, micropython_modules) get the list items joined with a space, which
+  expands to the same words.
+- Parity check: old parse_yaml + eval against the new loader, sha256 of each value, on 10 legit
+  layouts. arduino 110/110, platformio 30/30, nodemcu 20/20, micropython 20/20.
+- `tests/thinx-yml-loader.sh` in each repo uses marker payloads and passes under bash 5.2/3.2, gawk,
+  mawk and busybox. CI runs it in arduino (every deploy), platformio (`test-esp8266`) and nodemcu
+  (`test-docker-build`, which does not gate deploy). micropython has no CI test step.
+- Remaining steps:
+  - push each repo; arduino must also go to `esp32` and `esp8266`; platformio publishes `:latest`
+    only from `master`, while the work branch is `main`;
+  - bump the gitlinks in the parent on `thinx-staging`;
+  - run one real build per image.
+- The docker.sock question is handled separately by quick 261004-n5a, in the worker.
