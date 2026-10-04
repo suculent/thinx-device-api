@@ -61,6 +61,9 @@ If the Rollbar token is absent, every such message crashes the API process inste
 
 ## (3) Prerequisites before setting THINX_MQTT_DEVICE_WRITES=1
 
+**Status 2026-10-04 (quick 261004-rdf):** prerequisite 1 is fixed in `lib/thinx/device.js`; MQTT-triggered
+transformers remain hard off until `messenger.js` calls them (see item 1).
+
 **Status 2026-10-04 (quick 261004-25u, commits `d3e196e1`, `71c45c57`):** prerequisites 2, 3 and 4 are
 **resolved**; 1 (transformers, still hard off) and 5 (replies never reach the device) stay **open**. The
 operator decided (2026-10-04) to enable the flag after 25u is deployed, with 1 and 5 left out of
@@ -68,7 +71,20 @@ scope: transformers stay hard off from MQTT (no flag), and MQTT registration rep
 published. The `registration.udid` dereference on a failed registration noted in 5 was already fixed
 by 261003-vep. Post-enable checks: see `.planning/quick/261004-25u-mqtt-device-writes-safe-to-enable/261004-25u-SUMMARY.md`.
 
-1. **OPEN.** **`Device#runDeviceTransformers` with a null `reg`/`callback`** (`lib/thinx/device.js` `runDeviceTransformers` ~:522-722). It must handle the MQTT call shape before transformers can be re-enabled from MQTT:
+1. **RESOLVED in device.js (quick 261004-rdf, commits `3ca451d4`, `9d7e4f66`); MQTT transformers still hard off.**
+   `runDeviceTransformers` is now safe for the MQTT shape `(profile, doc, null, null, null)`: no `reg.status` on
+   null, no undeclared `udid`, nothing written without a result, and a result is patched as `{status}` only
+   after a re-read, skipped as `status_changed` when the stored status is no longer the transformed one. The
+   request goes to `TRANSFORMER_URL` (default `http://transformer:7474`, parsed once; `ENVIRONMENT=test` keeps
+   `localhost:<lambda>`), with `{jobs, device}` as `services/transformer` expects and a 5 s abort. Pinned by
+   `spec/jasmine/DeviceTransformersSpec.js`. **What remains before MQTT may trigger transformers** (a code change in
+   `lib/thinx/messenger.js`, still not a flag): replace the `transformers_disabled` notice in
+   `updateAndTransformDeviceStatus` with `Owner#profile` + `runDeviceTransformers(profile, doc, null, null, null)`
+   *after* a successful status edit, passing the document with the newly written status (the patch compares
+   against it); decide whether every MQTT status message (LWT included) should cost a transformer round trip
+   under the service's 0.05 CPU cap (see the 261004-rdf SUMMARY latency figures); add a MessengerDeviceWrites
+   case for it. Original finding:
+   **`Device#runDeviceTransformers` with a null `reg`/`callback`** (`lib/thinx/device.js` `runDeviceTransformers` ~:522-722). It must handle the MQTT call shape before transformers can be re-enabled from MQTT:
    - no transformers: `update_device_and_respond(device.udid, device, …)` (~:533) writes the document read before `Device#edit` back (stale write-back racing the status edit);
    - a matching transformer reads `reg.status` on null (~:562), and the lambda error path reads `reg.status` too (~:693);
    - the lambda response handler calls `devicelib.get(udid, …)` (~:652) with no `udid` declared in that scope;
