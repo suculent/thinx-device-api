@@ -384,7 +384,7 @@ describe("MessengerOwnershipSpec (quick 261003-vbg)", function () {
       }
       await flush();
       expect(lines.length, "captured lines").to.be.at.most(DROP_LINES_PER_WINDOW);
-      expect(lines.filter((l) => l.indexOf("UDID RegEx and replace failed") !== -1).length).to.equal(0);
+      expect(lines.filter((l) => l.indexOf("udid rejected: not a valid udid") !== -1).length).to.equal(0);
       expect(lines.filter((l) => l.indexOf("document identifier invalid") !== -1).length).to.equal(0);
       expectNoEffects(fx.rec);
     });
