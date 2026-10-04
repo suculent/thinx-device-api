@@ -235,7 +235,9 @@ describe("LOG-01 Database.initDatabase installs _design/paging on both init bran
           gets: 0,
           inserts: [],
           get(_id) { this.gets++; return Promise.reject(couchError(404, "not_found")); },
-          insert(doc, id) { this.inserts.push(id); return Promise.resolve({ ok: true, id: doc._id, rev: "1-a" }); }
+          insert(doc, id) { this.inserts.push(id); return Promise.resolve({ ok: true, id: doc._id, rev: "1-a" }); },
+          indexes: [],
+          createIndex(def) { this.indexes.push(JSON.parse(JSON.stringify(def))); return Promise.resolve({ result: "created", id: "_design/" + def.ddoc, name: def.name }); }
         };
       }
       return dbs[name];
@@ -317,6 +319,33 @@ describe("LOG-01 Database.initDatabase installs _design/paging on both init bran
     expect(handled).to.deep.equal(["managed_logs"]);
     expect(probe.calls).to.deep.equal([]);
     expect(nano.dbs).to.not.have.property("managed_logs");
+  });
+
+  it("WR-03: managed_logs (only) gets the owner/date Mango index for the audit fallback, one info line", async function () {
+    const nano = fakeNano(() => Promise.reject(couchError(412, "file_exists", "the file already exists")));
+    const d = newDatabase(nano);
+    const probe = instrument(d);
+    await Promise.all(NAMES.map((n) => d.initDatabase(n, "")));
+    await Promise.all(probe.pending);
+
+    expect(nano.dbs.managed_logs.indexes).to.deep.equal([require("../../design/index_logs_owner_date.json")]);
+    expect(nano.dbs.managed_builds.indexes).to.deep.equal([]);
+    const lines = console.log.calls.allArgs().map((a) => a.join(" ")).filter((l) => l.indexOf("[audit-index]") !== -1);
+    expect(lines).to.deep.equal(["ℹ️ [info] [audit-index] managed_logs _design/audit-owner-date action=created"]);
+  });
+
+  it("WR-03: an index failure logs one credential-free warning, never rejects, and keeps the paging upsert result", async function () {
+    const nano = fakeNano(() => Promise.reject(couchError(412, "file_exists", "the file already exists")));
+    const logsDb = nano.db.use("managed_logs");
+    logsDb.createIndex = () => Promise.reject(couchError(500, "internal_server_error", "boom http://u:p@couchdb:5984"));
+    const d = newDatabase(nano);
+    const probe = instrument(d);
+    await d.initDatabase("logs", "");
+    const results = await Promise.all(probe.pending);
+
+    expect(results[0].ok).to.equal(true);
+    const lines = console.log.calls.allArgs().map((a) => a.join(" ")).filter((l) => l.indexOf("[audit-index]") !== -1);
+    expect(lines).to.deep.equal(["⚠️ [warning] [audit-index] managed_logs _design/audit-owner-date action=skipped reason=500"]);
   });
 
   it("an upsert failure logs one owner-free warning line and boot continues", async function () {

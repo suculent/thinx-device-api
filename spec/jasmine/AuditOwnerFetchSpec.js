@@ -1,17 +1,21 @@
 /*
  * AuditOwnerFetchSpec.js — LOG-02 (phase 26-01)
  *
- * Drives the REAL map functions from design/paging_logs.json (owner-keyed
- * audit view) and design/design_logs.json (legacy logs_by_owner) over fixture
- * docs through a fake CouchDB view that applies CouchDB collation, descending
+ * Drives the REAL map function from design/paging_logs.json (owner-keyed
+ * audit view) over fixture docs, and an emulated Mango _find for the fallback,
+ * through a fake CouchDB view that applies CouchDB collation, descending
  * order, the [startkey, endkey] range and the limit. Proves that the legacy
  * no-parameter audit call (Audit.fetch):
  *   - queries paging/audit_by_owner_date with exactly the owner-bounded range,
  *   - returns at most 200 of the caller's own entries, newest first,
  *   - never returns a non-string flag (D-15) — a user document with a password
  *     hash, reset key and email in `flags` comes back as ["info"],
- *   - falls back to the legacy view with strict owner equality on not_found
- *     or timeout, and answers exactly once (D-19).
+ *   - falls back (D-19) on not_found, error or timeout to a Mango _find
+ *     bounded by owner on the dedicated owner/date index (WR-03: the legacy
+ *     [date, owner] view cannot be bounded by owner, so it returned the newest
+ *     200 entries of all tenants and usually none of the caller's), with
+ *     strict owner equality, and answers exactly once,
+ *   - answers an error, never a silently partial list, when the fallback fails.
  *
  * Helper-free; lib/thinx/couch is replaced in require.cache and audit.js is
  * required fresh. All owners, hashes and emails are synthetic.
@@ -27,7 +31,7 @@ const path = require('path');
 const COUCH_PATH = require.resolve("../../lib/thinx/couch");
 const AUDIT_PATH = require.resolve("../../lib/thinx/audit");
 const PAGING_LOGS_PATH = path.resolve(__dirname, "../../design/paging_logs.json");
-const LEGACY_LOGS = require("../../design/design_logs.json");
+const OWNER_INDEX = require("../../design/index_logs_owner_date.json");
 
 const OWNER_A = "a".repeat(64);
 const OWNER_B = "b".repeat(64);
@@ -91,12 +95,36 @@ function notFound() {
   return Object.assign(new Error("missing_named_view"), { statusCode: 404, error: "not_found", reason: "missing_named_view" });
 }
 
-// mode: "ok" | "not_found" | "error" | "hang" | "late"
+// Mango _find on the owner/date index: equality on owner, date present, sort
+// descending on [owner, date], limit, field projection.
+function mangoFind(docs, q) {
+  const owner = q.selector.owner;
+  const rows = docs
+    .filter((d) => d.owner === owner && typeof d.date !== "undefined" && d.date !== null)
+    .sort((x, y) => collate([y.owner, y.date], [x.owner, x.date]))
+    .slice(0, q.limit);
+  return {
+    docs: rows.map((d) => {
+      const out = {};
+      for (const f of q.fields) if (Object.prototype.hasOwnProperty.call(d, f)) out[f] = d[f];
+      return out;
+    })
+  };
+}
+
+// mode: "ok" | "not_found" | "error" | "hang" | "late"; findMode: "ok" | "error" | "hang"
 const fake = {
   mode: "ok",
+  findMode: "ok",
   docs: [],
   calls: [],
   release: null,
+  find(q) {
+    fake.calls.push({ design: "_find", view: "audit-owner-date", q: JSON.parse(JSON.stringify(q)) });
+    if (fake.findMode === "error") return Promise.reject(Object.assign(new Error("no_usable_index"), { statusCode: 400, error: "no_usable_index" }));
+    if (fake.findMode === "hang") return new Promise(() => { /* never settles */ });
+    return Promise.resolve(mangoFind(fake.docs, q));
+  },
   view(design, view, q, cb) {
     fake.calls.push({ design: design, view: view, q: JSON.parse(JSON.stringify(q)) });
     let p;
@@ -106,8 +134,6 @@ const fake = {
       else if (fake.mode === "hang") p = new Promise(() => { /* never settles */ });
       else if (fake.mode === "late") p = new Promise((resolve) => { fake.release = () => resolve(query(runView(pagingMap(), fake.docs), q)); });
       else p = Promise.resolve(query(runView(pagingMap(), fake.docs), q));
-    } else if (design === "logs" && view === "logs_by_owner") {
-      p = Promise.resolve(query(runView(LEGACY_LOGS.views.logs_by_owner.map, fake.docs), q));
     } else {
       p = Promise.reject(notFound());
     }
@@ -171,6 +197,7 @@ describe("LOG-02 Audit.fetch on the owner-keyed paging view", function () {
 
   beforeEach(function () {
     fake.mode = "ok";
+    fake.findMode = "ok";
     fake.docs = [];
     fake.calls = [];
     fake.release = null;
@@ -314,7 +341,7 @@ describe("LOG-02 Audit.fetch on the owner-keyed paging view", function () {
       return console.log.calls.allArgs().map((a) => a.join(" ")).filter((l) => l.indexOf("owner-keyed audit view unavailable") !== -1);
     }
 
-    it("not_found serves logs/logs_by_owner once, with strict owner equality, one owner-free warning and a counted fallback", async function () {
+    it("not_found runs one owner-bounded _find on the owner/date index, with strict owner equality, one owner-free warning and a counted fallback", async function () {
       fake.mode = "not_found";
       fallbackFixture();
       const before = Audit.fallbackCount;
@@ -323,8 +350,14 @@ describe("LOG-02 Audit.fetch on the owner-keyed paging view", function () {
       expect(r.body.map((i) => i.message)).to.deep.equal(["mine-2", "mine-1"]);
       r.body.forEach((i) => expect(i.flags).to.deep.equal(["info"]));
       expect(Audit.fallbackCount).to.equal(before + 1);
-      expect(fake.calls.map((c) => c.design + "/" + c.view)).to.deep.equal(["paging/audit_by_owner_date", "logs/logs_by_owner"]);
-      expect(fake.calls[1].q).to.deep.equal({ descending: true, limit: 200 });
+      expect(fake.calls.map((c) => c.design + "/" + c.view)).to.deep.equal(["paging/audit_by_owner_date", "_find/audit-owner-date"]);
+      expect(fake.calls[1].q).to.deep.equal({
+        selector: { owner: "abcde", date: { "$gt": null } },
+        sort: [{ owner: "desc" }, { date: "desc" }],
+        fields: ["owner", "date", "message", "flags"],
+        limit: 200,
+        use_index: [OWNER_INDEX.ddoc, OWNER_INDEX.name]
+      });
       const lines = warningLines();
       expect(lines).to.have.length(1);
       expect(lines[0]).to.contain("(reason=not_found)");
@@ -350,6 +383,50 @@ describe("LOG-02 Audit.fetch on the owner-keyed paging view", function () {
       expect(r.body.map((i) => i.message)).to.deep.equal(["mine-2", "mine-1"]);
       expect(Audit.fallbackCount).to.equal(before + 1);
       expect(warningLines()[0]).to.contain("(reason=timeout)");
+    });
+
+    it("WR-03: the fallback returns the caller's newest 200 even when 300 newer entries belong to other owners, with real flags", async function () {
+      fake.mode = "not_found";
+      fake.docs = [];
+      for (let i = 0; i < 205; i++) fake.docs.push(doc(OWNER_A, i, { message: "A-" + i, flags: ["warning"] }));
+      for (let i = 0; i < 300; i++) fake.docs.push(doc(OWNER_B, 1000 + i, { message: "B-" + i }));
+      const r = await fetchAsync(audit, OWNER_A);
+      expect(r.err).to.equal(false);
+      expect(r.body).to.have.length(200);
+      expect(r.body[0]).to.deep.equal({ date: iso(204), message: "A-204", flags: ["warning"] });
+      expect(r.body[199].message).to.equal("A-5");
+      r.body.forEach((item) => expect(Object.keys(item).sort()).to.deep.equal(["date", "flags", "message"]));
+    });
+
+    it("a failing fallback answers an error once, never a silently partial list, and logs no owner", async function () {
+      fake.mode = "not_found";
+      fake.findMode = "error";
+      fallbackFixture();
+      let count = 0;
+      let answer = null;
+      audit.fetch("abcde", (err, body) => { count++; answer = { err: err, body: body }; });
+      await wait(50);
+      expect(count).to.equal(1);
+      expect(answer.err).to.not.equal(false);
+      expect(answer.body).to.equal(undefined);
+      const lines = console.log.calls.allArgs().map((a) => a.join(" ")).filter((l) => l.indexOf("[audit] owner-bounded fallback failed") !== -1);
+      expect(lines).to.have.length(1);
+      expect(lines[0]).to.contain("(reason=error)");
+      expect(lines[0]).to.not.contain("abcde");
+    });
+
+    it("a fallback that never answers fails after VIEW_TIMEOUT_MS with reason=timeout", async function () {
+      fake.mode = "hang";
+      fake.findMode = "hang";
+      Audit.VIEW_TIMEOUT_MS = 50;
+      fallbackFixture();
+      const t0 = Date.now();
+      const r = await fetchAsync(audit, "abcde");
+      expect(Date.now() - t0).to.be.below(1000);
+      expect(r.err).to.not.equal(false);
+      const lines = console.log.calls.allArgs().map((a) => a.join(" ")).filter((l) => l.indexOf("[audit] owner-bounded fallback failed") !== -1);
+      expect(lines).to.have.length(1);
+      expect(lines[0]).to.contain("(reason=timeout)");
     });
 
     it("a late view answer after the timeout is dropped: the callback fires exactly once", async function () {
