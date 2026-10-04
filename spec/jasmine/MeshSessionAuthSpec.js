@@ -366,9 +366,9 @@ describe("MESH-AUTH (quick 261003-skk)", function () {
             expectNoCalls();
         });
 
-        it("answers 403 for a garbage Bearer token", async function () {
+        it("answers 401 for a garbage Bearer token", async function () {
             const r = await send("POST", "/api/mesh/create", { bearer: "garbage", body: { mesh_id: "skk-forged-mesh" } });
-            expect(r.status).to.equal(403);
+            expect(r.status).to.equal(401);
             expectNoCalls();
         });
     });

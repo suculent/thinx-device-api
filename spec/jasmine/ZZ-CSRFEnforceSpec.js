@@ -203,6 +203,8 @@ describe("ZZ-CSRFEnforceSpec (SEC-CSRF-02/03/05, CSRF_MODE=signed + CSRF_ENFORCE
             .send({}));
         expect(responseOf(res)).to.not.equal("csrf_token_invalid");
         expect(res.status).to.not.equal(403);
+        // A failed Bearer answers an empty 401 (261004-l9f); a body means the token verified and the handler answered.
+        expect(res.text, "Bearer verified and the handler answered").to.not.equal("");
     }, 30000);
 
     it("6. a Bearer call carrying the session cookie keeps the session id, never stores thx_auth, and case 3 still passes (SEC-CSRF-05)", async function () {
