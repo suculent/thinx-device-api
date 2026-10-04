@@ -394,10 +394,12 @@ async function settle() {
 function request(owner, body) {
     return new Promise((resolve) => {
         let done = false;
-        transfer.request(owner, body, (success, response) => {
+        // The answer is opaque since quick 261004-l7q; the transfer id comes as the
+        // in-process third argument (no router forwards it).
+        transfer.request(owner, body, (success, response, transfer_id) => {
             if (done) return;
             done = true;
-            resolve({ success: success, response: response });
+            resolve({ success: success, response: (success === true) ? transfer_id : response });
         });
     });
 }

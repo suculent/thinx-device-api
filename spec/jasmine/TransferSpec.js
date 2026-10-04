@@ -56,11 +56,14 @@ describe("Transfer", function () {
     var owner = envi.oid;
 
     // TODO: Turn this into async
-    transfer.request(owner, body, (t_success, response) => {
+    // The answer is opaque since quick 261004-l7q ("transfer_requested"); the transfer id
+    // comes as the in-process third argument, which no router forwards.
+    transfer.request(owner, body, (t_success, response, t_id) => {
       expect(t_success).to.equal(true);
-      expect(response).to.be.a('string');
+      expect(response).to.equal("transfer_requested");
+      expect(t_id).to.be.a('string');
       const tbody = {
-        transfer_id: response.replace("dt:", ""),
+        transfer_id: t_id,
         udids: [envi.udid]
       };
 
@@ -70,13 +73,14 @@ describe("Transfer", function () {
         expect(d_response).to.be.a('string');
 
         // TODO: Turn this into async
-        transfer.request(owner, body, (b_success, b_response) => {
+        transfer.request(owner, body, (b_success, b_response, b_id) => {
           expect(b_success).to.equal(true);
-          expect(b_response).to.be.a('string'); // transfer_requested      
+          expect(b_response).to.equal("transfer_requested");
+          expect(b_id).to.be.a('string');
 
           // 00-04 Accept
           var transfer_body = {
-            transfer_id: b_response.replace("dt:", ""),
+            transfer_id: b_id,
             udids: [envi.udid]
           };
 

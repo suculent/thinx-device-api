@@ -130,6 +130,29 @@ describe("Transfer (JWT)", function () {
         });
     }
 
+    // The request answer is opaque since 261004-l7q; only the e-mail links carry the transfer
+    // id. Read it from Redis: the pending dt: record whose udids name this device.
+    function pendingTransferId(udid) {
+        const redis = thx.app.redis_client;
+        return new Promise((resolve) => {
+            redis.keys("dt:*", (_err, keys) => {
+                const list = Array.isArray(keys) ? keys : [];
+                let left = list.length;
+                let found = null;
+                if (left === 0) return resolve(null);
+                for (const key of list) {
+                    redis.get(key, (_e, raw) => {
+                        try {
+                            const record = JSON.parse(raw);
+                            if (record && Array.isArray(record.udids) && (record.udids.indexOf(udid) !== -1)) found = key.substring(3);
+                        } catch (_p) { /* not a transfer record */ }
+                        if (--left === 0) resolve(found);
+                    });
+                }
+            });
+        });
+    }
+
     function requestTransfer(udids) {
         return new Promise((resolve) => {
             chai.request(thx.app)
@@ -278,20 +301,14 @@ describe("Transfer (JWT)", function () {
     }, 30000);
 
     // migrate the dynamic owner's own fixture device to cimrman (261003-t29)
-    it("POST /api/transfer/request (jwt, valid)", function (done) {
-        chai.request(thx.app)
-            .post('/api/transfer/request')
-            .set('Authorization', jwt)
-            .send({ to: "cimrman@thinx.cloud", udids: [transfer_udid], mig_sources: false, mig_apikeys: false })
-            .end((_err, res) => {
-                console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string'); 
-                let j = JSON.parse(res.text);
-                transfer_id = j.response;
-                expect(j.success).to.equal(true);
-                done();
-            });
+    it("POST /api/transfer/request (jwt, valid)", async function () {
+        const res = await requestTransfer([transfer_udid]);
+        console.log("🚸 [chai] POST /api/transfer/request (jwt, valid) response: ", res.text);
+        expect(res.status).to.equal(200);
+        // 261004-l7q: the sender's answer does not carry the transfer id.
+        expect(res.text).to.equal('{"success":true,"response":"transfer_requested"}');
+        transfer_id = await pendingTransferId(transfer_udid);
+        expect(transfer_id).to.be.a('string');
     }, 30000);
 
     it("POST /api/transfer/request (jwt, another owner's udid) answers like an unknown udid (261003-t29)", function (done) {
@@ -490,26 +507,42 @@ describe("Transfer (JWT)", function () {
             });
     }, 30000);
 
-    it("POST /api/v2/transfer/accept (jwt, udid outside the transfer) is refused (261003-t29)", function (done) {
+    // 261004-l7q: dynamic is the sender, so its session cannot accept or decline; it gets
+    // the unknown-transfer answer and the transfer stays pending. (The t29 out-of-transfer
+    // udid refusal is pinned locally in DeviceOwnershipSpec.)
+    it("POST /api/v2/transfer/accept (jwt, the sender) answers like an unknown transfer (261004-l7q)", function (done) {
         chai.request(thx.app)
             .post('/api/v2/transfer/accept')
             .set('Authorization', jwt)
-            .send({ udids: [envi.udid], transfer_id: transfer_id, owner: envi.dynamic.owner })
+            .send({ udids: [transfer_udid], transfer_id: transfer_id, owner: envi.oid })
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.equal(NOT_FOUND);
+                expect(res.text).to.equal('{"success":false,"response":"transfer_id_not_found"}');
                 done();
             });
     }, 30000);
 
-    it("POST /api/v2/transfer/accept III (261003-t29)", function (done) {
+    it("POST /api/v2/transfer/decline (jwt, the sender) answers like an unknown transfer (261004-l7q)", async function () {
+        const res = await new Promise((resolve) => {
+            chai.request(thx.app)
+                .post('/api/v2/transfer/decline')
+                .set('Authorization', jwt)
+                .send({ udids: [transfer_udid], transfer_id: transfer_id, owner: envi.oid })
+                .end((_err, r) => resolve(r));
+        });
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal('{"success":true,"response":"decline_complete_no_such_dtid"}');
+        expect(await pendingTransferId(transfer_udid), "transfer still pending").to.equal(transfer_id);
+    }, 30000);
+
+    // The recipient (cimrman) accepts through the e-mail link, which the transfer id alone
+    // authorises.
+    it("GET /api/v2/transfer/accept III (recipient's e-mail link) (261003-t29, 261004-l7q)", function (done) {
         chai.request(thx.app)
-            .post('/api/v2/transfer/accept')
-            .set('Authorization', jwt)
-            .send({ udids: [transfer_udid], transfer_id: transfer_id, owner: envi.dynamic.owner })
+            .get('/api/v2/transfer/accept?transfer_id=' + transfer_id)
             .end((_err, res) => {
                 expect(res.status).to.equal(200);
-                expect(res.text).to.be.a('string');
+                expect(res.text).to.equal('{"success":true,"response":"transfer_completed"}');
                 done();
             });
     }, 30000);

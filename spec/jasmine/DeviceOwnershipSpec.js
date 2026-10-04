@@ -837,9 +837,11 @@ describe("DeviceOwnershipSpec (quick 261003-t29)", function () {
             expect(r.status).to.equal(200);
             const j = JSON.parse(r.text);
             expect(j.success).to.equal(true);
-            expect(j.response).to.be.a("string");
-            expect(j.response.length).to.equal(36);
-            const stored = JSON.parse(redis.store.get("dt:" + j.response));
+            // Opaque answer since quick 261004-l7q: only the e-mail links carry the id.
+            expect(j.response).to.equal("transfer_requested");
+            const ids = dtKeys();
+            expect(ids.length, "stored transfers").to.equal(1);
+            const stored = JSON.parse(redis.store.get(ids[0]));
             expect(stored.udids).to.deep.equal([UDID_A]);
         });
 
