@@ -5,29 +5,29 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
-stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-04T19:18:03.668Z"
+stopped_at: v1.14 audit gaps_found (Phase 28 not started); post-audit fixes committed, ready to plan Phase 28
+last_updated: "2026-10-04T21:00:00.000Z"
 last_activity: 2026-10-04
-last_activity_desc: Phase 26 complete, transitioned to Phase 28
+last_activity_desc: v1.14 milestone audit (gaps_found, 22/25) and post-audit fixes (transformer, sanitka.udid, WR-02, WR-03)
 state_head: 711f3e5cb2f7ccd8c3325cab34ccf6fdb30d48a2
 progress:
   total_phases: 7
-  completed_phases: 12
+  completed_phases: 6
   total_plans: 43
   completed_plans: 43
-  percent: 92
+  percent: 86
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-09-29 (Phase 23 complete; transitioned to Phase 24)
+**Last updated:** 2026-10-04 (v1.14 audit gaps_found: Phases 22–27 complete, Phase 28 not started; post-audit fixes committed)
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 25 Session-Bound CSRF + Console Edge Headers (ready to discuss; `CSRF_SECRET` is provisioned on `thinx_api`).
+- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 28 Swarmpit Upgrade & Trim (ready to discuss; own maintenance window). It is the only open phase: the 2026-10-04 audit (`.planning/v1.14-MILESTONE-AUDIT.md`) found 22/25 requirements satisfied, the 3 gaps are OPS-SWARM-01..03.
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
@@ -37,9 +37,9 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-tgg: check-in path crash and hang bugs fixed (markUserBuildGoal, SigFox insert, envs, validateHasUpdateAvailable, no_mac) (not pushed)
+Last activity: 2026-10-04 - v1.14 milestone audit (gaps_found, 22/25; only Phase 28 open) and post-audit fixes: transformer 2.2.1 isolate recovery, transformer_error allowance dropped, sanitka.udid input no longer logged, WR-02 influx write pause, WR-03 owner-bounded audit fallback
 
-Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
+Progress: [████████████████░░░░] 6/7 v1.14 phases complete (86%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
 
 ## Milestones
 
@@ -256,7 +256,12 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-03: scripts/influx-stats-probe.js is the read-only aggregate evidence tool for 27-05..27-07 (exit 0/1/2, INFLUX-STATS-PROBE OK|FAIL reason=<token>)
 - [Phase 27]: 27-04: F-2 go-B — InfluxDB admin password random in an unmounted secret, UI via SSH tunnel, public route stays behind influx-auth
 - [Phase 27]: 27-04: stats points written at ns precision with strictly increasing per-process timestamps (fix-connector after CI #15564; same-ms identical writes collapsed)
-- [Phase 27]: 27-05: thinx_influxdb spec keeps dhi.io/influxdb:2.9.1 unpinned (swarm records no dhi.io digest); running task digest sha256:3d49ee8ee9a0 verified; pin by digest in 27-07 mirror
+- [Phase 27]: 27-05: thinx_influxdb spec keeps dhi.io/influxdb:2.9.1 unpinned (swarm records no dhi.io digest); running task digest sha256:3d49ee8ee9a0 verified; pin by digest in 27-07 mirror (superseded 2026-10-04: pinned by tag, see below)
+- [2026-10-04]: InfluxDB image is pinned by version tag (`dhi.io/influxdb:2.9.1`), not by `@sha256` digest — operator decision. Stack files and the live spec already match; the 27-05 "pin by digest" follow-up and the audit tech-debt item are closed with no change. Same policy as `thinx_couchdb` on DHI.
+- [2026-10-04]: Check-in without a MAC keeps answering `no_mac` (operator: leave the MAC guard alone); no udid fallback.
+- [2026-10-04]: WR-03 closed — the D-19 audit fallback is a Mango `_find` bounded by owner on `_design/audit-owner-date` (fields owner, date; installed at boot for managed_logs), newest 200 with real flags; on error/timeout it answers `log_fetch_failed` instead of a partial list. `_design/logs` untouched.
+- [2026-10-04]: WR-02 closed — an InfluxDB write answered 401/403/404 pauses writes for 5 min with one log line (no HTTP call while paused), then probes again; a success logs one "writes resumed" line.
+- [2026-10-04]: Transformer contract is 2.2+ only: the API refuses any `/do` answer with an `error` field (the pre-2.2 `transformer_error` allowance and output-text rejection list are gone) and logs the service reason code, e.g. `transformer_rejected (sandbox_memory)`. Transformer 2.2.1 recreates its isolate after a memory-limit disposal.
 - [Phase 27]: 27-05: operator window override at ~22:41 UTC (no production traffic expected) replaced the 22:30 cut-off for this run only
 - [Phase 27]: 27-06: operator answered enable-all; stats enabled on InfluxDB 2 at 2026-10-03T12:05:27Z, stats bucket 90 d with id kept, six empty upgrade buckets dropped, Chronograf retirement approved for 27-07
 - [Phase 27]: 27-07: operator answered delete-all at the D-07 gate despite count_24h_DEVICE_CHECKIN=0 and an unconfirmed dashboard check; the 1.8 data, upgrade copy, Chronograf volume and /root/phase27 on both nodes are deleted, no rollback to 1.8; dashboard/check-in stays an end-of-phase UAT item
@@ -375,9 +380,11 @@ Decided at plan time, not blocking the roadmap:
 
 **Last session:** 2026-10-04
 
-**Stopped at:** Quick-task chain complete and pushed: v9d, vbg, x9z (pentest XALG-3/4 Google login CSRF), vn3, w0c, 0es (console toast escaping), vd4, vep, w13. CORS_ENFORCE=true live on thinx_api since 2026-10-03 ~21:56Z (pentest triage: .planning/quick/261003-x9z-*/PENTEST-TRIAGE.md).
+**Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
-**Next action:** verify CircleCI + rollout of thinx_api and classic console; operator post-deploy checks (classic console build log + actionable toast, Google login in Vue console, device check-ins). Open decisions: OTT redemption JSON-vs-binary todo; transfer redirect scope for OTT/addpush (vd4 SUMMARY); apikey hash-as-credential todo.
+**Earlier:** Quick-task chain complete and pushed: v9d, vbg, x9z (pentest XALG-3/4 Google login CSRF), vn3, w0c, 0es (console toast escaping), vd4, vep, w13. CORS_ENFORCE=true live on thinx_api since 2026-10-03 ~21:56Z (pentest triage: .planning/quick/261003-x9z-*/PENTEST-TRIAGE.md).
+
+**Next action:** push the transformer repo, then `thinx-staging` (submodule pointer 243793c); verify CircleCI and the `thinx_api` + `transformer` rollout (a `[transformer] not applied` line now names the service reason code; `[audit-index] managed_logs _design/audit-owner-date action=created` appears once on the first boot). Then `/gsd-discuss-phase 28`. (Earlier: verify CircleCI + rollout of thinx_api and classic console; operator post-deploy checks (classic console build log + actionable toast, Google login in Vue console, device check-ins). Open decisions: OTT redemption JSON-vs-binary todo; transfer redirect scope for OTT/addpush (vd4 SUMMARY); apikey hash-as-credential todo.)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -390,12 +397,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Phase 25 (Session-Bound CSRF + Console Edge Headers) is next in the autonomous run
-- Before any `restart.sh`/stack deploy, resolve review WR-02: the yml's COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD api mounts would take effect
-- Run the worker todo (polling fix + legacy `cmd` removal + lifecycle) and the Rollbar token split as `/gsd-quick` tasks in one worker deploy window
-- Push the pending `.planning` docs commits on `thinx-staging` when convenient (triggers CircleCI + PR CodeQL)
-- Merge PR #569 when ready, then record the CodeQL main-push row (CI-01 follow-up)
-- Decide whether to sync `thinx-cloud/console` `main` to its `thinx-staging` (trails by the 22-04 fix commit `a5b0246`)
+- Phase 28 (Swarmpit Upgrade & Trim) is the last open v1.14 phase: `/gsd-discuss-phase 28` → plan → execute in its own maintenance window, then re-run `/gsd-audit-milestone` and `/gsd-complete-milestone v1.14`
+- Push the 2026-10-04 post-audit fixes: transformer repo `main` first, then the parent `thinx-staging`; watch CircleCI and the swarm rollout
+- Before any `restart.sh`/stack deploy, resolve review WR-02 (Phase 24): the yml's COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD api mounts would take effect, and live-only mounts (INFLUXDB_TOKEN) would be dropped
+- Phases 24 and 25 have no SECURITY.md; run `/gsd-secure-phase 24` and `/gsd-secure-phase 25` if the closing audit should show them
+- Rollbar server/client token split is still a pending todo (`todos/pending/2026-09-28-split-rollbar-server-and-client-tokens.md`)
 
 ## Performance Metrics
 
