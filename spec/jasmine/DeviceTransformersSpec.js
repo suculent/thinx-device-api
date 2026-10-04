@@ -3,8 +3,8 @@
  * Device#runDeviceTransformers is safe for every call shape.
  *
  * Runs without Redis, CouchDB or the transformer image. An in-process HTTP server stands in for
- * the transformer service (POST /do, the response shape of services/transformer/transformer.js:
- * `{output, error: "transformer_error"}` outside ENVIRONMENT=test). lib/thinx/couch.js and
+ * the transformer service (POST /do, the response shape of services/transformer/transformer.js
+ * 2.2.x: `{output}` on success, `{success: false, error: <reason code>}` on failure). lib/thinx/couch.js and
  * lib/thinx/audit.js are swapped in require.cache for a scriptable fake database and a no-op
  * audit log, and a fresh copy of lib/thinx/device.js is loaded with TRANSFORMER_URL pointing at
  * the stub. Everything is restored in afterAll, so nothing leaks into other spec files.
@@ -22,7 +22,9 @@
  * - Null shapes (reg null; callback null as from MQTT, or a function as from run_transformers):
  *   never throw, never write back the document read before the call; a result is patched as
  *   {status} only, and only when the stored status is still the one that was transformed.
- * - A failure logs exactly one "[transformer] not applied" line; no line carries the owner id,
+ * - The pre-2.2 shape `{output, error: "transformer_error"}` is refused like any other error.
+ * - A failure logs exactly one "[transformer] not applied" line, carrying the service's reason
+ *   code when it is a plain code (lowercase, digits, underscore); no line carries the owner id,
  *   lastkey, transformer code, status values or device fields.
  *
  * Nothing here prints an owner id, key or status; assertions report sentinel names only.
@@ -82,7 +84,16 @@ function stubHandler(req, res) {
         switch (stub.mode) {
             case "ok":
                 res.writeHead(200, { "Content-Type": "application/json" });
-                return res.end(JSON.stringify({ output: stub.output, error: "transformer_error" }));
+                return res.end(JSON.stringify({ output: stub.output }));
+            case "legacy_error_field":
+                res.writeHead(200);
+                return res.end(JSON.stringify({ output: STATUS_OUT, error: "transformer_error" }));
+            case "sandbox_memory":
+                res.writeHead(200);
+                return res.end(JSON.stringify({ success: false, error: "sandbox_memory" }));
+            case "error_not_a_code":
+                res.writeHead(200);
+                return res.end(JSON.stringify({ success: false, error: STATUS_IN + " (" + CODE_SENTINEL + ")" }));
             case "http500":
                 res.writeHead(500);
                 return res.end("internal");
@@ -94,10 +105,10 @@ function stubHandler(req, res) {
                 return res.end(JSON.stringify({ success: false, error: "missing: device" }));
             case "lambda_missing":
                 res.writeHead(200);
-                return res.end(JSON.stringify({ output: "lambda function missing", error: "transformer_error" }));
+                return res.end(JSON.stringify({ success: false, error: "lambda_missing" }));
             case "object_output":
                 res.writeHead(200);
-                return res.end(JSON.stringify({ output: { nested: STATUS_OUT }, error: "transformer_error" }));
+                return res.end(JSON.stringify({ output: { nested: STATUS_OUT } }));
             case "reset":
                 return req.socket.destroy();
             case "hold":
@@ -416,7 +427,10 @@ describe("Device transformers (quick 261004-rdf)", function () {
             ["HTTP 500", "http500", "transformer_http_error"],
             ["a non-JSON body", "not_json", "transformer_bad_response"],
             ["a 'missing: device' rejection", "rejected", "transformer_rejected"],
-            ["'lambda function missing'", "lambda_missing", "transformer_rejected"],
+            ["a lambda_missing rejection", "lambda_missing", "transformer_rejected (lambda_missing)"],
+            ["a sandbox_memory rejection", "sandbox_memory", "transformer_rejected (sandbox_memory)"],
+            ["the pre-2.2 error field next to an output", "legacy_error_field", "transformer_rejected (transformer_error)"],
+            ["an error that is not a reason code", "error_not_a_code", "not applied: transformer_rejected, udid"],
             ["an object output", "object_output", "transformer_output_invalid"]
         ];
 
@@ -542,7 +556,7 @@ describe("Device transformers (quick 261004-rdf)", function () {
             couch.stored.status = "rdf-newer-status";
             const res = stub.held.shift();
             res.writeHead(200);
-            res.end(JSON.stringify({ output: STATUS_OUT, error: "transformer_error" }));
+            res.end(JSON.stringify({ output: STATUS_OUT }));
             await quiesce();
             expect(couch.atomics.length, "writes").to.equal(0);
             expect(couch.stored.status).to.equal("rdf-newer-status");
