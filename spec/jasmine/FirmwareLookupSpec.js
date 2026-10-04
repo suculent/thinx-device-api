@@ -15,6 +15,13 @@
  *   the newest matching file by mtime, and keeps the newest across all extensions
  *   (an older file of a later extension does not displace a newer .bin).
  *
+ * - (Task 3) Deployment#fixAvailableVersion maps envelope versions "<name>:X.Y" and "X.Y"
+ *   to X.Y.0, "<name>:X" and "X" to X.0.0, keeps collapsing 4-/5-part versions into the
+ *   patch number, and answers undefined (no update) for anything else instead of throwing;
+ *   Deployment#hasUpdateAvailable therefore offers thinx-autoflood:1.0 to a device on 0.1.0,
+ *   compares versions only (the firmware name is ignored by operator decision), and never
+ *   throws on a garbage envelope or device version.
+ *
  * Nothing here prints an owner id, key or token.
  */
 
@@ -127,6 +134,120 @@ describe("Firmware lookup (quick 261004-liv)", function () {
             writeAt(path.join(root, "notes.txt"), "not firmware", 0);
             const found = await lookup(deploy, OWNER, UDID);
             expect(found).to.equal(false);
+        });
+    });
+
+    // Task 3: the check-in FIRMWARE_UPDATE decision (Device#update_device_and_respond →
+    // Deployment#hasUpdateAvailable → getAvailableVersion → fixAvailableVersion). Build
+    // envelopes carry "<repo>:<git tag>"; a one-dot tag used to collapse to 0.X.Y and an
+    // unprefixed one used to throw inside check-in.
+    describe("Deployment#fixAvailableVersion", function () {
+
+        const deploy = new Deployment();
+
+        const cases = [
+            ["thinx-autoflood:1.0", "1.0.0"],
+            ["1.0", "1.0.0"],
+            ["thinx-autoflood:1", "1.0.0"],
+            ["1", "1.0.0"],
+            ["thinx-autoflood:1.2.3", "1.2.3"],
+            ["1.2.3", "1.2.3"],
+            ["thinx-autoflood:v1.2", "1.2.0"],
+            ["group:thinx-autoflood:2.1", "2.1.0"],
+            ["thinx-autoflood:1.02", "1.2.0"],
+            // 4- and 5-part versions keep collapsing their tail into the patch number;
+            // longer ones keep their first three parts (unchanged behaviour)
+            ["thinx-autoflood:1.2.3.4", "1.2.7"],
+            ["thinx-autoflood:1.2.3.4.5", "1.2.12"],
+            ["thinx-autoflood:1.2.3.4.5.6", "1.2.3"],
+            [2, "2.0.0"],
+            [1.5, "1.5.0"]
+        ];
+
+        for (const [input, expected] of cases) {
+            it("maps " + JSON.stringify(input) + " to " + expected, function () {
+                expect(deploy.fixAvailableVersion(input)).to.equal(expected);
+            });
+        }
+
+        const garbage = ["", "thinx-autoflood:", "thinx-autoflood:abc", "abc", "1.x", "1.0-beta",
+            "thinx-autoflood:1..2", "thinx-autoflood:1.2.3.4.x", null, undefined, {}, [], true, NaN];
+
+        for (const input of garbage) {
+            const label = Number.isNaN(input) ? "NaN" : String(JSON.stringify(input));
+            it("answers undefined for " + label + " without throwing", function () {
+                let result = "not called";
+                expect(() => { result = deploy.fixAvailableVersion(input); }).to.not.throw();
+                expect(result).to.equal(undefined);
+            });
+        }
+    });
+
+    describe("Deployment#hasUpdateAvailable", function () {
+
+        let root = null;
+        let deploy = null;
+
+        function envelope(version) {
+            fs.writeFileSync(path.join(root, "build.json"), JSON.stringify({
+                platform: "platformio", version: version, env_hash: "cafebabe"
+            }));
+        }
+
+        function device(version) {
+            return { owner: OWNER, udid: UDID, platform: "arduino:esp8266", version: version, auto_update: true };
+        }
+
+        beforeEach(function () {
+            root = fs.mkdtempSync(path.join(os.tmpdir(), "liv-update-"));
+            spyOn(Filez, "deployPathForDevice").and.returnValue(root);
+            deploy = new Deployment();
+        });
+
+        afterEach(function () {
+            fs.rmSync(root, { recursive: true, force: true });
+        });
+
+        it("offers thinx-autoflood:1.0 to a device on 0.1.0 (production af6eac20 case)", function () {
+            envelope("thinx-autoflood:1.0");
+            expect(deploy.hasUpdateAvailable(device("0.1.0"))).to.equal(true);
+        });
+
+        it("offers an unprefixed 1.0 envelope to a device on 0.1.0 without throwing", function () {
+            envelope("1.0");
+            expect(deploy.hasUpdateAvailable(device("0.1.0"))).to.equal(true);
+        });
+
+        it("ignores the firmware name: version compare only (operator decision 2026-10-04)", function () {
+            envelope("some-other-firmware:0.2");
+            expect(deploy.hasUpdateAvailable(device("0.1.0"))).to.equal(true);
+        });
+
+        it("does not offer the same or an older version", function () {
+            envelope("thinx-autoflood:1.0");
+            expect(deploy.hasUpdateAvailable(device("1.0"))).to.equal(false);
+            expect(deploy.hasUpdateAvailable(device("1.0.0"))).to.equal(false);
+            expect(deploy.hasUpdateAvailable(device("2.0.0"))).to.equal(false);
+        });
+
+        it("answers false for a garbage envelope version without throwing", function () {
+            envelope("thinx-autoflood:latest");
+            let result = "not called";
+            expect(() => { result = deploy.hasUpdateAvailable(device("0.1.0")); }).to.not.throw();
+            expect(result).to.equal(false);
+        });
+
+        it("answers false for a garbage device version without throwing", function () {
+            envelope("thinx-autoflood:1.0");
+            for (const version of ["abc", "", 7, "1.x"]) {
+                let result = "not called";
+                expect(() => { result = deploy.hasUpdateAvailable(device(version)); }, "device " + JSON.stringify(version)).to.not.throw();
+                expect(result, "device " + JSON.stringify(version)).to.equal(false);
+            }
+        });
+
+        it("answers false when the device has no build envelope", function () {
+            expect(deploy.hasUpdateAvailable(device("0.1.0"))).to.equal(false);
         });
     });
 });
