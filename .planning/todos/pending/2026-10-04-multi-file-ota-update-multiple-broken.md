@@ -57,3 +57,7 @@ supported". Arduino, PlatformIO and Pine64 builds never use this path.
 - `Device#update_binary` logs `update_binary from path: <deploy>/<owner>/<udid>/firmware.bin`,
   which puts the owner id in the log. The same applies to the `Envelope … not found` line in
   `latestFirmwarePath`, which is in scope for 261004-l8k.
+
+  **Both resolved by 261004-l8k** (2026-10-04): at equal versions an update is offered only when
+  both env_hash values are non-empty strings and differ (cafebabe skip kept), and the
+  `update_binary` / `latestFirmwarePath` lines no longer print the deploy path or owner id.

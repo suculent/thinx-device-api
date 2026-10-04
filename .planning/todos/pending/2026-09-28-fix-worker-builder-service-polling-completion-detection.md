@@ -62,6 +62,38 @@ The bug predates phase 23. `builder` was last changed in `f5d7c05`, and phase 23
   recursive submodule update. Confirm in production with one real build: the log shows
   `Build completed.`, the `thinx_build-*` service is removed, and the worker picks up the next job.
 
+## Part 1 Resolution (2026-10-04, quick 261004-lps)
+
+Fixed in the worker submodule (`main`): `d0b6cc5` (failing spec), `cd2ce61` (fix), `9add6f3`
+(worker CLAUDE.md note). Not pushed yet. The orchestrator pushes worker `main` and then bumps the
+parent gitlink.
+
+- `swarmbuild` moved to `services/worker/builder-lib.sh`, which `builder` sources. The grep
+  tests check exit status directly. A replica count other than `1/1` makes the loop read
+  `docker service ps --no-trunc --format '{{.CurrentState}}|{{.Error}}'`:
+  - `Complete` prints `Build completed.` and returns 0.
+  - `Failed`, `Rejected`, `Shutdown`, `Orphaned` and `Remove` take the failure path.
+  - `Preparing` and the other pre-run states keep polling, because a new service also shows
+    `0/1` while its image is pulled.
+
+  Every terminal path stops the background `docker service logs`, appends the service log to
+  `$LOG_PATH` and removes the `thinx_build-*` service. The outcome is left in
+  `SWARMBUILD_OUTCOME` (complete, failed, gone or timeout). The first poll comes after 5 s, later
+  ones every 10 s, with 180 polls (about 30 min) as the ceiling.
+- The "successful build reported as FAILED" suspicion is answered as follows. For platformio,
+  the old loop timed out, then OUTFILE decided the result, so the build deployed late but
+  passed. The platformio branch now also refuses to deploy when the build service failed, timed
+  out or disappeared.
+- Also done in the same change: platformio environment selection. A multi-env `platformio.ini`
+  with no `platformio: environment:` in thinx.yml now fails before building. With an environment
+  set, OUTFILE is exactly `.pio/build/<env>/firmware.bin`.
+- Tests: `services/worker/builder.test.js` has 25 cases and uses a stub `docker` on PATH. Run
+  with `npm test` it passes 85/85 locally under bash. The 25 builder cases also pass under
+  busybox sh in `dhi.io/node:26-alpine3.24-dev` (25/25). Worker CircleCI runs only `npm install`, so CI
+  does not run these tests.
+- Still to do: confirm in production. Run one real build and check that it logs
+  `Build completed.`, leaves no `thinx_build-*` service behind, and deploys within minutes.
+
 ## Part 2 — Remove the legacy `cmd` shell path (added 2026-09-28)
 
 **Why now:** the user confirmed on 2026-09-28 that no other API or worker deployments exist. The

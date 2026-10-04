@@ -67,6 +67,9 @@ is pending).
   `Filez.deployPathForDevice` concatenates `<deploy_root>/<owner>/<udid>`. v9x validates every OTT
   record before it gets there; making `latestFirmwarePath` refuse a udid that fails `sanitka.udid`
   would protect any future caller too.
+  **Resolved by 261004-l8k** (2026-10-04): `latestFirmwarePath` (and `latestFirmwareEnvelope`,
+  `latestFirmwareArtifact`, `artifact`) refuse a udid that fails `sanitka.udid` before any path
+  is built or file touched.
 
 ## Resolution (quick 261004-22b, 2026-10-04)
 
@@ -86,6 +89,5 @@ fleet-count step under "Fix options" was waived by that decision.
   `Util.respond(res, {md5, filesize, payload})` and always has, so it JSON-serializes the
   envelope. That is a different path, not the fee22323 bug, and no shipping firmware calls it.
 
-Still open (see Follow-ups above): strict one-time redemption, the
-sink-level udid guard in `latestFirmwarePath`, and THiNXLib's retry loop on
-`HTTP_UPDATE_FAILED`.
+Still open (see Follow-ups above): strict one-time redemption and THiNXLib's retry loop on
+`HTTP_UPDATE_FAILED`. (The sink-level udid guard in `latestFirmwarePath` was resolved by 261004-l8k.)

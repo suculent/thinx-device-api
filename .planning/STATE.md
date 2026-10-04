@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-04T13:51:22.048Z"
+last_updated: "2026-10-04T14:08:18.224Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 64ee0d796f66302af869b2d39042a91d61c0ad01
+state_head: 19c8371b7a27a1cd47da64bb1973ffc115b3471f
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-liv: firmware lookup iterates extension values; version parsing fixed; fail-closed serving (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261004-l8k: device document log leaks and deploy-path udid guard; no re-offer without env_hash (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -348,6 +348,7 @@ Decided at plan time, not blocking the roadmap:
 | 261004-25u | MQTT device writes safe to enable (string status, stale-LWT guard, no double registration) | 2026-10-03 | 71c45c57 | [261004-25u-mqtt-device-writes-safe-to-enable](./quick/261004-25u-mqtt-device-writes-safe-to-enable/) |
 | 261004-l7q | transfer accept/decline bound to the recipient; revoke/partial/mig_sources fixes | 2026-10-04 | 656d3d3b | [261004-l7q-transfer-accept-and-decline-bound-to-the](./quick/261004-l7q-transfer-accept-and-decline-bound-to-the/) |
 | 261004-liv | firmware lookup iterates extension values; version parsing fixed; fail-closed serving | 2026-10-04 | 64ee0d79 | [261004-liv-firmware-lookup-loops-iterate-values](./quick/261004-liv-firmware-lookup-loops-iterate-values/) |
+| 261004-l8k | device document log leaks and deploy-path udid guard; no re-offer without env_hash | 2026-10-04 | 19c8371b | [261004-l8k-device-document-and-udid-hardening](./quick/261004-l8k-device-document-and-udid-hardening/) |
 
 ## Cross-Project Touchpoints
 
