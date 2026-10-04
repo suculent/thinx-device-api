@@ -125,6 +125,8 @@ THiNX Platform Library repositories for various IDEs and firmwares:
 
 [NodeJS](https://github.com/suculent/thinx-firmware-js)
 
+[MCP device (NodeJS)](https://github.com/suculent/thinx-mcp-device) - a THiNX device client run as an MCP stdio server: registers, listens on MQTT and downloads (never flashes) OTT firmware updates; it can report itself as an Arduino or PlatformIO device
+
 ## Custom Firmwares
 
 With built-in THiNX Client Library:
