@@ -760,6 +760,25 @@ describe("TransferRecipientSpec (quick 261004-l7q)", function () {
             expect(ownerOf(UDID_2) === OWNER_R, "remaining device moved").to.equal(true);
         });
 
+        it("an accept refused for one device keeps the moved one off the list, so the rest can complete", async function () {
+            const { id } = await offer([UDID_1, UDID_2]);
+            const UDID_S = "a7a00000-0000-4000-8000-000000000052";
+            couch.devices[UDID_S] = deviceDoc(UDID_S, OWNER_A, { lastkey: HASH_2 }); // UDID_2's key became shared
+            const refused = await send("POST", "/api/transfer/accept", { cookie: cookies.r, body: { transfer_id: id, owner: OWNER_R, udids: [UDID_1, UDID_2] } });
+            await settle();
+            expect(refused.text).to.equal('{"success":false,"response":"apikey_shared"}');
+            expect(ownerOf(UDID_1) === OWNER_R, "first device moved").to.equal(true);
+            expect(ownerOf(UDID_2) === OWNER_A, "refused device stays").to.equal(true);
+            expect(storedUdids(id), "remaining udids").to.deep.equal([UDID_2]);
+
+            delete couch.devices[UDID_S]; // the other device is gone: the key is no longer shared
+            const done = await send("GET", "/api/transfer/accept?transfer_id=" + id);
+            await settle();
+            expect(done.text).to.equal('{"success":true,"response":"transfer_completed"}');
+            expect(ownerOf(UDID_2) === OWNER_R, "second device moved").to.equal(true);
+            expect(redis.store.has("dt:" + id), "transfer record removed").to.equal(false);
+        });
+
         it("library decline with a udid list removes exactly those udids and answers once", async function () {
             const { id } = await offer([UDID_1, UDID_2]);
             const transfer = new Transfer(fakeMessenger, redis);

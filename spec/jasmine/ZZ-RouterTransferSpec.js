@@ -264,9 +264,8 @@ describe("Transfer (JWT)", function () {
     }, 30000);
 
     // Re-key remedy: once the other device checks in with its own key, the first one's key
-    // is no longer shared and the transfer can be requested. The request stays pending: the
-    // GET decline link answers twice for a live transfer (pre-existing, see the 261003-u86
-    // leftovers todo), so it is not used here.
+    // is no longer shared and the transfer can be requested. The request stays pending (the
+    // dt: record is harmless in CI's ephemeral Redis; decline answers once since 261004-l7q).
     it("POST /api/transfer/request (jwt) succeeds after the other device is re-keyed (261003-u86)", async function () {
         expect(shared_udids.length).to.equal(2);
         const hash = await createKey("u86-rekey-apikey");
