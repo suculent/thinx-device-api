@@ -6,10 +6,10 @@ current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: planning
 stopped_at: Phase 26 complete, ready to plan Phase 28
-last_updated: "2026-10-04T16:09:00.459Z"
+last_updated: "2026-10-04T16:43:52.279Z"
 last_activity: 2026-10-04
 last_activity_desc: Phase 26 complete, transitioned to Phase 28
-state_head: 5ed6da9b473aa49de5e6ebdf3e065c35612871dd
+state_head: 547f6b8952a5ce55b94c80829fee7badbf28782d
 progress:
   total_phases: 7
   completed_phases: 12
@@ -37,7 +37,7 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 Phase: 28 — Swarmpit Upgrade & Trim
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-04 - Completed quick task 261004-ou3: builder env header target never empty (platformio a8c35d9, arduino 976b5d6) (not pushed)
+Last activity: 2026-10-04 - Completed quick task 261004-on2: micropython builds work end to end; worker --detach and CI npm test (micropython 5c3d792, worker cc4fd28) (not pushed)
 
 Progress: [████████████████████] 15/15 plans ([█████████░] 92% of planned); 3/7 v1.14 phases complete (Phase 22 4/4, Phase 23 5/5, Phase 24 6/6 plans)
 
@@ -356,6 +356,7 @@ Decided at plan time, not blocking the roadmap:
 | 261004-n65 | builder images never eval thinx.yml (arduino 7841df0, platformio 5cdabaf, nodemcu 711aa42, micropython c2487e6) | 2026-10-04 | 37a60e85 | [261004-n65-builder-images-never-eval-thinx-yml](./quick/261004-n65-builder-images-never-eval-thinx-yml/) |
 | 261004-om7 | arduino installs every libs: entry (5d15914); nodemcu deploy requires tests (ca2ab2f) | 2026-10-04 | f9bd4d44 | [261004-om7-arduino-installs-all-libs-and-nodemcu-de](./quick/261004-om7-arduino-installs-all-libs-and-nodemcu-de/) |
 | 261004-ou3 | builder env header target never empty (platformio a8c35d9, arduino 976b5d6) | 2026-10-04 | 5ed6da9b | [261004-ou3-builder-env-header-target-never-empty](./quick/261004-ou3-builder-env-header-target-never-empty/) |
+| 261004-on2 | micropython builds work end to end; worker --detach and CI npm test (micropython 5c3d792, worker cc4fd28) | 2026-10-04 | 547f6b89 | [261004-on2-micropython-builds-work-end-to-end-and-w](./quick/261004-on2-micropython-builds-work-end-to-end-and-w/) |
 
 ## Cross-Project Touchpoints
 
