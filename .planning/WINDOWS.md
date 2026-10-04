@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 10
+open_count: 11
 waived_count: 0
 fixed_count: 1
-total_count: 11
-last_updated: 2026-10-03T22:35:35.762Z
+total_count: 12
+last_updated: 2026-10-04T13:36:30.251Z
 ---
 
 # Broken Windows Ledger
@@ -26,6 +26,7 @@ last_updated: 2026-10-03T22:35:35.762Z
 | 9 | quick-261003-vn3 | unrun-verify | spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js |  | 261003-vn3: ZZ-WebSocketHandshakeRtmSpec, ZZ-WebSocketLifecycleSpec and ZZ-LogTailWebSocketSpec (real server, real session) not run: no local Redis/CouchDB and docker-entrypoint.sh deletes ZZ specs before CI; per-owner routing and registry cleanup are pinned by MessengerOwnerSocketSpec | open |  | 2026-10-03T22:15:16.000Z |  |
 | 10 | quick-261003-vn3 | deviation | services/console/src/html/app/js/controllers/LogviewController.js | 219 | 261003-vn3 made actionable frames deliverable: the classic console renders the device-supplied notification.body as HTML in toastr (no escaping); any accepted publisher on /<owner>/<udid> (incl. a vbg transfer-bound previous owner) can inject HTML into the device owner's console; CSP blocks inline script; operator decision needed | open |  | 2026-10-03T22:15:16.260Z |  |
 | 11 | quick-261003-vd4 | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js | 324 | 261003-vd4 CI cases (own udid reaches the envelope path; another owner's udid and an unknown udid answer no_such_device) not run: ZZ specs need real Redis/CouchDB and docker-entrypoint deletes them before CI; protection pinned locally by DeviceFirmwareOwnerSpec | open |  | 2026-10-03T22:35:35.762Z |  |
+| 12 | quick-261004-l7q | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261004-l7q ZZ edits (opaque request answer + id read from Redis, sender's POST accept/decline answer like an unknown transfer, accept III through the recipient's GET e-mail link) and the TransferSpec (00) third-argument id not run locally: they need real Redis/CouchDB; ZZ specs are deleted before CI; binding pinned locally by TransferRecipientSpec | open |  | 2026-10-04T13:36:30.251Z |  |
 
 ````json
 [
@@ -169,6 +170,19 @@ last_updated: 2026-10-03T22:35:35.762Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-03T22:35:35.762Z",
+    "resolved_at": null,
+    "milestone": "v1.14"
+  },
+  {
+    "id": 12,
+    "kind": "unrun-verify",
+    "phase": "quick-261004-l7q",
+    "file": "spec/jasmine/ZZ-RouterTransferSpec.js",
+    "line": null,
+    "description": "261004-l7q ZZ edits (opaque request answer + id read from Redis, sender's POST accept/decline answer like an unknown transfer, accept III through the recipient's GET e-mail link) and the TransferSpec (00) third-argument id not run locally: they need real Redis/CouchDB; ZZ specs are deleted before CI; binding pinned locally by TransferRecipientSpec",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-04T13:36:30.251Z",
     "resolved_at": null,
     "milestone": "v1.14"
   }

@@ -66,3 +66,10 @@ are what that task deliberately did not cover.
    calls the same callback again with an error, and that path throws on `JSON.parse`. The
    result is an unhandled rejection. The 261003-u86 CI re-key case leaves its transfer
    pending for this reason, instead of declining it. Answer exactly once.
+
+## Status after 261004-l7q
+
+- **Item 6 resolved** (`656d3d3b`): `Transfer#decline` answers exactly once
+  (`storeRemainingKeys` is the only answer). Pinned by TransferRecipientSpec ("the GET decline
+  link works without a session and answers once", "library decline ... answers once").
+- Items 1-5 unchanged.

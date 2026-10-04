@@ -60,3 +60,39 @@ that the sender still owns. So this is a consent problem, not a device-takeover 
   after both the key and the owner have moved.
 - Because accept is still not bound to the recipient, a sender who accepts their own transfer
   now also pushes the device's API key into the recipient's account.
+
+## Resolution (261004-l7q)
+
+Commits: `d4c70ce7` (RED spec), `2d78df6d` (binding), `656d3d3b` (functional bugs). Local pin:
+`spec/jasmine/TransferRecipientSpec.js` (27 specs).
+
+- **Recipient binding: resolved** (`2d78df6d`). POST accept/decline (v1 and v2) pass
+  `Util.ownerFromRequest(req)` (never `body.owner`) to the library; `Transfer.boundToCaller`
+  requires it to equal `sha256(prefix + record.to)`. Any other caller gets exactly the
+  unknown-transfer answer (accept: 200 `transfer_id_not_found`; decline: 200 `success:true`
+  `decline_complete_no_such_dtid`) before anything changes. The GET e-mail links stay
+  capability-only (no session needed).
+- **Capability id no longer returned to the sender: resolved** (`2d78df6d`). Neither console
+  reads the request answer (classic `DevicesController` and Vue `Devices.vue`/`DeviceDetail.vue`
+  branch on `success` only), so `request()` now answers `"transfer_requested"`. The id goes only
+  into the recipient's e-mail (and a third callback argument for in-process callers; no router
+  forwards it). Console and audit lines no longer carry the id either (the sender's audit log
+  used to show it on accept/decline, which would have let the sender use the GET link).
+- **`revoke_devices`: resolved** (`656d3d3b`): appends every match, exact udid comparison. Note:
+  `owner_purge` revokes with a `udids` list, so a purge now removes every device, not just one.
+- **`mig_sources` ReferenceError: resolved** (`656d3d3b`): `finish_migration` takes the fetched
+  document. `move_source` also wrote the recipient's whole `sources` map into the *sender's*
+  document; it now writes only the recipient's (copy semantics, as `request()`'s comment says)
+  and refuses without writing when the source is not in the sender's map. Open question: user
+  documents keep sources under `repos`, not the legacy `sources` field, so `mig_sources` is
+  effectively a no-op for current accounts; it is also read from the *accept* body, which the
+  GET link never sets.
+- **Partial accept/decline: resolved** (`656d3d3b`): handled udids are filtered out of the stored
+  array; partial/complete threshold is now "anything left" (it was `> 1`); a refused accept keeps
+  already-moved devices off the list. Decline answers exactly once.
+- **`exit_on_transfer`: NOT fixed (out of scope).** Still inverted, racy (read before the
+  callbacks run) and keyed by array index (`dtr:0`, `dtr:1`, also in `store_pending_transfer`).
+  Tracked as item 3 of `2026-09-29-resolve-legacy-fixmes-owner-transfer.md`. This todo stays in
+  pending for that item only.
+- Unchanged by design: POST decline uses `body.udid` (one device) and declines everything when it
+  is absent, even if `body.udids` lists devices (the route requires `udids` but ignores it).
