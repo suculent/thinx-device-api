@@ -333,7 +333,24 @@ Plans:
   3. With `swarmpit_agent` removed, a third test push still redeploys within 5 minutes.
   4. `swarmpit_db` is untouched: still couchdb 2.3.0, with the same volume and linked registry credentials. Each step can be rolled back from a stack snapshot taken before it.
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 28-01-PLAN.md — Engine gate, runbook, OPS-SWARM-03 descope (D-12), pre-window push measured as gate 0 on unchanged 1.9; Step 0 drift check, baselines, swarmpit_db dump, rung 1 staged
+
+**Wave 2** *(blocked on 28-01)*
+
+- [ ] 28-02-PLAN.md — Step A on 1.9: stats/`swarmpit_influxdb` removed via stack file + stack deploy, Gate A push ≤ 5 min; `swarmpit/influxdb.conf` deleted after mount scan (D-13)
+
+**Wave 3** *(blocked on 28-02)*
+
+- [ ] 28-03-PLAN.md — Step B: `swarmpit/swarmpit:1.10` by tag with healthcheck override, swarmpit_db/agent untouched, Gate B push ≤ 5 min, 10-min stability hold
+
+**Wave 4** *(blocked on 28-03)*
+
+- [ ] 28-04-PLAN.md — `swarmpit_influx-data` removed after the last gate (D-14, one-way), end state verified, recovery docs updated, dump shredded
 **Notes**: Runs last, in its own maintenance window, never combined with a code deploy, and away from the ~06:45 UTC unattended-upgrade window. Check the Docker Engine version on `micro` and `core` first. Change one component per step, each gated by a push-to-redeploy test. Stage rung-1 recovery (`docker service update --force swarmpit_app`, per the `swarm-autopull-recovery` skill) before starting.
 **Research**: Needed at planning: what changes from 1.9 to 1.10 (especially stats configuration), where the stack file lives on `micro`, and how the app behaves without the agent.
 
@@ -353,7 +370,7 @@ Plans:
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete    | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete    | 2026-10-03 |
-| 28. Swarmpit Upgrade & Trim | v1.14 | 0/TBD | Not started | - |
+| 28. Swarmpit Upgrade & Trim | v1.14 | 0/4 | Planned | - |
 
 ---
 *v1.14 Backlog & Hardening Sweep roadmap created 2026-09-25: 25 requirements across 7 phases (22–28). Next: `/gsd:discuss-phase 22`.*
