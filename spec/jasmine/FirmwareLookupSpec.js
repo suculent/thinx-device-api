@@ -22,6 +22,15 @@
  *   compares versions only (the firmware name is ignored by operator decision), and never
  *   throws on a garbage envelope or device version.
  *
+ * - (Task 3 deviation) now that the lookup finds files, OTT redemption reaches
+ *   Device#updateFromPath for every platform. It fails closed instead of throwing: the
+ *   multi-file branch (nodemcu/micropython/mongoose/nodejs → update_multiple, which reads a
+ *   descriptor that does not exist) and an unreadable envelope answer callback(false) once,
+ *   an unsupported platform answers instead of never calling back; and
+ *   Deployment#supportedExtensions calls back exactly once even when the callback throws
+ *   (it used to re-invoke it with [] from its .catch, and the second throw escaped as an
+ *   unhandled rejection).
+ *
  * Nothing here prints an owner id, key or token.
  */
 
@@ -38,6 +47,7 @@ const sha256 = require("sha256");
 const Plugins = require("../../lib/thinx/plugins");
 const Deployment = require("../../lib/thinx/deployment");
 const Filez = require("../../lib/thinx/files");
+const Device = require("../../lib/thinx/device");
 
 const OWNER = sha256("liv-owner@example.com");
 const UDID = "d1700000-0000-4000-8000-0000000000d1";
@@ -181,6 +191,104 @@ describe("Firmware lookup (quick 261004-liv)", function () {
                 expect(result).to.equal(undefined);
             });
         }
+    });
+
+    describe("Device#updateFromPath fails closed", function () {
+
+        let root = null;
+
+        // updateFromPath only needs its two helpers; no Redis or CouchDB is touched.
+        const ctx = {
+            update_binary: Device.prototype.update_binary,
+            update_multiple: Device.prototype.update_multiple
+        };
+
+        function serve(file) {
+            return new Promise((resolve) => {
+                const calls = [];
+                let threw = null;
+                try {
+                    Device.prototype.updateFromPath.call(ctx, file, null, (...args) => calls.push(args));
+                } catch (e) {
+                    threw = e;
+                }
+                setTimeout(() => resolve({ calls, threw }), 50);
+            });
+        }
+
+        function envelope(platform) {
+            fs.writeFileSync(path.join(root, "build.json"), JSON.stringify({ platform: platform, version: "x:1.0" }));
+        }
+
+        beforeEach(function () {
+            root = fs.mkdtempSync(path.join(os.tmpdir(), "liv-serve-"));
+        });
+
+        afterEach(function () {
+            fs.rmSync(root, { recursive: true, force: true });
+        });
+
+        it("serves firmware.bin for platformio (unchanged)", async function () {
+            envelope("platformio");
+            fs.writeFileSync(path.join(root, "firmware.bin"), Buffer.alloc(4096, 7));
+            const { calls, threw } = await serve(path.join(root, "firmware.bin"));
+            expect(threw).to.equal(null);
+            expect(calls.length, "callbacks").to.equal(1);
+            expect(calls[0][0]).to.equal(true);
+            expect(calls[0][1].filesize).to.equal(4096);
+        });
+
+        for (const platform of ["nodemcu", "micropython", "mongoose", "nodejs"]) {
+            it("answers false once for multi-file platform " + platform, async function () {
+                envelope(platform);
+                fs.writeFileSync(path.join(root, "init.lua"), "print(1)");
+                const { calls, threw } = await serve(path.join(root, "init.lua"));
+                expect(threw, "thrown").to.equal(null);
+                expect(calls.length, "callbacks").to.equal(1);
+                expect(calls[0][0]).to.equal(false);
+            });
+        }
+
+        it("answers false for an unsupported platform instead of never calling back", async function () {
+            envelope("sigfox");
+            fs.writeFileSync(path.join(root, "firmware.bin"), Buffer.alloc(4096, 7));
+            const { calls, threw } = await serve(path.join(root, "firmware.bin"));
+            expect(threw, "thrown").to.equal(null);
+            expect(calls.length, "callbacks").to.equal(1);
+            expect(calls[0][0]).to.equal(false);
+        });
+
+        it("answers false for an unreadable envelope", async function () {
+            fs.writeFileSync(path.join(root, "build.json"), "not json");
+            fs.writeFileSync(path.join(root, "firmware.bin"), Buffer.alloc(4096, 7));
+            const { calls, threw } = await serve(path.join(root, "firmware.bin"));
+            expect(threw, "thrown").to.equal(null);
+            expect(calls.length, "callbacks").to.equal(1);
+            expect(calls[0][0]).to.equal(false);
+        });
+    });
+
+    describe("Deployment#supportedExtensions", function () {
+
+        it("calls back exactly once, even when the callback throws", async function () {
+            const deploy = new Deployment();
+            const rejections = [];
+            const recorder = (reason) => rejections.push(reason);
+            process.on("unhandledRejection", recorder);
+            try {
+                const seen = [];
+                deploy.supportedExtensions((extensions) => {
+                    seen.push(extensions);
+                    throw new Error("callback failure");
+                });
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                expect(seen.length, "callbacks").to.equal(1);
+                expect(seen[0]).to.include("*.bin");
+                expect(rejections.length, "unhandled rejections").to.equal(0);
+            } finally {
+                process.removeListener("unhandledRejection", recorder);
+            }
+        });
     });
 
     describe("Deployment#hasUpdateAvailable", function () {
