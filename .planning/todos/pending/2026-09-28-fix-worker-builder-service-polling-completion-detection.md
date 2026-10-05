@@ -9,6 +9,10 @@ files:
   - services/worker/test.js
   - lib/thinx/builder.js:222,275
   - spec/jasmine/BuilderRemoteJobSpec.js
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

@@ -10,6 +10,10 @@ files:
   - lib/thinx/transfer.js:133 (migrate_device reads an undefined `device`)
   - lib/thinx/transfer.js:108,669 (partial accept/decline delete array entries by udid key)
   - lib/thinx/transfer.js:250-261,354 (exit_on_transfer inversion)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

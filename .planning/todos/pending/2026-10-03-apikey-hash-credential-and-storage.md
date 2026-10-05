@@ -10,6 +10,10 @@ files:
   - services/console/vue/src/store/apikeys.js (hidden key header, sample key)
   - services/worker/builder (thinx_build.json and ./* zips)
   - lib/router.auth.js checkMqttKeyAndLogin (unbounded retry)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 Found during quick 261003-w13 (console key list carries no cleartext key). Each item was re-checked

@@ -14,6 +14,10 @@ files:
   - services/worker/class.js:1 (reads ROLLBAR_TOKEN, never set)
   - services/worker/worker.js:11
   - services/transformer/app.js, Dockerfile, .env.dist, README.md
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

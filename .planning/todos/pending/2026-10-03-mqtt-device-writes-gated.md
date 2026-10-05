@@ -6,6 +6,10 @@ severity: medium
 files:
   - lib/thinx/messenger.js respondToMqttMessage / updateAndTransformDeviceStatus
   - lib/thinx/device.js runDeviceTransformers
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Context

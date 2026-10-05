@@ -8,6 +8,10 @@ files:
   - thinx-core.js upgrade handler duplicate-path guard (socketMap keyed by path)
   - lib/router.build.js existing_sockets
   - services/console/src/html/app/js/controllers/LogviewController.js:214-260 (actionable toast)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

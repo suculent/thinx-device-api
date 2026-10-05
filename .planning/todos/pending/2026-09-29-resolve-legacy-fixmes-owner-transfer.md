@@ -7,6 +7,10 @@ files:
   - lib/thinx/owner.js:266 (avatar_path ignores development-mode override)
   - lib/thinx/owner.js:901 (create logs the owner username hash)
   - lib/thinx/transfer.js:338 (request() evaluates result before exit_on_transfer callbacks return)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

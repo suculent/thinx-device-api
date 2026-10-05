@@ -10,6 +10,10 @@ files:
   - builders/nodemcu-docker-build/cmd.sh:5 (parse_yaml), :53 (eval)
   - builders/micropython-docker-build/cmd.sh:17 (prints the parse), :18 (eval)
   - services/worker/builder-lib.sh (thinx_yml_load: the worker's non-evaluating loader to port)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem

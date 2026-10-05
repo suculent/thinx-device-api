@@ -9,6 +9,10 @@ files:
   - lib/thinx/transfer.js (decline answers its callback twice)
   - lib/thinx/device.js (update_device logs the whole document on a failed write)
   - thinx-firmware-esp8266-ino / thinx-firmware-esp8266-pio THiNXLib.cpp (owner persistence)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Context

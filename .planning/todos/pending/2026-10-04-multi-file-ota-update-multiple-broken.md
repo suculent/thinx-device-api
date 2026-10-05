@@ -8,6 +8,10 @@ files:
   - lib/thinx/device.js:113-170 (updateFromPath, multi-file branch; fails closed since 261004-liv)
   - lib/thinx/device.js:172-222 (update_multiple)
   - lib/router.deviceapi.js:15-37 (GET /device/firmware?ott= serves only a binary)
+
+audit_acknowledged:
+  milestone: v1.14
+  at: 2026-10-05
 ---
 
 ## Problem
