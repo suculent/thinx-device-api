@@ -324,6 +324,68 @@ Plan 28-04, only after Gate B has passed.
 
 ---
 
+## Phase 28 end state
+
+Recorded 2026-10-05 12:26–12:28 UTC (Annex rows "D-14", "end state", "shred").
+
+**Services and versions.**
+
+| Service | State |
+|---|---|
+| `swarmpit_app` | `swarmpit/swarmpit:1.10` by tag (spec digest `15c044a82fed`, `/version` `1.10-SNAPSHOT`), statistics false, API pins 1.44 kept, stack-file healthcheck with a 300 s start period, on micro |
+| `swarmpit_db` | `couchdb:2.3.0` (`ee75c9a737e7`), task `isp4hjomiuzg` on core, unchanged from Step 0 to the end, no migration, all 7 documents equal to the D-07 dump at Step B |
+| `swarmpit_agent` | `swarmpit/agent:latest` (`1306e2a2f538`), global, tasks unchanged from Step 0 (D-04: no release after 2.2) |
+| `swarmpit_influxdb` | removed in Step A; its config files removed under D-13; its volume removed on micro under D-14 |
+
+The stack file `/mnt/gluster/deployment/swarm/swarmpit.yml` is compose 3.8 and equals
+`swarm-configs/swarmpit-stack.B.post.yml`.
+
+**Gate deltas** (CircleCI push_end → `thinx_api` task Running, SLA 300 s):
+
+| Gate | Swarmpit | Delta |
+|---|---|---|
+| 0 | 1.9 with stats (unchanged) | 32 s |
+| A | 1.9, stats stack removed | 31 s |
+| B | 1.10 | 50 s |
+
+No re-measure was needed: rung 1 (D-11) never ran.
+
+**Rollback sources that remain.**
+
+- Gluster backups next to the stack file: `swarmpit.yml.bak.20261005110213.p28-A-pre` and
+  `swarmpit.yml.bak.20261005112754.p28-B-pre`.
+- Committed snapshots in `.planning/runbooks/swarm-configs/`: `swarmpit-stack.{A,B}.{pre,post}.yml`
+  and the two `swarmpit-influxdb*.A.pre.conf` copies.
+- Step B rollback (back to 1.9) is unchanged.
+- A Step A rollback now starts an **empty** InfluxDB: `swarmpit_influx-data` is gone on micro, so
+  the old stats history cannot come back. Restore the conf files from the committed copies first
+  (the `/root/phase28` copies were shredded).
+- The D-07 swarmpit_db dump was shredded at close. swarmpit_db itself was never written by Phase 28.
+
+**Follow-ups (recorded, not fixed)**
+
+- **Core `swarmpit_influx-data` (D-14, open).** Core also holds a `swarmpit_influx-data` volume
+  (research A6 assumed none). The operator holds its removal: `p28_d14_core` is pending-operator,
+  with the exact command in the Annex row "D-14". Record its CreatedAt and size before removing it.
+- **Double `swarmpit.db-data` label (Pitfall 4).** Both nodes are labelled `swarmpit.db-data=true`,
+  and micro holds a stale 2022 `swarmpit_db-data`. Any swarmpit_db reschedule from core to micro
+  swaps volumes and loses the current Swarmpit users, registry link and settings.
+- **Stale `swarmpit.influx-data` label.** Micro still carries `swarmpit.influx-data=true`, which
+  nothing uses now.
+- **dhi.io autoredeploy noise.** `swarmpit.service.deployment.autoredeploy=true` on `thinx_couchdb`
+  and `thinx_influxdb` makes Swarmpit log an `autoredeploy failed` 401 every minute for each (dhi.io
+  is not linked in Swarmpit). This is the thinx stack, out of D-17 scope.
+- **Gluster git HEAD.** The swarm directory's git HEAD is stale against the working `swarmpit.yml`;
+  no gluster git commit was made in this phase.
+- **docker-ce 29.8.2** is pending on micro (not auto-upgraded; the engine is still 29.8.1).
+- **`swarmpit/agent:latest`** can move on a future deploy that uses the default
+  `--resolve-image always`. Keep `--resolve-image changed`, or pin the agent digest deliberately.
+- **Closed:** the Phase 27 "Swarmpit `influxdb` DNS" follow-up
+  (`.planning/runbooks/influxdb2-upgrade.md` § Phase 28 follow-ups) is resolved by Step A:
+  `swarmpit_app` no longer has `SWARMPIT_INFLUXDB`, so the bare `influxdb` name is never resolved.
+
+---
+
 ## Rollback
 
 **Step A.**
@@ -365,3 +427,4 @@ All rows are aggregates. Times are UTC.
 | step B stability | 2026-10-05 11:38–11:39 | **Hold (Pitfall 1):** read at 11:38:38Z, `p28_B_stable_min=10` since the Step B deploy (no rung 1 ran). swarmpit_app task still `e3qc53lt51jg` (= `p28_app_taskB`), health `healthy`, FailingStreak 0, container RestartCount 0, container up since 11:28:33Z; the start period ended 11:33:33Z and the five checks after it (11:34:15, 11:35:16, 11:36:16, 11:37:17, 11:38:17, 60 s apart) all exited 0. `docker service ps swarmpit_app` lists no task created after the deploy other than `e3qc53lt51jg` (the others are `nn7ssiwqmmmo`, shut down by the deploy, and the older 1.9 history). **D-04:** Agent unchanged in Step B: no swarmpit/agent release after 2.2; upstream 1.10 compose uses agent:latest, which production already runs at the Step 0 digest. Docker Hub tags read at 11:27 UTC: `latest`, `2.2` (2020-04-28), `2.1`, `2.0`; `latest` digest `1306e2a2f538` = the live swarmpit_agent spec digest = `p28_agent_digest`; swarmpit_agent tasks `bju4mnwpbuz3+tcrkflv13cge` (= Step 0). swarmpit_db `isp4hjomiuzg` on core (= Step 0). **UI and noise:** `https://swarmpit.thinx.cloud/` 200. `docker service logs swarmpit_app --since <gate B push_end>` up to 11:38:46Z, counts only: `autoredeploy fired` naming thinx_api 1; `autoredeploy failed` 4 (2 thinx_couchdb + 2 thinx_influxdb, the pre-existing dhi.io 401 noise, a follow-up for Step C docs, not a signal); ERROR lines 4, all of them `autoredeploy failed` lines (0 other ERROR lines). The operator tasks-UI check (live CPU/memory from swarmpit_agent; timeseries "Statistics disabled") is left for end-of-phase UAT. |
 | D-14 | 2026-10-05 12:25–12:27 | Started 12:25 UTC (outside 05:15–10:00, D-16), after `p28_stepB` PASS and `p28_B_stable_min` 10 (D-14 after the last gate), no per-step approval (D-15). Precondition: `swarmpit_influxdb` absent on the manager (`influx_svc=0`). **Reference scan (micro, 12:26:07Z):** containers using the volume 0 (`docker ps -aq --filter volume=swarmpit_influx-data`); service specs scanned 21 (union of 3× `docker service ls -q` and `docker stack services <stack> -q`), mount Sources equal to `swarmpit_influx-data` 0 (this scan is cluster-wide, so it also covers services placed on core). **Record before removal (micro):** name `swarmpit_influx-data`, node micro, exists 1, driver local, label `com.docker.stack.namespace=swarmpit`, CreatedAt 2022-02-11T14:31:15Z, `du -sh` of the mountpoint 130M (132 files; 117M at Step 0, before InfluxDB's shutdown flush in Step A). `swarmpit_db-data` on micro: count 1 (CreatedAt 2022-02-07, the stale copy from Pitfall 4, kept). **Removal (micro, 12:26:19Z):** `docker volume rm swarmpit_influx-data` by exact name, exit 0; no prune, no pattern. After: `influx_vol=0`, `db_vol=1`. `p28_d14_removed=micro:130M`. **Core:** 28-02 saw a `swarmpit_influx-data` volume on core as well (research A6 assumed none). Its name, size and CreatedAt were not read in 28-04: reaching core needs `CORE_SSH`, a host outside the literal manager ssh form, and the operator chose to hold that for a human run. Recorded as the token `p28_d14_core=pending-operator` with the command below. `swarmpit_db-data` on core is in use by the running swarmpit_db task (`isp4hjomiuzg` on core mounts `volume:swarmpit_db-data`), so it exists there; it is not touched. Operator command for core (one ssh host per call, exact name, nothing else): `CORE_SSH 'docker ps -aq --filter volume=swarmpit_influx-data \| wc -l; docker volume inspect swarmpit_influx-data --format "{{.CreatedAt}} {{.Mountpoint}}"; du -sh "$(docker volume inspect swarmpit_influx-data --format "{{.Mountpoint}}")"; docker volume rm swarmpit_influx-data; docker volume ls -q \| grep -cx swarmpit_influx-data; docker volume ls -q \| grep -cx swarmpit_db-data'` (expect 0 containers, then `swarmpit_influx-data`, then 0 and 1). |
 | end state | 2026-10-05 12:26–12:27 | One pass on the manager (12:26:38Z) and from the Mac (12:26:55Z). **Swarmpit:** `/version` `1.10-SNAPSHOT`, statistics false, API 1.44; UI 200. The swarmpit stack holds swarmpit_agent, swarmpit_app and swarmpit_db only; `swarmpit_influxdb` absent; `swarmpit_influx-data` on micro 0. **swarmpit_db:** task `isp4hjomiuzg` on core, `couchdb:2.3.0` digest `ee75c9a737e7`, Running (= `p28_db_task`, `p28_db_node`, `p28_db_digest`); `swarmpit_db-data` on micro 1, on core in use by that task. **swarmpit_agent:** tasks `bju4mnwpbuz3+tcrkflv13cge`, digest `1306e2a2f538` (= Step 0). **swarmpit_app:** task `e3qc53lt51jg` on micro (= `p28_app_taskB`), Running, health `healthy`, FailingStreak 0, RestartCount 0, spec digest `15c044a82fed`; `SWARMPIT_INFLUXDB` env 0, 1.44 pins 2. **thinx_api:** running task `ydaoq586u8v5`, spec digest `f55fa456ca23` (= the Gate B digest; no newer push since), Running since 2026-10-05T11:37:33.399Z; `/api/v2/csrf-token` 200. **thinx_influxdb:** task `lpl1pp201yyi` on core, Running, mounts under `/swarm/swarmpit/` 0. |
+| shred | 2026-10-05 12:28 | D-07 dump lifetime ends at phase close (RESEARCH Open Question 5). On micro, `/root/phase28` (dir 700, ext4, so `shred` overwrites in place) held 4 regular files, listed by size only: the swarmpit_db dump (2584 bytes), its `.sha256` (121), `influxdb.conf.A.pre` (372) and `influxdb.conf.bak.20260521200918.A.pre` (188). `shred -u` on each regular file at 12:28:36Z, then `rmdir /root/phase28`; afterwards `test -e /root/phase28` is false. `p28_shred=4`. The conf copies remain as the committed `swarmpit-influxdb.A.pre.conf` and `swarmpit-influxdb-bak-20260521200918.A.pre.conf`. The gluster backups `swarmpit.yml.bak.20261005110213.p28-A-pre` and `swarmpit.yml.bak.20261005112754.p28-B-pre` stay (no secrets). Live `swarmpit.yml` hash `0fd7d2c2de8d` (= `p28_B_post_sha`). |

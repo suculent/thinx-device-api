@@ -16,7 +16,7 @@ Operator-facing recovery procedures for the THiNX production swarm host `micro`.
 **Symptom signature** (all of):
 - `https://swarmpit.thinx.cloud` returns **Bad Gateway (502)** via Traefik.
 - `docker service logs swarmpit_app --since 30m` is **empty** (zero application log lines from the watcher for an extended window).
-- CircleCI builds and pushes `thinxcloud/api:latest` to Docker Hub successfully, BUT `docker service inspect thinx_api --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'` continues to show the OLD digest — i.e., the swarm is not picking up the new image.
+- CircleCI (`api-registry` job on `thinx-staging`) builds and pushes `registry.thinx.cloud:5000/thinx/api:swarm` to the private registry successfully, BUT `docker service inspect thinx_api --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'` continues to show the OLD digest — i.e., the swarm is not picking up the new image.
 - The swarmpit_app container itself is **Running** (no exit, no restart loop) — only the application inside has gone silent. This distinguishes the silent-watcher pattern from a crash/restart loop.
 
 ### Rung 1 — Force-restart swarmpit_app (default first move)
@@ -25,7 +25,9 @@ Operator-facing recovery procedures for the THiNX production swarm host `micro`.
 ssh micro "docker service update --force swarmpit_app"
 ```
 
-Wait ~90s for the new task to boot (Swarmpit 1.9 JVM + CouchDB + InfluxDB warm-up).
+Wait about 3–4 minutes. Swarmpit 1.10 (JDK 17) needs about 2 minutes to listen at its 0.25 CPU
+limit, its healthcheck has a 300 s start period, and the first autoredeploy poll runs 60 s after
+boot. Since Phase 28 the stack has no InfluxDB.
 
 **Verify recovery:**
 ```bash
@@ -38,20 +40,25 @@ ssh micro \
 # expect: startup banner + "Swarmpit running on port 8080" + "Docker SOCK: /var/run/docker.sock"
 ```
 
-**SLA verification** (controlled push-and-observe):
+**SLA verification** (controlled push-and-observe): follow § Gate procedure in
+`.planning/runbooks/swarmpit-upgrade.md`. In short:
+
 ```bash
-# 1. Push a no-op commit
-git commit --allow-empty -m "chore: push-observe SLA test marker"
+# 1. Push a signed, non-empty evidence commit to thinx-staging (no [skip ci]);
+#    any thinx-staging push builds and pushes registry.thinx.cloud:5000/thinx/api:swarm.
 git push origin thinx-staging
 
-# 2. Wait for CircleCI to push a new thinxcloud/api:latest digest to Docker Hub (typically 3-5 min)
-# 3. Confirm the swarm autoredeploys thinx_api to the new digest within 5 min:
+# 2. SLA start: the end_time of the CircleCI api-registry step "Push to private registry"
+#    (push_end); its log carries the pushed digest.
+# 3. SLA stop: the Status.Timestamp of the thinx_api task that runs that digest:
 ssh micro \
-  "docker service ps thinx_api --no-trunc --format '{{.ID}} {{.CurrentState}} {{.Image}}' | head -3"
-# expect: new task ID, Running, new digest matching Hub's :latest
+  "docker service ps thinx_api --no-trunc --filter desired-state=running --format '{{.ID}} {{.CurrentState}} {{.Image}}' | head -3"
+# expect: new task ID, Running, the pushed digest, within 300 s of push_end
 ```
 
-Phase 3 observed SLA: **delta = 63 seconds** (Hub digest change → new task Running), well under the 5-min target.
+Phase 3 observed SLA: **delta = 63 seconds** (then measured against Docker Hub). Phase 28 measured
+32 s on Swarmpit 1.9, 31 s after the stats stack was removed and 50 s on Swarmpit 1.10 (private
+registry, push_end → task Running).
 
 **Rollback** (if Rung 1 makes things worse):
 ```bash
@@ -65,7 +72,7 @@ If Rung 1 doesn't restore autoredeploy, the next moves are documented in detail 
 
 - **Rung 2 — Rebuild swarmpit_db (CouchDB 2.3.0):** Loses Swarmpit internal history (task event log, watcher state); Swarmpit re-derives operational state from Docker on first boot. Best-effort `_all_docs` backup before applying.
 - **Rung 3 — Stale-node membership cleanup:** Removes the phantom peer `b356ad8e1d60` / `10.133.0.4` from the memberlist gossip layer. **Risk:** swarm-fabric perturbation; only attempt on a low-traffic window. See OPS-02 in `.planning/REQUIREMENTS.md`.
-- **Rung 4 — Upgrade Swarmpit 1.9 → latest:** Heaviest fix. Schema migration on swarmpit_db; possible API/env-var breakage. Pin to a SPECIFIC version tag (NOT `latest`) and preserve `docker-swarm.yml` pre-upgrade as backup.
+- **Rung 4 — Upgrade Swarmpit (done in Phase 28, 2026-10):** Swarmpit runs `swarmpit/swarmpit:1.10` by tag with a stack-file healthcheck override (300 s start period). swarmpit_db stayed `couchdb:2.3.0` with no migration, and the stats stack (`swarmpit_influxdb` and its volume) was removed. Procedure, evidence and rollback: `.planning/runbooks/swarmpit-upgrade.md`. A future upgrade follows the same runbook: pin a specific tag, back up `swarmpit.yml` first.
 
 **Final fallback** (if Rungs 1-4 all fail): document `./restart.sh` as the canonical operator action and ship without autoredeploy. Path C in `phases/03-swarm-auto-pull/03-CONTEXT.md` `<domain>`.
 
