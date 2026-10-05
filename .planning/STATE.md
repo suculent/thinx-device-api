@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: executing
-stopped_at: Completed 28-01-PLAN.md
-last_updated: "2026-10-05T10:21:54.304Z"
+stopped_at: Completed 28-02-PLAN.md
+last_updated: "2026-10-05T11:25:00.647Z"
 last_activity: 2026-10-05
 last_activity_desc: Phase 28 execution started
-state_head: ec24fe86ceeef20d669ccf5cd0ce3b8c76f5f413
+state_head: 0cd6365d28f147ccb3b86dd486057c8b34d1a760
 progress:
   total_phases: 7
   completed_phases: 12
   total_plans: 47
-  completed_plans: 44
-  percent: 94
+  completed_plans: 45
+  percent: 96
 ---
 
 # STATE — THiNX Device API
@@ -35,11 +35,11 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 ## Current Position
 
 Phase: 28 (Swarmpit Upgrade & Trim) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-10-05 — Phase 28 execution started
 
-Progress: [████████████████░░░░] 6/7 v1.14 phases complete ([█████████░] 94%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
+Progress: [████████████████░░░░] 6/7 v1.14 phases complete ([█████████░] 96%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
 
 ## Milestones
 
@@ -270,6 +270,7 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 28]: D-12 applied: swarmpit_agent stays, OPS-SWARM-03 moved to Future Requirements (v1.14 = 24)
 - [Phase 28]: Gate 0 PASS on unchanged Swarmpit 1.9: .planning-only push autoredeployed thinx_api in 32 s (D-11a confirmed)
 - [Phase 28]: D-17 drift 0: swarmpit.yml equals the live spec; no reconciliation snapshot
+- [Phase 28]: 28-02: Step A trim on Swarmpit 1.9 passed Gate A (sla_s=31); influxdb.conf deleted after 0-reference mount scan (D-13); swarmpit_influx-data kept on micro, and core also holds one (for 28-04)
 
 ### Todos
 
@@ -380,11 +381,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 28-01-PLAN.md
+**Stopped at:** Completed 28-02-PLAN.md
 
 **Resume file:** None
 
-**Last session:** 2026-10-05T10:21:54.119Z
+**Last session:** 2026-10-05T11:25:00.403Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -452,3 +453,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P06 | 5min | 3 tasks | 1 files |
 | Phase 27 P07 | 74min | 3 tasks | 2 files |
 | Phase 28 P01 | 20min | 2 tasks | 4 files |
+| Phase 28 P02 | 21 min | 2 tasks | 5 files |
