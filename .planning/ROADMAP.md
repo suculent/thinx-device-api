@@ -332,7 +332,7 @@ Plans:
   2. With Swarmpit stats disabled and `swarmpit_influxdb` removed, a second test push still redeploys within 5 minutes, and `thinx_influxdb` keeps running unaffected.
   3. `swarmpit_db` is untouched: still couchdb 2.3.0, with the same volume and linked registry credentials. Each step can be rolled back from a stack snapshot taken before it.
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -345,7 +345,7 @@ Plans:
 
 **Wave 3** *(blocked on 28-02)*
 
-- [ ] 28-03-PLAN.md — Step B: `swarmpit/swarmpit:1.10` by tag with healthcheck override, swarmpit_db/agent untouched, Gate B push ≤ 5 min, 10-min stability hold
+- [x] 28-03-PLAN.md — Step B: `swarmpit/swarmpit:1.10` by tag with healthcheck override, swarmpit_db/agent untouched, Gate B push ≤ 5 min, 10-min stability hold
 
 **Wave 4** *(blocked on 28-03)*
 
@@ -370,7 +370,7 @@ Plans:
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete    | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete    | 2026-10-03 |
-| 28. Swarmpit Upgrade & Trim | v1.14 | 2/4 | In Progress|  |
+| 28. Swarmpit Upgrade & Trim | v1.14 | 3/4 | In Progress|  |
 
 ---
 *v1.14 Backlog & Hardening Sweep roadmap created 2026-09-25: 25 requirements across 7 phases (22–28). Next: `/gsd:discuss-phase 22`.*

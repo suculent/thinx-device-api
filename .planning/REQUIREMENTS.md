@@ -52,7 +52,7 @@
 
 ### Ops — Swarmpit
 
-- [ ] **OPS-SWARM-01**: Swarmpit runs 1.10 in production and registry-triggered autoredeploy still completes within the 5-minute SLA
+- [x] **OPS-SWARM-01**: Swarmpit runs 1.10 in production and registry-triggered autoredeploy still completes within the 5-minute SLA
 - [x] **OPS-SWARM-02**: Swarmpit stats are disabled and `swarmpit_influxdb` is removed (since Phase 27 no service mounts `swarmpit/influxdb.conf`, so the file is deleted with a copy kept in the Step A snapshot); autoredeploy verified by a test push
 
 ## Future Requirements
@@ -103,7 +103,7 @@
 | OPS-INFLUX-01 | Phase 27 | Complete |
 | OPS-INFLUX-02 | Phase 27 | Complete |
 | OPS-INFLUX-03 | Phase 27 | Complete |
-| OPS-SWARM-01 | Phase 28 | Pending |
+| OPS-SWARM-01 | Phase 28 | Complete |
 | OPS-SWARM-02 | Phase 28 | Complete |
 
 **Coverage:**
