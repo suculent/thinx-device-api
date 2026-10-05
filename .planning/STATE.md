@@ -2,19 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
-current_phase: 28
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 28 complete — all phases complete
-last_updated: "2026-10-05T13:44:10.622Z"
+last_updated: "2026-10-05T13:58:15.789Z"
 last_activity: 2026-10-05
-last_activity_desc: Phase 28 complete
-state_head: 821422093a7052de7de429418f478f994585bdd6
+last_activity_desc: Milestone v1.14 completed and archived
+state_head: a8b948f45278eb4964a74da5ade1c4b72b8713e6
 progress:
   total_phases: 7
   completed_phases: 13
   total_plans: 47
   completed_plans: 47
   percent: 100
+current_phase: 28
 ---
 
 # STATE — THiNX Device API
@@ -33,12 +33,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after Phase 28)
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-10-05 — Phase 28 complete
-
-Progress: [████████████████████] 7/7 v1.14 phases complete; 47/47 plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8, 28 4/4)
+Phase: Milestone v1.14 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-05 — Milestone v1.14 completed and archived
 
 ## Milestones
 
@@ -127,6 +125,31 @@ Carried from the 2026-09-19 sessions, none of them blocking. Rows now scheduled 
 | Snyk `snyk-monitor-console-classic` | Green as of 2026-09-19 (the missing `dockerhub` context was the original cause; the later failure was the registry timeout above). |
 
 ## Deferred Items
+
+### Acknowledged at v1.14 close (2026-10-05)
+
+| Category | Item | Status | Deferred At | Milestone |
+|----------|------|--------|-------------|-----------|
+| quick_tasks | 261003-w13-fix-api-key-cleartext-exposure | unknown | 2026-10-05 | v1.14 |
+| todos | 2026-09-28-fix-worker-builder-service-polling-completion-detection.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-09-28-split-rollbar-server-and-client-tokens.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-09-29-resolve-legacy-fixmes-owner-transfer.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-apikey-hash-credential-and-storage.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-console-notification-delivery-gaps.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-mqtt-device-writes-gated.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-transfer-accept-not-bound-to-recipient.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-transfer-continuity-leftovers.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-04-builder-cmd-sh-evals-repository-thinx-yml.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-04-multi-file-ota-update-multiple-broken.md | (presence-only) | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Worker README and Dockerfile comments name only ROLLBAR_ACCESS_TOKEN status: open **Found during:** … | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Transformer trans.js still reads WORKER_SECRET from env status: open **Found during:** 24-02 Task 3 … | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: API build-queue cron loop does not dispatch waiting builds in production status: open **Found during… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Stale entries in the production build queue status: open **Found during:** 24-05 Task 1 (read-only q… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: From plan 26-03 (2026-10-01) 1. ** lib/thinx/owner.js atomic() error path logs the changes object.**… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: From plan 26-02 (2026-10-01) 1. **The ZZ spec tier does not run in CI, so ZZ-LogPagingCouchSpec.js w… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: Resolved (orchestrator, 2026-10-01, after wave 2) - 26-03 items 1 and 2 ( owner.js atomic() and appl… | acknowledged | 2026-10-05 | v1.14 |
+
+### Carried forward from earlier closes
 
 Items acknowledged and deferred at prior milestone closes and carried forward. Rows now scheduled in v1.14 name their phase.
 
@@ -411,11 +434,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Phase 28 (Swarmpit Upgrade & Trim) is the last open v1.14 phase: `/gsd-discuss-phase 28` → plan → execute in its own maintenance window, then re-run `/gsd-audit-milestone` and `/gsd-complete-milestone v1.14`
-- Push the 2026-10-04 post-audit fixes: transformer repo `main` first, then the parent `thinx-staging`; watch CircleCI and the swarm rollout
-- Before any `restart.sh`/stack deploy, resolve review WR-02 (Phase 24): the yml's COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD api mounts would take effect, and live-only mounts (INFLUXDB_TOKEN) would be dropped
-- Phases 24 and 25 have no SECURITY.md; run `/gsd-secure-phase 24` and `/gsd-secure-phase 25` if the closing audit should show them
-- Rollbar server/client token split is still a pending todo (`todos/pending/2026-09-28-split-rollbar-server-and-client-tokens.md`)
+- Start the next milestone with /gsd-new-milestone
 
 ## Performance Metrics
 

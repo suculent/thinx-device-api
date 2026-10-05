@@ -18,6 +18,7 @@ Out-of-scope discoveries logged by executors. Not fixed in the plan that found t
 
 Neither is reached by the `AuditFlagWritersSpec` guard, which covers `alog.log` flags
 and the `set_password_reset` body only.
+  status: acknowledged
 
 ## From plan 26-02 (2026-10-01)
 
@@ -34,6 +35,7 @@ and the `set_password_reset` body only.
 2. **`GET /api/v2/logs/build/:bid` (`fetchBuildLogID`, `lib/router.logs.js`) has no owner check.**
    Pre-existing, out of scope for 26-02 (LOG-04 covers the list routes only). It also logs the
    whole build log and the owner on two lines.
+  status: acknowledged
 
 ## Resolved (orchestrator, 2026-10-01, after wave 2)
 
@@ -48,3 +50,4 @@ and the `set_password_reset` body only.
 - 26-02 item 2 (`fetchBuildLogID` owner check): operator approved. The three by-id routes now require a
   session and use the owner-checked `Buildlog#fetchOwned`; another owner's build reads exactly like a
   missing build, and the owner id and log text are no longer logged. Spec: `BuildLogOwnerSpec.js`.
+  status: acknowledged
