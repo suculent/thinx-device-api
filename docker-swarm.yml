@@ -18,28 +18,77 @@ networks:
     driver: overlay
     attachable: true
 
-# SEC-CFG-01 (#418): lib/thinx/secrets.js prefers /run/secrets/<NAME> over the
-# matching ${...} env var, falling back to env when the file is absent.
+# SEC-CFG-01 (#418) / SEC-CFG-02 (phase 24): lib/thinx/secrets.js (and its
+# copies in the worker and transformer images) prefers /run/secrets/<NAME> over
+# the matching ${...} env var, falling back to env when the file is absent.
 #
-# These are declared `external: true`, so they MUST exist in the swarm before
-# the first `docker stack deploy` — otherwise the deploy is rejected with
-# "secret not found". As of 2026-09-18 only ROLLBAR_TOKEN existed, so create
-# the rest on a manager node, taking the values from the deployment .env:
+# Live state as of the 2026-09-29 rollout (names only, never values):
 #
-#   ENVF=/mnt/gluster/thinx/.env
-#   for K in COUCHDB_USER COUCHDB_PASS REDIS_PASSWORD; do
-#     printf '%s' "$(grep -E "^${K}=" "$ENVF" | tail -1 | cut -d= -f2-)" \
-#       | docker secret create "$K" -
-#   done
+#   api          CSRF_SECRET, SLACK_BOT_TOKEN, SLACK_WEBHOOK,
+#                GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY,
+#                GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET,
+#                INFLUXDB_TOKEN (Phase 27, mounted 2026-10-03)
+#   worker       WORKER_SECRET, ROLLBAR_SERVER_TOKEN
+#   transformer  ROLLBAR_SERVER_TOKEN
 #
-# The env vars below are kept deliberately: they remain the fallback path and
-# are still what a non-swarm `docker compose` run uses.
+# INFLUXDB_TOKEN (Phase 27) is the InfluxDB 2 org all-access token the API
+# uses for statistics. It was minted inside the swarm by
+# `influx auth create --all-access`, its JSON piped through `jq -j .token`
+# straight into `docker secret create INFLUXDB_TOKEN -`; it was never printed
+# or stored anywhere else. InfluxDB 2.9 keeps tokens hashed, so rotating it
+# means minting a new one the same way. INFLUXDB_OPERATOR_TOKEN and
+# INFLUXDB_ADMIN_PASSWORD also exist in the swarm but are mounted on NO service
+# and are not declared here (D-11): they are operator-only.
+#
+# Every secret below is declared `external: true`, so it MUST exist in the
+# swarm before any `docker stack deploy`, or the deploy is rejected with
+# "secret not found". They were created on a manager node: carried-over values
+# come from the running service's env, and CSRF_SECRET and WORKER_SECRET are
+# random (WORKER_SECRET was rotated, so its env value is the old one). The
+# pattern, with no value ever printed:
+#
+#   docker service inspect thinx_api \
+#     --format '{{range .Spec.TaskTemplate.ContainerSpec.Env}}{{println .}}{{end}}' \
+#     | sed -n 's/^SLACK_WEBHOOK=//p' | tr -d '\n' | docker secret create SLACK_WEBHOOK -
+#   openssl rand -hex 32 | tr -d '\n' | docker secret create CSRF_SECRET -
+#
+# ROLLBAR_SERVER_TOKEN holds the value of ROLLBAR_ACCESS_TOKEN.
+#
+# The env vars below are kept deliberately (D-06): they remain the fallback
+# path and are still what a non-swarm `docker compose` run uses. Removing them
+# is SEC-CFG-03.
+#
+# COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD exist in the swarm but are NOT
+# mounted on the live thinx_api yet; mounting them is SEC-CFG-04.
+# REGISTRY_HTTP_SECRET and ROLLBAR_TOKEN (stale) also exist in the swarm but are
+# not used by this stack. SLACK_CLIENT_SECRET is not created while Slack OAuth
+# is off (its env value is empty).
 secrets:
   COUCHDB_USER:
     external: true
   COUCHDB_PASS:
     external: true
   REDIS_PASSWORD:
+    external: true
+  SLACK_BOT_TOKEN:
+    external: true
+  SLACK_WEBHOOK:
+    external: true
+  GITHUB_CLIENT_SECRET:
+    external: true
+  GOOGLE_OAUTH_SECRET:
+    external: true
+  MAILGUN_API_KEY:
+    external: true
+  ROLLBAR_SERVER_TOKEN:
+    external: true
+  WORKER_SECRET:
+    external: true
+  GIT_KEY_PASSPHRASE:
+    external: true
+  CSRF_SECRET:
+    external: true
+  INFLUXDB_TOKEN:
     external: true
 
 services:
@@ -186,6 +235,8 @@ services:
       - "ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}"
       - "ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}"
       - "REVISION=2"
+    secrets:
+      - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
     labels:
@@ -196,7 +247,7 @@ services:
           cpus: '0.01'
           memory: 64M
         limits:
-          cpus: '0.05'
+          cpus: '0.25'
           memory: 64M
       placement:
         constraints:
@@ -214,14 +265,24 @@ services:
     networks:
       - internal
       - traefik-public
-#    image: ${REGISTRY}/thinx/api:swarm
-    image: thinxcloud/api:latest
+    image: ${REGISTRY}/thinx/api:swarm
     # Mounted at /run/secrets/<NAME>; read via lib/thinx/secrets.js. See the
-    # top-level `secrets:` block for the one-time creation step.
+    # top-level `secrets:` block for the creation step.
     secrets:
+      # Declared here but NOT mounted on the live thinx_api yet (SEC-CFG-04).
       - COUCHDB_USER
       - COUCHDB_PASS
       - REDIS_PASSWORD
+      - SLACK_BOT_TOKEN
+      - SLACK_WEBHOOK
+      - GITHUB_CLIENT_SECRET
+      - GOOGLE_OAUTH_SECRET
+      - MAILGUN_API_KEY
+      - ROLLBAR_SERVER_TOKEN
+      - WORKER_SECRET
+      - GIT_KEY_PASSPHRASE
+      - CSRF_SECRET
+      - INFLUXDB_TOKEN
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
@@ -246,6 +307,9 @@ services:
       - "SLACK_WEBHOOK=${SLACK_WEBHOOK}"
       - "MAILGUN_API_KEY=${MAILGUN_API_KEY}"
       - "GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}"
+      # Phase 25: CSRF_MODE legacy|observe|signed; roll back with CSRF_MODE=legacy. CSRF_ENFORCE stays true.
+      - "CSRF_ENFORCE=true"
+      - "CSRF_MODE=signed"
     ports:
       - 7442:7442
     volumes:
@@ -430,6 +494,9 @@ services:
       - "WORKER_SECRET=${WORKER_SECRET}"
       - "THINX_HOSTNAME=${THINX_HOSTNAME}"
       - "COUNTRY=${COUNTRY}" # for sake of service path creation, not really nice
+    secrets:
+      - WORKER_SECRET
+      - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
     labels:
@@ -449,18 +516,20 @@ services:
         - "swarmpit.service.deployment.autoredeploy=true"
 
   influxdb:
-    image: influxdb:1.8
+    image: dhi.io/influxdb:2.9.1
     networks:
       - internal
       - traefik-public
 # public is for development only but last deployment shows it has been not found
     volumes:
-      - '/mnt/gluster/thinx/influx:/var/lib/influxdb'
-      - '/mnt/gluster/deployment/swarm/swarmpit/influxdb.conf:/etc/influxdb/influxdb.conf'
+      - '/mnt/gluster/thinx/influxdb2:/var/lib/influxdb2'
     environment:
-      - INFLUXDB_DB=db0
-      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
-      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+      - INFLUXD_BOLT_PATH=/var/lib/influxdb2/influxd.bolt
+      - INFLUXD_ENGINE_PATH=/var/lib/influxdb2/engine
+      - INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE=256m
+      - INFLUXD_STORAGE_MAX_CONCURRENT_COMPACTIONS=1
+      - INFLUXD_LOG_LEVEL=error
+      - INFLUXD_REPORTING_DISABLED=true
     deploy:
       resources:
         reservations:
@@ -488,47 +557,3 @@ services:
 
         - traefik.http.middlewares.influx-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
         - traefik.http.routers.thinx-influx-https.middlewares=influx-auth,error-pages-middleware
-        - traefik.http.routers.thinx-influx-http.middlewares=influx-auth,error-pages-middleware
-
-  chronograf:
-    image: chronograf:1.9
-    networks:
-      - internal
-      - traefik-public
-    volumes:
-      - '/mnt/gluster/thinx/chronograf:/var/lib/chronograf'
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
-      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
-    deploy:
-      resources:
-        reservations:
-          memory: 32M
-          cpus: '0.1'
-        limits:
-          cpus: '0.1'
-          memory: 64M
-      labels:
-        - "traefik.http.services.thinx-chronograf.loadbalancer.server.port=8888"
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
-        - "traefik.constraint-label=traefik-public"
-
-#        - "traefik.http.routers.thinx-chronograf-http.rule=Host(`${CHRONOGRAF_HOSTNAME}`)"
-#        - "traefik.http.routers.thinx-chronograf-http.entrypoints=http"
-#        - "traefik.http.routers.thinx-chronograf-http.middlewares=chrono-auth,https-redirect"
-#        - "traefik.http.routers.thinx-chronograf-http.middlewares=chrono-auth,error-pages-middleware"
-
-        - "traefik.http.routers.thinx-chronograf-https.rule=Host(`${CHRONOGRAF_HOSTNAME}`)"
-        - "traefik.http.routers.thinx-chronograf-https.middlewares=chrono-auth"
-        - "traefik.http.routers.thinx-chronograf-https.entrypoints=https"
-        - "traefik.http.routers.thinx-chronograf-https.tls=true"
-        - "traefik.http.routers.thinx-chronograf-https.tls.certresolver=le"
-
-        - swarmpit.service.deployment.autoredeploy=true
-
-        - traefik.http.middlewares.chrono-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
-        - traefik.http.routers.thinx-chronograf-https.middlewares=chrono-auth,error-pages-middleware

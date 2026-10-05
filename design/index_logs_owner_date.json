@@ -1,0 +1,6 @@
+{
+  "index": { "fields": ["owner", "date"] },
+  "ddoc": "audit-owner-date",
+  "name": "audit-owner-date",
+  "type": "json"
+}

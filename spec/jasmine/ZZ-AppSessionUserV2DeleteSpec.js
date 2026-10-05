@@ -7,6 +7,8 @@ const expect = require('chai').expect;
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
+const EventTaxonomy = require('../../lib/thinx/event_taxonomy');
+
 const envi = require("../_envi.json");
 const dynamic_owner_id = envi.dynamic2.owner;
 
@@ -192,7 +194,11 @@ describe("User Routes V2", function () {
       .end((_err, res) => {
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
-        expect(res.text).to.equal('{"success":false,"response":"no_results"}');
+        // 27-03 (F-1): the V2 route answers {success:true, response:{KPI:[n]}}
+        const body = JSON.parse(res.text);
+        expect(body.success).to.equal(true);
+        expect(Object.keys(body.response)).to.have.members(EventTaxonomy.names());
+        EventTaxonomy.names().forEach((k) => expect(body.response[k], k).to.be.an('array'));
         done();
       });
   }, 30000);

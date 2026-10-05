@@ -2,43 +2,41 @@
 gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
-current_phase: 22
-current_phase_name: ci-sast-baseline
-status: executing
-stopped_at: Completed 22-03-PLAN.md
-last_updated: "2026-09-25T13:58:45.307Z"
-last_activity: 2026-09-25
-last_activity_desc: Phase 22 execution started
-state_head: ce4d5c4dfdc4841307417543cd8017cca74c84e7
+status: Awaiting next milestone
+stopped_at: v1.14 milestone closed and archived; ready for /gsd-new-milestone
+last_updated: "2026-10-05T13:58:15.789Z"
+last_activity: 2026-10-05
+last_activity_desc: Milestone v1.14 completed and archived
+state_head: a8b948f45278eb4964a74da5ade1c4b72b8713e6
 progress:
   total_phases: 7
-  completed_phases: 6
-  total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_phases: 7
+  total_plans: 47
+  completed_plans: 47
+  percent: 100
+current_phase: 28
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-09-25 (v1.14 roadmap created: Phases 22–28, 25/25 requirements mapped)
+**Last updated:** 2026-10-05 (v1.14 shipped and archived to `.planning/milestones/`; awaiting next milestone)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-25 at v1.14 start)
+See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 22 CI & SAST Baseline (ready to plan; verify-first).
-- **Production today (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
+- **Current focus:** Planning next milestone (`/gsd-new-milestone`). v1.14 Backlog & Hardening Sweep shipped 2026-10-05 (24/24, audit `tech_debt`, `override_closeout`); candidates are listed in PROJECT.md § Next Milestone Goals and the Deferred Items table below.
+- **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
+- **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: 22 (ci-sast-baseline) — READY TO EXECUTE
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-09-25 — Phase 22 execution started
-
-Progress: [████████░░] 75% (0/7 phases)
+Phase: Milestone v1.14 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-05 — Milestone v1.14 completed and archived
 
 ## Milestones
 
@@ -128,6 +126,31 @@ Carried from the 2026-09-19 sessions, none of them blocking. Rows now scheduled 
 
 ## Deferred Items
 
+### Acknowledged at v1.14 close (2026-10-05)
+
+| Category | Item | Status | Deferred At | Milestone |
+|----------|------|--------|-------------|-----------|
+| quick_tasks | 261003-w13-fix-api-key-cleartext-exposure | unknown | 2026-10-05 | v1.14 |
+| todos | 2026-09-28-fix-worker-builder-service-polling-completion-detection.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-09-28-split-rollbar-server-and-client-tokens.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-09-29-resolve-legacy-fixmes-owner-transfer.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-apikey-hash-credential-and-storage.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-console-notification-delivery-gaps.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-mqtt-device-writes-gated.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-transfer-accept-not-bound-to-recipient.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-03-transfer-continuity-leftovers.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-04-builder-cmd-sh-evals-repository-thinx-yml.md | (presence-only) | 2026-10-05 | v1.14 |
+| todos | 2026-10-04-multi-file-ota-update-multiple-broken.md | (presence-only) | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Worker README and Dockerfile comments name only ROLLBAR_ACCESS_TOKEN status: open **Found during:** … | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Transformer trans.js still reads WORKER_SECRET from env status: open **Found during:** 24-02 Task 3 … | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: API build-queue cron loop does not dispatch waiting builds in production status: open **Found during… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 24/deferred-items.md: Stale entries in the production build queue status: open **Found during:** 24-05 Task 1 (read-only q… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: From plan 26-03 (2026-10-01) 1. ** lib/thinx/owner.js atomic() error path logs the changes object.**… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: From plan 26-02 (2026-10-01) 1. **The ZZ spec tier does not run in CI, so ZZ-LogPagingCouchSpec.js w… | acknowledged | 2026-10-05 | v1.14 |
+| deferred_items | 26/deferred-items.md: Resolved (orchestrator, 2026-10-01, after wave 2) - 26-03 items 1 and 2 ( owner.js atomic() and appl… | acknowledged | 2026-10-05 | v1.14 |
+
+### Carried forward from earlier closes
+
 Items acknowledged and deferred at prior milestone closes and carried forward. Rows now scheduled in v1.14 name their phase.
 
 | Category | Item | Status |
@@ -158,6 +181,9 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 
 Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
+- 2026-09-29 — Phase 24 complete (SEC-CFG-02). The swarm secrets were added one service at a time with `docker service update --secret-add`. The env fallback is kept (removing it is SEC-CFG-03). `WORKER_SECRET` was rotated and proven by a real build, and `CSRF_SECRET` (64 hex) is mounted on `thinx_api`.
+- 2026-09-29 — Review CR-01 (GitHub OAuth cross-user token delivery, pre-existing) was fixed in b09aea35 and deployed as thinx-staging 5e4ebe88. The operator confirmed GitHub and Google logins afterwards. WR-01 is deferred to SEC-CFG-03, and the operator removed WORKER_SECRET from the swarm `.env`.
+
 - 2026-09-25 — v1.14 roadmap shape: 7 phases (22–28) under `granularity: coarse`. Boundaries follow deploy surfaces and risk windows (CI only / backend image / swarm secrets / backend + consoles + gluster / backend + Vue submodule / InfluxDB storage / Swarmpit). Phase 24 (single requirement) is kept separate as a production secret migration with its own verification; it is the fold candidate if fewer phases are wanted.
 - 2026-09-25 — v1.14 ordering: CodeQL baseline (22) before sink fixes (23); sinks before the secrets sweep (24) so `/run/secrets` grows only after symlink containment; secrets before CSRF (25) so `CSRF_SECRET` exists and the HMAC key is never random; log paging (26) after CSRF so regressions stay distinguishable; InfluxDB 2 (27) after all other code deploys; Swarmpit (28) last in its own window.
 - 2026-09-25 — InfluxDB scope changed after research: `thinx_influxdb` is upgraded 1.8 → InfluxDB 2 (irreversible; verified backup first), and 90-day retention becomes bucket retention. CI keeps `dhi.io/influxdb:2`; research's `influxdb:1.8` CI switch is dropped. Phase 27 re-homes or drops the `swarmpit/influxdb.conf` bind mount, which decouples it from the Swarmpit trim.
@@ -172,10 +198,110 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 22]: [Phase 22]: CodeQL security-extended does not flag git.js execSync or builder readFileSync/lstatSync sinks; Phase 23 sink before/after must come from Aikido (baseline 147 open alerts at 89c5cf93)
 - [Phase 22]: 22-02: D-13 gluster+live removal of VUE_APP_CONSOLE_HOSTNAME approved (proceed); first attempt denied by the auto-mode permission classifier, applied on re-dispatch 2026-09-25 13:08Z (gluster line 290 removed with backup, one --env-rm on thinx_console, image unchanged)
 - [Phase 22]: 22-03: Release PR #569 thinx-staging -> main opened after user 'open-pr' gate; left OPEN, CodeQL PR analysis 1839520597 green and non-required; main-push run pending user merge
+- [Phase 22]: 22-04: Layout.vue got the per-component hostnames mixin (2 lines, template unchanged); a global Vue.mixin or populating the prototype was rejected
+- [Phase 22]: 22-04: logged-in /app footer check approved 2026-09-25; CI-03 Complete; CI-01/CI-02 left for the phase re-verification
+- [Phase 22]: 22-04: console submodule main (a0e86707) trails thinx-staging by a5b02467; syncing it is the user's call
+- [Phase 23]: 23-01: GIT_SSH_COMMAND is one constant (accept-new, IdentitiesOnly, publickey-only, seeded file as GlobalKnownHostsFile, learned file as UserKnownHostsFile); per-attempt values reach it only via env
+- [Phase 23]: 23-01: GIT_ASKPASS=false + GIT_TERMINAL_PROMPT=0 on every git run and PasswordAuthentication=no on ssh, so the forced askpass never answers a remote credential/password prompt
+- [Phase 23]: 23-01: learned known_hosts at <data_root>/ssh_known_hosts used only if not symlink, not group/world-writable, owned by process uid; never repaired, falls back to seeded file
+- [Phase 23]: 23-01: Redis gitkey:<owner> holds only the key filename (EX 30d) and is honoured only when === one of the owner's own key names
+- [Phase 23]: 23-02: worker spawns argv jobs as spawn(BUILDER_PROGRAM, argv, {shell:false}); the job never names the program; any job carrying argv is validated as argv and refused with Invalid argv, never retried on the cmd shell path
+- [Phase 23]: 23-02: worker logs redact the job secret and the --env JSON; production worker logs written before this change contain WORKER_SECRET, so rotate it after the new worker deploys
+- [Phase 23]: 23-03: all builder repo-file reads/writes go through lib/thinx/safepath.js (realpath + path.relative + lstat no-symlink + O_NOFOLLOW); refusals use refuseBuild -> unsafe_repository_file
+- [Phase 23]: 23-03: BUILD_PATH = buildPathFor(owner, udid, build_id) with Sanitka.strictOwner (exactly 64 [a-z0-9]) + Sanitka.udid, never stripped; invalid -> invalid_device before mkdirp and no remote job
+- [Phase 23]: 23-04: remote jobs carry argv (arguments only) plus a legacy cmd byte-identical to shell-escape 0.2.0 via builder.legacyShellCommand; runRemoteShell refuses non --flag args with invalid_build_arguments after the invalid_device identity check
+- [Phase 23]: 23-04: shell-escape removed (package.json + deletion-only lockfile); parent services/worker gitlink committed at 79611f6, unpushed - 23-05 must push worker main before the parent
+- [Phase 24]: SecretsSweepSpec freshRequire evicts modules first loaded during a fresh require, so instances built under a swapped secret never reach later suites
+- [Phase 24]: router.slack returns the profile-help redirect early when SLACK_CLIENT_SECRET is absent; SLACK_CLIENT_ID stays a plain env read
+- [Phase 24]: 24-02: worker and transformer carry a local copy of lib/thinx/secrets.js (readSecret byte-identical) plus rollbarServerToken(); keep the copies in sync
+- [Phase 24]: 24-02: the worker builds its only Rollbar client in worker.js; class.js and the transformer's trans.js no longer build one
+- [Phase 24]: runRemoteShell refuses with worker_secret_missing (release, notify, one info line) when readSecret(WORKER_SECRET) is falsy, instead of emitting secret: null
+- [Phase 24]: An empty-string GITHUB_CLIENT_SECRET or GOOGLE_OAUTH_SECRET disables that OAuth provider (readSecret truthiness); with a non-empty secret behaviour is unchanged
+- [Phase 24]: globals.js builds Rollbar at most once per process from ROLLBAR_SERVER_TOKEN, then ROLLBAR_ACCESS_TOKEN (file before env in each chain)
+- [Phase 24]: 24-04: thinx_api now mounts SLACK_BOT_TOKEN, SLACK_WEBHOOK, GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY, ROLLBAR_SERVER_TOKEN (from ROLLBAR_ACCESS_TOKEN), GIT_KEY_PASSPHRASE and CSRF_SECRET via one --secret-add; fp12 unchanged, env kept as fallback
+- [Phase 24]: 24-04: SLACK_CLIENT_SECRET left off (empty env); WORKER_SECRET stays env-only on thinx_api until the 24-05 rotation; ROLLBAR_SERVER_TOKEN secret already exists, 24-05 mounts it without re-creating
+- [Phase 24]: 24-05: WORKER_SECRET rotated to a new random swarm secret mounted on thinx_api and thinx_worker together; the file wins over the old env value on both sides (env kept as D-12 fallback until SEC-CFG-03)
+- [Phase 24]: 24-05: proof build dispatched by the operator via console Build (rotate-build-manual); console builds bypass the Redis queue, so the build_id is taken from the worker runArgv line
+- [Phase 24]: 24-05: ROLLBAR_SERVER_TOKEN mounted on thinx_worker then thinx_transformer from the existing secret, no rotation
+- [Phase 24]: 24-06: docker-swarm.yml mirrors the live phase-24 secrets (external: true, per-service lists) and the api image ${REGISTRY}/thinx/api:swarm; api keeps its unmounted COUCHDB/REDIS entries under a SEC-CFG-04 comment
+- [Phase 24]: 24-06: a Swarmpit autoredeploy of thinx_api (push to thinx-staging) keeps every --secret-add mount; WORKER_SECRET fp12 still equals the worker's after the redeploy
+- [Phase 25]: 25-01: establishSession queues the rotated XSRF-TOKEN before writing owner/markLogin, so a mint failure leaves no owned session
+- [Phase 25]: 25-01: CSRF priming answers 503 service_unavailable without req.session and 503 csrf_key_unavailable without a key, before writing any pre-session
+- [Phase 25]: 25-01: CSRF_MODE unset/empty is silent legacy; an unrecognised non-empty value warns once per process
+- [Phase 25]: 25-02: classic dashboard XSRF seam only sends X-XSRF-TOKEN to urlBase or same-origin relative URLs (rejects // and /\ forms); committed in console 3c906ff, unpushed until 25-04
+- [Phase 25]: 25-02: check-console-headers.js resolves proxy_hide_header with nginx inheritance; --canonical keeps the default snapshot as a compared file; extra fail-closed markers MALFORMED/DUPLICATE-HEADER/UNPARSEABLE
+- [Phase 25]: 25-03: CSRF observe telemetry is a Redis hash csrf:obs:{UTC day}, field {mode}:{reason}:{METHOD} {route pattern}, 30-day expiry, counted in every mode; read with scripts/csrf-obs-counters.js
+- [Phase 25]: 25-03: CSRF exemption keys only on request-local req.thx_auth (bearer|apikey) set in router.js after verified auth; header presence and validateSession never exempt (D-09)
+- [Phase 25]: 25-03: Google new-user callback writes no session; login happens only via POST /login {token} (establishSession)
+- [Phase 25]: 25-04: observe_start_utc 2026-09-29T17:06:30Z (thinx_api task Running); 25-06 may start at 2026-09-30T17:06:30Z
+- [Phase 25]: 25-04: D-05 start-of-observe found 0 external POST /api/v2/user or /api/user/create callers (Traefik logs no User-Agent; probe traffic matched by timestamp)
+- [Phase 25]: 25-04: node repair dcbbd416 logs the Google new-user owner via a local so LoggingQualityAuditSpec full_user_wrapper passes
+- [Phase 25]: 25-05: Tier 1 OpenAPI operations carry the XsrfTokenHeader ref only (they also accept Bearer); login/password routes keep header+cookie refs
+- [Phase 25]: 25-05: guarded-route set locked by static CsrfRouteInventorySpec (GUARDED + NOT_GUARDED with reasons); new guards add a row there
+- [Phase 25]: 25-07: admin mutations run csrf.verifyCsrfToken before requireAdmin (inventory spec enforces the order); GET /api/user/rsakey/create guarded as a state-changing GET via the D-18 seam; transfer POSTs are D-11 account mutations, e-mail GETs stay open
+- [Phase 26]: ensureDesignDoc reason tokens come only from statusCode, CouchDB error word, Node error code or timeout, validated; e.message never read (credentialed URL)
+- [Phase 26]: loadPagingDesign accepts only _id _design/paging, so the boot upsert can never write _design/logs (D-13)
+- [Phase 26]: One Audit.stringFlags filter serves read (toAuditItem, both fetch paths) and write (_buildRecord) for D-15
+- [Phase 26]: Audit.fetch D-19 fallback uses first-answer-wins: a late owner-keyed view answer after VIEW_TIMEOUT_MS is dropped
+- [Phase 26]: 26-03: --targets without --apply is a usage error (exit 2), mirroring --apply without --targets
+- [Phase 26]: 26-03: cleanup CLI apply prints before-state aggregates then apply counters; bulk rejection is fatal (INCOMPLETE, exit 1), rerun converges
+- [Phase 26]: 26-03: alog.log static guard accepts cond ? literal : literal (owner_purge.js); any other non-literal flag fails the spec
+- [Phase 26]: 26-04: retention job fails closed - audit_by_date or either build view failing is LOG-RETENTION FAIL (audit_read_failed / record_read_failed) before any folder is inspected; zero build rows aborts the orphan sweep
+- [Phase 26]: 26-04: --roots and --no-audit without --apply are usage errors (exit 2); the wrapper mounts a root read-write only when --apply --roots names it
+- [Phase 26]: 26-04: retention schedule is /etc/cron.d/thinx-log-retention at 09:40 UTC; old job files retire to /usr/local/sbin/retired/couchdb-log-retention.{cron,sh}
+- [Phase 26]: 26-05: History owns its paged rows and cursors (copies the store first page once, appends only its own pages), so Header/Notifications/DeviceDetail first-page refreshes cannot reset a paged table
+- [Phase 26]: 26-05: Load more is a plain button.btn.btn-outline-secondary.btn-sm, because bootstrap-vue BButton overwrites a caller aria-disabled with null on real buttons
+- [Phase 26]: 26-05: normalizeBuildItems falls back to item.udid/item.date for flat {date, udid} build items; DeviceDetail per-device history now derives from the owner's newest 100 builds (D-19), no per-device Load more
+- [Phase 26]: 26-05: History initial load uses Promise.allSettled + finally so each table loads independently and Loading... always clears
+- [Phase 26]: 26-02: log_paging.buildQuery merges extra first and then forces the owner bounds, direction and limit and drops skip/startkey_docid, so no option can widen the owner range
+- [Phase 26]: 26-02: the paged audit/build branches are opt-in on hasOwnProperty(limit|cursor) and answer {success, response, paging} via Util.respond; the legacy no-param shape is unchanged; owner only from the session
+- [Phase 26]: 26-02: Buildlog reads are side-effect free (prune removed); purgeOwner ranges over paging/builds_by_owner_time with include_docs and falls back to latest_builds {key: owner}
+- [Phase 26]: 26-02: the log-paging probe FAILs when Audit.fetch used its legacy fallback; ZZ-LogPagingCouchSpec does not run in CI today (split-tests deletes ZZ*.js on node 0), see deferred-items 26-02 item 1
+- [Phase 26]: 26-09: Cypress stubbed sessions stub POST /api/v2/session/token in visitApp (tokens are memory-only); cy.visitAppRoute enters via the dashboard to bypass the pre-existing App.vue deep-link redirect, which stays a recorded follow-up
+- [Phase 26]: 26-09: Paged-intercept Load more requests are asserted from @alias.all filtered by cursor, not cy.wait, because the dashboard on the entry path already sent first-page requests
+- [Phase 26]: 26-06: D-15 applied with reset-keys,audit-flags (operator apply-both); 44 reset keys cleared, 197 audit docs redacted, post-apply 0/0; one-way, no snapshot
+- [Phase 26]: 26-06: _design/logs map sha12 is 41de3686cde2 (exact string); plan's 925f3cee0cc4 hashed a trailing newline
+- [Phase 26]: Push 2 approved (D-14); Vue paging UI live via signed gitlink bump a1d65e0a; closeout commits ride the next parent push
+- [Phase 26]: Earlier unsigned 26-06/26-07 docs commits pushed unchanged (hashes cited in SUMMARYs), not re-signed
+- [Phase 26]: Retention apply approved as all (approved_roots=deploy,repos); daily /etc/cron.d slot 09:40 UTC, no COUCHDB_HOST override; old couchdb-log-retention job retired to /usr/local/sbin/retired/
+- [Phase 26]: 26-10: dark-theme warning/danger History rows use $header-color text on a .2 cell tint (7.71-9.35:1); $text-color would be 4.44:1 and fail AA
+- [Phase 27]: A6 settled on Linux: uid 65532 cannot read a root-0700 1.8 copy, so the cutover chown -R 65532:65532 is required
+- [Phase 27]: Phase 27 backup p27_backup=influx-1.8-portable-20261002T1650Z (T 2026-10-02T16:50:14Z) held root-only on core and micro until 27-07 (D-02); restore and rehearsal counts equal (2379)
+- [Phase 27]: The stats rename to 90d is left to the API boot ensure (adopt) in 27-06; rehearsal proved one PATCH keeps bucket id and DBRP mapping
+- [Phase 27]: 27-02: InfluxDB client packages pinned exactly at 1.35.0 (T-27-SC)
+- [Phase 27]: 27-02: CI test compose uses DHI influxdb:2.9.1 with tmpfs uid 65532 form; A5 fallback not needed locally (Compose v5.5.1)
+- [Phase 27]: 27-02: host-side curl health waits against docker-published ports need --retry-all-errors (docker-proxy answers empty reply, exit 52)
+- [Phase 27]: 27-08: the dhi.io login lives in CircleCI 'Starting Influx' (once per job, stdin), before the first DHI pull; 'Starting Support Services' no longer logs in
+- [Phase 27]: 27-08: dev influxdb-setup one-shot treats 'has already been set up' as success because the dev data dir persists
+- [Phase 27]: 27-08: setup one-shots create bucket stats without retention; ensureStatsBucket() at api boot alone sets 90 days
+- [Phase 27]: 27-03 D-12: APIKEY_INVALID drops the rejected key (no hash: sha256(key) is THiNX's key id); LOGIN_INVALID limited to LOGIN_INVALID_REASONS or unlisted
+- [Phase 27]: 27-03: scripts/influx-stats-probe.js is the read-only aggregate evidence tool for 27-05..27-07 (exit 0/1/2, INFLUX-STATS-PROBE OK|FAIL reason=<token>)
+- [Phase 27]: 27-04: F-2 go-B — InfluxDB admin password random in an unmounted secret, UI via SSH tunnel, public route stays behind influx-auth
+- [Phase 27]: 27-04: stats points written at ns precision with strictly increasing per-process timestamps (fix-connector after CI #15564; same-ms identical writes collapsed)
+- [Phase 27]: 27-05: thinx_influxdb spec keeps dhi.io/influxdb:2.9.1 unpinned (swarm records no dhi.io digest); running task digest sha256:3d49ee8ee9a0 verified; pin by digest in 27-07 mirror (superseded 2026-10-04: pinned by tag, see below)
+- [2026-10-04]: InfluxDB image is pinned by version tag (`dhi.io/influxdb:2.9.1`), not by `@sha256` digest — operator decision. Stack files and the live spec already match; the 27-05 "pin by digest" follow-up and the audit tech-debt item are closed with no change. Same policy as `thinx_couchdb` on DHI.
+- [2026-10-04]: Check-in without a MAC keeps answering `no_mac` (operator: leave the MAC guard alone); no udid fallback.
+- [2026-10-04]: WR-03 closed — the D-19 audit fallback is a Mango `_find` bounded by owner on `_design/audit-owner-date` (fields owner, date; installed at boot for managed_logs), newest 200 with real flags; on error/timeout it answers `log_fetch_failed` instead of a partial list. `_design/logs` untouched.
+- [2026-10-04]: WR-02 closed — an InfluxDB write answered 401/403/404 pauses writes for 5 min with one log line (no HTTP call while paused), then probes again; a success logs one "writes resumed" line.
+- [2026-10-04]: Transformer contract is 2.2+ only: the API refuses any `/do` answer with an `error` field (the pre-2.2 `transformer_error` allowance and output-text rejection list are gone) and logs the service reason code, e.g. `transformer_rejected (sandbox_memory)`. Transformer 2.2.1 recreates its isolate after a memory-limit disposal.
+- [Phase 27]: 27-05: operator window override at ~22:41 UTC (no production traffic expected) replaced the 22:30 cut-off for this run only
+- [Phase 27]: 27-06: operator answered enable-all; stats enabled on InfluxDB 2 at 2026-10-03T12:05:27Z, stats bucket 90 d with id kept, six empty upgrade buckets dropped, Chronograf retirement approved for 27-07
+- [Phase 27]: 27-07: operator answered delete-all at the D-07 gate despite count_24h_DEVICE_CHECKIN=0 and an unconfirmed dashboard check; the 1.8 data, upgrade copy, Chronograf volume and /root/phase27 on both nodes are deleted, no rollback to 1.8; dashboard/check-in stays an end-of-phase UAT item
+- [Phase 27]: 27-07: Chronograf retired (D-13); stack files mirror InfluxDB 2.9.1; the INFLUXDB_TOKEN mount lives only on the live thinx_api spec (gluster thinx.yml has no top-level secrets block), so a stack deploy would drop it
+- [Phase 28]: D-02 engine gate passed (29.8.1 both nodes): trim on 1.9 first, then 1.10
+- [Phase 28]: D-12 applied: swarmpit_agent stays, OPS-SWARM-03 moved to Future Requirements (v1.14 = 24)
+- [Phase 28]: Gate 0 PASS on unchanged Swarmpit 1.9: .planning-only push autoredeployed thinx_api in 32 s (D-11a confirmed)
+- [Phase 28]: D-17 drift 0: swarmpit.yml equals the live spec; no reconciliation snapshot
+- [Phase 28]: 28-02: Step A trim on Swarmpit 1.9 passed Gate A (sla_s=31); influxdb.conf deleted after 0-reference mount scan (D-13); swarmpit_influx-data kept on micro, and core also holds one (for 28-04)
+- [Phase 28]: 28-03: Swarmpit 1.10 by tag (spec 15c044a82fed) with stack-file healthcheck start_period 300s under compose 3.8; Gate B PASS sla_s=50, no rung 1; swarmpit_db and agent untouched (D-04, D-06)
+- [Phase 28]: 28-04: core swarmpit_influx-data held for the operator (CORE_SSH outside the literal manager form); micro copy removed after Gate B (D-14)
 
 ### Todos
 
-- None open for v1.14 yet. The v1.13-era notes below (2026-09-21) are kept for reference: each is either resolved or now a v1.14 requirement (Vue `connect-src` gap and stale runbook snapshots → SEC-CSP-04; `WEB_HOSTNAME` for `:vue` → CI-03; gluster bind-mount source of truth → SEC-CSP-03, retirement → SEC-CSP-05 future).
+- [2026-09-28] [worker] Fix worker builder service polling completion detection; remove legacy cmd shell path — [todo file](.planning/todos/pending/2026-09-28-fix-worker-builder-service-polling-completion-detection.md)
+- [2026-09-28] [config] Split Rollbar server and client tokens — [todo file](.planning/todos/pending/2026-09-28-split-rollbar-server-and-client-tokens.md)
+
+The v1.13-era notes below (2026-09-21) are kept for reference: each is either resolved or now a v1.14 requirement (Vue `connect-src` gap and stale runbook snapshots → SEC-CSP-04; `WEB_HOSTNAME` for `:vue` → CI-03; gluster bind-mount source of truth → SEC-CSP-03, retirement → SEC-CSP-05 future).
 
 <details>
 <summary>v1.13-era notes (2026-09-21), reference only</summary>
@@ -195,6 +321,34 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
 - None.
 
+### Concerns carried from Phase 28
+
+- ⚠️ [Phase 28] Both nodes carry `swarmpit.db-data=true` and micro holds a stale 2022 `swarmpit_db-data`; a swarmpit_db reschedule to micro would start on stale data (runbook follow-up, not fixed).
+- ⚠️ [Phase 28] ~1.5k/day `autoredeploy failed` noise for the dhi.io images on `thinx_couchdb`/`thinx_influxdb` (autoredeploy labels on services Swarmpit cannot pull); micro still has the stale `swarmpit.influx-data` node label.
+- ⚠️ [Phase 28] `.claude/` is untracked but not gitignored; the local skill file contains the manager ssh line — avoid `git add -A`.
+
+### Concerns carried from Phase 22
+
+- ⚠️ [Phase 22] Console `test:unit` (footer hostnames guard) runs in no CI job or image build (review WR-03); its sweep/render also has blind spots (WR-04, WR-05).
+- ⚠️ [Phase 22] Submodule `Test Vue console` CircleCI job has failed on every thinx-staging run since job 836 (2026-09-23) in `Install dependencies and build`; not the deploy path.
+- ⚠️ [Phase 22] Review WR-01 (test job still receives the private-registry credential via context) and WR-02 (AGENTS.md publishes the ssh endpoint) remain open.
+
+### Concerns carried from Phase 23
+
+- ⚠️ [Phase 23] Worker lifecycle (worker todo Parts 1–3): the builder polling loop never detects completion; the worker never reconnects after a build, so with 1 replica each later build queues until the worker restarts; the reservation owner token; re-queue on `worker_busy`.
+- ⚠️ [Phase 23] Legacy worker `cmd` shell path still deployed. No other deployments exist (user, 2026-09-28), so removal is unblocked (worker todo Part 2).
+- ⚠️ [Phase 23] Rotate `WORKER_SECRET`: worker logs from before 23-02 contain it.
+- ⚠️ [Phase 23] Build checkouts are world-writable (0o777/0o766) and have never been hardened; least-privilege follow-up. `thinx.yml` `eval` in the worker `builder` was transferred to the backlog (T-23-14).
+- ⚠️ [Phase 23] Aikido IaC scan not run locally (Checkov binary missing). The platform auto-rescan is weekly and non-blocking.
+
+### Concerns carried from Phase 24
+
+- ⚠️ [Phase 24] **Stack deploy hazard (review WR-02):** `docker-swarm.yml` lists COUCHDB_USER, COUCHDB_PASS and REDIS_PASSWORD as api secrets, which the live `thinx_api` does not mount. Because the secret file wins over env, the next `restart.sh`/`docker stack deploy` will switch the API to those values. Compare them with the current env values, or comment the three entries out, before any stack deploy.
+- ⚠️ [Phase 24] WR-01 (old leaked WORKER_SECRET kept as env fallback) is deferred to SEC-CFG-03. The operator removed WORKER_SECRET from the swarm `.env` (2026-09-29). The live `thinx_api`/`thinx_worker` specs still carry it until the next stack deploy. The mounted secret file wins in the meantime.
+- ⚠️ [Phase 24] Production build-queue cron loop does not dispatch (probably the `.legacy()` Redis client), and there are 3 stale `waiting` entries. See `24-secrets-sweep/deferred-items.md`. Console Build presses are unaffected.
+- ⚠️ [Phase 24] Review WR-03 (worker socket has no worker auth), WR-04 (Slack bot-token precedence) and IN-01..04 are open. See `24-REVIEW-DISPOSITION.md`. CR-01 (GitHub OAuth cross-user token) was fixed and deployed in b09aea35.
+- ⚠️ [Phase 24] `thinx_api` GIT_KEY_PASSPHRASE is only 5 characters long. It was not rotated in this phase.
+
 ### Open Questions
 
 Decided at plan time, not blocking the roadmap:
@@ -212,6 +366,41 @@ Decided at plan time, not blocking the roadmap:
 | 260605-lix | Device check-in did not persist top-level lastupdate (console showed stale "last connected"): `update_device_and_respond` wrote a nested `doc.changes` blob via the flat-merge `devices/modify` handler; also `runDeviceTransformers` had no else branch for transformer-less devices. Fixed both + DeviceSpec (04b) regression. Root cause proven on prod doc 04ed1650. | 2026-06-05 | 6b4a077c | [260605-lix-fix-device-check-in-lastupdate-not-persi](./archive/quick/260605-lix-fix-device-check-in-lastupdate-not-persi/) |
 | 260605-inf | Influx stats fix (v1.10 OBS addition): dashboard check-in numbers read 0/stale + API log spammed `error parsing query: found BADSTRING`. Fixed `lib/thinx/influx.js` — tag mismatch (write `owner` vs read `owner_id`), malformed time predicates (stray `'`, Date/number → `'<ISO>'` / `now() - 7d`), `mean`→`count`, `${measurement}`→`${kpi}` loop index, removed malformed helper queries. Return shape preserved (statistics.js + Visits.vue compatible). CI green (pipeline 5266). Live in prod (autoredeployed). | 2026-06-05 | 9b6d931c | (loose commit — folded into v1.10, no quick-task dir) |
 | 260619-lgl | OAuth login failed from the Vue console: Google/GitHub buttons hit `/api/v2/oauth/{google,github}` (Vue API base is `/api/v2`) but the backend only mounted `/api/oauth/*` → `404 Cannot GET`. Dual-mounted the OAuth initiator+callback routes under `/api` and `/api/v2` (parity with `/login`+`/logout`); `redirect_uri` unchanged. Issue #2 (`/static/gdpr.html` 404) is deploy-lag — API code already serves it (`thinx-core.js:433`), ships on deploy. Console pin left at `1191184b`. Deployed via `thinx-staging`. | 2026-06-19 | b92f7c76 | [260619-lgl-oauth-v2-routes-gdpr-static](./archive/quick/260619-lgl-oauth-v2-routes-gdpr-static/) |
+| 6 | Vue console Dockerfile: run nginx as non-root (Aikido USER root finding) — console 7c6f90c | 2026-09-30 | 056d313d | — |
+| 261003-s59 | CR-01 API-key auth bypass: exact constant-time key/hash match (Util.safeEqual), empty/non-string rejected, device paths fail closed (log_invalid_key), firmware ott guard, router body api_key normalized, login hash compare constant-time. Not pushed — device OTA with wrong/revoked keys stops working once deployed. | 2026-10-03 | 9d567610 | [261003-s59-fix-cr-01-api-key-substring-authenticati](./quick/261003-s59-fix-cr-01-api-key-substring-authenticati/) |
+| 261003-skk | Mesh/validateSession auth bypass: validateSession trusts only router-verified Bearer/API-key identity or the session owner (no unverified owner_id+api_key body); router verifies the key against the body owner; mesh handlers and attachMesh act on the authenticated owner; CSRF on the four mesh write routes (D-21 lifted for mesh). Not pushed. PUT/DELETE /api/v2/mesh with an API key now 401 (use Bearer or v1 POST). | 2026-10-03 | 05ebbd85 | [261003-skk-fix-mesh-validatesession-auth-bypass](./quick/261003-skk-fix-mesh-validatesession-auth-bypass/) |
+| 261003-t29 | Device udid ownership (IDOR): Device#fetchOwned/filterOwned/isOwnedBy and a withOwnedDevice gate on all 10 udid-keyed device routes (owner from authenticated identity only; foreign = unknown = 200 no_such_device); push filtered to owned udids; edit cannot write owner/previous_owner; transfer request requires sender ownership, accept moves only stored udids, migrate_device re-checks owner. Not pushed. | 2026-10-03 | 5ef392e6 | [261003-t29-fix-device-udid-ownership-check](./quick/261003-t29-fix-device-udid-ownership-check/) |
+| 261003-tv5 | /device/register owner binding: Device#resolveRegistration — key owner's own udid checks in; unknown udid (404) kept; foreign/malformed udid gets a fresh uuid; MAC fallback filtered to the key owner's devices (Device.isOwnedBy), else new device for the key owner; MQTT credentials only for the resolved udid. Not pushed. | 2026-10-03 | c9305716 | [261003-tv5-fix-device-register-mac-fallback-owner-b](./quick/261003-tv5-fix-device-register-mac-fallback-owner-b/) |
+| 261003-u86 | Transfer carries the device's API key: atomic Redis EVAL moves the key with the owner change; refuses shared/unidentifiable/Default-MQTT keys at request and accept (apikey_shared, apikey_not_identified, apikey_ambiguous, apikey_owner_mqtt_key, apikey_check_failed, apikey_move_failed, device_move_failed); seamless continuity — old owner id + moved key + own udid redirects to the new owner (never consumed); check-ins record lastkey. Not pushed. | 2026-10-03 | 16bde50a | [261003-u86-device-transfer-carries-its-api-key](./quick/261003-u86-device-transfer-carries-its-api-key/) |
+| 261003-v05 | WebSocket log tail: non-JSON frame no longer crashes the API (live crash); sockets bound to the verified session owner (else close 1008); logtail only for the owner's own builds, no fs side effects on miss; dead HTTP /api/user/logs/tail and /api/v2/logs/tail removed. Not pushed. | 2026-10-03 | 51c5b100 | [261003-v05-fix-logs-tail-handler](./quick/261003-v05-fix-logs-tail-handler/) |
+| 261003-v9x | OTT owner binding: closes live cross-owner firmware read (traversal udid in stored OTT); tokens 32 random bytes, SET EX 86400, TTL capped at 3600 s on first redemption, never extended; ott_request owner from body + exact verify + fetchOwned; redemption re-checks owner/udid; tokens no longer logged. JSON-vs-binary redemption left for operator. Not pushed. | 2026-10-03 | 6c0ae6b2 | [261003-v9x-fix-ott-request-owner](./quick/261003-v9x-fix-ott-request-owner/) |
+| 261003-v9d | /device/addpush owner-bound push token | 2026-10-03 | 81cc0fb6 | [261003-v9d-fix-device-addpush-key-check](./quick/261003-v9d-fix-device-addpush-key-check/) |
+| 261003-vbg | MQTT status owner check with transfer binding | 2026-10-03 | 84f23c20 | [261003-vbg-fix-mqtt-status-owner-check](./quick/261003-vbg-fix-mqtt-status-owner-check/) |
+| 261003-x9z | Google OAuth state bound to the initiating browser; pentest XALG-1..4 triage | 2026-10-03 | 971284b8 | [261003-x9z-bind-google-oauth-state-to-the-initiatin](./quick/261003-x9z-bind-google-oauth-state-to-the-initiatin/) |
+| 261003-vn3 | messenger per-owner websocket routing | 2026-10-03 | 63716bae | [261003-vn3-fix-messenger-process-wide-websocket](./quick/261003-vn3-fix-messenger-process-wide-websocket/) |
+| 261003-w0c | MQTT handler never throws; device writes gated (THINX_MQTT_DEVICE_WRITES off) | 2026-10-03 | d46bb756 | [261003-w0c-fix-mqtt-forwardnonnotification-crash](./quick/261003-w0c-fix-mqtt-forwardnonnotification-crash/) |
+| 261004-0es | classic console escapes device-supplied toast fields (console e43a94d) | 2026-10-03 | 7f6ac1cc | [261004-0es-escape-device-supplied-notification-fiel](./quick/261004-0es-escape-device-supplied-notification-fiel/) |
+| 261003-vd4 | firmware loads only the verified owner's device; device-side todo closed | 2026-10-03 | 561bc65e | [261003-vd4-fix-firmware-owner-compare](./quick/261003-vd4-fix-firmware-owner-compare/) |
+| 261003-vep | builder embeds the device's own API key; create() refuses duplicates | 2026-10-03 | 8ea88930 | [261003-vep-fix-builder-masked-api-key](./quick/261003-vep-fix-builder-masked-api-key/) |
+| 261003-w13 | API key list without cleartext keys; Default MQTT key lookup arity fix | 2026-10-03 | 7e3c8645 | [261003-w13-fix-api-key-cleartext-exposure](./quick/261003-w13-fix-api-key-cleartext-exposure/) |
+| 261004-22b | OTT redemption serves the firmware binary; specs stop printing key material | 2026-10-03 | 40a5bd60 | [261004-22b-ott-redemption-serves-the-firmware-binar](./quick/261004-22b-ott-redemption-serves-the-firmware-binar/) |
+| 261004-22d | Vue one-time API key dialog reads api_key (console 7d8098e) | 2026-10-03 | 2836f579 | [261004-22d-vue-console-copy-key-dialog-reads-api-ke](./quick/261004-22d-vue-console-copy-key-dialog-reads-api-ke/) |
+| 261004-25u | MQTT device writes safe to enable (string status, stale-LWT guard, no double registration) | 2026-10-03 | 71c45c57 | [261004-25u-mqtt-device-writes-safe-to-enable](./quick/261004-25u-mqtt-device-writes-safe-to-enable/) |
+| 261004-l7q | transfer accept/decline bound to the recipient; revoke/partial/mig_sources fixes | 2026-10-04 | 656d3d3b | [261004-l7q-transfer-accept-and-decline-bound-to-the](./quick/261004-l7q-transfer-accept-and-decline-bound-to-the/) |
+| 261004-liv | firmware lookup iterates extension values; version parsing fixed; fail-closed serving | 2026-10-04 | 64ee0d79 | [261004-liv-firmware-lookup-loops-iterate-values](./quick/261004-liv-firmware-lookup-loops-iterate-values/) |
+| 261004-l8k | device document log leaks and deploy-path udid guard; no re-offer without env_hash | 2026-10-04 | 19c8371b | [261004-l8k-device-document-and-udid-hardening](./quick/261004-l8k-device-document-and-udid-hardening/) |
+| 261004-lps | worker build completion detection and platformio env selection (worker cd2ce61) | 2026-10-04 | b04a5bdc | [261004-lps-worker-build-completion-and-platformio-e](./quick/261004-lps-worker-build-completion-and-platformio-e/) |
+| 261004-m46 | worker never evals repository thinx.yml (T-23-14; worker 192521b) | 2026-10-04 | 08270caf | [261004-m46-worker-never-evals-repository-thinx-yml](./quick/261004-m46-worker-never-evals-repository-thinx-yml/) |
+| 261004-l9f | failed Bearer verification answers 401 | 2026-10-04 | 85a25236 | [261004-l9f-failed-bearer-verification-answers-401](./quick/261004-l9f-failed-bearer-verification-answers-401/) |
+| 261004-n5a | build containers never get docker.sock (worker 27fff67) | 2026-10-04 | 345b3bab | [261004-n5a-build-containers-never-get-docker-sock](./quick/261004-n5a-build-containers-never-get-docker-sock/) |
+| 261004-n65 | builder images never eval thinx.yml (arduino 7841df0, platformio 5cdabaf, nodemcu 711aa42, micropython c2487e6) | 2026-10-04 | 37a60e85 | [261004-n65-builder-images-never-eval-thinx-yml](./quick/261004-n65-builder-images-never-eval-thinx-yml/) |
+| 261004-om7 | arduino installs every libs: entry (5d15914); nodemcu deploy requires tests (ca2ab2f) | 2026-10-04 | f9bd4d44 | [261004-om7-arduino-installs-all-libs-and-nodemcu-de](./quick/261004-om7-arduino-installs-all-libs-and-nodemcu-de/) |
+| 261004-ou3 | builder env header target never empty (platformio a8c35d9, arduino 976b5d6) | 2026-10-04 | 5ed6da9b | [261004-ou3-builder-env-header-target-never-empty](./quick/261004-ou3-builder-env-header-target-never-empty/) |
+| 261004-on2 | micropython builds work end to end; worker --detach and CI npm test (micropython 5c3d792, worker cc4fd28) | 2026-10-04 | 547f6b89 | [261004-on2-micropython-builds-work-end-to-end-and-w](./quick/261004-on2-micropython-builds-work-end-to-end-and-w/) |
+| 261004-rdf | API reaches the transformer service; runDeviceTransformers null-safe | 2026-10-04 | 9d7e4f66 | [261004-rdf-api-reaches-the-transformer-service-and-](./quick/261004-rdf-api-reaches-the-transformer-service-and-/) |
+| 261004-sdv | check-in never logs the registration body or device documents | 2026-10-04 | 043e3bda | [261004-sdv-check-in-never-logs-the-registration-bod](./quick/261004-sdv-check-in-never-logs-the-registration-bod/) |
+| 261004-seq | transformer service logs no sensitive data; honest /do results (transformer b28185c, 2.2.0) | 2026-10-04 | 0bea70cc | [261004-seq-transformer-service-logging-and-honest-r](./quick/261004-seq-transformer-service-logging-and-honest-r/) |
+| 261004-tgg | check-in path crash and hang bugs fixed (markUserBuildGoal, SigFox insert, envs, validateHasUpdateAvailable, no_mac) | 2026-10-04 | 711f3e5c | [261004-tgg-check-in-path-crash-and-hang-bugs](./quick/261004-tgg-check-in-path-crash-and-hang-bugs/) |
 
 ## Cross-Project Touchpoints
 
@@ -222,13 +411,17 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
+**Stopped at:** v1.14 milestone closed and archived (tag v1.14), ready for /gsd-new-milestone
+
 **Resume file:** None
 
-**Last session:** 2026-09-25T13:19:12.516Z
+**Last session:** 2026-10-05T12:31:05.806Z
 
-**Stopped at:** Completed 22-03-PLAN.md
+**Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
-**Next action:** `/gsd:discuss-phase 22` (then `/gsd:plan-phase 22`)
+**Earlier:** Quick-task chain complete and pushed: v9d, vbg, x9z (pentest XALG-3/4 Google login CSRF), vn3, w0c, 0es (console toast escaping), vd4, vep, w13. CORS_ENFORCE=true live on thinx_api since 2026-10-03 ~21:56Z (pentest triage: .planning/quick/261003-x9z-*/PENTEST-TRIAGE.md).
+
+**Next action:** push the transformer repo, then `thinx-staging` (submodule pointer 243793c); verify CircleCI and the `thinx_api` + `transformer` rollout (a `[transformer] not applied` line now names the service reason code; `[audit-index] managed_logs _design/audit-owner-date action=created` appears once on the first boot). Then `/gsd-discuss-phase 28`. (Earlier: verify CircleCI + rollout of thinx_api and classic console; operator post-deploy checks (classic console build log + actionable toast, Google login in Vue console, device check-ins). Open decisions: OTT redemption JSON-vs-binary todo; transfer redirect scope for OTT/addpush (vd4 SUMMARY); apikey hash-as-credential todo.)
 
 ---
 *v1.0 GA backend closures shipped and archived: 2026-05-27 (4/4 v1 requirements Verified)*
@@ -241,7 +434,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Review `.planning/ROADMAP.md` (v1.14 section), then start Phase 22 with `/gsd:discuss-phase 22`
+- Start the next milestone with /gsd-new-milestone
 
 ## Performance Metrics
 
@@ -250,3 +443,42 @@ Decided at plan time, not blocking the roadmap:
 | Phase 22 P01 | 10 min | 3 tasks | 4 files |
 | Phase 22 P02 | 13 min | 3 tasks | 1 files |
 | Phase 22 P03 | 4min | 2 tasks | 1 files |
+| Phase 22 P04 | 19min | 3 tasks | 6 files |
+| Phase 23 P01 | 16 min | 3 tasks | 6 files |
+| Phase 23 P02 | 7min | 2 tasks | 2 files |
+| Phase 23 P03 | 10 min | 3 tasks | 8 files |
+| Phase 23 P04 | 5min | 2 tasks | 7 files |
+| Phase 24 P01 | 7 min | 2 tasks | 7 files |
+| Phase 24 P02 | 7 min | 3 tasks | 10 files |
+| Phase 24 P03 | 9 min | 3 tasks | 10 files |
+| Phase 24 P04 | 51 min | 3 tasks | 2 files |
+| Phase 24 P05 | 42 min | 3 tasks | 1 files |
+| Phase 24 P06 | 9 min | 3 tasks | 1 files |
+| Phase 25 P01 | 12 min | 2 tasks | 6 files |
+| Phase 25 P02 | 7min | 2 tasks | 6 files |
+| Phase 25 P03 | 12min | 3 tasks | 9 files |
+| Phase 25 P04 | 27 min | 3 tasks | 3 files |
+| Phase 25 P05 | 15 min | 2 tasks | 6 files |
+| Phase 25 P07 | 6min | 3 tasks | 10 files |
+| Phase 26 P01 | 8 min | 2 tasks | 8 files |
+| Phase 26 P03 | 7min | 2 tasks | 5 files |
+| Phase 26 P04 | 14 min | 3 tasks | 6 files |
+| Phase 26 P05 | 10min | 3 tasks | 7 files |
+| Phase 26 P02 | 17 min | 3 tasks | 10 files |
+| Phase 26 P09 | 9min | 2 tasks | 7 files |
+| Phase 26 P06 | 35min | 3 tasks | 1 files |
+| Phase 26 P07 | 20 min | 3 tasks | 3 files |
+| Phase 26 P08 | 21 min | 3 tasks | 1 files |
+| Phase 26 P10 | 15min | 3 tasks | 4 files |
+| Phase 27 P01 | 8 min | 2 tasks | 2 files |
+| Phase 27 P02 | 15 min | 2 tasks | 8 files |
+| Phase 27 P08 | 6min | 2 tasks | 3 files |
+| Phase 27 P03 | 11 min | 3 tasks | 9 files |
+| Phase 27 P04 | 1h 32m | 3 tasks | 3 files |
+| Phase 27 P05 | 7 min | 2 tasks | 1 files |
+| Phase 27 P06 | 5min | 3 tasks | 1 files |
+| Phase 27 P07 | 74min | 3 tasks | 2 files |
+| Phase 28 P01 | 20min | 2 tasks | 4 files |
+| Phase 28 P02 | 21 min | 2 tasks | 5 files |
+| Phase 28 P03 | 13 min | 2 tasks | 3 files |
+| Phase 28 P04 | 6min | 2 tasks | 2 files |

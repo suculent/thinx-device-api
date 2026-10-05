@@ -132,6 +132,52 @@ describe("Meshes (noauth)", function () {
                 done();
             });
     }, 30000);
+
+    // 261003-skk: a forged owner_id + api_key body must never authenticate. Only the
+    // throwaway "skk-forged-mesh" id is used, so a regression cannot touch the
+    // "device-mesh-id" fixture the JWT list case matches exactly.
+    const SKK_FORGED_KEY = "0".repeat(64);
+
+    it("POST /api/mesh/create (forged owner_id + api_key, 261003-skk)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/create')
+            .send({ owner_id: envi.dynamic.owner, api_key: SKK_FORGED_KEY, mesh_id: "skk-forged-mesh", alias: "skk" })
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
+    }, 30000);
+
+    it("POST /api/mesh/delete (forged owner_id + api_key, 261003-skk)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/delete')
+            .send({ owner_id: envi.dynamic.owner, api_key: SKK_FORGED_KEY, mesh_ids: ["skk-forged-mesh"] })
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
+    }, 30000);
+
+    it("POST /api/mesh/create (forged body with Origin: device, 261003-skk)", function (done) {
+        chai.request(thx.app)
+            .post('/api/mesh/create')
+            .set('Origin', 'device')
+            .send({ owner_id: envi.dynamic.owner, api_key: "mock-api-key", mesh_id: "skk-forged-mesh", alias: "skk" })
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
+    }, 30000);
+
+    it("PUT /api/v2/mesh (forged owner_id + api_key, 261003-skk)", function (done) {
+        chai.request(thx.app)
+            .put('/api/v2/mesh')
+            .send({ owner_id: envi.dynamic.owner, api_key: SKK_FORGED_KEY, mesh_id: "skk-forged-mesh", alias: "skk" })
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
+    }, 30000);
 });
 
 describe("Meshes (JWT)", function () {

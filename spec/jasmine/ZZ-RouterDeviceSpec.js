@@ -192,7 +192,7 @@ describe("Devices (JWT)", function () {
         expect(j.response.api_key).to.be.a('string');
         expect(j.response.hash).to.be.a('string');
         created_api_key = j.response.hash;
-        console.log("[spec] saving apikey (D)", j.response.api_key);
+        console.log("[spec] saving apikey (D), hash present:", typeof (j.response.hash) === "string");
         done();
       });
   }, 30000);
@@ -227,6 +227,106 @@ describe("Devices (JWT)", function () {
         dynamic_devices = j.response;
         expect(res.status).to.equal(200);
         expect(res.text).to.be.a('string');
+        done();
+      });
+  }, 30000);
+
+  // Cross-owner regressions (261003-t29): envi.udid is cimrman's device (DeviceSpec registers it
+  // under envi.oid), so dynamic gets exactly the answer of an unknown udid on every udid route.
+  const T29_NOT_FOUND = '{"success":false,"response":"no_such_device"}';
+
+  it("POST /api/device/detail (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/detail')
+      .set('Authorization', jwt)
+      .send({ udid: envi.udid })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/envs (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/envs')
+      .set('Authorization', jwt)
+      .send({ udid: envi.udid })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/edit (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/edit')
+      .set('Authorization', jwt)
+      .send({ changes: { udid: envi.udid, alias: "t29-cross-owner" } })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/detach (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/detach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.udid })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/attach (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/attach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.udid, source_id: "t29-source" })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/mesh/detach (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/mesh/detach')
+      .set('Authorization', jwt)
+      .send({ udid: envi.udid, mesh_id: "device-mesh-id" })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/push (jwt, another owner's udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/push')
+      .set('Authorization', jwt)
+      .send({ udids: [envi.udid], enviros: [] })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/device/detail (jwt, unknown udid) answers no_such_device (261003-t29)", function (done) {
+    chai.request(thx.app)
+      .post('/api/device/detail')
+      .set('Authorization', jwt)
+      .send({ udid: "00000000-0000-1000-8000-000000000000" })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(T29_NOT_FOUND);
         done();
       });
   }, 30000);

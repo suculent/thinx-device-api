@@ -226,6 +226,49 @@
 
 ---
 
+## Milestone: v1.14 — Backlog & Hardening Sweep
+
+**Shipped:** 2026-10-05
+**Phases:** 7 (22–28) | **Plans:** 47 | **Tasks:** 116
+
+### What Was Built
+- **CI & SAST (22):** CodeQL v4 on `thinx-staging`/`main`, retrying registry logins, Vue console hostname proven end to end.
+- **Build-pipeline sinks (23):** argv-only git and worker jobs, `core.symlinks=false`, `safepath` containment for every repository-controlled read/write.
+- **Secrets sweep (24):** every `lib/` integration credential plus `CSRF_SECRET` through `readSecret()` from swarm secrets; `WORKER_SECRET` rotated.
+- **Session-bound CSRF + edge headers (25):** HMAC token bound to the session, rotated on login, enforced on all cookie-authenticated mutations; console headers mirrored into images with a CI parity check.
+- **Log paging (26):** owner-bound cursor paging for audit/build logs in the Vue History page; daily 365-day retention job.
+- **InfluxDB 2 (27):** in-place upgrade to 2.9.1 from a verified backup, v2 client, 90-day `stats` bucket.
+- **Swarmpit (28):** stats stack removed, then 1.10; agent kept (OPS-SWARM-03 descoped).
+
+### What Worked
+- **Gated production steps with real push-to-redeploy measurements.** Phase 28 timed each step from the CircleCI push end to the new task Running (32/31/50 s), with pre-step snapshots and rollback recipes; no rollback was needed.
+- **Observe before enforce, again.** CSRF went legacy → observe (24 h, reason-coded counters) → enforce; observe caught one console path before anyone was locked out.
+- **Rehearse irreversible storage changes.** The InfluxDB upgrade was rehearsed from a restored copy before cutover; all 2402 points carried over.
+- **Research reading upstream source, not changelogs.** Diffing Swarmpit 1.9 vs 1.10 showed identical CouchDB migrations and the healthcheck default that would have restart-looped the app.
+
+### What Was Inefficient
+- **Verification digests went stale under later quick tasks and post-audit fixes.** Six of seven phase reports were stale at close; an integration re-check had to stand in for re-verification.
+- **Auto-mode classifier stops mid-execution.** Phase 28 halted several times on agent launches and deletions (production change, self-modification); each needed an operator round trip.
+- **GPG passphrase expiry** stopped the first gate commit; unlocking took a checkpoint.
+- **Open-artifact sprawl.** 18 items (todos, deferred items, one quick task with invalid frontmatter) had to be acknowledged at close.
+
+### Patterns Established
+- **Gate commits as phase evidence:** a `.planning`-only signed commit on `thinx-staging` exercises the real CI → registry → Swarmpit path and doubles as the evidence record.
+- **SLA clock:** CircleCI push-step `end_time` → task `Status.Timestamp`; registry logs are not a usable clock.
+- **Stack snapshots with redaction** under `.planning/runbooks/swarm-configs/` (`<stack>.<step>.{pre,post}.yml`).
+- **Rollout-flag pattern** (v1.13) extended to a three-mode switch (`CSRF_MODE` legacy/observe/signed).
+
+### Key Lessons
+- Re-verify (or at least record a regression check) whenever a quick task touches a verified phase's files; stale digests accumulate silently.
+- Pre-authorize production-changing agent launches before an unattended window, or run those windows outside auto mode.
+- Keep untracked operator tooling (`.claude/`) out of `git add -A` paths — it holds host details.
+
+### Cost Observations
+- Model mix: orchestration on opus; research/plan/check/execute/verify subagents per phase.
+- Notable: Phase 28 needed 4 plans and ~1 h of production time but several operator interventions caused by permission gates rather than technical issues.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -237,6 +280,7 @@
 | v1.10 | 3 | 5 | First milestone-level audit (`v1.10-MILESTONE-AUDIT.md`, ✅ passed) — closes the v1.0/v1.9 "no milestone audit" revisit flag; codified discrepancy-branch closure (verify + persist annex when fix already live); helper-first sequencing so OPS phases consume their own code deps; quick-task-as-milestone-addition for in-cycle non-requirement commits |
 | v1.11 | 3 | 6 | Closed at `tech_debt` with runtime phases deliberately undeployed; semantics spec encoding the replaced dependency contract |
 | v1.13 | 1 | 5 | Fail-open to enforce rollout flag for breaking security controls; operator overrides for criteria whose tool disappeared; first formal `audit-open acknowledge` pass (8 legacy items) |
+| v1.14 | 7 | 47 | Milestone re-audit with an integration regression check standing in for stale phase verifications; gated push-to-redeploy measurement for ops phases; three-mode security rollout switch |
 
 ### Cumulative Quality
 
@@ -246,6 +290,7 @@
 | v1.9 | 7+ (`02-OwnerSpec.js` × 5 behavior-locking, `ZZ-RouterAdminReactivateSpec.js`, `ZZ-CookieAttributeSpec.js`, `ZZ-WebSocketLifecycleSpec.js`, `ZZ-CertProbeSpec.js`, `ZZ-AuditTTLSpec.js`, `ZZ-RouterPasswordResetSpec.js` extensions) | base image bumped to `1.9.3054`; production deploy deferred to operator push (CI green-gate on `thinx-staging`) | per-phase VERIFICATION.md PASS for all 7 phases (no separate milestone audit; carries the same revisit flag as v1.0's gap) |
 | v1.10 | 2+ (`ZZ-WebSocketHandshakeRtmSpec.js`, `ZZ-AuditTTLEvictionSpec.js`, redactor Slack-receipt unit spec) | device check-in fix + no_team Slack catch DEPLOYED & live (`sha256:2bf95549`); influx fix `9b6d931c` CI-green (pipeline 5266), operator force-rollout pending | **first milestone-level audit** — `v1.10-MILESTONE-AUDIT.md` ✅ passed (requirements 5/5, phases 3/3, integration 2/2, flows 2/2); closes the v1.0/v1.9 revisit flag |
 | v1.13 | CSRF middleware specs (fail-open/enforce paths) | classic + Vue console images; `thinx_api` with `CSRF_ENFORCE` on (2026-09-25 09:02Z) | no milestone audit; Phase 21 VERIFICATION `passed` 19/19 with 3 overrides |
+| v1.14 | CsrfRouteInventory/SessionFlow, Git/BuilderPath/SafePath, SecretsSweep, LogPaging/BuildLogOwner, Influx* (CI 1756 specs, 0 failures) | api, worker, transformer, both consoles; InfluxDB 2.9.1; Swarmpit 1.10 | tech_debt (24/24; override_closeout) |
 
 ### Recurring Backlog Themes
 
@@ -256,9 +301,11 @@
 - **Survived all three milestones (v1.0 → v1.9 → v1.10):** TEST-CHAI-01, OPS-02 / OPS-03, CONSOLE-LEGACY-JSON-PARSE — these have crossed the threshold from "deferred" into "structurally orthogonal to this codebase's lifecycle". v1.10 did NOT make the deliberate keep/drop call (the milestone was OPS-execution-scoped, not backlog-grooming); they auto-carried a 4th time. **v1.11 planning must force the keep/drop decision** — they are now overdue for it.
 - **v1.10 → carried forward to v1.11:** fs-finder removal sweep (now unblocked — the ops loop v1.10 closed was its stated gate), fresh Dependabot triage (5 alerts), the four structurally-orthogonal items above, and the influx-fix prod deploy (`9b6d931c`, CI-green, operator force-rollout pending).
 - **v1.13 → carried forward:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS), WR-06 (session-bound CSRF), WR-04 (`POST /api/v2/user`), console CSP source-of-truth retirement, SEC-CFG-02. TEST-CHAI-01 / OPS-02 / OPS-03 have now been carried through **six** milestones without a keep/drop call. Make that call in v1.14 or move them to Out of Scope.
+- **v1.14 → carried forward:** OPS-SWARM-03, SEC-CSP-02, worker lifecycle / build-queue cron, API-key storage hardening, Rollbar token split, legacy worker `cmd` removal, CI exit on spec failure. TEST-CHAI-01, OPS-02/03, `uuid #194` survive again.
 
 ---
 *Retrospective initialized: 2026-05-27 (v1.0 milestone close)*
 *v1.9 milestone section appended: 2026-06-04*
 *v1.10 milestone section appended: 2026-06-05*
 *v1.13 milestone section appended: 2026-09-25*
+*v1.14 milestone section appended: 2026-10-05*

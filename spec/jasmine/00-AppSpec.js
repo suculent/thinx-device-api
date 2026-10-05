@@ -114,14 +114,26 @@ describe("App should support", function () {
       });
   }, 30000);
 
-  it("POST /api/user/logs/tail (should not exist before login)", function (done) {
+  it("POST /api/user/logs/tail (removed in quick 261003-v05, 404)", function (done) {
     chai.request(thx.app)
       .post('/api/user/logs/tail')
       .send({
         'body': 'nonsense'
       })
       .end((err, res) => {
-        expect(res.status).to.equal(404); // not implemented at this stage
+        expect(res.status).to.equal(404); // route removed; build logs are tailed over the WebSocket
+        done();
+      });
+  }, 30000);
+
+  it("POST /api/v2/logs/tail (removed in quick 261003-v05, 404)", function (done) {
+    chai.request(thx.app)
+      .post('/api/v2/logs/tail')
+      .send({
+        'body': 'nonsense'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(404); // route removed; build logs are tailed over the WebSocket
         done();
       });
   }, 30000);

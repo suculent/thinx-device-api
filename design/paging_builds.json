@@ -1,0 +1,12 @@
+{
+  "_id": "_design/paging",
+  "language": "javascript",
+  "views": {
+    "builds_by_owner_time": {
+      "map": "function (doc) { var r = doc; if (typeof doc.owner !== 'string' && Array.isArray(doc.log) && doc.log.length > 0 && doc.log[0] && typeof doc.log[0].owner === 'string') { r = doc.log[0]; } if (typeof r.owner !== 'string' || r.owner.length === 0) return; var t = (typeof r.start_time === 'number') ? r.start_time : ((typeof r.timestamp === 'number') ? r.timestamp : 0); emit([r.owner, t], null); }"
+    },
+    "builds_by_time": {
+      "map": "function (doc) { var r = doc; if (typeof doc.owner !== 'string' && Array.isArray(doc.log) && doc.log.length > 0 && doc.log[0] && typeof doc.log[0].owner === 'string') { r = doc.log[0]; } if (typeof r.owner !== 'string') return; var t = (typeof r.start_time === 'number') ? r.start_time : ((typeof r.timestamp === 'number') ? r.timestamp : null); if (t === null) return; emit(t, { owner: r.owner, udid: (typeof r.udid === 'string') ? r.udid : null, build_id: (typeof r.build_id === 'string') ? r.build_id : doc._id, rev: doc._rev }); }"
+    }
+  }
+}

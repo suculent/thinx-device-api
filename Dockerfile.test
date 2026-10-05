@@ -144,6 +144,11 @@ COPY . .
 # API-served HTML must not depend on inline scripts. No test packages required.
 RUN node --test spec/node/StaticCsp.test.js
 
+# Retention installer (cron-line injection, schedule window) and host wrapper
+# (credential hygiene, read-only mounts) contracts, plus the `npm test` exit-code
+# contract (jasmine failures must fail the api container). A failure fails the build.
+RUN node --test spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js
+
 RUN mkdir -p ./.nyc_output
 
 # only for test mocking (may not work, will need structure with mock data in repo)

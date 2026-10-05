@@ -12,15 +12,22 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
-**Shipped:** v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
+**Shipped:** v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
+
+Previously: v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
 
 Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user GitHub token backend, Docker Secrets `readSecret()` helper. v1.11 Backlog Drawdown (2026-06-06) — fs-finder excised, Dependabot triage, influx fix confirmed live. v1.10 Operational Closures (2026-06-05). v1.9 Backend Hygiene & Posture (2026-06-04). v1.0 GA Backend Closures (2026-05-27).
 
 **Production topology (2026-09-21, swarm-verified; placement floats — always query it):** `thinx_api` on core, `thinx_console` on micro, `thinx_vue` on core. Both console services bind-mount the same gluster `default.conf`, so both hosts serve one identical CSP.
 
-**Codebase posture (as of v1.13):**
+**Codebase posture (as of v1.14):**
+- Session-bound HMAC CSRF (`CSRF_SECRET` via `readSecret`, rotated on login) guards WR-04 and every cookie-authenticated mutation; a static route inventory spec locks the guard set.
+- Build pipeline: git and worker jobs run argv-only (no shell), clones use `core.symlinks=false`, and every repository-controlled read/write goes through `lib/thinx/safepath.js`. The legacy worker `cmd` is still emitted for old workers.
+- Logs: opt-in owner-bound cursor paging for audit and build logs; a daily 365-day retention job on micro.
+- Stats on InfluxDB 2.9.1 (Flux, `@influxdata/influxdb-client` 1.35.0), `stats` bucket 90 days, ensured at boot; writes pause 5 min after a refused write.
+- Swarm: Swarmpit 1.10 (stats stack removed, agent kept) does registry autoredeploy within ~30–75 s; recovery ladder in `.planning/runbooks/swarm.md`.
 - Web edge: pinned-host CSP (no scheme wildcards; `unsafe-eval` still present for AngularJS); double-submit CSRF enforced on cookie-session login/account POSTs; rollback via `CSRF_ENFORCE` flag per `.planning/runbooks/csp-csrf-hardening.md`.
-- Core credentials (Redis, CouchDB) load through `readSecret()` from Docker secrets; GDPR purge is a single orchestrator (`owner_purge.js`) reused by scheduled purges.
+- Core credentials (Redis, CouchDB) and, since v1.14 Phase 24, every integration credential in `lib/` (Slack, GitHub/Google OAuth, Mailgun, Rollbar, worker secret, deploy-key passphrase) load through `readSecret()` from Docker secrets, falling back to env; GDPR purge is a single orchestrator (`owner_purge.js`) reused by scheduled purges.
 - `lib/thinx/owner.js` is fully async/await (~73 callback patterns swept; 5 behavior-locking specs added) with strict equality throughout and SEC-PII-01 + Phase 5 REFACTOR-02 invariants preserved.
 - WebSocket lifecycle is deterministic (raw-socket `close` handler), session cookie is `httpOnly: true` with documented sub-5-min rollback, edge-handshake gap captured in an operator runbook.
 - Account lifecycle: admin `POST /api/v2/admin/user/:id/reactivate` exists for soft-deleted users; password-reset emails land on the Vue console (`/password-reset?`).
@@ -29,29 +36,35 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 **Companion project:** `services/console` submodule shipped its SEC-DEP-02 phase under a new `v1.x Operational Hygiene` milestone; pointer landed in this repo via Phase 10 commit `28a4add4`.
 
-## Current Milestone: v1.14 Backlog & Hardening Sweep
+## Next Milestone Goals
 
-**Goal:** Close the v1.13 security follow-ups and the open ops/code findings, and ship three long-standing backlog features (log paging, InfluxDB retention, Swarmpit trim). Phases start at 22.
-
-**Target features:**
-- **WR-06** — session-bound CSRF token (HMAC(secret, random‖session_id)), rotated on login
-- **WR-04** — `POST /api/v2/user` requires the CSRF token, no machine-client exemption (decision 2026-09-25: non-browser clients must prime the token)
-- **Console CSP source of truth** — the gluster bind-mounted `default.conf` is canonical (decision 2026-09-25); image `default.conf` files and the runbook snapshots mirror it, including the Vue `connect-src` `app.thinx.cloud` fix; spot-check classic register / forgot / reset-confirm under enforcement
-- **SEC-CFG-02** — `readSecret()` sweep over the ~20 remaining sensitive env vars
-- **builder.js path traversal** — fix Aikido-flagged `readFileSync`/`lstatSync` sinks in `lib/thinx/builder.js`
-- **git.js argv** — `lib/thinx/git.js` `execSync` sink takes argv, not a shell string
-- **CodeQL workflow** — trigger on `main`, current action majors
-- **Registry login retry** — retry wrapper on the CI `docker login registry.thinx.cloud:5000` step
-- **Vue hostname var** — separate Vue console hostname build var so footer links point at itself
-- **Log paging** — optional bookmark paging for audit + build logs, used by the Vue Console only; Legacy console keeps the 200-item behavior unchanged
-- **InfluxDB 2** — upgrade `thinx_influxdb` 1.8 → 2 in production (added 2026-09-25), with `influx.js` moved to v2 and a 90-day retention on `stats` (default `autogen` is infinite today)
-- **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
-
-**Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
-
-**Scope note:** log paging and the Vue hostname var touch `services/console` (Vue). As in v1.13, this milestone coordinates the console submodule pointer bump rather than treating that work as fully external.
+Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Deferred Items):
+- Worker lifecycle and the build-queue cron that never dispatches waiting builds (todo `2026-09-28-fix-worker-builder-service-polling-completion-detection`)
+- API-key credential/storage hardening (todo `2026-10-03-apikey-hash-credential-and-storage`), Rollbar server/client token split
+- Remove the legacy worker `cmd` path and the last shell-exec sites in `statistics.js`; drop stale env secrets next to the swarm mounts
+- OPS-SWARM-03 (remove `swarmpit_agent`) if monitoring moves off the Swarmpit UI; SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`
+- Make CI fail on spec failures (`jasmine || true`)
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.14 Backlog & Hardening Sweep (shipped 2026-10-05)</summary>
+
+- ✓ **CI-01** — v1.14 (Phase 22) — CodeQL `javascript-typescript` (`codeql-action@v4`, `checkout@v7`, `build-mode: none`) runs on pushes to `thinx-staging`/`main` and PRs to `main`; non-required; default setup off. security-extended baseline recorded (147 alerts). Main-push row pending the merge of PR #569.
+- ✓ **SEC-CFG-02** — v1.14 (Phase 24) — `SLACK_BOT_TOKEN`, `SLACK_CLIENT_SECRET`, `SLACK_WEBHOOK`, `GITHUB_CLIENT_SECRET`, `GOOGLE_OAUTH_SECRET`, `MAILGUN_API_KEY`, `ROLLBAR_SERVER_TOKEN` (falling back to `ROLLBAR_ACCESS_TOKEN`), `WORKER_SECRET` and `GIT_KEY_PASSPHRASE` all load through `readSecret()`, secret file first, then env. When both are absent the integration is switched off, and `SecretsSweepSpec` covers that.
+  - Production: each service was switched with its own `docker service update --secret-add`. `thinx_api` mounts 9 secrets, including the new `CSRF_SECRET`. `thinx_worker` mounts `WORKER_SECRET` and `ROLLBAR_SERVER_TOKEN`; `thinx_transformer` mounts `ROLLBAR_SERVER_TOKEN`.
+  - `WORKER_SECRET` was rotated, and a real build on the new value succeeded. `docker-swarm.yml` mirrors the live stack. There was no outage.
+- ✓ **OPS-INFLUX-01/02/03** — v1.14 (Phase 27) — `thinx_influxdb` upgraded 1.8 → `dhi.io/influxdb:2.9.1` in place (2026-10-02 22:43–22:45 UTC, ~2 min down) after a verified, rehearsed backup; all 2402 points migrated, the 80-day window (501) proven equal after the trim. `lib/thinx/influx.js` uses `@influxdata/influxdb-client` 1.35.0 with Flux and strictly increasing ns timestamps; a boot ensure adopts `stats/autogen` as `stats` with 90-day retention. Stats re-enabled 2026-10-03 12:05 UTC; dashboard/Visits and a test-device check-in confirmed in UAT. CI runs the influx specs on InfluxDB 2.9.1 (1018 specs, 0 failures). Chronograf retired; 1.8 data and backups deleted.
+  - `INFLUXDB_TOKEN` is mounted only on the live `thinx_api` spec (not in gluster `thinx.yml`) — `restart.sh`/stack deploy turns stats off until re-added.
+- ✓ **OPS-SWARM-01/02** — v1.14 (Phase 28) — Stats stack removed on 1.9 first (Step A, Gate A 31 s), then Swarmpit 1.10 by tag with compose 3.8 and a 300 s healthcheck start period, keeping the API 1.44 pins (Step B, Gate B 50 s, 10-min hold with no restarts). `swarmpit_db` unchanged (7 docs hash-equal to the pre-phase dump, no migration); agent unchanged on `agent:latest` (no 1.10-matching release). `swarmpit_influx-data` removed on micro (130M) and core (87M). Each step snapshotted under `.planning/runbooks/swarm-configs/`; rollback accepted un-drilled in UAT. OPS-SWARM-03 (remove agent) moved to Future Requirements — the Swarmpit tasks UI is still used for monitoring.
+- ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
+- ✓ **SEC-EXEC-01** — v1.14 (Phase 23) — `lib/thinx/git.js` runs git argv-only (`runGit` is a detached `spawn`, `shell:false`; `ls-files` uses `execFileSync`). No shell string, no `ssh-agent sh -c`. Constant `GIT_SSH_COMMAND` + askpass, passphrase in env, publickey-only ssh. Private builds proven in production (43c748d0, 17d30770).
+- ✓ **SEC-EXEC-02** — v1.14 (Phase 23) — Remote jobs carry `argv` (arguments only), and the worker spawns its constant builder program with `shell:false`. `shell-escape` is gone from `package.json` and the lockfile. The legacy `cmd` shell path is retained for now (removal is a pending todo).
+- ✓ **SEC-PATH-01** — v1.14 (Phase 23) — Every builder read/write of a repository-controlled file goes through `safepath` (realpath containment, O_NOFOLLOW, symlink refusal), including the `thinx.yml` write-back. `buildPathFor` refuses a malformed owner/udid (`invalid_device`, owner notified).
+- ✓ **SEC-PATH-02** — v1.14 (Phase 23) — Clone and pull use `core.symlinks=false`, persisted in the checkout.
+- ✓ **CI-03** — v1.14 (Phase 22) — Vue console "THiNX Console" links (layout, login, password reset) point at the Vue console host via `VUE_WEB_HOSTNAME` → `VUE_APP_CONSOLE_HOSTNAME` build arg; dead runtime env removed from `docker-swarm.yml`, gluster and the live service. The authenticated Layout footer needed a gap-closure fix (22-04: missing hostnames mixin), guarded by a plain-node footer test.
+
+</details>
 
 <details>
 <summary>v1.13 Web Hardening (Console/Edge) (shipped 2026-09-25)</summary>
@@ -138,7 +151,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 ## Context
 
 - **Tech stack:** Node/Express monolith, CommonJS (no ESM migration), chai-http v4 pinned per `AGENTS.md:82-92`
-- **Production deploy:** parent `thinx-staging` push → CircleCI build → image publish → Swarmpit autoredeploy on `micro` (SLA ~50-65s observed in v1.0). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
+- **Production deploy:** parent `thinx-staging` push → CircleCI build → private-registry publish → Swarmpit 1.10 autoredeploy (registry push → task Running 31–75 s in v1.14; SLA 5 min). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
 - **Branch model (since 2026-09-19):** `master` is deleted and `main` is the default branch. `main` is protected — direct pushes are rejected (`GH006`), so changes reach it through a PR. `thinx-staging` accepts direct pushes. Since `3cfd0666` the two branches publish to different registries: `thinx-staging` → `registry.thinx.cloud:5000`, `main` → Docker Hub, which ended the race where both wrote the same tags. All six submodules publish from `main` only.
 - **Signing:** GPG-sign commits is the project default; the 2026-05-26 single-session authorization for unsigned commits is recorded in memory `unsigned-commits-260526` and does not carry forward.
 - **AGENTS.md** at parent root is the existing onboarding doc (Codex-runtime convention) — kept as the ops/deploy + dependency-lock rationale reference alongside `.planning/`.
@@ -184,11 +197,30 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 | v1.11 closed at `tech_debt` with Phases 15/16 unpushed/undeployed | The 4 requirements (remove fs-finder, triage deps, confirm influx live) are met and code/audit-verified; pushing+deploying 15/16 is follow-on operator work outside the requirement set. Full CI suite validates on push | — Pending — operator push → CI green → optional prod deploy of 15/16 |
 
 | v1.13 SEC-CSP-01 + SEC-CSRF-01 combined into one phase | Same three deploy surfaces and the same two-console consistency check; `granularity: coarse` | ✓ Good — one deploy pipeline, one verification pass |
+| v1.14 OPS-SWARM-03 descoped; `swarmpit_agent` kept | The operator still monitors through the Swarmpit tasks/stats UI, which needs the agent | ✓ Good — 1.10 runs stats-free with the agent; requirement moved to Future |
+| v1.14 Swarmpit trim before upgrade, each step gated by a real push-to-redeploy | Smallest stack for the version jump; every step snapshotted and rollbackable; real CI → registry → Swarmpit path measured | ✓ Good — gates 32/31/50 s, no rollback needed |
+| v1.14 InfluxDB 2 upgraded in place from a verified, rehearsed backup; image pinned by tag | Keep all stats history; avoid digest churn on DHI images | ✓ Good — 2402 points migrated, ~2 min downtime |
+| v1.14 CSRF rolled out legacy → observe (24 h) → enforce | Catch real clients without a token before enforcement | ✓ Good — one console fix surfaced in observe, then enforced |
+| v1.14 closed as `override_closeout` with stale 22–27 verification digests | Integration re-check found no regression; formal re-verify judged not worth the cost | — Pending (re-verify 23–27 if those areas change again) |
 | CSRF via double-submit cookie, not a server-side synchronizer token | Stateless; works identically for the classic and Vue consoles across `app.`/`console.`/`rtm.` subdomains; no session-store coupling | ⚠️ Revisit — review WR-06: the cookie is scoped to `.thinx.cloud`, so a sibling subdomain can plant it; a session-bound HMAC token is the stronger design |
 | CSRF rolled out fail-open (21-04), enforcement flipped separately (21-05) | Lets both consoles be verified live before a bad token can lock anyone out; enforcement is a single env flag with a documented rollback | ✓ Good — two browser-found defects fixed before the flip; no lockout |
 | Console CSRF wired through two shared seams, not per call site | Four plan-check passes kept finding missed call sites | ✓ Good — no call-site regressions after the flip |
 | HawkScan acceptance criteria closed by operator override | StackHawk was removed (`bb0ce4a7`); substitute evidence = CSP parse, CSRF specs, live probes, operator cold-browser approval | — Pending — a substitute DAST run (e.g. Burp) would turn the override into evidence |
 | Production CSP source of truth = gluster bind mount, documented rather than removed | Discovered mid-phase; removing the mount while the Vue image config lacks `app.thinx.cloud` would lock out cold Vue sessions | ⚠️ Revisit — finish the retirement path in `console-csp-source-of-truth.md` |
+| Phase 22 re-opened CI-03 after verification instead of accepting the public-page evidence | 22-02 marked CI-03 complete without the logged-in Layout check; the verifier found the Layout footer links had no href (missing hostnames mixin, pre-existing) | ✓ Good — 22-04 fixed it with the per-component mixin pattern and marked CI-03 complete only after a logged-in approval |
+| Layout gets the hostnames mixin per component, not a global `Vue.mixin` or a populated prototype | A global mixin would run the hostnames `data()`/`created()` on every component instance, library components included; four pages already use the per-component pattern | ✓ Good — 2-line fix, template byte-identical |
+| Console `test:unit` stays a local pre-deploy guard for now | It runs in no CI job or image build (review WR-03); adding it to the Vue Dockerfile is the known fix | ⚠️ Revisit — wire `yarn test:unit` into the Vue image build |
+| Phase 23 kept the legacy worker `cmd` shell path during the rollout (D-01/D-03) | Either-order API/worker deploys during the change window; production showed 0 legacy jobs afterwards | ⚠️ Revisit — the user confirmed no other deployments exist (2026-09-28); removal is in the worker todo |
+| Phase 23 code review ran 5 fix passes (2 beyond the 3-iteration cap, user-approved) | Each pass surfaced the next edge of the build-queue/worker lifecycle (busy flag, reservation expiry, queue drops, reconnect) | ⚠️ Revisit — plan the queue/worker lifecycle as one change (worker todo Part 3) rather than patching it inside a sink-hardening phase |
+| 35-minute prep reservation as a stopgap instead of per-reservation owner tokens | The 2-minute bound let a second request take the single worker from a build that was still cloning; raising the bound was one constant and safe for 1 replica | ⚠️ Revisit — owner token in the worker todo |
+| Phase 24 kept the env fallback behind every `readSecret()` (D-06) | Code could deploy before any secret existed; each `--secret-add` was reversible with `--secret-rm` and no value was lost | ✓ Good — no outage across three services. ⚠️ Revisit — SEC-CFG-03 removes the fallbacks, WORKER_SECRET first (review WR-01; operator already dropped it from `.env`) |
+| Secrets added one service at a time with `docker service update`, never `restart.sh`/stack deploy | A stack deploy would also re-read `.env` and re-apply the yml, e.g. mount the unmounted DB/Redis secrets (WR-02) | ✓ Good — every step had a checkpoint and a one-command rollback |
+| WORKER_SECRET rotated as a paired api+worker update, proven by a manual console Build | The value in env had leaked into logs (Phase 23), and the production build-queue cron loop does not dispatch | ✓ Good — the Fridge build succeeded on the new value. The queue defect is deferred |
+| Critical review finding CR-01 (GitHub OAuth cross-user token) fixed and deployed inside Phase 24 | Pre-existing but live; the operator asked for it ASAP | ✓ Good — per-request token handling, isolation spec, CI and live logins green |
+| Phase 27 upgraded InfluxDB in place (`influxd upgrade` on a copy, one `docker service update`), not a side-by-side migration | Small data (~4 MB backup); keeps the bucket id and DBRP mapping; one-step `docker service rollback` until the D-07 deletion | ✓ Good — ~2 min write gap, history equal; rollback window closed by operator `delete-all` 2026-10-03 |
+| Dormant connector shipped before the cutover (stats off without `INFLUXDB_TOKEN`) | Decouples the code deploy from the irreversible storage upgrade | ✓ Good — the first push caught a ms-timestamp collision bug in CI (#15564) before any data moved |
+| InfluxDB UI credentials: go-B (random admin password as an unmounted secret, UI via SSH tunnel) | Keeps edge basic-auth and InfluxDB credentials independent; no password-sync duty | ✓ Good |
+| 27 review CR-01 (API-key substring match, pre-existing) split out as quick task 261003-s59 | Outside the phase goal but a live auth bypass | — Pending |
 
 ## Evolution
 
@@ -209,4 +241,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-09-25 at v1.14 milestone start (Backlog & Hardening Sweep; first phase = 22)*
+*Last updated: 2026-10-05 after v1.14 milestone*

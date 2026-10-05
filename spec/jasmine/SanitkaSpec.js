@@ -224,4 +224,58 @@ describe("Sanitka", function () {
     expect(result).to.equal(null);
   });
 
+  // Every caller hands sanitka.udid() request input (headers, bodies, MQTT topics), so a
+  // rejected value is never logged: one fixed warning line, no fragment of the input.
+  it("logs a rejected udid without any part of the input", function () {
+    const inputs = [
+      "SECRETUDIDMARKER-0000-0000-000000000",  // 36 chars, fails the hex RegEx
+      "d6ff2bb0-df34-11e7-b351-eb378'SECRET",   // 36 chars, fails RegEx and replace
+      "short-SECRET"                            // wrong length
+    ];
+    const lines = [];
+    const spy = spyOn(console, "log").and.callFake((...args) => lines.push(args.map(String).join(" ")));
+    try {
+      for (const input of inputs) expect(sanitka.udid(input)).to.equal(null);
+    } finally {
+      spy.and.callThrough();
+    }
+    const all = lines.join("\n");
+    expect(all).not.to.contain("SECRET");
+    expect(all).not.to.contain("d6ff2bb0");
+    for (const line of lines) expect(line).to.equal("⚠️ [warning] udid rejected: not a valid udid");
+  });
+
+  // D-12: device.owner builds BUILD_PATH, so it must be exactly 64 [a-z0-9].
+  // strictOwner never strips or rewrites: two different inputs must never
+  // collapse onto one directory.
+  describe("strictOwner", function () {
+
+    const VALID = "07cef9718edaad79b3974251bb5ef4aedca58703142e8c4c48c20f96cda4979c";
+
+    it("returns a 64-char lowercase hex owner unchanged", function () {
+      expect(Sanitka.strictOwner(VALID)).to.equal(VALID);
+      expect(sanitka.strictOwner(VALID)).to.equal(VALID);
+    });
+
+    const REJECTED = {
+      "63 chars": VALID.slice(0, 63),
+      "65 chars": VALID + "a",
+      "uppercase": VALID.toUpperCase(),
+      "one uppercase letter": "A" + VALID.slice(1),
+      "../ prefix": "../" + VALID.slice(0, 61),
+      "slash inside": VALID.slice(0, 30) + "/" + VALID.slice(31),
+      "null": null,
+      "undefined": undefined,
+      "empty string": "",
+      "number": 123
+    };
+
+    for (const [name, input] of Object.entries(REJECTED)) {
+      it("rejects " + name, function () {
+        expect(Sanitka.strictOwner(input)).to.equal(null);
+        expect(sanitka.strictOwner(input)).to.equal(null);
+      });
+    }
+  });
+
 });

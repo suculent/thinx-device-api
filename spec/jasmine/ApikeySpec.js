@@ -79,19 +79,23 @@ describe("API Key", function () {
     );
   });
 
-  it("(01b) should be able to generate Default MQTT API Key", function (done) {
+  // 02-OwnerSpec usually created this owner's Default MQTT API Key already, and create()
+  // refuses a duplicate alias since quick 261003-vep: both outcomes are valid here.
+  it("(01b) should have a Default MQTT API Key", function (done) {
     apikey.create(
       owner,
       "Default MQTT API Key",
       (success, array_or_error) => {
         if (success) {
           generated_key_hash = sha256(array_or_error[0].key);
+          expect(array_or_error[array_or_error.length - 1].alias).to.equal("Default MQTT API Key");
         } else {
-          console.log("[spec] APIKey failed: ", { array_or_error });
+          expect(array_or_error).to.equal("alias_already_exists");
         }
-        expect(success).to.equal(true);
-        expect(array_or_error[0].key).to.be.a('string');
-        done();
+        apikey.list(owner, (keys) => {
+          expect(keys.filter((k) => k.alias === "Default MQTT API Key").length).to.be.at.least(1);
+          done();
+        });
       }
     );
   });
@@ -101,6 +105,23 @@ describe("API Key", function () {
       owner,
       (object) => {
         expect(object).to.be.a('array');
+        done();
+      });
+  });
+
+  // quick 261003-w13: the console list never carries the cleartext key (never print items).
+  it("(02b) should list API Keys without the cleartext key", function (done) {
+    apikey.list(
+      owner,
+      (keys) => {
+        expect(Array.isArray(keys)).to.equal(true);
+        expect(keys.length).to.be.above(0);
+        keys.forEach((item, i) => {
+          expect(Object.prototype.hasOwnProperty.call(item, "key"), "item " + i + " has a key property").to.equal(false);
+          expect((typeof (item.name) === "string") && item.name.startsWith("*".repeat(30)), "item " + i + " name is masked").to.equal(true);
+          expect((typeof (item.hash) === "string") && /^[0-9a-f]{64}$/.test(item.hash), "item " + i + " hash is 64 hex").to.equal(true);
+          expect(Object.prototype.hasOwnProperty.call(item, "alias"), "item " + i + " has an alias").to.equal(true);
+        });
         done();
       });
   });
@@ -124,7 +145,7 @@ describe("API Key", function () {
       "sample-key-for-revocation",
       (success, array_or_error) => {
         expect(success).to.equal(true);
-        console.log("[spec] APIKey revoking: sample-key-for-revocation from", { array_or_error });
+        console.log("[spec] APIKey revoking: sample-key-for-revocation, keys listed:", Array.isArray(array_or_error) ? array_or_error.length : typeof (array_or_error));
         for (let index in array_or_error) {
           let item = array_or_error[index];
           if (item.alias.indexOf("sample-key-for-revocation") !== -1) {

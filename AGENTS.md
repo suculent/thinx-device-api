@@ -13,6 +13,14 @@
   - `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
   - Swarm path: `/mnt/gluster/deployment/swarm`
 
+## Legacy plaintext device port — keep 7442
+
+The plaintext HTTP device port **7442** (next to HTTPS 7443) and plain (non-TLS) MQTT are
+**required**: legacy devices that cannot do HTTPS/MQTTS (`__DISABLE_HTTPS__` THiNXLib builds) check
+in, redeem OTT tokens and download firmware over them. Operator decision 2026-10-04. Do not close,
+redirect or TLS-enforce them as a "hardening" fix; any hardening on these paths must keep plaintext
+clients working.
+
 ## Local Verification
 - Build command:
   - `npm run build:test`
@@ -54,7 +62,11 @@ different, non-trivial reason (verified by local `docker build` of each on `ubun
 
 - **micropython** — 26.04 dropped `python2` / `python2-dev` from the archive. The esp-open-sdk
   fork (`pfalcon/esp-open-sdk`) is Python 2-only, so there is no in-place fix. 22.04 still ships
-  `python2` in universe, which is why 22.04 is fine.
+  `python2` in universe, which is why 22.04 is fine. **Since 2026-10-04 (quick 261004-on2)** the
+  image uses `ChrisMacGregor/esp-open-sdk` (the fork nodemcu uses, newlib pre-seeded), builds the
+  toolchain and `mpy-cross` at image build time, and adds python3/esptool for current MicroPython;
+  before that the published image never had a built toolchain and could not produce firmware. The
+  22.04 ceiling still applies (the SDK's crosstool-NG still needs python2-era host tooling).
 - **mongoose** — no longer applies: the image left the Ubuntu line entirely on 2026-09-22. The
   `ppa:mongoose-os/mos` dependency (which publishes focal only, hence the 26.04 `404 … resolute
   Release`) is gone — `mos` is now compiled from source in a `golang:1.27.1` stage and dropped

@@ -1,24 +1,50 @@
 /*
- * ZZ-CSRFSpec.js — SEC-CSRF-01 regression spec
+ * ZZ-CSRFSpec.js — SEC-CSRF-01 / SEC-CSRF-02 regression spec
  *
- * Unit-tests `lib/middleware/csrf.js` (double-submit anti-CSRF token) in
- * isolation against mock req/res objects. Deliberately does NOT boot the
- * full THiNX app (no CouchDB/Redis dependency) — csrf.js only needs
- * `app_config.api_url` / `app_config.debug.csrf_enforce`, resolved from the
- * bundled `spec/mnt/data/conf/config.json`, which is already CI/local-safe.
+ * Unit-tests `lib/middleware/csrf.js` in isolation against mock req/res objects.
+ * Deliberately does NOT boot the full THiNX app (no CouchDB/Redis dependency) —
+ * csrf.js only needs `app_config.api_url` / `app_config.debug.csrf_enforce`,
+ * resolved from the bundled `spec/mnt/data/conf/config.json`, and the session
+ * secret from the bundled `spec/mnt/data/conf/node-session.json`.
  *
- * Covers: (1) matching cookie/header -> next(); (2) missing header,
- * fail-open -> next() + warning log; (3) missing header, enforce -> 403;
- * (4) forged header, enforce -> 403; (5) ensureXsrfCookie mints a fresh
- * cookie only when none present; (6) issueCsrfToken echoes the
- * already-minted token WITHOUT a second Set-Cookie / second randomBytes
- * call (no-double-generation); (7) fail-open log carries a reason code and
- * duplicate-cookie count, never token values; (8) enforce mode logs one
- * reason-coded line per rejection; (9) cookie Domain derivation never
- * throws and keeps ".thinx.cloud" for the production api_url; (10) the minted
- * cookie carries that domain and path "/"; (11) no token is minted for
- * preflights, device, firmware and webhook traffic, while console routes
- * still get one.
+ * Legacy double-submit (the v1.13 rollback contract, D-08), run three times: with
+ * CSRF_MODE="legacy" set explicitly, with CSRF_MODE unset, and with an unrecognised
+ * CSRF_MODE="signd" (legacy plus exactly one warning line):
+ *   (1) matching cookie/header -> next(); (2) missing header, fail-open -> next()
+ *   + warning log; (3) missing header, enforce -> 403; (4) forged header, enforce
+ *   -> 403; (5) ensureXsrfCookie mints a fresh cookie only when none present;
+ *   (6) issueCsrfToken echoes the already-minted token WITHOUT a second
+ *   Set-Cookie (no-double-generation); (7) fail-open log carries a reason code and
+ *   duplicate-cookie count, never token values; (8) enforce mode logs one
+ *   reason-coded line per rejection; (9) cookie Domain derivation never throws and
+ *   keeps ".thinx.cloud" for the production api_url; (10) the minted cookie
+ *   carries that domain and path "/"; (10b) a throwing res.cookie still calls
+ *   next(); (11) no token is minted for preflights, device, firmware and webhook
+ *   traffic, while console routes still get one.
+ *
+ * Signed / observe (SEC-CSRF-02, D-17): (1s) bound token + matching sid -> next;
+ * (4s) token of another sid -> 403 with reason binding_mismatch; observe logs the
+ * same failure and lets it through; signed without CSRF_ENFORCE is fail-open;
+ * missing / session_mismatch reason codes; (5s) cookieless request -> no mint, no
+ * session write; (6s) priming creates the pre-session and echoes the minted value;
+ * rotate() and clear().
+ *
+ * Key (D-04): source secret / hkdf / none; the hkdf key is identical across two
+ * resets (the redeploy proxy); assertReady() throws csrf_key_unavailable for
+ * observe and signed without a key but not for legacy.
+ *
+ * Boundary and precision: dot at 63/65, 48-hex, uppercase, non-string -> stale;
+ * exact shape with a wrong MAC -> binding_mismatch; the MAC input is length
+ * prefixed, so shifting characters between sid and nonce never validates.
+ *
+ * Observe telemetry and lazy re-mint (25-03, D-06/D-17): every double-submit and
+ * binding failure bumps the Redis hash csrf:obs:{YYYYMMDD UTC} field
+ * {mode}:{reason}:{METHOD} {route pattern} (30-day expiry) through a stub
+ * redis_client; a missing or failing client never throws; persisted sessions with
+ * a stale or foreign XSRF-TOKEN get a bound one from ensureXsrfCookie, and a
+ * duplicate host-only cookie is cleared.
+ *
+ * Captured log lines never contain a token value or a session id.
  */
 
 // Force the lightweight bundled config path (spec/mnt/data/conf/config.json)
@@ -29,20 +55,30 @@ if (typeof (process.env.ENVIRONMENT) === "undefined") {
 
 var expect = require('chai').expect;
 
+const crypto = require("crypto");
 const cookie = require("cookie");
 const CookiePolicy = require("../../lib/middleware/cookie-policy");
+const secrets = require("../../lib/thinx/secrets");
 const csrfFactory = require("../../lib/middleware/csrf");
 const csrf = csrfFactory({}); // no app.* members are used by this middleware
+
+const SPEC_CSRF_SECRET = "5f1c0a9e7b3d2468ace013579bdf2468ace013579bdf2468ace013579bdf2468";
+const SPEC_SESSION_SECRET = "<some-session-secret>"; // spec/mnt/data/conf/node-session.json
+const SIGNED_SHAPE = /^[0-9a-f]{64}\.[0-9a-f]{32}$/;
 
 function mockRes() {
     const res = {
         locals: {},
         _cookieCalls: [],
+        _clearCalls: [],
         _status: null,
         _ended: null
     };
     res.cookie = function (name, value, options) {
         res._cookieCalls.push({ name: name, value: value, options: options });
+    };
+    res.clearCookie = function (name, options) {
+        res._clearCalls.push({ name: name, options: options });
     };
     res.status = function (code) {
         res._status = code;
@@ -57,19 +93,37 @@ function mockRes() {
     return res;
 }
 
-describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
+// Runs fn with console.log captured; returns the captured lines.
+function withCapturedLog(fn) {
+    const originalLog = console.log;
+    const lines = [];
+    console.log = function () {
+        lines.push(Array.prototype.map.call(arguments, String).join(" "));
+    };
+    try {
+        fn();
+    } finally {
+        console.log = originalLog;
+    }
+    return lines;
+}
 
-    beforeAll(() => {
-        console.log(`🚸 [chai] >>> running SEC-CSRF-01 CSRF middleware spec`);
+// Runs verifyCsrfToken and returns every console.log line it emitted.
+function captureLogs(req, res) {
+    let nextCalled = false;
+    const lines = withCapturedLog(function () {
+        csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
     });
+    return { lines: lines, nextCalled: nextCalled };
+}
 
-    afterAll(() => {
-        console.log(`🚸 [chai] <<< completed SEC-CSRF-01 CSRF middleware spec`);
-    });
+function resetAll() {
+    secrets._resetCacheForTests();
+    csrfFactory._resetForTests();
+}
 
-    afterEach(function () {
-        delete process.env.CSRF_ENFORCE;
-    });
+// The v1.13 double-submit contract. Mode set-up happens in the caller's beforeEach.
+function legacyCases() {
 
     it("1. matching cookie/header -> next() is called, no status set", function (done) {
         const req = {
@@ -117,7 +171,9 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
         };
         const res = mockRes();
         let nextCalled = false;
-        csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        withCapturedLog(function () {
+            csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        });
         expect(res._status).to.equal(403);
         expect(nextCalled).to.equal(false);
         done();
@@ -133,7 +189,9 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
         };
         const res = mockRes();
         let nextCalled = false;
-        csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        withCapturedLog(function () {
+            csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+        });
         expect(res._status).to.equal(403);
         expect(nextCalled).to.equal(false);
         done();
@@ -172,26 +230,18 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
             expect(res._cookieCalls.length).to.equal(1);
 
             const body = JSON.parse(res._ended);
-            expect(body.csrf_token).to.equal(mintedToken);
+            expect(body.csrf_token === mintedToken, "echo equals the minted token").to.equal(true);
             done();
         });
     });
 
-    // Runs verifyCsrfToken and returns every console.log line it emitted.
-    function captureLogs(req, res) {
-        const originalLog = console.log;
-        const lines = [];
-        let nextCalled = false;
-        console.log = function (msg) {
-            lines.push(String(msg));
-        };
-        try {
-            csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
-        } finally {
-            console.log = originalLog;
-        }
-        return { lines: lines, nextCalled: nextCalled };
-    }
+    it("6b. issueCsrfToken echoes the freshly minted token before a stale request cookie", function () {
+        const req = { cookies: { 'XSRF-TOKEN': 'stale-request-cookie' } };
+        const res = mockRes();
+        res.locals.xsrfToken = 'freshly-minted';
+        csrf.issueCsrfToken(req, res);
+        expect(JSON.parse(res._ended).csrf_token).to.equal('freshly-minted');
+    });
 
     it("7. fail-open log carries a reason code and the duplicate-cookie count, never the token values (WR-01)", function () {
         const cases = [
@@ -326,4 +376,740 @@ describe("ZZ-CSRFSpec (SEC-CSRF-01)", function () {
         expect(mints({ method: "GET", path: "/api/githooks" })).to.equal(true);
     });
 
+    it("12. rotate() is a no-op in legacy and clear() drops the cookie with the mint's Domain and Path", function () {
+        const res = mockRes();
+        csrf.rotate({ sessionID: "sid-A", session: {} }, res);
+        expect(res._cookieCalls.length).to.equal(0);
+        csrf.clear(res);
+        expect(res._clearCalls.length).to.equal(1);
+        expect(res._clearCalls[0].name).to.equal("XSRF-TOKEN");
+        expect(res._clearCalls[0].options).to.deep.equal({ domain: ".thinx.cloud", path: "/" });
+    });
+}
+
+// A signed/observe mock request on session `sid` carrying `token` as cookie and header.
+function boundReq(sid, token, overrides) {
+    return Object.assign({
+        cookies: { 'XSRF-TOKEN': token },
+        headers: { 'x-xsrf-token': token, cookie: 'x-thx-core=s%3A' + sid + '.sig; XSRF-TOKEN=' + token },
+        session: { csrf_pre: 1, cookie: {} },
+        sessionID: sid,
+        method: 'POST',
+        originalUrl: '/api/v2/login'
+    }, overrides || {});
+}
+
+describe("ZZ-CSRFSpec (SEC-CSRF-01/02)", function () {
+
+    beforeAll(() => {
+        console.log(`🚸 [chai] >>> running SEC-CSRF-01/02 CSRF middleware spec`);
+    });
+
+    afterAll(() => {
+        console.log(`🚸 [chai] <<< completed SEC-CSRF-01/02 CSRF middleware spec`);
+    });
+
+    beforeEach(function () {
+        resetAll();
+    });
+
+    afterEach(function () {
+        delete process.env.CSRF_ENFORCE;
+        delete process.env.CSRF_MODE;
+        delete process.env.CSRF_SECRET;
+        resetAll();
+    });
+
+    describe("legacy, CSRF_MODE=legacy set explicitly (rollback contract, D-08)", function () {
+        beforeEach(function () {
+            process.env.CSRF_MODE = "legacy";
+        });
+        legacyCases();
+    });
+
+    describe("legacy, CSRF_MODE unset", function () {
+        beforeEach(function () {
+            delete process.env.CSRF_MODE;
+        });
+        legacyCases();
+    });
+
+    describe("legacy, CSRF_MODE unrecognised ('signd')", function () {
+        beforeEach(function () {
+            process.env.CSRF_MODE = "signd";
+            // The warning is logged once per process (until the next reset).
+            const lines = withCapturedLog(function () {
+                expect(csrfFactory.mode()).to.equal("legacy");
+                expect(csrfFactory.mode()).to.equal("legacy");
+            });
+            const warnings = lines.filter((l) => l.indexOf("CSRF_MODE=signd not recognised, using legacy") !== -1);
+            expect(warnings.length).to.equal(1);
+            expect(lines.length).to.equal(1);
+        });
+        legacyCases();
+    });
+
+    describe("mode()", function () {
+        it("trims and lower-cases, and caps the logged unrecognised value at 32 characters", function () {
+            process.env.CSRF_MODE = " Signed ";
+            expect(csrfFactory.mode()).to.equal("signed");
+            process.env.CSRF_MODE = "OBSERVE";
+            expect(csrfFactory.mode()).to.equal("observe");
+            process.env.CSRF_MODE = "";
+            expect(csrfFactory.mode()).to.equal("legacy");
+            process.env.CSRF_MODE = "x".repeat(100);
+            const lines = withCapturedLog(function () {
+                expect(csrfFactory.mode()).to.equal("legacy");
+            });
+            expect(lines.length).to.equal(1);
+            expect(lines[0]).to.contain("x".repeat(32));
+            expect(lines[0]).to.not.contain("x".repeat(33));
+        });
+    });
+
+    describe("signed / observe (SEC-CSRF-02, D-17)", function () {
+
+        beforeEach(function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("1s. a token bound to the request's session passes (next, no status)", function () {
+            const token = csrfFactory.mint("sid-A");
+            const res = mockRes();
+            process.env.CSRF_ENFORCE = 'true';
+            const out = captureLogs(boundReq("sid-A", token), res);
+            expect(out.nextCalled).to.equal(true);
+            expect(res._status).to.equal(null);
+            expect(out.lines.length).to.equal(0);
+        });
+
+        it("4s. a token of another session is rejected 403 with reason binding_mismatch (enforced)", function () {
+            process.env.CSRF_ENFORCE = 'true';
+            const token = csrfFactory.mint("sid-B");
+            const res = mockRes();
+            const out = captureLogs(boundReq("sid-A", token), res);
+            expect(out.nextCalled).to.equal(false);
+            expect(res._status).to.equal(403);
+            expect(JSON.parse(res._ended).response).to.equal("csrf_token_invalid");
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding rejected reason=binding_mismatch mode=signed xsrf_cookies=1 for POST /api/v2/login (enforced, 403)");
+            expect(out.lines[0].indexOf(token)).to.equal(-1);
+            expect(out.lines[0]).to.not.contain("sid-A");
+            expect(out.lines[0]).to.not.contain("sid-B");
+        });
+
+        it("4s-observe. observe logs the binding failure and lets it through, even with CSRF_ENFORCE on", function () {
+            process.env.CSRF_MODE = "observe";
+            process.env.CSRF_ENFORCE = 'true';
+            const token = csrfFactory.mint("sid-B");
+            const res = mockRes();
+            const out = captureLogs(boundReq("sid-A", token), res);
+            expect(out.nextCalled).to.equal(true);
+            expect(res._status).to.equal(null);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding observed reason=binding_mismatch mode=observe");
+            expect(out.lines[0].indexOf(token)).to.equal(-1);
+            expect(out.lines[0]).to.not.contain("sid-A");
+        });
+
+        it("4s-failopen. signed without CSRF_ENFORCE logs the observed form and lets it through", function () {
+            const token = csrfFactory.mint("sid-B");
+            const res = mockRes();
+            const out = captureLogs(boundReq("sid-A", token), res);
+            expect(out.nextCalled).to.equal(true);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding observed reason=binding_mismatch mode=signed");
+            expect(out.lines[0]).to.contain("(fail-open, not enforced)");
+        });
+
+        it("4s-reasons. missing, session_mismatch and stale are reported with their own codes", function () {
+            process.env.CSRF_ENFORCE = 'true';
+            const token = csrfFactory.mint("sid-A");
+            const legacyToken = crypto.randomBytes(24).toString("hex");
+            const cases = [
+                { req: boundReq("sid-A", token, { headers: { 'x-xsrf-token': token, cookie: 'XSRF-TOKEN=' + token } }), reason: "missing" },
+                { req: boundReq("sid-A", token, { session: { cookie: {} } }), reason: "session_mismatch" },
+                { req: boundReq("sid-A", legacyToken), reason: "stale" }
+            ];
+            cases.forEach(function (c) {
+                const res = mockRes();
+                const out = captureLogs(c.req, res);
+                expect(res._status, c.reason).to.equal(403);
+                expect(out.lines.length, c.reason).to.equal(1);
+                expect(out.lines[0]).to.contain("reason=" + c.reason + " ");
+                expect(out.lines[0].indexOf(token)).to.equal(-1);
+                expect(out.lines[0].indexOf(legacyToken)).to.equal(-1);
+                expect(out.lines[0]).to.not.contain("sid-A");
+            });
+        });
+
+        it("4s-doublesubmit. the double-submit layer still runs first with its own reason codes", function () {
+            process.env.CSRF_ENFORCE = 'true';
+            const token = csrfFactory.mint("sid-A");
+            const res = mockRes();
+            const out = captureLogs(boundReq("sid-A", token, { headers: { cookie: 'x-thx-core=s%3Asid-A.sig' } }), res);
+            expect(res._status).to.equal(403);
+            expect(out.lines[0]).to.contain("CSRF token rejected reason=no_header");
+        });
+
+        it("5s. a cookieless request gets no mint and no session write", function () {
+            ["signed", "observe"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                const req = { cookies: {}, headers: {}, session: { cookie: {} }, sessionID: "sid-A", method: "GET", path: "/api/v2/device" };
+                const res = mockRes();
+                let nextCalled = false;
+                csrf.ensureXsrfCookie(req, res, function next() { nextCalled = true; });
+                expect(nextCalled, m).to.equal(true);
+                expect(res._cookieCalls.length, m).to.equal(0);
+                expect(req.session, m).to.deep.equal({ cookie: {} });
+            });
+        });
+
+        it("6s. priming creates the pre-session and echoes the minted value", function () {
+            const req = { cookies: {}, headers: {}, session: { cookie: {} }, sessionID: "sid-A", method: "GET" };
+            const res = mockRes();
+            csrf.issueCsrfToken(req, res);
+            expect(req.session.csrf_pre).to.be.a("number");
+            expect(req.session.cookie.maxAge).to.equal(15 * 60 * 1000);
+            expect(res._cookieCalls.length).to.equal(1);
+            const body = JSON.parse(res._ended);
+            expect(body.csrf_token === res._cookieCalls[0].value, "echo equals Set-Cookie").to.equal(true);
+            expect(SIGNED_SHAPE.test(body.csrf_token)).to.equal(true);
+            expect(csrfFactory.check(body.csrf_token, "sid-A")).to.equal(null);
+        });
+
+        it("6s-stale. priming a persisted session re-mints a stale cookie and keeps the session lifetime", function () {
+            const req = {
+                cookies: { 'XSRF-TOKEN': crypto.randomBytes(24).toString("hex") },
+                headers: {},
+                session: { owner: "o", login_owner: "o", cookie: { maxAge: 8 * 3600 * 1000 } },
+                sessionID: "sid-A",
+                method: "GET"
+            };
+            const res = mockRes();
+            csrf.issueCsrfToken(req, res);
+            expect(req.session.csrf_pre).to.equal(undefined);
+            expect(req.session.cookie.maxAge).to.equal(8 * 3600 * 1000);
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(JSON.parse(res._ended).csrf_token === res._cookieCalls[0].value).to.equal(true);
+        });
+
+        it("6s-nokey. priming without a key answers 503 csrf_key_unavailable and writes no pre-session", function () {
+            delete process.env.CSRF_SECRET;
+            resetAll();
+            csrfFactory._resetForTests({ sessionSecret: null });
+            const req = { cookies: {}, headers: {}, session: { cookie: {} }, sessionID: "sid-A", method: "GET" };
+            const res = mockRes();
+            csrf.issueCsrfToken(req, res);
+            expect(res._status).to.equal(503);
+            expect(JSON.parse(res._ended).response).to.equal("csrf_key_unavailable");
+            expect(req.session.csrf_pre).to.equal(undefined);
+        });
+
+        it("rotate() binds a new token to the (regenerated) session id", function () {
+            const res = mockRes();
+            csrf.rotate({ sessionID: "sid-new", session: {} }, res);
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(csrfFactory.check(res._cookieCalls[0].value, "sid-new")).to.equal(null);
+            expect(res.locals.xsrfToken === res._cookieCalls[0].value).to.equal(true);
+        });
+    });
+
+    describe("key resolution (D-04)", function () {
+
+        it("uses CSRF_SECRET when it is set (source secret)", function () {
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            expect(csrfFactory.keySource()).to.equal("secret");
+            expect(csrfFactory.resolveKey().equals(Buffer.from(SPEC_CSRF_SECRET, "utf8"))).to.equal(true);
+        });
+
+        it("falls back to HKDF of the session secret, identical across resets (the redeploy proxy)", function () {
+            expect(csrfFactory.keySource()).to.equal("hkdf");
+            const first = csrfFactory.resolveKey();
+            const token = csrfFactory.mint("sid-A");
+            resetAll();
+            const second = csrfFactory.resolveKey();
+            expect(first.equals(second)).to.equal(true);
+            expect(csrfFactory.check(token, "sid-A")).to.equal(null);
+            const expected = Buffer.from(crypto.hkdfSync("sha256", SPEC_SESSION_SECRET, "thinx-csrf", "csrf-v1", 32));
+            expect(second.equals(expected)).to.equal(true);
+
+            csrfFactory._resetForTests({ sessionSecret: "another-session-secret" });
+            const a = csrfFactory.resolveKey();
+            csrfFactory._resetForTests({ sessionSecret: "another-session-secret" });
+            expect(a.equals(csrfFactory.resolveKey())).to.equal(true);
+            expect(a.equals(first)).to.equal(false);
+        });
+
+        it("resolves to none with no CSRF_SECRET and no session secret", function () {
+            csrfFactory._resetForTests({ sessionSecret: null });
+            expect(csrfFactory.resolveKey() === null, "no key resolved").to.equal(true);
+            expect(csrfFactory.keySource()).to.equal("none");
+        });
+
+        it("assertReady() throws csrf_key_unavailable for observe and signed without a key, not for legacy", function () {
+            ["observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                csrfFactory._resetForTests({ sessionSecret: null });
+                let thrown = null;
+                const lines = withCapturedLog(function () {
+                    try { csrfFactory.assertReady(); } catch (e) { thrown = e; }
+                });
+                expect(thrown, m).to.be.an("error");
+                expect(thrown.message).to.equal("csrf_key_unavailable");
+                expect(lines.join("\n")).to.contain("CRITICAL CSRF_MODE=" + m + " needs CSRF_SECRET or a session secret; refusing to start");
+            });
+
+            process.env.CSRF_MODE = "legacy";
+            csrfFactory._resetForTests({ sessionSecret: null });
+            const lines = withCapturedLog(function () {
+                expect(function () { csrfFactory.assertReady(); }).to.not.throw();
+            });
+            expect(lines.length).to.equal(1);
+            expect(lines[0]).to.contain("CSRF mode=legacy key_source=none enforce=false");
+        });
+
+        it("assertReady() logs one mode/key_source/enforce line and never the key; the factory exposes it too", function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_ENFORCE = "true";
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            const lines = withCapturedLog(function () {
+                csrf.assertReady();
+            });
+            expect(lines.length).to.equal(1);
+            expect(lines[0]).to.contain("CSRF mode=signed key_source=secret enforce=true");
+            expect(lines[0]).to.not.contain(SPEC_CSRF_SECRET);
+            expect(lines[0]).to.not.contain(csrfFactory.resolveKey().toString("hex"));
+        });
+    });
+
+    describe("observe telemetry and lazy re-mint (25-03, D-06/D-17)", function () {
+
+        const OBS_TTL_S = 30 * 24 * 3600;
+
+        function todayKey() {
+            return "csrf:obs:" + new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        }
+
+        // Records HINCRBY / EXPIRE calls (upper-case names, as on the node-redis
+        // legacy client) and invokes their callbacks, optionally with an error.
+        function stubRedis(fail) {
+            const calls = [];
+            function reply(cb) {
+                if (typeof (cb) !== "function") return;
+                if (fail) {
+                    const err = new Error("connect ECONNREFUSED");
+                    err.code = "ECONNREFUSED";
+                    return cb(err);
+                }
+                cb(null, 1);
+            }
+            return {
+                calls: calls,
+                HINCRBY: function (key, field, incr, cb) {
+                    calls.push({ cmd: "HINCRBY", key: key, field: field, incr: incr, hasCb: typeof (cb) === "function" });
+                    reply(cb);
+                },
+                EXPIRE: function (key, secs, cb) {
+                    calls.push({ cmd: "EXPIRE", key: key, secs: secs, hasCb: typeof (cb) === "function" });
+                    reply(cb);
+                }
+            };
+        }
+
+        function runVerify(instance, req, res) {
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                instance.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+            });
+            return { lines: lines, nextCalled: nextCalled };
+        }
+
+        function fields(redis) {
+            return redis.calls.filter((c) => c.cmd === "HINCRBY").map((c) => c.field);
+        }
+
+        beforeEach(function () {
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("t1. observe + foreign token: next(), one observed line, HINCRBY + EXPIRE on csrf:obs:{UTC date}", function () {
+            process.env.CSRF_MODE = "observe";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const token = csrfFactory.mint("sid-B");
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", token, { originalUrl: "/api/login?next=secret" }), res);
+
+            expect(out.nextCalled).to.equal(true);
+            expect(res._status).to.equal(null);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding observed reason=binding_mismatch mode=observe");
+
+            const hincr = redis.calls.filter((c) => c.cmd === "HINCRBY");
+            const expire = redis.calls.filter((c) => c.cmd === "EXPIRE");
+            expect(hincr.length).to.equal(1);
+            expect(hincr[0].key).to.equal(todayKey());
+            expect(/^csrf:obs:\d{8}$/.test(hincr[0].key)).to.equal(true);
+            expect(hincr[0].field).to.equal("observe:binding_mismatch:POST /api/login");
+            expect(hincr[0].incr).to.equal(1);
+            expect(hincr[0].hasCb).to.equal(true);
+            expect(expire.length).to.equal(1);
+            expect(expire[0].key).to.equal(todayKey());
+            expect(expire[0].secs).to.equal(OBS_TTL_S);
+            expect(expire[0].hasCb).to.equal(true);
+            expect(hincr[0].field.indexOf(token)).to.equal(-1);
+            expect(hincr[0].field).to.not.contain("sid-");
+        });
+
+        it("t2. observe + stale 48-hex pair: next(), reason stale counted", function () {
+            process.env.CSRF_MODE = "observe";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const legacyToken = crypto.randomBytes(24).toString("hex");
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", legacyToken), res);
+            expect(out.nextCalled).to.equal(true);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("reason=stale mode=observe");
+            expect(fields(redis)).to.deep.equal(["observe:stale:POST /api/v2/login"]);
+        });
+
+        it("t3. signed + enforce + foreign token: 403, rejected line, counter field prefix signed:", function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_ENFORCE = "true";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const res = mockRes();
+            const out = runVerify(instance, boundReq("sid-A", csrfFactory.mint("sid-B")), res);
+            expect(out.nextCalled).to.equal(false);
+            expect(res._status).to.equal(403);
+            expect(out.lines.length).to.equal(1);
+            expect(out.lines[0]).to.contain("CSRF binding rejected reason=binding_mismatch mode=signed");
+            expect(out.lines[0]).to.contain("(enforced, 403)");
+            expect(fields(redis)).to.deep.equal(["signed:binding_mismatch:POST /api/v2/login"]);
+        });
+
+        it("t4. a double-submit failure (no_header) keeps its log string and is counted in every mode", function () {
+            ["legacy", "observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                delete process.env.CSRF_ENFORCE;
+                const redis = stubRedis(false);
+                const instance = csrfFactory({ redis_client: redis });
+                const req = {
+                    cookies: { 'XSRF-TOKEN': 'cookietoken1' },
+                    headers: { cookie: 'XSRF-TOKEN=cookietoken1' },
+                    method: 'POST',
+                    originalUrl: '/api/user/create'
+                };
+                const out = runVerify(instance, req, mockRes());
+                expect(out.nextCalled, m).to.equal(true);
+                expect(out.lines.length, m).to.equal(1);
+                expect(out.lines[0], m).to.contain("CSRF token missing/mismatched reason=no_header xsrf_cookies=1 for POST /api/user/create (fail-open, not enforced)");
+                expect(fields(redis), m).to.deep.equal([m + ":no_header:POST /api/user/create"]);
+
+                process.env.CSRF_ENFORCE = "true";
+                const redis2 = stubRedis(false);
+                const res2 = mockRes();
+                const out2 = runVerify(csrfFactory({ redis_client: redis2 }), req, res2);
+                expect(res2._status, m).to.equal(403);
+                expect(out2.lines[0], m).to.contain("CSRF token rejected reason=no_header");
+                expect(fields(redis2), m).to.deep.equal([m + ":no_header:POST /api/user/create"]);
+            });
+        });
+
+        it("t5. a route with a param is counted by its pattern, never by the concrete owner", function () {
+            process.env.CSRF_MODE = "observe";
+            const redis = stubRedis(false);
+            const instance = csrfFactory({ redis_client: redis });
+            const owner = "d6ff2bb0df7a4bd1b0e3b6e5b9a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9";
+            const req = {
+                cookies: {},
+                headers: {},
+                method: 'DELETE',
+                originalUrl: '/api/v2/admin/session/' + owner,
+                route: { path: '/api/v2/admin/session/:owner' }
+            };
+            runVerify(instance, req, mockRes());
+            expect(fields(redis)).to.deep.equal(["observe:no_cookie:DELETE /api/v2/admin/session/:owner"]);
+            expect(fields(redis)[0]).to.not.contain(owner);
+        });
+
+        it("t6. no redis_client, or a client whose HINCRBY fails: no throw, the request continues, one warning per process", function () {
+            process.env.CSRF_MODE = "observe";
+            const token = csrfFactory.mint("sid-B");
+
+            [{}, { redis_client: null }, { redis_client: {} }].forEach(function (app) {
+                const out = runVerify(csrfFactory(app), boundReq("sid-A", token), mockRes());
+                expect(out.nextCalled).to.equal(true);
+                expect(out.lines.length).to.equal(1);
+            });
+
+            const failing = stubRedis(true);
+            const instance = csrfFactory({ redis_client: failing });
+            const first = runVerify(instance, boundReq("sid-A", token), mockRes());
+            const second = runVerify(instance, boundReq("sid-A", token), mockRes());
+            expect(first.nextCalled).to.equal(true);
+            expect(second.nextCalled).to.equal(true);
+            const warnings = first.lines.concat(second.lines).filter((l) => l.indexOf("CSRF telemetry counter failed: ECONNREFUSED") !== -1);
+            expect(warnings.length).to.equal(1);
+
+            const throwing = { HINCRBY: function () { throw new Error("client closed"); }, EXPIRE: function () { throw new Error("client closed"); } };
+            const out = runVerify(csrfFactory({ redis_client: throwing }), boundReq("sid-A", token), mockRes());
+            expect(out.nextCalled).to.equal(true);
+        });
+
+        it("t7. ensureXsrfCookie re-mints a bound token for a persisted session with a stale or foreign cookie", function () {
+            ["observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                [crypto.randomBytes(24).toString("hex"), csrfFactory.mint("sid-B"), undefined].forEach(function (stale) {
+                    const req = {
+                        cookies: (typeof (stale) === "string") ? { 'XSRF-TOKEN': stale } : {},
+                        headers: { cookie: 'x-thx-core=s%3Asid-A.sig' + ((typeof (stale) === "string") ? '; XSRF-TOKEN=' + stale : '') },
+                        session: { owner: "o", login_owner: "o", cookie: {} },
+                        sessionID: "sid-A",
+                        method: "GET",
+                        path: "/api/v2/device"
+                    };
+                    const res = mockRes();
+                    let nextCalled = false;
+                    csrf.ensureXsrfCookie(req, res, function next() { nextCalled = true; });
+                    expect(nextCalled, m).to.equal(true);
+                    expect(res._cookieCalls.length, m).to.equal(1);
+                    expect(res._cookieCalls[0].name).to.equal("XSRF-TOKEN");
+                    expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+                    expect(csrfFactory.check(res._cookieCalls[0].value, "sid-A") === null, "bound to the session").to.equal(true);
+                    expect(res.locals.xsrfToken === res._cookieCalls[0].value).to.equal(true);
+                    expect(res._clearCalls.length, m).to.equal(0);
+                });
+            });
+        });
+
+        it("t7-bound. ensureXsrfCookie leaves an already bound cookie alone", function () {
+            process.env.CSRF_MODE = "signed";
+            const token = csrfFactory.mint("sid-A");
+            const req = {
+                cookies: { 'XSRF-TOKEN': token },
+                headers: { cookie: 'x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + token },
+                session: { csrf_pre: 1, cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            csrf.ensureXsrfCookie(req, res, function () { });
+            expect(res._cookieCalls.length).to.equal(0);
+        });
+
+        it("t7-duplicate. two XSRF-TOKEN pairs: the host-only duplicate is cleared and a bound domain cookie set", function () {
+            process.env.CSRF_MODE = "observe";
+            const a = crypto.randomBytes(24).toString("hex");
+            const b = crypto.randomBytes(24).toString("hex");
+            const req = {
+                cookies: { 'XSRF-TOKEN': a },
+                headers: { cookie: 'XSRF-TOKEN=' + a + '; x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + b },
+                session: { owner: "o", cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            csrf.ensureXsrfCookie(req, res, function () { });
+            expect(res._clearCalls.length).to.equal(1);
+            expect(res._clearCalls[0].name).to.equal("XSRF-TOKEN");
+            expect(res._clearCalls[0].options).to.deep.equal({ path: "/" });
+            expect(res._cookieCalls.length).to.equal(1);
+            expect(res._cookieCalls[0].options.domain).to.equal(".thinx.cloud");
+            expect(csrfFactory.check(res._cookieCalls[0].value, "sid-A") === null).to.equal(true);
+        });
+
+        it("t7-anon. no persisted session: no cookie and no session write, even with a stale cookie (D-02)", function () {
+            ["observe", "signed"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                const stale = crypto.randomBytes(24).toString("hex");
+                const req = {
+                    cookies: { 'XSRF-TOKEN': stale },
+                    headers: { cookie: 'x-thx-core=s%3Asid-A.sig; XSRF-TOKEN=' + stale + '; XSRF-TOKEN=x' },
+                    session: { cookie: {} },
+                    sessionID: "sid-A",
+                    method: "GET",
+                    path: "/api/v2/device"
+                };
+                const res = mockRes();
+                let nextCalled = false;
+                csrf.ensureXsrfCookie(req, res, function () { nextCalled = true; });
+                expect(nextCalled, m).to.equal(true);
+                expect(res._cookieCalls.length, m).to.equal(0);
+                expect(res._clearCalls.length, m).to.equal(0);
+                expect(req.session, m).to.deep.equal({ cookie: {} });
+            });
+        });
+
+        it("t7-throw. a throwing res.cookie during the re-mint still calls next()", function () {
+            process.env.CSRF_MODE = "signed";
+            const req = {
+                cookies: {},
+                headers: { cookie: 'x-thx-core=s%3Asid-A.sig' },
+                session: { owner: "o", cookie: {} },
+                sessionID: "sid-A",
+                method: "GET",
+                path: "/api/v2/device"
+            };
+            const res = mockRes();
+            res.cookie = function () { throw new TypeError("option domain is invalid"); };
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                csrf.ensureXsrfCookie(req, res, function () { nextCalled = true; });
+            });
+            expect(nextCalled).to.equal(true);
+            expect(lines.join("\n")).to.contain("XSRF-TOKEN cookie not set");
+        });
+    });
+
+    describe("verified-auth exemption through req.thx_auth (D-09, SEC-CSRF-05)", function () {
+
+        // A request with no XSRF cookie and no header: only the exemption can pass it.
+        function bareReq(overrides) {
+            return Object.assign({
+                cookies: {},
+                headers: {},
+                session: { cookie: {} },
+                sessionID: "sid-A",
+                method: "POST",
+                originalUrl: "/api/v2/session/token"
+            }, overrides || {});
+        }
+
+        function run(req) {
+            const res = mockRes();
+            let nextCalled = false;
+            const lines = withCapturedLog(function () {
+                csrf.verifyCsrfToken(req, res, function next() { nextCalled = true; });
+            });
+            return { res: res, lines: lines, nextCalled: nextCalled };
+        }
+
+        beforeEach(function () {
+            process.env.CSRF_MODE = "signed";
+            process.env.CSRF_ENFORCE = "true";
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("x1. signed + enforce, req.thx_auth 'bearer', no cookie and no header: next(), nothing logged", function () {
+            const out = run(bareReq({ thx_auth: "bearer", headers: { authorization: "Bearer abc" } }));
+            expect(out.nextCalled).to.equal(true);
+            expect(out.res._status).to.equal(null);
+            expect(out.lines.length).to.equal(0);
+        });
+
+        it("x2. signed + enforce, req.thx_auth 'apikey' on a guarded account route, no cookie and no header: next(), nothing logged", function () {
+            const out = run(bareReq({ thx_auth: "apikey", originalUrl: "/api/v2/profile", body: { owner: "o", api_key: "k" } }));
+            expect(out.nextCalled).to.equal(true);
+            expect(out.res._status).to.equal(null);
+            expect(out.lines.length).to.equal(0);
+        });
+
+        it("x2b. req.thx_auth 'apikey' with a session cookie is checked like a cookie request (403, 25-REVIEW CR-01)", function () {
+            const out = run(bareReq({ thx_auth: "apikey", originalUrl: "/api/v2/profile", headers: { cookie: "x-thx-core=s%3Asid-A.sig" }, body: { owner: "o", api_key: "k" } }));
+            expect(out.nextCalled).to.equal(false);
+            expect(out.res._status).to.equal(403);
+        });
+
+        it("x2c. req.thx_auth 'apikey' never exempts a public login, registration or password route (403, 25-REVIEW CR-01)", function () {
+            ["/api/login", "/api/v2/login", "/api/v2/session/token", "/api/user/create", "/api/v2/user", "/API/V2/Password/Reset/", "/api/user/password/set?x=1"].forEach(function (url) {
+                const out = run(bareReq({ thx_auth: "apikey", originalUrl: url, body: { owner: "o", api_key: "k" } }));
+                expect(out.nextCalled, url).to.equal(false);
+                expect(out.res._status, url).to.equal(403);
+            });
+        });
+
+        it("x3. an Authorization header without req.thx_auth is checked like any cookie request (403)", function () {
+            ["Bearer eyJhbGciOiJIUzI1NiJ9.e30.x", "Bearer null", "Basic dTpw"].forEach(function (h) {
+                const out = run(bareReq({ headers: { authorization: h } }));
+                expect(out.nextCalled, h).to.equal(false);
+                expect(out.res._status, h).to.equal(403);
+                expect(JSON.parse(out.res._ended).response).to.equal("csrf_token_invalid");
+            });
+        });
+
+        it("x4. req.thx_auth set to any other value is checked (403)", function () {
+            ["admin", "true", true, 1, "Bearer", "APIKEY", {}].forEach(function (v) {
+                const out = run(bareReq({ thx_auth: v }));
+                expect(out.nextCalled, String(v)).to.equal(false);
+                expect(out.res._status, String(v)).to.equal(403);
+            });
+        });
+
+        it("x5. a body owner_id + api_key pair without req.thx_auth is checked (403)", function () {
+            const out = run(bareReq({ body: { owner_id: "o", api_key: "k", owner: "o" } }));
+            expect(out.nextCalled).to.equal(false);
+            expect(out.res._status).to.equal(403);
+        });
+
+        it("x6. the exemption applies in legacy and observe as well", function () {
+            ["legacy", "observe"].forEach(function (m) {
+                process.env.CSRF_MODE = m;
+                ["bearer", "apikey"].forEach(function (a) {
+                    const out = run(bareReq({ thx_auth: a, originalUrl: "/api/v2/profile" }));
+                    expect(out.nextCalled, m + "/" + a).to.equal(true);
+                    expect(out.res._status, m + "/" + a).to.equal(null);
+                    expect(out.lines.length, m + "/" + a).to.equal(0);
+                });
+                const checked = run(bareReq());
+                expect(checked.res._status, m).to.equal(403);
+            });
+        });
+    });
+
+    describe("token boundaries and precision (SEC-CSRF-02)", function () {
+
+        beforeEach(function () {
+            process.env.CSRF_SECRET = SPEC_CSRF_SECRET;
+            resetAll();
+        });
+
+        it("malformed shapes are stale; the exact shape with a wrong MAC is binding_mismatch", function () {
+            const token = csrfFactory.mint("sid-A");
+            const macPart = token.slice(0, 64);
+            const nonce = token.slice(65);
+            expect(csrfFactory.check(token, "sid-A")).to.equal(null);
+
+            expect(csrfFactory.check(macPart.slice(0, 63) + "." + nonce, "sid-A")).to.equal("stale");       // dot at 63
+            expect(csrfFactory.check(macPart + "0." + nonce, "sid-A")).to.equal("stale");                   // dot at 65
+            expect(csrfFactory.check(crypto.randomBytes(24).toString("hex"), "sid-A")).to.equal("stale");  // 48-hex legacy
+            expect(csrfFactory.check(token.toUpperCase(), "sid-A")).to.equal("stale");
+            expect(csrfFactory.check(token + "0", "sid-A")).to.equal("stale");
+            [undefined, null, 42, {}, [token]].forEach(function (v) {
+                expect(csrfFactory.check(v, "sid-A")).to.equal("stale");
+            });
+
+            const flipped = (macPart[0] === "0" ? "1" : "0") + macPart.slice(1) + "." + nonce;
+            expect(csrfFactory.check(flipped, "sid-A")).to.equal("binding_mismatch");
+            expect(csrfFactory.check(token, "sid-B")).to.equal("binding_mismatch");
+        });
+
+        it("the MAC input is length-prefixed: shifting characters between sid and nonce never validates", function () {
+            const token = csrfFactory.mint("ab");
+            const macPart = token.slice(0, 64);
+            const nonce = token.slice(65);
+            expect(csrfFactory.check(token, "ab")).to.equal(null);
+            expect(csrfFactory.check(token, "a")).to.equal("binding_mismatch");
+
+            // Same MAC, the "b" moved from the sid into the nonce (shape kept at 32 hex).
+            const shifted = macPart + "." + ("b" + nonce).slice(0, 32);
+            expect(csrfFactory.check(shifted, "a")).to.equal("binding_mismatch");
+
+            const key = csrfFactory.resolveKey();
+            const prefixed = crypto.createHmac("sha256", key).update("2!ab!32!" + nonce).digest("hex");
+            const naive = crypto.createHmac("sha256", key).update("ab" + nonce).digest("hex");
+            expect(macPart === prefixed, "length-prefixed message").to.equal(true);
+            expect(macPart === naive, "not a plain concatenation").to.equal(false);
+        });
+    });
 });

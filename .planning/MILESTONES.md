@@ -1,5 +1,41 @@
 # Milestones
 
+## v1.14 — Backlog & Hardening Sweep (Shipped: 2026-10-05)
+
+**Delivered:** Closed the v1.13 security follow-ups and the open ops/code findings, and shipped the three long-standing backlog items. 24/24 requirements across Phases 22–28 (OPS-SWARM-03 descoped to Future Requirements). Production enforces session-bound CSRF, builds run argv-only with contained file access, credentials load from swarm secrets, the Vue console pages its logs, stats run on InfluxDB 2 with 90-day retention, and Swarmpit runs 1.10 without its stats stack.
+
+**Stats:**
+
+- Phases: 7 (Phases 22–28) | Plans: 47 | Tasks: 116
+- Timeline: 2026-09-25 (v1.13 close, `7e36d71a`) → 2026-10-05 (~10 days)
+- Git range: `7e36d71a` → close on `thinx-staging` (493 commits; 474 files, +95,225 / −3,226, of which `lib/`+`spec/`+`thinx-core.js` are 130 files, +35,109 / −2,795)
+- Milestone audit: `tech_debt` (24/24 requirements, integration 13/13, flows 5/5); CI test #15713: 1756 specs, 0 failures
+
+**Key accomplishments:**
+
+- **CI & SAST (22):** CodeQL v4 security-extended on `thinx-staging`/`main`, retrying private-registry logins, Vue console hostname proven from CI var to rendered href.
+- **Build-pipeline sinks (23):** git runs argv-only with `core.symlinks=false`; the worker spawns argv jobs with no shell; every repository-controlled read/write goes through `safepath`; `shell-escape` removed.
+- **Secrets sweep (24):** 9 `lib/` credentials plus a new `CSRF_SECRET` load through `readSecret()` from swarm secrets; `WORKER_SECRET` rotated with a real-build proof; `docker-swarm.yml` mirrors the live mounts.
+- **Session-bound CSRF + edge headers (25):** HMAC token bound to the session id, rotated on login, guarding WR-04 and every cookie-authenticated mutation; observed for 24 h, then enforced. Console nginx headers mirrored into the images with a CI parity check.
+- **Log paging (26):** opt-in owner-bound cursor paging for audit and build logs in the Vue History page; legacy 200-item path kept; a 365-day retention job runs daily.
+- **InfluxDB 2 (27):** `thinx_influxdb` upgraded in place to `dhi.io/influxdb:2.9.1` from a verified backup with no lost points; `influx.js` on the v2 client; `stats` bucket at 90 days.
+- **Swarmpit (28):** stats stack removed, then Swarmpit 1.10 by tag; every gated redeploy landed in 31–75 s; `swarmpit_db` untouched.
+
+**Known verification overrides:** 18 newly acknowledged, 8 carried forward from a prior close (see STATE.md Deferred Items). The 18 are 1 quick task (`261003-w13`, frontmatter fixed so it could be acknowledged), 10 pending todos and 7 deferred items from Phases 24/26 — none blocks a v1.14 requirement. Phases 22–27 VERIFICATION.md read `passed` but their digests are stale (later phases and post-audit fixes touched covered files); the 2026-10-05 integration check found no regression. Phase 28 carries one operator override (rollback accepted un-drilled).
+
+**Closeout type:** `override_closeout` (stale verification digests on 22–27 and 18 acknowledged open items; milestone audit `tech_debt`).
+
+**Deferred:** OPS-SWARM-03 (remove `swarmpit_agent`), SEC-CSP-02 (`unsafe-eval`), TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`; tech debt listed in `v1.14-MILESTONE-AUDIT.md` (last shell-exec sites in `statistics.js`, legacy worker `cmd`, stale env secrets next to mounts, no SECURITY.md for 24/25, `jasmine || true`).
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.14-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.14-REQUIREMENTS.md`
+- Audit: `.planning/milestones/v1.14-MILESTONE-AUDIT.md`
+- Phases: `.planning/milestones/v1.14-phases/`
+
+---
+
 ## v1.13 — Web Hardening (Console/Edge) (Shipped: 2026-09-25)
 
 **Delivered:** Closed the two HawkScan Medium findings in the console/edge layer. The CSP `https:`/`wss:` scheme wildcard is gone in favour of pinned hosts, and a double-submit anti-CSRF token guards every cookie-session login/account POST on both consoles, enforced in production since 2026-09-25 09:02Z. 2/2 requirements (SEC-CSP-01, SEC-CSRF-01) in Phase 21.

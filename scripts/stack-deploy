@@ -3,3 +3,11 @@
 export $(cat .env.at)
 
 docker stack deploy --with-registry-auth -c ./docker-swarm.yml thinx
+
+# Enable the daily log/build retention job on first deployment. Re-running is
+# safe: an existing schedule is kept. A failure here never fails the deploy.
+if [ "$(id -u)" -eq 0 ]; then
+  "$(dirname "$0")/install-log-retention-cron.sh" || echo "warning: retention cron not installed; run scripts/install-log-retention-cron.sh as root"
+else
+  echo "note: run 'sudo scripts/install-log-retention-cron.sh' once to enable the daily log retention job"
+fi

@@ -1,0 +1,92 @@
+version: '3.3'
+
+services:
+  app:
+    image: swarmpit/swarmpit:1.9
+    environment:
+      - SWARMPIT_DOCKER_API=1.44
+      - DOCKER_API_VERSION=1.44
+      - SWARMPIT_DB=http://db:5984
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+      - traefik-public
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 768M
+        reservations:
+          cpus: '0.15'
+          memory: 384M
+      placement:
+        constraints:
+          - node.hostname == micro
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.swarmpit-http.rule=Host(`swarmpit.thinx.cloud`)
+        - traefik.http.routers.swarmpit-http.entrypoints=http
+        
+        - traefik.http.routers.swarmpit-http.middlewares=https-redirect
+        
+        - traefik.http.routers.swarmpit-https.rule=Host(`swarmpit.thinx.cloud`)
+        - traefik.http.routers.swarmpit-https.entrypoints=https
+        - traefik.http.routers.swarmpit-https.tls=true
+        - traefik.http.routers.swarmpit-https.tls.certresolver=le
+        - traefik.http.services.swarmpit.loadbalancer.server.port=8080
+
+  db:
+    image: couchdb:2.3.0
+    volumes:
+      - db-data:/opt/couchdb/data
+      - /mnt/gluster/deployment/swarm/swarmpit/couchdb-logging.ini:/opt/couchdb/etc/local.d/logging.ini
+    networks:
+      - traefik-public
+      - net
+#    ports:
+#      - 5984
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+      placement:
+        constraints:
+          - node.labels.swarmpit.db-data == true
+
+  agent:
+    image: swarmpit/agent:latest
+    environment:
+      - DOCKER_API_VERSION=1.43
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 64M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
+networks:
+  net:
+    driver: overlay
+    attachable: true
+  traefik-public:
+    external: true
+
+volumes:
+  db-data:
+    driver: local
+

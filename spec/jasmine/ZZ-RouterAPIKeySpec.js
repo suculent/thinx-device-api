@@ -105,7 +105,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.response.api_key).to.be.a('string');
                 expect(j.response.hash).to.be.a('string');
                 created_api_key = j.response.hash;
-                console.log("[spec] saving apikey (1)", j.response.api_key);
+                console.log("[spec] saving apikey (1), hash present:", typeof (j.response.hash) === "string");
                 done();
             });
     }, 30000);
@@ -123,7 +123,7 @@ describe("API Keys (JWT)", function () {
                 expect(j.success).to.equal(true);
                 expect(j.response.api_key).to.be.a('string');
                 expect(j.response.hash).to.be.a('string');
-                console.log("[spec] saving apikey (2)", j.hash);
+                console.log("[spec] saving apikey (2), hash present:", typeof (j.hash) === "string");
                 created_api_key_2 = j.hash;
                 done();
             });
@@ -160,7 +160,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.response).to.be.an('array');
-                console.log(`🚸 [chai] API Keys in revocation:", ${JSON.stringify(j)} from res ${res.text}`);
+                console.log(`🚸 [chai] API Keys in revocation: ${j.response.length}`);
                 //expect(aks.length >= 1);
                 done();
             });
@@ -267,7 +267,7 @@ describe("API Keys (JWT)", function () {
                 let j = JSON.parse(res.text);
                 expect(j.success).to.equal(true);
                 expect(j.response).to.be.an('array');
-                console.log(`🚸 [chai] API Keys in V2 revocation:", ${JSON.stringify(j)} from res ${res.text}`);
+                console.log(`🚸 [chai] API Keys in V2 revocation: ${j.response.length}`);
                 //expect(aks.length >= 1);
                 done();
             });

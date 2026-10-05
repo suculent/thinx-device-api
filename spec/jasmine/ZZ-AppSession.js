@@ -71,14 +71,15 @@ describe("ZZ-AppSession Session Management", function () {
       .catch((e) => console.log("/api/login (valid) e:", e));
   }, 30000);
 
-  it("POST /api/user/logs/tail (with session)", function (done) {
+  it("POST /api/user/logs/tail (with session; removed in quick 261003-v05, 404)", function (done) {
+    // Route removed in quick 261003-v05: the build log is tailed over the WebSocket.
     agent
       .post('/api/user/logs/tail')
       .send({
         'body': 'nonsense'
       })
       .end((err, res) => {
-        expect(res.status).to.equal(200); // not implemented at this stage
+        expect(res.status).to.equal(404);
         done();
       });
   }, 30000);
