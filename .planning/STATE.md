@@ -5,17 +5,17 @@ milestone_name: Backlog & Hardening Sweep
 current_phase: 28
 current_phase_name: Swarmpit Upgrade & Trim
 status: executing
-stopped_at: Phase 28 context gathered
-last_updated: "2026-10-04T22:28:20.200Z"
-last_activity: 2026-10-04
-last_activity_desc: v1.14 milestone audit (gaps_found, 22/25) and post-audit fixes (transformer, sanitka.udid, WR-02, WR-03)
-state_head: c931ee0b0c8427caf686d92060f9e80d89c65553
+stopped_at: Completed 28-01-PLAN.md
+last_updated: "2026-10-05T10:21:54.304Z"
+last_activity: 2026-10-05
+last_activity_desc: Phase 28 execution started
+state_head: ec24fe86ceeef20d669ccf5cd0ce3b8c76f5f413
 progress:
   total_phases: 7
   completed_phases: 12
   total_plans: 47
-  completed_plans: 43
-  percent: 91
+  completed_plans: 44
+  percent: 94
 ---
 
 # STATE — THiNX Device API
@@ -34,12 +34,12 @@ See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
 
 ## Current Position
 
-Phase: 28 (Swarmpit Upgrade & Trim) — READY TO EXECUTE
-Plan: Not started
+Phase: 28 (Swarmpit Upgrade & Trim) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-10-04 - v1.14 milestone audit (gaps_found, 22/25; only Phase 28 open) and post-audit fixes: transformer 2.2.1 isolate recovery, transformer_error allowance dropped, sanitka.udid input no longer logged, WR-02 influx write pause, WR-03 owner-bounded audit fallback
+Last activity: 2026-10-05 — Phase 28 execution started
 
-Progress: [████████████████░░░░] 6/7 v1.14 phases complete ([█████████░] 91%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
+Progress: [████████████████░░░░] 6/7 v1.14 phases complete ([█████████░] 94%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
 
 ## Milestones
 
@@ -266,6 +266,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 27]: 27-06: operator answered enable-all; stats enabled on InfluxDB 2 at 2026-10-03T12:05:27Z, stats bucket 90 d with id kept, six empty upgrade buckets dropped, Chronograf retirement approved for 27-07
 - [Phase 27]: 27-07: operator answered delete-all at the D-07 gate despite count_24h_DEVICE_CHECKIN=0 and an unconfirmed dashboard check; the 1.8 data, upgrade copy, Chronograf volume and /root/phase27 on both nodes are deleted, no rollback to 1.8; dashboard/check-in stays an end-of-phase UAT item
 - [Phase 27]: 27-07: Chronograf retired (D-13); stack files mirror InfluxDB 2.9.1; the INFLUXDB_TOKEN mount lives only on the live thinx_api spec (gluster thinx.yml has no top-level secrets block), so a stack deploy would drop it
+- [Phase 28]: D-02 engine gate passed (29.8.1 both nodes): trim on 1.9 first, then 1.10
+- [Phase 28]: D-12 applied: swarmpit_agent stays, OPS-SWARM-03 moved to Future Requirements (v1.14 = 24)
+- [Phase 28]: Gate 0 PASS on unchanged Swarmpit 1.9: .planning-only push autoredeployed thinx_api in 32 s (D-11a confirmed)
+- [Phase 28]: D-17 drift 0: swarmpit.yml equals the live spec; no reconciliation snapshot
 
 ### Todos
 
@@ -376,11 +380,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 28 context gathered
+**Stopped at:** Completed 28-01-PLAN.md
 
-**Resume file:** .planning/phases/28-swarmpit-upgrade-trim/28-CONTEXT.md
+**Resume file:** None
 
-**Last session:** 2026-10-04T21:32:47.787Z
+**Last session:** 2026-10-05T10:21:54.119Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -447,3 +451,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 27 P05 | 7 min | 2 tasks | 1 files |
 | Phase 27 P06 | 5min | 3 tasks | 1 files |
 | Phase 27 P07 | 74min | 3 tasks | 2 files |
+| Phase 28 P01 | 20min | 2 tasks | 4 files |
