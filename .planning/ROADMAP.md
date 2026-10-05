@@ -78,7 +78,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
 - [x] **Phase 25: Session-Bound CSRF + Console Edge Headers** - HMAC session-bound CSRF token with login rotation, WR-04 and mutation routes covered, hardened console headers mirrored into the images (completed 2026-10-01)
 - [x] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept (completed 2026-10-03)
 - [x] **Phase 27: InfluxDB 2 Upgrade** - `thinx_influxdb` 1.8 → 2 from a verified backup, `influx.js` on v2, 90-day bucket retention on `stats` (completed 2026-10-03)
-- [ ] **Phase 28: Swarmpit Upgrade & Trim** - Swarmpit 1.10, then stats/`swarmpit_influxdb` and `swarmpit_agent` removed, each step gated by a push-to-redeploy test
+- [ ] **Phase 28: Swarmpit Upgrade & Trim** - stats/`swarmpit_influxdb` removed, then Swarmpit 1.10 (`swarmpit_agent` kept), each step gated by a push-to-redeploy test
 
 **Ordering (hard edges):** 22 → 23 (CodeQL before/after evidence for the sink fixes) → 24 (symlink containment closes before `/run/secrets` grows; git.js already passes `GIT_KEY_PASSPHRASE` explicitly) → 25 (`CSRF_SECRET` exists, so the HMAC key is never random). 26 follows 25 for sequencing only. 27 reuses the Phase 24 secret pattern and runs after the other code deploys because its storage upgrade is irreversible. 28 goes last, in its own maintenance window: every earlier phase deploys through Swarmpit autoredeploy, and 27 has already moved `thinx_influxdb` off the `swarmpit/influxdb.conf` bind mount.
 
@@ -323,15 +323,14 @@ Plans:
 
 ### Phase 28: Swarmpit Upgrade & Trim
 
-**Goal**: Swarmpit is reduced to the part that matters, registry-triggered autoredeploy on 1.10. Its stats stack and agent are gone, and every deploy still lands within the 5-minute SLA.
+**Goal**: Swarmpit is reduced to the part that matters, registry-triggered autoredeploy on 1.10. Its stats stack is gone, its agent stays for the tasks UI, and every deploy still lands within the 5-minute SLA.
 **Depends on**: Phase 27 (`thinx_influxdb` no longer depends on the Swarmpit directory) and all earlier v1.14 phases, since they deploy through Swarmpit autoredeploy
-**Requirements**: OPS-SWARM-01, OPS-SWARM-02, OPS-SWARM-03
+**Requirements**: OPS-SWARM-01, OPS-SWARM-02 (OPS-SWARM-03 descoped to Future Requirements, D-12)
 **Success Criteria** (what must be TRUE):
 
   1. Swarmpit runs 1.10 in production, and a test push to `thinx-staging` produces a new `thinx_api` task within 5 minutes.
   2. With Swarmpit stats disabled and `swarmpit_influxdb` removed, a second test push still redeploys within 5 minutes, and `thinx_influxdb` keeps running unaffected.
-  3. With `swarmpit_agent` removed, a third test push still redeploys within 5 minutes.
-  4. `swarmpit_db` is untouched: still couchdb 2.3.0, with the same volume and linked registry credentials. Each step can be rolled back from a stack snapshot taken before it.
+  3. `swarmpit_db` is untouched: still couchdb 2.3.0, with the same volume and linked registry credentials. Each step can be rolled back from a stack snapshot taken before it.
 
 **Plans**: 4 plans
 
@@ -351,7 +350,7 @@ Plans:
 **Wave 4** *(blocked on 28-03)*
 
 - [ ] 28-04-PLAN.md — `swarmpit_influx-data` removed after the last gate (D-14, one-way), end state verified, recovery docs updated, dump shredded
-**Notes**: Runs last, in its own maintenance window, never combined with a code deploy, and away from the ~06:45 UTC unattended-upgrade window. Check the Docker Engine version on `micro` and `core` first. Change one component per step, each gated by a push-to-redeploy test. Stage rung-1 recovery (`docker service update --force swarmpit_app`, per the `swarm-autopull-recovery` skill) before starting.
+**Notes**: Runs last, in its own maintenance window, never combined with a code deploy, and away from the ~06:45 UTC unattended-upgrade window. Check the Docker Engine version on `micro` and `core` first. Change one component per step, each gated by a push-to-redeploy test. Stage rung-1 recovery (`docker service update --force swarmpit_app`, per the `swarm-autopull-recovery` skill) before starting. Order per D-01: the trim (criterion 2) is gated first, then the 1.10 upgrade (criterion 1).
 **Research**: Needed at planning: what changes from 1.9 to 1.10 (especially stats configuration), where the stack file lives on `micro`, and how the app behaves without the agent.
 
 ## Progress

@@ -13,7 +13,12 @@ Snapshots follow the pattern `<hostname>-server.{pre,post}.nginx` literally. Exa
 - `rtm.thinx.cloud-server.pre.nginx` — pre-fix full server-block snapshot
 - `rtm.thinx.cloud-server.post.nginx` — post-fix full server-block snapshot
 
-Future OPS phases targeting additional hosts (e.g., `swarmpit.thinx.cloud`, mosquitto edge) extend the same pattern.
+Swarm stack files and the config files they bind-mount use a per-step pattern:
+
+- `swarmpit-stack.<step>.{pre,post}.yml` — the Swarmpit stack file (`/mnt/gluster/deployment/swarm/swarmpit.yml`) captured before and after each Phase 28 step. Steps: `0` (only if the D-17 drift check found drift and the file was reconciled), `A` (stats trim), `B` (1.10 upgrade).
+- `swarmpit-influxdb*.A.pre.conf` — copies of `swarmpit/influxdb.conf` (and its `.bak.*` sibling) taken before Step A deletes them; the restore source for the Step A rollback.
+
+Future OPS phases targeting additional hosts (e.g., mosquitto edge) extend the same pattern.
 
 ## Snapshot capture recipe
 
@@ -31,11 +36,15 @@ Operator transfers both files back to a developer workstation via `scp` (or `cat
 
 Snapshots are checked in as-is — no reformatting, no comment stripping, no secret redaction beyond what nginx itself emits in `nginx -T`. The point of the snapshot is to be a bit-exact restore source for the documented rollback procedure; reformatting defeats that purpose and breaks `diff` parity against the live config.
 
+**Exception for YAML stack snapshots and copied config files (Phase 28, D-17).** Stack snapshots (`*-stack.<step>.{pre,post}.yml`) and copied config files have every secret value replaced by the literal `<redacted>` and are otherwise bit-exact, so `diff` against the live file and the rollback restore still work (restore the redacted values from the live backup on the manager, never from git). `swarmpit/couchdb-logging.ini` carries the CouchDB admin hash and is never copied, snapshotted or committed, in any form.
+
 The snapshots are NOT executable. They are configuration text, not scripts.
 
 ## Established by
 
 Phase 13 (OPS-EXEC-01) — see `.planning/runbooks/websocket-handshake.md` for the SEC-WS-01 Execution Annex + Rollback Procedure that consume these snapshots. The Annex links each annex entry to the matching `pre.nginx` / `post.nginx` pair; the Rollback Procedure uses `rtm.thinx.cloud-server.pre.nginx` as the restore source for a < 5-minute SLA rollback.
+
+Established by Phase 28 (Swarmpit upgrade and trim) for the YAML stack snapshots: see `.planning/runbooks/swarmpit-upgrade.md` (§ Conventions, § Rollback and the Annex rows that name each `swarmpit-stack.<step>.{pre,post}.yml` pair).
 
 ## v1.11+ adoption
 

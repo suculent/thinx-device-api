@@ -53,8 +53,7 @@
 ### Ops — Swarmpit
 
 - [ ] **OPS-SWARM-01**: Swarmpit runs 1.10 in production and registry-triggered autoredeploy still completes within the 5-minute SLA
-- [ ] **OPS-SWARM-02**: Swarmpit stats are disabled and `swarmpit_influxdb` is removed (the `swarmpit/influxdb.conf` file `thinx_influxdb` mounts is preserved or re-homed); autoredeploy verified by a test push
-- [ ] **OPS-SWARM-03**: `swarmpit_agent` is removed; autoredeploy verified by a test push; `swarmpit_db` untouched
+- [ ] **OPS-SWARM-02**: Swarmpit stats are disabled and `swarmpit_influxdb` is removed (since Phase 27 no service mounts `swarmpit/influxdb.conf`, so the file is deleted with a copy kept in the Step A snapshot); autoredeploy verified by a test push
 
 ## Future Requirements
 
@@ -64,6 +63,7 @@
 - **SEC-CSP-05**: Retire the gluster bind mount so images own the console headers
 - **SEC-CSRF-07**: `__Host-` cookie prefix / cookie rename
 - TEST-CHAI-01, OPS-02, OPS-03, `uuid #194` — carried deferrals
+- **OPS-SWARM-03**: `swarmpit_agent` is removed; autoredeploy verified by a test push; `swarmpit_db` untouched. Descoped from v1.14 on 2026-10-04 (Phase 28 D-12): Swarmpit tasks/stats UI is still used for monitoring; the agent stays. Revisit if monitoring moves off the Swarmpit UI.
 
 ## Out of Scope
 
@@ -105,14 +105,13 @@
 | OPS-INFLUX-03 | Phase 27 | Complete |
 | OPS-SWARM-01 | Phase 28 | Pending |
 | OPS-SWARM-02 | Phase 28 | Pending |
-| OPS-SWARM-03 | Phase 28 | Pending |
 
 **Coverage:**
 
-- v1.14 requirements: 25 total
-- Mapped to phases: 25 (Phases 22–28)
+- v1.14 requirements: 24 total
+- Mapped to phases: 24 (Phases 22–28)
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-25*
-*Last updated: 2026-10-02 after Phase 26 plan 07 (LOG-01..LOG-04 complete; Vue paging UI deployed)*
+*Last updated: 2026-10-04 after Phase 28 D-12 descope (OPS-SWARM-03 moved to Future Requirements; swarmpit_agent stays)*
