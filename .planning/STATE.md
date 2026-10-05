@@ -3,14 +3,14 @@ gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 status: Awaiting next milestone
-stopped_at: Phase 28 complete — all phases complete
+stopped_at: v1.14 milestone closed and archived; ready for /gsd-new-milestone
 last_updated: "2026-10-05T13:58:15.789Z"
 last_activity: 2026-10-05
 last_activity_desc: Milestone v1.14 completed and archived
 state_head: a8b948f45278eb4964a74da5ade1c4b72b8713e6
 progress:
   total_phases: 7
-  completed_phases: 13
+  completed_phases: 7
   total_plans: 47
   completed_plans: 47
   percent: 100
@@ -19,14 +19,14 @@ current_phase: 28
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-10-05 (Phase 28 complete — all v1.14 phases 22–28 complete; milestone ready to close)
+**Last updated:** 2026-10-05 (v1.14 shipped and archived to `.planning/milestones/`; awaiting next milestone)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-05 after Phase 28)
+See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — all phases (22–28) complete; next is milestone completion. Phase 28 closed 2026-10-05: Swarmpit 1.10 live, stats stack and both `swarmpit_influx-data` volumes removed, agent kept (OPS-SWARM-03 descoped to Future), gates 32/31/50 s, UAT 5/5, security 20/20. v1.14 now has 24 requirements.
+- **Current focus:** Planning next milestone (`/gsd-new-milestone`). v1.14 Backlog & Hardening Sweep shipped 2026-10-05 (24/24, audit `tech_debt`, `override_closeout`); candidates are listed in PROJECT.md § Next Milestone Goals and the Deferred Items table below.
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
@@ -411,7 +411,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 28 complete (verified passed, UAT 5/5, SECURITY threats_open 0), ready to run /gsd-complete-milestone v1.14
+**Stopped at:** v1.14 milestone closed and archived (tag v1.14), ready for /gsd-new-milestone
 
 **Resume file:** None
 
