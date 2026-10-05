@@ -78,7 +78,7 @@ See `.planning/milestones/v1.13-ROADMAP.md`. 2/2 v1.13 requirements (SEC-CSP-01,
 - [x] **Phase 25: Session-Bound CSRF + Console Edge Headers** - HMAC session-bound CSRF token with login rotation, WR-04 and mutation routes covered, hardened console headers mirrored into the images (completed 2026-10-01)
 - [x] **Phase 26: Vue Console Log Paging** - opt-in cursor paging for audit and build logs in the Vue Console; legacy 200-item path kept (completed 2026-10-03)
 - [x] **Phase 27: InfluxDB 2 Upgrade** - `thinx_influxdb` 1.8 → 2 from a verified backup, `influx.js` on v2, 90-day bucket retention on `stats` (completed 2026-10-03)
-- [ ] **Phase 28: Swarmpit Upgrade & Trim** - stats/`swarmpit_influxdb` removed, then Swarmpit 1.10 (`swarmpit_agent` kept), each step gated by a push-to-redeploy test
+- [x] **Phase 28: Swarmpit Upgrade & Trim** - stats/`swarmpit_influxdb` removed, then Swarmpit 1.10 (`swarmpit_agent` kept), each step gated by a push-to-redeploy test (completed 2026-10-05)
 
 **Ordering (hard edges):** 22 → 23 (CodeQL before/after evidence for the sink fixes) → 24 (symlink containment closes before `/run/secrets` grows; git.js already passes `GIT_KEY_PASSPHRASE` explicitly) → 25 (`CSRF_SECRET` exists, so the HMAC key is never random). 26 follows 25 for sequencing only. 27 reuses the Phase 24 secret pattern and runs after the other code deploys because its storage upgrade is irreversible. 28 goes last, in its own maintenance window: every earlier phase deploys through Swarmpit autoredeploy, and 27 has already moved `thinx_influxdb` off the `swarmpit/influxdb.conf` bind mount.
 
@@ -332,7 +332,7 @@ Plans:
   2. With Swarmpit stats disabled and `swarmpit_influxdb` removed, a second test push still redeploys within 5 minutes, and `thinx_influxdb` keeps running unaffected.
   3. `swarmpit_db` is untouched: still couchdb 2.3.0, with the same volume and linked registry credentials. Each step can be rolled back from a stack snapshot taken before it.
 
-**Plans**: 4/4 plans executed
+**Plans**: 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -370,7 +370,7 @@ Plans:
 | 25. Session-Bound CSRF + Console Edge Headers | v1.14 | 10/10 | Complete    | 2026-10-01 |
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete    | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete    | 2026-10-03 |
-| 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | In Progress|  |
+| 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete    | 2026-10-05 |
 
 ---
 *v1.14 Backlog & Hardening Sweep roadmap created 2026-09-25: 25 requirements across 7 phases (22–28). Next: `/gsd:discuss-phase 22`.*

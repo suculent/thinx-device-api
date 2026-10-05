@@ -45,7 +45,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 - ✓ **Vue hostname var** — separate Vue console hostname build var so footer links point at itself *(shipped Phase 22, CI-03)*
 - ✓ **Log paging** — opt-in owner-bound cursor paging (`limit`/`cursor`, `paging:{limit,has_more,next_cursor}`) for audit and build logs in the Vue Console; the Legacy console keeps its 200-item call (now owner-keyed, string flags); daily log-retention cron on micro *(shipped Phase 26, LOG-01..04)*
 - ✓ **InfluxDB 2** — `thinx_influxdb` runs `dhi.io/influxdb:2.9.1` in production, upgraded in place from a verified backup; `influx.js` is on the v2 client (Flux); `stats` has 90-day bucket retention *(shipped Phase 27, OPS-INFLUX-01/02/03)*
-- **Swarmpit 1.10 + trim** — upgrade Swarmpit to 1.10 (added 2026-09-25), then disable stats and drop `swarmpit_influxdb` and `swarmpit_agent`; registry-triggered autoredeploy must keep working; `swarmpit_db` stays couchdb 2.3.0
+- ✓ **Swarmpit 1.10 + trim** — Swarmpit runs `swarmpit/swarmpit:1.10` with stats removed (`swarmpit_influxdb`, its config and data volumes gone); `swarmpit_agent` kept for the tasks UI (OPS-SWARM-03 descoped); registry autoredeploy within SLA (31–75 s); `swarmpit_db` untouched on couchdb 2.3.0 *(shipped Phase 28, OPS-SWARM-01/02)*
 
 **Still deferred:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS retirement); TEST-CHAI-01, OPS-02, OPS-03, `uuid #194`.
 
@@ -62,6 +62,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
   - `WORKER_SECRET` was rotated, and a real build on the new value succeeded. `docker-swarm.yml` mirrors the live stack. There was no outage.
 - ✓ **OPS-INFLUX-01/02/03** — v1.14 (Phase 27) — `thinx_influxdb` upgraded 1.8 → `dhi.io/influxdb:2.9.1` in place (2026-10-02 22:43–22:45 UTC, ~2 min down) after a verified, rehearsed backup; all 2402 points migrated, the 80-day window (501) proven equal after the trim. `lib/thinx/influx.js` uses `@influxdata/influxdb-client` 1.35.0 with Flux and strictly increasing ns timestamps; a boot ensure adopts `stats/autogen` as `stats` with 90-day retention. Stats re-enabled 2026-10-03 12:05 UTC; dashboard/Visits and a test-device check-in confirmed in UAT. CI runs the influx specs on InfluxDB 2.9.1 (1018 specs, 0 failures). Chronograf retired; 1.8 data and backups deleted.
   - `INFLUXDB_TOKEN` is mounted only on the live `thinx_api` spec (not in gluster `thinx.yml`) — `restart.sh`/stack deploy turns stats off until re-added.
+- ✓ **OPS-SWARM-01/02** — v1.14 (Phase 28) — Stats stack removed on 1.9 first (Step A, Gate A 31 s), then Swarmpit 1.10 by tag with compose 3.8 and a 300 s healthcheck start period, keeping the API 1.44 pins (Step B, Gate B 50 s, 10-min hold with no restarts). `swarmpit_db` unchanged (7 docs hash-equal to the pre-phase dump, no migration); agent unchanged on `agent:latest` (no 1.10-matching release). `swarmpit_influx-data` removed on micro (130M) and core (87M). Each step snapshotted under `.planning/runbooks/swarm-configs/`; rollback accepted un-drilled in UAT. OPS-SWARM-03 (remove agent) moved to Future Requirements — the Swarmpit tasks UI is still used for monitoring.
 - ✓ **CI-02** — v1.14 (Phase 22) — Every private-registry login in `.circleci/config.yml` goes through the retrying stdin `registry-login` command; the raw argv-password login in the test job is gone.
 - ✓ **SEC-EXEC-01** — v1.14 (Phase 23) — `lib/thinx/git.js` runs git argv-only (`runGit` is a detached `spawn`, `shell:false`; `ls-files` uses `execFileSync`). No shell string, no `ssh-agent sh -c`. Constant `GIT_SSH_COMMAND` + askpass, passphrase in env, publickey-only ssh. Private builds proven in production (43c748d0, 17d30770).
 - ✓ **SEC-EXEC-02** — v1.14 (Phase 23) — Remote jobs carry `argv` (arguments only), and the worker spawns its constant builder program with `shell:false`. `shell-escape` is gone from `package.json` and the lockfile. The legacy `cmd` shell path is retained for now (removal is a pending todo).
@@ -241,4 +242,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-03 after Phases 26 (Vue Console Log Paging) and 27 (InfluxDB 2 Upgrade)*
+*Last updated: 2026-10-05 after Phase 28 (Swarmpit Upgrade & Trim)*

@@ -3,16 +3,15 @@ gsd_state_version: "1.0"
 milestone: v1.14
 milestone_name: Backlog & Hardening Sweep
 current_phase: 28
-current_phase_name: Swarmpit Upgrade & Trim
-status: verifying
-stopped_at: Completed 28-04-PLAN.md
-last_updated: "2026-10-05T12:31:05.957Z"
+status: completed
+stopped_at: Phase 28 complete — all phases complete
+last_updated: "2026-10-05T13:44:10.622Z"
 last_activity: 2026-10-05
-last_activity_desc: Phase 28 execution started
-state_head: 2f5816afd5bcf14371fac298a409591d2e440a95
+last_activity_desc: Phase 28 complete
+state_head: 821422093a7052de7de429418f478f994585bdd6
 progress:
   total_phases: 7
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 47
   completed_plans: 47
   percent: 100
@@ -20,26 +19,26 @@ progress:
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-10-04 (v1.14 audit gaps_found: Phases 22–27 complete, Phase 28 not started; post-audit fixes committed)
+**Last updated:** 2026-10-05 (Phase 28 complete — all v1.14 phases 22–28 complete; milestone ready to close)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-29 after Phase 24)
+See: `.planning/PROJECT.md` (updated 2026-10-05 after Phase 28)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.14 Backlog & Hardening Sweep — Phase 28 Swarmpit Upgrade & Trim (ready to discuss; own maintenance window). It is the only open phase: the 2026-10-04 audit (`.planning/v1.14-MILESTONE-AUDIT.md`) found 22/25 requirements satisfied, the 3 gaps are OPS-SWARM-01..03.
+- **Current focus:** v1.14 Backlog & Hardening Sweep — all phases (22–28) complete; next is milestone completion. Phase 28 closed 2026-10-05: Swarmpit 1.10 live, stats stack and both `swarmpit_influx-data` volumes removed, agent kept (OPS-SWARM-03 descoped to Future), gates 32/31/50 s, UAT 5/5, security 20/20. v1.14 now has 24 requirements.
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: 28 (Swarmpit Upgrade & Trim) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-10-05 — Phase 28 execution started
+Phase: 28
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-10-05 — Phase 28 complete
 
-Progress: [████████████████░░░░] 6/7 v1.14 phases complete ([██████████] 100%); 43/43 planned plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8); Phase 28 not planned
+Progress: [████████████████████] 7/7 v1.14 phases complete; 47/47 plans done (Phase 22 4/4, 23 5/5, 24 6/6, 25 10/10, 26 10/10, 27 8/8, 28 4/4)
 
 ## Milestones
 
@@ -299,6 +298,12 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 
 - None.
 
+### Concerns carried from Phase 28
+
+- ⚠️ [Phase 28] Both nodes carry `swarmpit.db-data=true` and micro holds a stale 2022 `swarmpit_db-data`; a swarmpit_db reschedule to micro would start on stale data (runbook follow-up, not fixed).
+- ⚠️ [Phase 28] ~1.5k/day `autoredeploy failed` noise for the dhi.io images on `thinx_couchdb`/`thinx_influxdb` (autoredeploy labels on services Swarmpit cannot pull); micro still has the stale `swarmpit.influx-data` node label.
+- ⚠️ [Phase 28] `.claude/` is untracked but not gitignored; the local skill file contains the manager ssh line — avoid `git add -A`.
+
 ### Concerns carried from Phase 22
 
 - ⚠️ [Phase 22] Console `test:unit` (footer hostnames guard) runs in no CI job or image build (review WR-03); its sweep/render also has blind spots (WR-04, WR-05).
@@ -383,7 +388,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 28-04-PLAN.md
+**Stopped at:** Phase 28 complete (verified passed, UAT 5/5, SECURITY threats_open 0), ready to run /gsd-complete-milestone v1.14
 
 **Resume file:** None
 
