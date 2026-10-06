@@ -100,8 +100,13 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 4. A rollback snapshot of the current working edge is saved before Phase 30.
 
 **Plans:** 3 plans (planned 2026-10-06)
+**Wave 1**
 - [ ] 29-01-PLAN.md — Tracer: anti-drift spine end-to-end on the `:7442` slice (generator → read-only mirror → staleness check → CI gate)
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 29-02-PLAN.md — Full live edge capture, live↔repo diff, reconcile `thinx-swarm` (production wins, zero cleanup), ACME cert inventory
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 29-03-PLAN.md — Out-of-git rollback snapshot (600) on `micro`, source-of-truth runbook section, P30–P34 fix-forward list
 
 ### Phase 30: v1→v2 Syntax Migration (parity)
