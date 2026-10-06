@@ -112,6 +112,61 @@ Evidence:
 
 ---
 
+## Traefik Edge Source of Truth (Phase 29 / EDGE-RECON-01 — 2026-10-06)
+
+The Traefik edge config has **one documented, one-way source-of-truth chain**. Each node is
+derived from the one above it; edits flow downward only.
+
+1. **ULTIMATE source of truth — live on `micro`.** Entered via the `thx` alias into the swarm
+   deploy folder `/mnt/gluster/deployment/swarm/`. The *authoritative* capture is the running
+   task, not the on-disk file (D-08):
+
+   ```bash
+   ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}'"
+   # expect: the resolved static command incl. --entrypoints.thxp.address=:7442 (AGENTS.md keep-7442)
+   ```
+
+2. **COMMITTED source of truth — the private `thinx-swarm` repo** (`traefik.yml` +
+   `traefik/tls.toml`). Reconciled to equal live in Phase 29 (D-01, production wins); warts
+   preserved deliberately (see `traefik-edge-fixforward.md`). This is the repo you edit for a real
+   edge change.
+
+3. **Generated READ-ONLY mirror — `thinx-device-api/docker-compose.traefik.yml`.** Produced by
+   `scripts/generate-traefik-mirror.js` from `thinx-swarm`, secrets redacted, banner-stamped
+   `GENERATED — do not edit. source: thinx-swarm@<sha>`. **Never hand-edit it** — it exists for
+   visibility in this repo, not for deploy.
+
+**Anti-drift enforcement (D-03).** `scripts/check-traefik-mirror.js` verifies the mirror's banner
+SHA + body hash, and (with `--swarm-repo`) that it matches the recorded `thinx-swarm` HEAD. The
+CircleCI **"Traefik mirror staleness (EDGE-RECON-01)"** step runs it and **fails the build** if the
+mirror drifts:
+
+```bash
+node scripts/check-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm
+# expect: "MIRROR OK files=1" (exit 0); non-zero on MIRROR-EDITED / MIRROR-STALE / MISSING
+```
+
+**ACME storage (authoritative path).** The live certificate store is the named Docker volume
+`/var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json` on `micro` (confirmed
+by `services/traefik/update.sh`). The dead app-repo path `/traefik/acme.json` is a historical drift
+signal only (recorded in `swarm-configs/traefik-edge-diff.2026-10-06.md`).
+
+**Pre-Phase-30 rollback baseline (out-of-git, D-11).** A faithful copy of the current working edge
+is stored out-of-git on `micro`, mode 600 (dir 700, root-owned):
+
+```bash
+ssh micro "stat -c '%a %U' /mnt/data/edge-rollback/traefik-2026-10-06/acme.json"
+# expect: 600 root
+# dir also holds resolved-snapshot.yml (resolved command/labels/env/tls.toml). NEVER commit / scp into a repo.
+```
+
+Phase-30 rollback restores certs instantly from this `acme.json` without re-triggering ACME
+challenges. Deferred warts (pilot token, exposedbydefault, --api, log level, docker.sock, ACME
+email) are enumerated in `.planning/runbooks/traefik-edge-fixforward.md` — none were changed in
+Phase 29 (D-06, zero cleanup).
+
+---
+
 ## Related v1.x backlog items
 
 - **OPS-02** (REQUIREMENTS.md) — Stale swarm membership entry `b356ad8e1d60` / `10.133.0.4`. Defer; cleanup is the Rung 3 procedure.
