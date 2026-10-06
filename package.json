@@ -22,6 +22,8 @@
     "roadmap-entropy": "node scripts/roadmap-entropy.js",
     "privacy-check": "node scripts/privacy-policy-check.js",
     "check:headers": "node scripts/check-console-headers.js",
+    "generate:traefik-mirror": "node scripts/generate-traefik-mirror.js",
+    "check:traefik-mirror": "node scripts/check-traefik-mirror.js",
     "lint": "eslint ./",
     "lint:commit": "commitlint --from HEAD~1 --to HEAD --verbose",
     "setup:hooks": "git config core.hooksPath .githooks",
