@@ -99,7 +99,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 3. The actual deploy source of truth (repo file vs gluster path) is documented in the swarm runbook.
 4. A rollback snapshot of the current working edge is saved before Phase 30.
 
-**Plans:** 3/3 plans executed (planned 2026-10-06)
+**Plans:** 3/3 plans complete (planned 2026-10-06)
 **Wave 1**
 - [x] 29-01-PLAN.md — Tracer: anti-drift spine end-to-end on the `:7442` slice (generator → read-only mirror → staleness check → CI gate)
 
@@ -178,7 +178,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete | 2026-10-03 |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete | 2026-10-05 |
-| 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | In Progress | — |
+| 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete    | 2026-10-06 |
 | 30. v1→v2 Syntax Migration (parity) | v1.15 | 0/? | Pending | — |
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 0/? | Pending | — |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 0/? | Pending | — |

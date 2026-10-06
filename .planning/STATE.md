@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
-current_phase: 29
-current_phase_name: Edge Reconciliation & Source of Truth
-status: executing
-stopped_at: Phase 29 context gathered
-last_updated: "2026-10-06T19:25:54.309Z"
+current_phase: 30
+current_phase_name: v1→v2 Syntax Migration (parity)
+status: planning
+stopped_at: Phase 29 complete, ready to plan Phase 30
+last_updated: "2026-10-06T20:22:09.575Z"
 last_activity: 2026-10-06
-last_activity_desc: Phase 29 execution started
-state_head: 2f056898e60cbc010004f8f8d82ac2c3188bce29
+last_activity_desc: Phase 29 complete, transitioned to Phase 30
+state_head: fb7b1d258451054aabc32463d147d6f563ad96c0
 progress:
   total_phases: 6
-  completed_phases: 13
+  completed_phases: 14
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 74
 ---
 
 # STATE — THiNX Device API
@@ -34,10 +34,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: 29 (Edge Reconciliation & Source of Truth) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 29
-Last activity: 2026-10-06 — Phase 29 execution started
+Phase: 30 — v1→v2 Syntax Migration (parity)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-06 — Phase 29 complete, transitioned to Phase 30
 
 ## Milestones
 
@@ -412,7 +412,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 29 context gathered
+**Stopped at:** Phase 29 complete, ready to plan Phase 30
 
 **Resume file:** .planning/phases/29-edge-reconciliation-source-of-truth/29-CONTEXT.md
 
