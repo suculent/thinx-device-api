@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@e316ea60719e209d8e0d6982e9f9f23742506b22 generated:2026-10-06T19:32:05Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:16460451dd36c8ef751f3aebd400c4c4043d65782bd66470c0ea494fd1e140f5
+# GENERATED — do not edit. source: thinx-swarm@eb94be5bcbf64f6f43d290cd2a058b436a047eda generated:2026-10-06T19:51:02Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:6af4a0915c85122057ec167c7c908e7d5404f2b36c57a4f9cf60fbf64f48bfd7
 version: '3.7'
 
 services:
@@ -41,6 +41,18 @@ services:
         # It can be re-used by other stacks in other Docker Compose files
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+
+        # security-headers middleware (referenced by thinx-console / thinx-api / thinx-vue as
+        # security-headers@docker). Reconciled from live on 2026-10-06 (Phase 29, EDGE-RECON-02,
+        # production wins) — this block was running on the traefik service but missing from this
+        # committed file, so a redeploy from here would have dropped security-headers@docker.
+        - traefik.http.middlewares.security-headers.headers.browserxssfilter=true
+        - traefik.http.middlewares.security-headers.headers.contenttypenosniff=true
+        - traefik.http.middlewares.security-headers.headers.forcestsheader=true
+        - traefik.http.middlewares.security-headers.headers.framedeny=true
+        - traefik.http.middlewares.security-headers.headers.stsincludesubdomains=true
+        - traefik.http.middlewares.security-headers.headers.stspreload=true
+        - traefik.http.middlewares.security-headers.headers.stsseconds=31536000
 
         # traefik-http set up only to use the middleware to redirect to https
         # Uses the environment variable DOMAIN
