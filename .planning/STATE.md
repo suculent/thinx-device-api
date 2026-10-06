@@ -1,16 +1,21 @@
 ---
 gsd_state_version: "1.0"
 milestone: v1.15
-milestone_name: Traefik Hardening
+milestone_name: Traefik Hardening (Edge)
+current_phase: 29
+current_phase_name: Edge Reconciliation & Source of Truth
 status: planning
-last_updated: "2026-10-06T13:28:41.178Z"
+stopped_at: Phase 29 context gathered
+last_updated: "2026-10-06T14:29:44.765Z"
 last_activity: 2026-10-06
+last_activity_desc: Milestone v1.15 roadmap created (Phases 29–34, 14 requirements)
+state_head: "0bb2099f6405e8673827b04e11d0b59da4e73e9d"
 progress:
-  total_phases: 0
-  completed_phases: 0
+  total_phases: 1
+  completed_phases: 13
   total_plans: 0
   completed_plans: 0
-  percent: 0
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -407,11 +412,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** v1.14 milestone closed and archived (tag v1.14), ready for /gsd-new-milestone
+**Stopped at:** Phase 29 context gathered
 
-**Resume file:** None
+**Resume file:** .planning/phases/29-edge-reconciliation-source-of-truth/29-CONTEXT.md
 
-**Last session:** 2026-10-05T12:31:05.806Z
+**Last session:** 2026-10-06T14:29:44.184Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
