@@ -88,47 +88,65 @@ See `.planning/milestones/v1.14-ROADMAP.md`. 24/24 v1.14 requirements (OPS-SWARM
 
 Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard constraint across every phase: the plaintext device entrypoint `:7442` and plain MQTT keep working (legacy `__DISABLE_HTTPS__` devices), and each phase is independently rollback-able within the 5-minute deploy SLA.
 
-**Phase 29: Edge Reconciliation & Source of Truth** — EDGE-RECON-01, EDGE-RECON-02
-Goal: Establish exactly what Traefik config is deployed (gluster bind-mount suspected) and make the repo authoritative before any change.
-Success criteria:
+### Phase 29: Edge Reconciliation & Source of Truth
+
+**Requirements**: EDGE-RECON-01, EDGE-RECON-02
+**Goal**: Establish exactly what Traefik config is deployed (gluster bind-mount suspected) and make the repo authoritative before any change.
+**Success Criteria** (what must be TRUE):
+
 1. The live swarm-host Traefik static flags, dynamic rules, and ACME storage are captured and committed as a dated snapshot.
 2. A diff of live vs repo (`docker-compose.traefik.yml` + `services/traefik/*`) exists; every difference is reconciled into the repo or documented with rationale.
 3. The actual deploy source of truth (repo file vs gluster path) is documented in the swarm runbook.
 4. A rollback snapshot of the current working edge is saved before Phase 30.
 
-**Phase 30: v1→v2 Syntax Migration (parity)** — EDGE-MIG-01, EDGE-MIG-04
-Goal: Migrate static flags + Docker labels to v2 syntax on a current v2.x image with identical routing; plaintext device paths preserved.
-Success criteria:
+### Phase 30: v1→v2 Syntax Migration (parity)
+
+**Requirements**: EDGE-MIG-01, EDGE-MIG-04
+**Goal**: Migrate static flags + Docker labels to v2 syntax on a current v2.x image with identical routing; plaintext device paths preserved.
+**Success Criteria** (what must be TRUE):
+
 1. Static config uses v2 entrypoints / `providers.docker` / `certificatesresolvers`; labels use `http.routers`/`http.services`.
 2. Every existing route (app, landing, dev, console hostnames) serves identically; HTTP→HTTPS redirect intact; ACME issues/renews under the v2 resolver.
 3. Plaintext `:7442` + plain MQTT verified: legacy check-in, OTT redeem, and firmware download all succeed.
 4. Rollback to the Phase 29 snapshot is demonstrated.
 
-**Phase 31: v2→v3 Upgrade (backward-compat mode)** — EDGE-MIG-02
-Goal: Upgrade to current Traefik v3.x with `core.defaultRuleSyntax: v2`, via the official three-phase rollout, rollback-able.
-Success criteria:
+### Phase 31: v2→v3 Upgrade (backward-compat mode)
+
+**Requirements**: EDGE-MIG-02
+**Goal**: Upgrade to current Traefik v3.x with `core.defaultRuleSyntax: v2`, via the official three-phase rollout, rollback-able.
+**Success Criteria** (what must be TRUE):
+
 1. Running current v3.x image with the BC switch; all routes serve identically.
 2. The prepare→migrate-prod→(defer routing) rollout is followed; rollback to v2 is demonstrated or staged-ready.
 3. ACME + TLS posture preserved under v3; plaintext `:7442` + MQTT re-verified.
 
-**Phase 32: v3 Native Syntax & BC Removal** — EDGE-MIG-03
-Goal: Convert routing rules to native v3 syntax and remove the BC switch (or document retention).
-Success criteria:
+### Phase 32: v3 Native Syntax & BC Removal
+
+**Requirements**: EDGE-MIG-03
+**Goal**: Convert routing rules to native v3 syntax and remove the BC switch (or document retention).
+**Success Criteria** (what must be TRUE):
+
 1. Routing rules are in native v3 syntax; `core.defaultRuleSyntax` removed or its retention documented.
 2. Full route parity confirmed; plaintext `:7442` + MQTT re-verified.
 3. Repo config matches the deployed v3 config.
 
-**Phase 33: Dashboard Lockdown & TLS Hardening** — EDGE-API-01, EDGE-API-02, EDGE-TLS-01, EDGE-TLS-02, EDGE-TLS-03
-Goal: Close the dashboard/API surface and enforce modern TLS on the v3 edge.
-Success criteria:
+### Phase 33: Dashboard Lockdown & TLS Hardening
+
+**Requirements**: EDGE-API-01, EDGE-API-02, EDGE-TLS-01, EDGE-TLS-02, EDGE-TLS-03
+**Goal**: Close the dashboard/API surface and enforce modern TLS on the v3 edge.
+**Success Criteria** (what must be TRUE):
+
 1. Port 8080 is not externally reachable and `--api.insecure` is disabled; the dashboard is either off in prod or served via `api@internal` behind auth.
 2. HTTPS enforces min TLS 1.2 (prefer 1.3) with a modern cipher set; HSTS is sent; plaintext `:7442` unaffected.
 3. ACME uses the real operator email (not `admin@example.com`); `acme.json` is `600`; renewal verified.
 4. An external scan confirms no open dashboard and the expected TLS posture.
 
-**Phase 34: Ops Surface Reduction & SLA Close-out** — EDGE-OPS-01, EDGE-OPS-02, EDGE-OPS-03
-Goal: Reduce the operational attack surface and confirm the deploy SLA end-to-end.
-Success criteria:
+### Phase 34: Ops Surface Reduction & SLA Close-out
+
+**Requirements**: EDGE-OPS-01, EDGE-OPS-02, EDGE-OPS-03
+**Goal**: Reduce the operational attack surface and confirm the deploy SLA end-to-end.
+**Success Criteria** (what must be TRUE):
+
 1. Log level is `INFO`/`WARN` in production (access logs, if kept, free of secrets).
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
 3. push → CI → Swarmpit measured ≤5 minutes end-to-end on an edge change; swarm runbook updated.
