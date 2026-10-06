@@ -10,6 +10,19 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
+## Current Milestone: v1.15 Traefik Hardening (Edge)
+
+**Goal:** Reconcile the Traefik edge against what is actually deployed, then modernize and harden it — migrating off the outdated `v2.6.1` image driven by v1-syntax flags/labels — without breaking plaintext device check-in (`:7442`) or the 5-minute deploy SLA.
+
+**Target features:**
+- Reconcile repo `docker-compose.traefik.yml` + `services/traefik/*` against the live swarm-host config (gluster bind-mount suspected) to establish source of truth before any change.
+- Version + config modernization: two-hop migration v1→v2 syntax, then v2→v3 (BC switch `core.defaultRuleSyntax: v2`), landing on current Traefik v3.x. See `.planning/research/TRAEFIK-MIGRATION.md`.
+- Dashboard/API lockdown: close/secure port 8080 and the `--api` dashboard.
+- TLS hardening: min TLS 1.2/1.3, modern ciphers, HSTS, real ACME email, `acme.json` 600.
+- Ops surface reduction: `DEBUG → INFO/WARN` logging; broker `docker.sock` via a socket-proxy.
+
+**Hard constraints:** plaintext device entrypoint `:7442` and plain MQTT must survive every hop (legacy `__DISABLE_HTTPS__` devices); each migration hop stays independently rollback-able. This milestone intentionally reverses the prior "edge layer redesign out of scope" boundary.
+
 ## Current State
 
 **Shipped:** v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
@@ -241,4 +254,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-05 after v1.14 milestone*
+*Last updated: 2026-10-06 after v1.15 milestone start*

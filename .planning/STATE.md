@@ -1,20 +1,16 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.14
-milestone_name: Backlog & Hardening Sweep
-status: Awaiting next milestone
-stopped_at: v1.14 milestone closed and archived; ready for /gsd-new-milestone
-last_updated: "2026-10-05T13:58:15.789Z"
-last_activity: 2026-10-05
-last_activity_desc: Milestone v1.14 completed and archived
-state_head: a8b948f45278eb4964a74da5ade1c4b72b8713e6
+milestone: v1.15
+milestone_name: Traefik Hardening
+status: planning
+last_updated: "2026-10-06T13:28:41.178Z"
+last_activity: 2026-10-06
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 47
-  completed_plans: 47
-  percent: 100
-current_phase: 28
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE — THiNX Device API
@@ -33,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: Milestone v1.14 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-10-05 — Milestone v1.14 completed and archived
+Status: Defining requirements
+Last activity: 2026-10-06 — Milestone v1.15 started
 
 ## Milestones
 
