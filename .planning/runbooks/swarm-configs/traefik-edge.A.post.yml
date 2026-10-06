@@ -1,0 +1,173 @@
+# traefik-edge.A.pre.yml
+# Phase 29 (EDGE-RECON-01/02) — full live Traefik edge snapshot, step A, PRE-migration.
+# Captured 2026-10-06 from micro (188.166.23.244) swarm manager, read-only:
+#   docker service inspect / docker config inspect / docker service ls / jq on acme.json
+# AUTHORITATIVE SOURCE = running task state (D-08). This file is redacted + NOT executable
+# (README: secrets -> literal <redacted>, ${VAR} kept templated, otherwise bit-faithful).
+# It is a capture artifact for diff + rollback, not a deploy source.
+#
+# Live traefik image: traefik:v2.11   (stack service: traefik_traefik)
+
+traefik_service:
+  image: traefik:v2.11
+  # Published host ports — the traefik service itself publishes ONLY 80 and 443 (ingress).
+  published_ports:
+    - 80:80/tcp     # entrypoint http
+    - 443:443/tcp   # entrypoint https
+  # Resolved static command (Spec.TaskTemplate.ContainerSpec.Args), in live order:
+  command:
+    - --providers.docker
+    - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+    - --providers.docker.exposedbydefault=true            # WART (D-05) -> fix-forward P33/P30
+    - --providers.docker.swarmmode
+    - --entrypoints.http.address=:80
+    - --entrypoints.https.address=:443
+    - --entrypoints.vpn.address=:1194                     # entrypoint defined; NO router + NOT published (vestigial)
+    - --entrypoints.mqtt.address=:1883                    # entrypoint defined; NO traefik router; :1883 published by thinx_mosquitto directly
+    - --entrypoints.mqtts.address=:8883                   # entrypoint defined; thinx_mosquitto has a tcp router on mqtts, but traefik does NOT publish :8883 (see DRIFT)
+    - --entrypoints.thxp.address=:7442                    # entrypoint defined; NO traefik router; :7442 published by thinx_api directly (AGENTS.md keep-7442)
+    - --certificatesresolvers.le.acme.email=${EMAIL}      # live resolves to a real operator address; kept templated in git (D-10), resolved value only in the out-of-git rollback snapshot (29-03)
+    - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+    - --certificatesresolvers.le.acme.tlschallenge=true
+    - --accesslog
+    - --log
+    - --log.level=ERROR                                   # WART (D-05) -> fix-forward P34 (policy choice)
+    - --api                                               # WART (D-05) -> fix-forward P33 (dashboard/API lockdown)
+    - --pilot.token=<redacted>                            # WART: cleartext Traefik Pilot token (UUID redacted) -> fix-forward P30 (remove; v3 rejects the flag)
+  mounts:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: true                                     # ro raw docker.sock (D-05) -> fix-forward P34 (socket-proxy)
+    - type: volume
+      source: traefik_traefik-public-certificates         # swarm-namespaced; committed file names it traefik-public-certificates
+      target: /certificates
+  configs:
+    - config_name: tls-config-1                           # committed: name tls-config-${CONFIG:-1}, so CONFIG=1 live
+      target: /traefik/tls.toml
+      mode: "0444"
+  networks:
+    - traefik-public                                      # alias: traefik; external network
+  # Resolved deploy labels on the traefik service itself (basic-auth hash redacted):
+  labels:
+    traefik.enable: "true"
+    traefik.docker.network: traefik-public
+    traefik.constraint-label: traefik-public
+    traefik.http.middlewares.admin-auth.basicauth.users: ${USERNAME}:<redacted>   # apr1/bcrypt hash redacted (D-10)
+    traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+    traefik.http.middlewares.https-redirect.redirectscheme.permanent: "true"
+    # security-headers middleware — DEFINED LIVE, referenced by thinx-console/thinx-api/thinx-vue as security-headers@docker.
+    # NOT present in committed thinx-swarm/traefik.yml before this phase -> DRIFT, reconciled in 29-02 Task 2.
+    traefik.http.middlewares.security-headers.headers.browserxssfilter: "true"
+    traefik.http.middlewares.security-headers.headers.contenttypenosniff: "true"
+    traefik.http.middlewares.security-headers.headers.forcestsheader: "true"
+    traefik.http.middlewares.security-headers.headers.framedeny: "true"
+    traefik.http.middlewares.security-headers.headers.stsincludesubdomains: "true"
+    traefik.http.middlewares.security-headers.headers.stspreload: "true"
+    traefik.http.middlewares.security-headers.headers.stsseconds: "31536000"
+    traefik.http.middlewares.error-pages-middleware.errors.status: 400-599
+    traefik.http.middlewares.error-pages-middleware.errors.service: errorpage
+    traefik.http.middlewares.error-pages-middleware.errors.query: /{status}.html
+    traefik.http.routers.traefik-public-http.rule: Host(`${DOMAIN}`)              # live DOMAIN=micro.thinx.cloud
+    traefik.http.routers.traefik-public-http.entrypoints: http
+    traefik.http.routers.traefik-public-http.middlewares: https-redirect
+    traefik.http.routers.traefik-public-https.rule: Host(`${DOMAIN}`)
+    traefik.http.routers.traefik-public-https.entrypoints: https
+    traefik.http.routers.traefik-public-https.tls: "true"
+    traefik.http.routers.traefik-public-https.service: api@internal
+    traefik.http.routers.traefik-public-https.tls.certresolver: le
+    traefik.http.routers.traefik-public-https.middlewares: admin-auth,error-pages-middleware
+    traefik.http.services.traefik-public.loadbalancer.server.port: "8080"
+
+# ---------------------------------------------------------------------------
+# Dynamic config — docker config tls-config-1, mounted at /traefik/tls.toml.
+# Byte-identical to committed thinx-swarm/traefik/tls.toml (zero drift).
+tls_toml: |
+  [tls]
+    [tls.options]
+      [tls.options.default]
+        minVersion = "VersionTLS12"
+        sniStrict = true
+        cipherSuites = [
+          "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+          "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+          "TLS_AES_128_GCM_SHA256",
+          "TLS_AES_256_GCM_SHA384",
+          "TLS_CHACHA20_POLY1305_SHA256"
+        ]
+
+# ---------------------------------------------------------------------------
+# Full entrypoint map (D-09 / AGENTS.md "keep 7442"):
+entrypoints:
+  ":80  http":   { defined_in_traefik: true,  traefik_published: true,  notes: "HTTP -> https-redirect" }
+  ":443 https":  { defined_in_traefik: true,  traefik_published: true,  notes: "primary HTTPS edge, all http routers" }
+  ":1194 vpn":   { defined_in_traefik: true,  traefik_published: false, notes: "no router, no published port — vestigial entrypoint" }
+  ":1883 mqtt":  { defined_in_traefik: true,  traefik_published: false, notes: "plain MQTT; published DIRECTLY by thinx_mosquitto (*:1883-1884->1883-1884), NOT via traefik — AGENTS.md plain-MQTT path" }
+  ":8883 mqtts": { defined_in_traefik: true,  traefik_published: false, notes: "thinx_mosquitto has tcp router mosquitto-secure on entrypoint mqtts AND publishes *:8883->8883 directly; traefik does NOT publish :8883 (see DRIFT)" }
+  ":7442 thxp":  { defined_in_traefik: true,  traefik_published: false, notes: "legacy plaintext device port; published DIRECTLY by thinx_api (*:7442->7442), NOT via traefik — AGENTS.md keep-7442" }
+
+# Per-stack traefik.* labels (routed services). Captured live; see routed-labels for full detail.
+routed_services:
+  thinx_api:        # Host(app.thinx.cloud) http/https + websocket router on rtm.thinx.cloud; sslheaders@docker + security-headers@docker; lb port 7442
+    enable: true
+    routers: [thinx-api-http, thinx-api-https, thinx-api-ws]
+    loadbalancer_port: 7442
+    middlewares: [sslheaders@docker, security-headers@docker]
+    note: "service publishes *:7442->7442 directly (legacy plaintext)"
+  thinx_console:    # Host(rtm.thinx.cloud); security-headers@docker; STSPreload/STSSeconds frontend labels (legacy v1-style); lb port 80
+    enable: true
+    routers: [thinx-console-http, thinx-console-https]
+    loadbalancer_port: 80
+  thinx_vue:        # Host(console.thinx.cloud); lb port 80
+    enable: true
+    routers: [thinx-vue-console-http, thinx-vue-console-https]
+    loadbalancer_port: 80
+  thinx_mosquitto:  # TCP router on mqtts entrypoint; lb port 8883; publishes *:1883-1884 + *:8883 directly
+    enable: true
+    tcp_routers: [mosquitto-secure]
+    tcp_entrypoints: [mqtts]
+    loadbalancer_port: 8883
+  landing_landing:  # Host(thinx.cloud) || Host(www.thinx.cloud); lb port 80
+    enable: true
+    routers: [landing-page-http, landing-page-https]
+    loadbalancer_port: 80
+  errorpage_errorpage:  # HostRegexp catch-all priority 1 + error-pages-middleware (status 400-599); lb port 80
+    enable: true
+    routers: [error-router]
+    middlewares: [error-pages-middleware]
+    loadbalancer_port: 80
+  swarmpit_app:     # Host(swarmpit.thinx.cloud); lb port 8080
+    enable: true
+    routers: [swarmpit-http, swarmpit-https]
+    loadbalancer_port: 8080
+  downtime_downtime:  # HostRegexp catch-all priority 2; lb port 80
+    enable: true
+    routers: [downtime-http, downtime-https]
+    loadbalancer_port: 80
+  # Additional traefik-enabled stacks present live (out of the named thinx/landing/errorpage/swarmpit/vault/downtime set, recorded for a complete edge map):
+  fotostim_landing-com:  { enable: true, rule: "Host(www.fotostim.com) || Host(fotostim.com)", loadbalancer_port: 80 }
+  fotostim_landing-cz:   { enable: true, rule: "Host(www.fotostim.cz) || Host(fotostim.cz)",   loadbalancer_port: 80 }
+  igraczech-com_web:     { enable: true, rule: "Host(igraczech.com) || Host(www.igraczech.com) [+ igraczech.unitednewschannel.net on https]", loadbalancer_port: 80 }
+  syxra-cz_web:          { enable: true, rule: "Host(www.syxra.cz)", loadbalancer_port: 80 }
+
+# vault: EDGE-02 empty-edge — NO vault service is deployed live (docker service ls shows none).
+#        The named-scope set listed vault; it is absent, documented here rather than silently dropped.
+vault: "ABSENT — no vault service deployed on micro as of 2026-10-06 (EDGE-02 empty edge)."
+
+# ---------------------------------------------------------------------------
+# DRIFT: running task vs on-disk thinx-swarm/traefik.yml (D-08):
+# DRIFT: security-headers middleware (7 labels) is present on the LIVE traefik service but ABSENT
+#        from committed thinx-swarm/traefik.yml -> reconciled into thinx-swarm in 29-02 Task 2 (production wins).
+# DRIFT: the ":8883 mqtts" entrypoint has a thinx_mosquitto tcp router (mosquitto-secure), but the traefik
+#        service does NOT publish :8883 on the host; :8883 is published directly by thinx_mosquitto. The traefik
+#        mqtts/mqtt/thxp/vpn entrypoints are therefore defined-but-not-host-published. This matches the committed
+#        file (which also defines those entrypoints and publishes only 80/443) — it is an edge-map fact, not a
+#        traefik.yml drift. Flagged for Phase 30 (routing model) review.
+# DRIFT: none for the traefik static command, published ports (80/443), mounts, configs, networks, and tls.toml —
+#        the running traefik task matches committed thinx-swarm/traefik.yml for all of these (warts preserved).
