@@ -676,6 +676,10 @@ jobs:
         command: node scripts/check-console-headers.js && node --test spec/node/ConsoleHeaderParity.test.js
 
     - run:
+        name: Traefik mirror staleness (EDGE-RECON-01)
+        command: node scripts/check-traefik-mirror.js
+
+    - run:
         name: Create Circle CI Artifacts Folders
         command: |
           mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
