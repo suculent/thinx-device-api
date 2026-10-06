@@ -29,10 +29,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 29 — Edge Reconciliation & Source of Truth (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-10-06 — Milestone v1.15 started
+Status: Roadmap ready — next: /gsd-discuss-phase 29
+Last activity: 2026-10-06 — Milestone v1.15 roadmap created (Phases 29–34, 14 requirements)
 
 ## Milestones
 

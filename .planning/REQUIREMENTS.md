@@ -58,25 +58,25 @@ Filled during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EDGE-RECON-01 | TBD | Pending |
-| EDGE-RECON-02 | TBD | Pending |
-| EDGE-MIG-01 | TBD | Pending |
-| EDGE-MIG-02 | TBD | Pending |
-| EDGE-MIG-03 | TBD | Pending |
-| EDGE-MIG-04 | TBD | Pending |
-| EDGE-API-01 | TBD | Pending |
-| EDGE-API-02 | TBD | Pending |
-| EDGE-TLS-01 | TBD | Pending |
-| EDGE-TLS-02 | TBD | Pending |
-| EDGE-TLS-03 | TBD | Pending |
-| EDGE-OPS-01 | TBD | Pending |
-| EDGE-OPS-02 | TBD | Pending |
-| EDGE-OPS-03 | TBD | Pending |
+| EDGE-RECON-01 | Phase 29 | Pending |
+| EDGE-RECON-02 | Phase 29 | Pending |
+| EDGE-MIG-01 | Phase 30 | Pending |
+| EDGE-MIG-04 | Phase 30 | Pending |
+| EDGE-MIG-02 | Phase 31 | Pending |
+| EDGE-MIG-03 | Phase 32 | Pending |
+| EDGE-API-01 | Phase 33 | Pending |
+| EDGE-API-02 | Phase 33 | Pending |
+| EDGE-TLS-01 | Phase 33 | Pending |
+| EDGE-TLS-02 | Phase 33 | Pending |
+| EDGE-TLS-03 | Phase 33 | Pending |
+| EDGE-OPS-01 | Phase 34 | Pending |
+| EDGE-OPS-02 | Phase 34 | Pending |
+| EDGE-OPS-03 | Phase 34 | Pending |
 
 **Coverage:**
 - v1 requirements: 14 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-06*
