@@ -717,6 +717,23 @@ describe("TransferApiKeySpec (quick 261003-u86)", function () {
             await expectRefused([UDID_FB], "no_such_device");
             expect(couch.finds, "find calls").to.equal(0);
         });
+
+        it("a device already being transferred: transfer_already_in_progress (dtr guard restored)", async function () {
+            // Regression for the FIXME in transfer.request(): the dtr:<udid> in-progress gate
+            // used to run synchronously, before exit_on_transfer's async Redis callbacks
+            // resolved, so it never fired (and walked array indices via for..in). The
+            // promisified gate now refuses the whole request up front when any offered device
+            // has a pending dtr:<udid>, before any ownership or key lookup.
+            redis.store.set("dtr:" + UDID_1, "pending-transfer-id");
+            const before = snapshot();
+            const r = await request(OWNER_A, { to: EMAIL_R, udids: [UDID_1], mig_sources: false, mig_apikeys: false });
+            await settle();
+            expect(r.success, "refused").to.equal(false);
+            expect(r.response, "reason").to.equal("transfer_already_in_progress");
+            expect(couch.finds, "short-circuited at the guard: no ownership lookup").to.equal(0);
+            expect(mails, "no mail sent").to.equal(0);
+            expectStoresUnchanged(before, "in-progress guard");
+        });
     });
 
     // -----------------------------------------------------------------------
