@@ -121,7 +121,7 @@ services:
         - "traefik.tcp.services.mosquitto.loadbalancer.server.port=8883"
         - "traefik.tcp.routers.mosquitto-secure.entrypoints=mqtts"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "swarmpit.service.deployment.autoredeploy=true"
 
   couchdb:
@@ -181,7 +181,7 @@ services:
 
         - "traefik.http.services.thinx-db.loadbalancer.server.port=5985"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-db-http.rule=Host(`db.thinx.cloud`)"
@@ -335,7 +335,7 @@ services:
       labels:
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-api-http.rule=Host(`${THINX_HOSTNAME}`)"
@@ -346,7 +346,7 @@ services:
         - "traefik.http.routers.thinx-api-https.entrypoints=https"
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@docker,security-headers@docker"
+        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm"
         - "swarmpit.service.deployment.autoredeploy=true"
 
         # NGINX Entrypoint for WSS
@@ -362,7 +362,11 @@ services:
         # negotiates cookie.secure from req.secure, which is only true when this
         # header arrives AND `trust proxy` accepts the hop it came from (see
         # lib/middleware/cookie-policy.js). Both routers below must keep
-        # referencing sslheaders@docker — declaring the middleware is not enough.
+        # referencing sslheaders@swarm — declaring the middleware is not enough.
+        # Phase 31 (EDGE-MIG-02): the suffix is @swarm because Traefik v3 discovers swarm
+        # services through its separate swarm provider (the v2 docker-provider suffix is a
+        # dangling reference under v3). The v2 docker-network label became traefik.swarm.network
+        # for the same reason — the api sits on two overlay networks, so the label is required.
         - "traefik.http.middlewares.sslheaders.headers.customRequestHeaders.X-Forwarded-Proto=https"
         - "traefik.http.middlewares.sslheaders.headers.customResponseHeaders.X-Forwarded-Proto=https"
         - "traefik.http.middlewares.sslheaders.headers.customRequestHeaders.Connection=upgrade"
@@ -373,7 +377,7 @@ services:
         - "traefik.http.routers.thinx-api-ws.entrypoints=https"
         - "traefik.http.routers.thinx-api-ws.priority=200"
         - "traefik.http.routers.thinx-api-ws.service=thinx-api"
-        - "traefik.http.routers.thinx-api-ws.middlewares=sslheaders@docker"
+        - "traefik.http.routers.thinx-api-ws.middlewares=sslheaders@swarm"
         - "traefik.http.routers.thinx-api-ws.tls=true"
         - "traefik.http.routers.thinx-api-ws.tls.certresolver=le"
 
@@ -416,7 +420,7 @@ services:
         # should be 7440, but the 80 port of container is exposed anyway in swarm mode
         - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-console-http.rule=Host(`${WEB_HOSTNAME}`)"
@@ -427,7 +431,7 @@ services:
         - "traefik.http.routers.thinx-console-https.entrypoints=https"
         - "traefik.http.routers.thinx-console-https.tls=true"
         - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-console-https.middlewares=security-headers@docker"
+        - "traefik.http.routers.thinx-console-https.middlewares=security-headers@swarm"
 
         - swarmpit.service.deployment.autoredeploy=true
 
@@ -467,7 +471,7 @@ services:
       labels:
         - "traefik.http.services.thinx-vue-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-vue-console-http.rule=Host(`${VUE_HOSTNAME}`)"
@@ -541,7 +545,7 @@ services:
       labels:
         - "traefik.http.services.thinx-influx.loadbalancer.server.port=8086"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-influx-http.rule=Host(`${INFLUX_HOSTNAME}`)"

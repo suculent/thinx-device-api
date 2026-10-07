@@ -1,11 +1,13 @@
-# GENERATED — do not edit. source: thinx-swarm@3e048a5d92fe07a1b3c11ffdf017f1be3a2124df generated:2026-10-07T12:23:49Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:ad3e04bc2739e5f4ccd63891f5fa8ac30288deb7a8e83fcf452d1114d697a7eb
+# GENERATED — do not edit. source: thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772 generated:2026-10-07T20:13:44Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:660e859ba13c0798e8c20981b9f00bcc69009be1e3fbe7c4e2437a4d3f3d863a
 version: '3.7'
 
 services:
 
   traefik:
-    image: traefik:v2.11.0
+    # Phase 31 (EDGE-MIG-02, D-03): exact patch tag, never @sha256; rollback target is v2.11.0.
+    image: traefik:v3.7.14
+#    image: traefik:v2.11.0
 #    image: traefik:v2.6.1
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
@@ -25,8 +27,9 @@ services:
         # Enable Traefik for this service, to make it available in the public network
         - traefik.enable=true
 
-        # Use the traefik-public network (declared below)
-        - traefik.docker.network=traefik-public
+        # Use the traefik-public network (declared below). The v3 swarm provider reads
+        # traefik.swarm.network (the v2 docker provider read the docker-network label instead).
+        - traefik.swarm.network=traefik-public
 
         # Use the custom label "traefik.constraint-label=traefik-public"
         # This public Traefik will only use services with this label
@@ -42,8 +45,9 @@ services:
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
-        # security-headers middleware (referenced by thinx-console / thinx-api / thinx-vue as
-        # security-headers@docker). Reconciled from live on 2026-10-06 (Phase 29, EDGE-RECON-02,
+        # security-headers middleware (referenced by thinx-console / thinx-api as
+        # security-headers@swarm — @docker before the Phase 31 v3 hop; thinx-vue carries no ref live).
+        # Reconciled from live on 2026-10-06 (Phase 29, EDGE-RECON-02,
         # production wins) — this block was running on the traefik service but missing from this
         # committed file, so a redeploy from here would have dropped security-headers@docker.
         - traefik.http.middlewares.security-headers.headers.browserxssfilter=true
@@ -93,14 +97,21 @@ services:
       # Mount the volume to store the certificates
       - traefik-public-certificates:/certificates
     command:
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - --providers.docker
+      # Phase 31 (EDGE-MIG-02, D-04 minimum-to-boot): Traefik v3 splits the Docker provider —
+      # the v2 `providers.docker` + `providers.docker.swarmmode` flags are replaced by the separate
+      # swarm provider. Its resources are namespaced @swarm, so every app-stack middleware ref moved
+      # from sslheaders@docker / security-headers@docker to @swarm and every v2 docker-network label
+      # became traefik.swarm.network. No --providers.swarm.endpoint on purpose: the default unix
+      # socket is exactly the docker.sock:ro mount below.
+      - --providers.swarm
       # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
-      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed (CHANGED)
-      - --providers.docker.exposedbydefault=true
-      # Enable Docker Swarm mode
-      - --providers.docker.swarmmode
+      # Value stays true (P30 D-05: the exposure audit is Phase 33); only the namespace moved.
+      - --providers.swarm.exposedbydefault=true
+      # Backward-compat switch (official three-phase rollout, phase 3 deferred): router rules keep
+      # the v2 matcher syntax until Phase 32 (EDGE-MIG-03) converts them natively.
+      - --core.defaultRuleSyntax=v2
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443

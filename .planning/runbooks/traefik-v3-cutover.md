@@ -148,3 +148,64 @@ is accepted and timed instead.
 The inspect output contained three live basic-auth hashes (`admin-auth`, `couch-auth`,
 `influx-auth`); none is reproduced in this runbook or any committed file. Only label KEYS and
 `${VAR}` templates appear here.
+
+---
+
+## Converted config + mirror regeneration (31-01 Task 2, 2026-10-07)
+
+### `thinx-swarm/traefik.yml` — the forced static delta (D-04, RESEARCH rows 1-6)
+
+Committed in the external edge source repo as **`thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772`**
+(parent `3e048a5`, the P30 end state). The command block went from 17 to **18** flags; nothing else
+in the block moved:
+
+| # | v2.11 (P30 end state, `traefik-edge.B.post.yml`) | v3 (committed now) |
+|---|---|---|
+| 1 | `--providers.docker` | `--providers.swarm` |
+| 2 | `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)` | `--providers.swarm.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)` (value byte-identical, backticks kept) |
+| 3 | `--providers.docker.exposedbydefault=true` | `--providers.swarm.exposedbydefault=true` (**stays `true`** — P33 deferral) |
+| 4 | `--providers.docker.swarmmode` | `--core.defaultRuleSyntax=v2` (BC switch, CLI form; takes the slot of the removed flag) |
+| 5-10 | six `--entrypoints.*.address` (incl. `thxp=:7442`, vestigial `vpn`/`mqtt`/`mqtts` + their P30 D-03 comments) | **unchanged** |
+| 11-13 | three `--certificatesresolvers.le.acme.*` | **unchanged** |
+| 14-17 | `--accesslog`, `--log`, `--log.level=ERROR`, `--api` | **unchanged** |
+
+No `--providers.swarm.endpoint` was added (Pitfall 2 — the default `unix:///var/run/docker.sock`
+is the existing `docker.sock:ro` mount). The image line is `traefik:v3.7.14` (D-03 exact tag, never
+`@sha256`; the previous `traefik:v2.11.0` line is kept commented as the rollback target). The
+service's own `traefik.docker.network=traefik-public` deploy label became
+`traefik.swarm.network=traefik-public`. `tls.toml` untouched (no forced v3 change). `${EMAIL}`,
+`${USERNAME}`, `${HASHED_PASSWORD}`, `${DOMAIN}`, `${CONFIG}` stay templated. The pre-existing
+duplicate `traefik-public-https.middlewares` label key (`admin-auth` then
+`admin-auth,error-pages-middleware`, last-wins) is carried unchanged.
+
+### App-stack renames (same thinx-swarm commit + this repo)
+
+| File | Change |
+|---|---|
+| `docker-swarm.yml` (this repo, authoritative) | `thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm`; `thinx-api-ws.middlewares=sslheaders@swarm`; `thinx-console-https.middlewares=security-headers@swarm`; `traefik.swarm.network=traefik-public` on mosquitto, couchdb, api, console, vue, influxdb (6 labels). `grep -v '^#' docker-swarm.yml \| grep -c traefik.docker.network` = **0**. |
+| `thinx-swarm/thinx.yml` | `sslheaders@docker` -> `sslheaders@swarm` (`:254`); 7 network labels renamed (mosquitto, couchdb, api, console, vue, influxdb, chronograf-retired) |
+| `thinx-swarm/landing.yml`, `errorpage.yml`, `downtime.yml`, `swarmpit.yml` | 1 network label each renamed |
+| `thinx-swarm/vault.yml` | 1 network label renamed (carried harmlessly; vault is not deployed) |
+
+No `--providers.docker*` flag, no `traefik.docker.network` label and no `@docker` reference
+survives on a non-comment line in any committed file of either repo.
+
+### Mirror regeneration (anti-drift spine)
+
+```
+node scripts/generate-traefik-mirror.js --swarm-repo "$HOME/Repositories/thinx-swarm"
+# MIRROR-GENERATED ok source=thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772 -> docker-compose.traefik.yml
+node scripts/check-traefik-mirror.js --swarm-repo "$HOME/Repositories/thinx-swarm"
+# MIRROR OK files=1   (exit 0)
+```
+
+New banner: `source: thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772`,
+`mirror-sha256:660e859ba13c0798e8c20981b9f00bcc69009be1e3fbe7c4e2437a4d3f3d863a`. The
+entrypoint / ACME / log / api lines of the regenerated mirror are byte-identical to the previous
+mirror (`diff` of those lines against `HEAD:docker-compose.traefik.yml` is empty). Secret-marker scan
+(`$apr1$`, `$2[aby]$`, `BEGIN `, `PRIVATE KEY`) over the mirror, `docker-swarm.yml` and this runbook:
+**0** hits.
+
+**Live state is untouched by Task 2:** the gluster deploy copies and the running services still
+carry the v2 forms (`@docker`, `traefik.docker.network`, `traefik:v2.11`). The committed files are the
+cutover target that Plan 31-03 applies per the staged mechanism above.
