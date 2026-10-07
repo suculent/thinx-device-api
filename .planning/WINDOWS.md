@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 12
+open_count: 13
 waived_count: 0
 fixed_count: 1
-total_count: 13
-last_updated: 2026-10-04T14:12:59.534Z
+total_count: 14
+last_updated: 2026-10-07T20:31:35.630Z
 ---
 
 # Broken Windows Ledger
@@ -28,6 +28,7 @@ last_updated: 2026-10-04T14:12:59.534Z
 | 11 | quick-261003-vd4 | unrun-verify | spec/jasmine/ZZ-RouterDeviceAPISpec.js | 324 | 261003-vd4 CI cases (own udid reaches the envelope path; another owner's udid and an unknown udid answer no_such_device) not run: ZZ specs need real Redis/CouchDB and docker-entrypoint deletes them before CI; protection pinned locally by DeviceFirmwareOwnerSpec | open |  | 2026-10-03T22:35:35.762Z |  |
 | 12 | quick-261004-l7q | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261004-l7q ZZ edits (opaque request answer + id read from Redis, sender's POST accept/decline answer like an unknown transfer, accept III through the recipient's GET e-mail link) and the TransferSpec (00) third-argument id not run locally: they need real Redis/CouchDB; ZZ specs are deleted before CI; binding pinned locally by TransferRecipientSpec | open |  | 2026-10-04T13:36:30.251Z |  |
 | 13 | quick-261004-l9f | unrun-verify | spec/jasmine/ZZ-CSRFEnforceSpec.js | 207 | 261004-l9f ZZ edit (case 5 also asserts a non-empty body, because a failed Bearer now answers an empty 401 that not.equal(403) no longer catches) not run locally: needs real Redis/CouchDB; ZZ specs are deleted before CI; 401 pinned locally by BearerVerifyStatusSpec | open |  | 2026-10-04T14:12:59.534Z |  |
+| 14 | 31 | deviation | .planning/runbooks/traefik-v3-cutover.md |  | 31-01 Task 3 'every router enabled' gate deferred to Plan 03 post-B2 (operator decision A); live /api/http/routers status filter must print nothing after B2 | open |  | 2026-10-07T20:31:35.630Z |  |
 
 ````json
 [
@@ -199,6 +200,19 @@ last_updated: 2026-10-04T14:12:59.534Z
     "recorded_at": "2026-10-04T14:12:59.534Z",
     "resolved_at": null,
     "milestone": "v1.14"
+  },
+  {
+    "id": 14,
+    "kind": "deviation",
+    "phase": "31",
+    "file": ".planning/runbooks/traefik-v3-cutover.md",
+    "line": null,
+    "description": "31-01 Task 3 'every router enabled' gate deferred to Plan 03 post-B2 (operator decision A); live /api/http/routers status filter must print nothing after B2",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-07T20:31:35.630Z",
+    "resolved_at": null,
+    "milestone": "v1.15"
   }
 ]
 ````

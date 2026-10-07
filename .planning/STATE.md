@@ -5,17 +5,17 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 31
 current_phase_name: v2→v3 Upgrade (backward-compat mode)
 status: executing
-stopped_at: Phase 31 context gathered
-last_updated: "2026-10-07T19:36:02.408Z"
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-10-07T20:32:21.125Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 30 complete, transitioned to Phase 31
-state_head: fc9fef5ec6895b4865e1b6f15c8e03d1af8eed9f
+last_activity_desc: Phase 31 execution started
+state_head: 6fa445d3e1fcd82e8904b3585cf5e07878cd138a
 progress:
   total_phases: 6
   completed_phases: 15
   total_plans: 8
-  completed_plans: 5
-  percent: 63
+  completed_plans: 6
+  percent: 75
 ---
 
 # STATE — THiNX Device API
@@ -34,10 +34,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: 31 (v2→v3 Upgrade (backward-compat mode)) — READY TO EXECUTE
-Plan: Not started
+Phase: 31 (v2→v3 Upgrade (backward-compat mode)) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-10-07 — Phase 30 complete, transitioned to Phase 31
+Last activity: 2026-10-07 — Phase 31 execution started
 
 ## Milestones
 
@@ -299,6 +299,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 28]: 28-02: Step A trim on Swarmpit 1.9 passed Gate A (sla_s=31); influxdb.conf deleted after 0-reference mount scan (D-13); swarmpit_influx-data kept on micro, and core also holds one (for 28-04)
 - [Phase 28]: 28-03: Swarmpit 1.10 by tag (spec 15c044a82fed) with stack-file healthcheck start_period 300s under compose 3.8; Gate B PASS sla_s=50, no rung 1; swarmpit_db and agent untouched (D-04, D-06)
 - [Phase 28]: 28-04: core swarmpit_influx-data held for the operator (CORE_SSH outside the literal manager form); micro copy removed after Gate B (D-14)
+- [Phase 31]: docker-swarm.yml is the authoritative committed thinx-stack source; thinx-swarm/thinx.yml is stale (missing thinx-api-ws router + security-headers refs) and must not be stack-deployed until reconciled — docker service inspect on all 16 live traefik-enabled services: docker-swarm.yml has 0 traefik-label diff vs the gluster deploy copy (what restart.sh deploys) and vs live Spec.Labels; thinx-swarm/thinx.yml differs in 292 lines and lacks live routers/refs. Renames were mirrored into the stale file so a future sync cannot re-introduce @docker (31-01 Task 1).
+- [Phase 31]: Traefik v3 cutover mechanism: ordered surgical docker service update (Stage A bridge traefik.swarm.network on all 16 services; B1 traefik image+args hop; B2 @swarm middleware refs on thinx_api/thinx_console; C remove traefik.docker.network), NOT a stack deploy — A stack deploy would redeploy storage-bearing thinx services for a label-only change, drop the live-only INFLUXDB_TOKEN mount (no top-level secrets: in the gluster thinx.yml), reset the couch/influx edge auth hashes via restart.sh, and cannot reach the 5 traefik-enabled services (4 external stacks + registry) that have no stack file in either repo. Carrying both network-label keys across the hop gives a zero-length window (31-01 Task 1).
+- [Phase 31]: Operator decision A (31-01 Task 3 blocking-human checkpoint): the 'every router enabled' boot-and-discover gate is deferred to Plan 03 post-Stage-B2 against the live v3 service; the 3 disabled @docker-ref routers are accepted as the tracer's falsification record; no production label touched, probe not re-run — The probe reads live labels, and the 3 @docker refs (thinx-api-https, thinx-api-ws, thinx-console-https) can only flip to @swarm at the hop; flipping them under v2.11 breaks the same routers on production. Probe result 29/32 enabled with the 3 disabled exactly matching the inventory, 0 service/middleware errors. The unqualified-ref zero-window bridge was not chosen; the committed files pin @swarm per the plan must-have. Post-B2 the live /api/http/routers status filter MUST print nothing (runbook cutover table).
 
 ### Todos
 
@@ -415,11 +418,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 31 context gathered
+**Stopped at:** Completed 31-01-PLAN.md
 
-**Resume file:** .planning/phases/31-v2-v3-upgrade-backward-compat-mode/31-CONTEXT.md
+**Resume file:** None
 
-**Last session:** 2026-10-07T13:52:24.060Z
+**Last session:** 2026-10-07T20:31:34.622Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -486,3 +489,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 28 P02 | 21 min | 2 tasks | 5 files |
 | Phase 28 P03 | 13 min | 2 tasks | 3 files |
 | Phase 28 P04 | 6min | 2 tasks | 2 files |
+| Phase 31 P01 | ~18 min | 3 tasks | 11 files |
