@@ -33,3 +33,16 @@
   update --label-*` only.
   status: open
   **Found during:** 31-01 Task 1.
+
+## From plan 31-02 (2026-10-07)
+
+- **Rollback image identity is the running digest, not the literal committed tag.** The known-good v2.11
+  edge is `traefik:v2.11@sha256:d57faa4f…` (image id `32c7339c302b…`, created 2026-04-29, present on
+  `micro` by digest only, tags `[]`). The committed `thinx-swarm/traefik.yml` line `traefik:v2.11.0` has
+  never matched that digest (a `traefik:v2.11` floating-tag pull), and the `traefik:v2.11.0` tag is not
+  present on `micro` — a rollback by that tag would pull a different v2.11 build from Docker Hub. The
+  P31 rollback section names the digest; any future "revert to the committed image line" must do the
+  same. After the v3 hop the committed `traefik:v3.7.14` tag and the live digest will coincide; the
+  P33/P34 image-pin hygiene pass may want to record the digest in the committed file as a comment.
+  status: open
+  **Found during:** 31-02 Task 2 (rollback dry-verify pre-flight, read-only `docker image inspect`).

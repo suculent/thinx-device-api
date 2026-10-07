@@ -137,12 +137,12 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. The prepare→migrate-prod→(defer routing) rollout is followed; rollback to v2 is demonstrated or staged-ready.
 3. ACME + TLS posture preserved under v3; plaintext `:7442` + MQTT re-verified.
 
-**Plans:** 1/3 plans executed (planned 2026-10-07)
+**Plans:** 2/3 plans executed (planned 2026-10-07)
 **Wave 1**
 - [x] 31-01-PLAN.md — Tracer: convert the v3 static config (swarm provider + `core.defaultRuleSyntax=v2`) + `@docker`→`@swarm`/network-label renames, regenerate the mirror, and prove it off-line via boot-and-discover (every router enabled, zero host traffic) (EDGE-MIG-02)
 
 **Wave 2** *(blocked on Wave 1)*
-- [ ] 31-02-PLAN.md — Pre-cutover out-of-git 600 snapshot (`acme.json` + resolved config) on `micro` + staged-ready v3→v2.11 rollback dry-verify (D-02) (EDGE-MIG-02)
+- [x] 31-02-PLAN.md — Pre-cutover out-of-git 600 snapshot (`acme.json` + resolved config) on `micro` + staged-ready v3→v2.11 rollback dry-verify (D-02) (EDGE-MIG-02)
 
 **Wave 3** *(blocked on Wave 2)*
 - [ ] 31-03-PLAN.md — Live `traefik:v3.7.14` cutover (checkpoint:decision gated) with route/cert parity + human-verify of the legacy device flow over `:7442`/plain-MQTT (EDGE-MIG-02, EDGE-MIG-04)
@@ -197,7 +197,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete | 2026-10-05 |
 | 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete    | 2026-10-06 |
 | 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete    | 2026-10-07 |
-| 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 1/3 | In Progress | — |
+| 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 2/3 | In Progress | — |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 0/? | Pending | — |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 0/? | Pending | — |
 | 34. Ops Surface Reduction & SLA Close-out | v1.15 | 0/? | Pending | — |
