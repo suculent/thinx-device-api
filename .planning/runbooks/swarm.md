@@ -167,6 +167,75 @@ Phase 29 (D-06, zero cleanup).
 
 ---
 
+## Traefik Pilot-token removal + rollback demo (Phase 30 / EDGE-MIG-01 — 2026-10-07)
+
+Phase 30 confirmed v2-syntax parity and actioned the P30-tagged warts live on `traefik:v2.11`.
+
+**Pilot-token removal (D-04).** The inert cleartext `--pilot.token` flag was stripped from the
+committed `thinx-swarm` static command and deployed live to the running `traefik_traefik` task
+(v2.11 tolerates its absence; Traefik v3 would reject the flag). It is referenced **by flag name
+only** — the resolved UUID value was never written to any committed artifact and lives only in the
+out-of-git 600 snapshot on `micro`. Exactly one flag removed; all six entrypoints (incl. `:7442`)
+and every other wart preserved. Assert the running task carries no pilot flag and still exposes the
+legacy plaintext entrypoint:
+
+```bash
+ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}'" | grep -c 'pilot'
+# expect: 0
+ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}'" | grep -c 'entrypoints.thxp.address=:7442'
+# expect: 1 (AGENTS.md keep-7442)
+```
+
+**Live rollback + restore cycle (D-06).** Within the P30 maintenance window the full rollback was
+demonstrated end-to-end on the real service and the edge was returned to the P30 end state. The
+cycle is captured, redacted, in `.planning/runbooks/swarm-configs/traefik-edge.B.rollback-demo.md`:
+
+1. Restore the snapshot `acme.json` onto the authoritative named volume, then roll the service back
+   to the Phase-29 resolved command (re-introducing `--pilot.token` temporarily):
+
+   ```bash
+   ssh micro "cp -a /mnt/data/edge-rollback/traefik-2026-10-06/acme.json \
+     /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json"
+   # expect: 600 root; certs served from the restored store with NO ACME re-challenge
+   ```
+
+2. On the OLD config, all app/console/landing routes serve over `:443`, HTTP→HTTPS redirect holds
+   (console/rtm/landing `301`; `app.thinx.cloud` answers HTTP `200` by design — API host, HSTS on),
+   the served cert is valid, and `:7442`/`:1883`/`:8883` accept connections.
+3. Re-apply the P30 (pilot-removed) config — rebuilt as the rollback Args **minus** the pilot line,
+   nothing else — and re-verify the P30 end state (0 pilot, six entrypoints incl. `:7442`, exactly
+   one running task, valid cert). A belt-and-suspenders full-spec backup was also kept on `micro`
+   out-of-git (`/mnt/data/edge-rollback/traefik-p30-prerolldemo-<UTC>.json`, 600 root).
+
+   ```bash
+   ssh micro "docker service ps --filter desired-state=running traefik_traefik"
+   # expect: exactly one Running task (single consistent edge state at each stage)
+   ```
+
+The whole cycle is a surgical single-flag delta on the running service's resolved Args
+(`docker service update --args`), with the pinned image digest (`traefik:v2.11@sha256:d57faa4f…`),
+published ports (`:80`/`:443`), `admin-auth` label and `tls.toml` config unchanged throughout.
+
+**Device/MQTT model preserved (D-02).** `:7442` (thxp) stays published directly by `thinx_api`;
+`:1883`/`:8883` (mqtt/mqtts) directly by `thinx_mosquitto`; Traefik keeps publishing only
+`:80`/`:443`. The `:7442` plaintext port and plain (non-TLS) MQTT kept accepting connections at
+every stage of the cycle (AGENTS.md keep-7442 hard constraint).
+
+> **Verify-command caveat.** `docker service ls --filter name=mosquitto -q` returns empty — Docker's
+> service-name filter is prefix-matched and the service is `thinx_mosquitto`. Use
+> `--filter name=thinx_mosquitto` (or `docker service inspect thinx_mosquitto`).
+
+**Still deferred** per `.planning/runbooks/traefik-edge-fixforward.md`: `exposedbydefault=true`
+(P33), `--api` + port 8080 (P33), ACME email/renewal + TLS min/HSTS (P33), `--log.level=ERROR`
+(P34), raw `docker.sock:ro` (P34). None were touched in P30.
+
+**Secret hygiene.** The out-of-git rollback snapshot and the pre-roll-demo spec backup stay on
+`micro` at mode 600 (dir 700, root) and are **never** committed or scp'd into a repo — they hold the
+resolved pilot UUID, the `admin-auth` hash, the ACME email and raw `acme.json` key material.
+Committed artifacts name them by path only and redact every secret to `<redacted>`/`${VAR}`.
+
+---
+
 ## Related v1.x backlog items
 
 - **OPS-02** (REQUIREMENTS.md) — Stale swarm membership entry `b356ad8e1d60` / `10.133.0.4`. Defer; cleanup is the Rung 3 procedure.
