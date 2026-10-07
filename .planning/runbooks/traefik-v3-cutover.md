@@ -203,9 +203,158 @@ New banner: `source: thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772`,
 `mirror-sha256:660e859ba13c0798e8c20981b9f00bcc69009be1e3fbe7c4e2437a4d3f3d863a`. The
 entrypoint / ACME / log / api lines of the regenerated mirror are byte-identical to the previous
 mirror (`diff` of those lines against `HEAD:docker-compose.traefik.yml` is empty). Secret-marker scan
-(`$apr1$`, `$2[aby]$`, `BEGIN `, `PRIVATE KEY`) over the mirror, `docker-swarm.yml` and this runbook:
+(apr1 / bcrypt hash prefixes, PEM armor headers) over the mirror, `docker-swarm.yml` and this runbook:
 **0** hits.
 
 **Live state is untouched by Task 2:** the gluster deploy copies and the running services still
 carry the v2 forms (`@docker`, `traefik.docker.network`, `traefik:v2.11`). The committed files are the
 cutover target that Plan 31-03 applies per the staged mechanism above.
+
+---
+
+## Boot-and-discover (31-01 Task 3, D-01 tracer, 2026-10-07 ~20:20 UTC)
+
+### Probe invocation (throwaway, no host ports, ACME neutralized — D-01a / T-31-02)
+
+```
+ssh micro "docker service create --name traefik_v3probe --detach \
+  --constraint 'node.labels.Traefik == true' --network traefik-public \
+  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly \
+  --limit-memory 256M --label gsd.phase=31 --label gsd.purpose=boot-and-discover \
+  traefik:v3.7.14 \
+  --providers.swarm \
+  '--providers.swarm.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)' \
+  --providers.swarm.exposedbydefault=true --core.defaultRuleSyntax=v2 \
+  --entrypoints.http.address=:80 --entrypoints.https.address=:443 --entrypoints.vpn.address=:1194 \
+  --entrypoints.mqtt.address=:1883 --entrypoints.mqtts.address=:8883 --entrypoints.thxp.address=:7442 \
+  --certificatesresolvers.le.acme.email=\${EMAIL} \
+  --certificatesresolvers.le.acme.storage=/tmp/acme-test.json \
+  --certificatesresolvers.le.acme.tlschallenge=true \
+  --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory \
+  --accesslog --log --log.level=ERROR --api --api.insecure=true"
+# expect: converges to 1/1 (static config parsed); Endpoint.Ports == null; the only mount is docker.sock:ro
+```
+
+Differences from the committed command, all probe-only: `--api.insecure=true` (API on `:8080` inside
+the task), ACME storage at the throwaway `/tmp/acme-test.json` (the shared
+`traefik_traefik-public-certificates` volume is NOT mounted), and the Let's Encrypt **staging** CA so the
+probe's inevitable, unanswerable TLS-ALPN challenges (no `:443` published) touch no production ACME
+account or rate limit. `${EMAIL}` was read from the live service Args into a shell variable on `micro`
+and never printed. The `tls.toml` config was not mounted (the static command does not load it — it
+has no file provider; pre-existing, out of scope). The probe carries no `traefik.constraint-label`,
+so neither the live v2.11 edge nor the probe itself discovers it.
+
+| Pre-flight / convergence | Observed |
+|---|---|
+| production `acme.json` baseline (`stat -c '%s %Y %a %U'`) | `301146 1791377596 600 root` |
+| live `traefik_traefik` | `traefik:v2.11@sha256:d57faa4f…`, 1 replica, 17 args, publishes `80 443` |
+| `docker service create` | id `xhq81elykmdn…`, rc 0 |
+| convergence | **`1/1` at t=10 s** (`Running 4 seconds ago`, node `micro`) — the v3 static config parsed, no crash-loop |
+| `Endpoint.Ports` | `null` (no host port) |
+| mounts | `[{bind /var/run/docker.sock -> /var/run/docker.sock ro}]` only |
+| args | 19 (18 converted + `--api.insecure=true`) |
+
+### Discovery — the gate
+
+```
+ssh micro "T=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_v3probe | head -1); \
+  docker exec \$T wget -qO- http://localhost:8080/api/http/routers \
+  | jq -r '.[] | select(.status!=\"enabled\") | .name + \"  \" + .status'"
+# expect (post-cutover labels): nothing
+```
+
+**Observed (live labels still carry the v2 `@docker` refs — Task 2 changed committed files only):**
+```
+thinx-api-https@swarm  disabled
+thinx-api-ws@swarm  disabled
+thinx-console-https@swarm  disabled
+```
+`/api/overview`: HTTP routers total **32**, errors **3**, warnings 0; services **18**, errors 0;
+middlewares **9**, errors 0; TCP routers **0**.
+
+Full discovered-vs-expected comparison (`/api/http/routers`, `/api/tcp/routers`):
+
+| Expected router (traefik-edge.A.pre.yml) | Discovered as | Status | Middlewares resolved | Error |
+|---|---|---|---|---|
+| thinx-api-http | `thinx-api-http@swarm` | **enabled** | — | |
+| thinx-api-https | `thinx-api-https@swarm` | **disabled** | `sslheaders@docker,security-headers@docker` | `middleware "security-headers@docker" does not exist` |
+| thinx-api-ws | `thinx-api-ws@swarm` | **disabled** | `sslheaders@docker` | `middleware "sslheaders@docker" does not exist` |
+| thinx-console-http | `thinx-console-http@swarm` | **enabled** | `https-redirect@swarm` | |
+| thinx-console-https | `thinx-console-https@swarm` | **disabled** | `security-headers@docker` | `middleware "security-headers@docker" does not exist` |
+| thinx-vue-console-http / -https | both `@swarm` | **enabled** | `https-redirect@swarm` / — | |
+| landing-page-http / -https | both `@swarm` | **enabled** | `https-redirect@swarm` / — | |
+| error-router | `error-router@swarm` | **enabled** | `error-pages-middleware@swarm` | |
+| swarmpit-http / -https | both `@swarm` | **enabled** | `https-redirect@swarm` / — | |
+| downtime-http / -https | both `@swarm` | **enabled** | `https-redirect@swarm` / — | |
+| traefik-public-http / -https | both `@swarm` | **enabled** | `https-redirect@swarm` / `admin-auth@swarm,error-pages-middleware@swarm` | |
+| fotostimcom-http / -https (`fotostim_landing-com`) | both `@swarm` | **enabled** | | |
+| fotostimcz-http / -https (`fotostim_landing-cz`) | both `@swarm` | **enabled** | | |
+| igraczech-http / -https | both `@swarm` | **enabled** | | |
+| syxra-http / -https | both `@swarm` | **enabled** | | |
+| *(not in the A.pre list, discovered live)* registry-http / -https, thinx-db-http / -https (`couch-auth@swarm,…`), thinx-influx-http / -https (`influx-auth@swarm,…`) | all `@swarm` | **enabled** | unqualified refs re-resolved to `@swarm` | |
+| api@internal, dashboard@internal | internal | enabled | | |
+| TCP `mosquitto-secure` (mqtts) | **not discovered** | — | — | see note |
+
+**Reading:** 29/32 routers enabled, every one of them with its middleware chain re-resolved inside
+the swarm provider. The three disabled routers are **exactly** the three `@docker` labels Task 1
+inventoried — no fourth dangling ref, no absent router, no error on any service or middleware. This
+is the designed falsification (RESEARCH §Blast Radius): the swarm provider confirms the v2 provider
+suffix is dead, and the error text names the three label values Plan 03 Stage B2 overwrites.
+Everything the hop does NOT touch (unqualified refs, the four external stacks, registry, db/influx
+basic-auth chains, the dashboard router) is proven enabled under v3.
+
+**`mosquitto-secure` note (no regression):** `thinx_mosquitto` carries `traefik.enable=true` and the
+TCP router/service labels but **no `traefik.constraint-label`** (confirmed by inspect) and no
+`rule`; the provider constraint `Label(\`traefik.constraint-label\`, \`traefik-public\`)` filters it
+out under v3 exactly as the identical v2 constraint does today. It was never a live Traefik router
+(P30 D-03 "dead router"); the A.pre.yml row came from the service's labels, not from Traefik. `:8883`
+stays published directly by `thinx_mosquitto` (D-05), unaffected.
+
+### Services / network-label grading (Open Question 2, RESEARCH A3)
+
+`/api/http/services` (all 18 **enabled**): `thinx-api@swarm -> http://10.0.1.83:7442`,
+`thinx-console@swarm -> http://10.0.1.81:80`, `thinx-vue-console@swarm -> http://10.0.1.82:80`,
+`thinx-db@swarm -> http://10.0.1.6:5985`, `thinx-influx@swarm -> http://10.0.1.67:8086`,
+`swarmpit@swarm -> http://10.0.1.62:8080`, `registry@swarm -> http://10.0.1.22:5000`, landing /
+errorpage / downtime / fotostim / igraczech / syxra on `10.0.1.x:80`, `traefik-public@swarm ->
+http://10.0.1.86:8080`. `traefik-public` is `10.0.1.0/24`; `thinx_internal` is `10.0.2.0/24`
+(`docker network inspect`). So for every multi-network service (`thinx_api`, `thinx_couchdb`,
+`thinx_influxdb`, `swarmpit_app`) the v3 swarm provider **auto-selected the `traefik-public` address
+even without `traefik.swarm.network`** — in this topology the missing label is harmless (A3 graded:
+not a mis-pick today). The rename is still applied everywhere so the choice is explicit rather than
+heuristic (the heuristic depends on network ordering, which is not contractual).
+
+Backend reachability was not exercised from inside the probe: the executor's tool-permission
+classifier denied the batch that `wget`'d the discovered `thinx-console`/`thinx-api` server URLs and
+pulled `docker service logs` of the probe. The server URLs above sit on the probe's own overlay
+(`traefik-public`), and the routers' `enabled` state plus the correct-subnet addresses are the
+evidence recorded; the live HTTPS probes at the Plan 03 re-verify matrix are the definitive check.
+
+### Teardown + no-side-effect checks
+
+```
+ssh micro "docker service rm traefik_v3probe"
+ssh micro "docker service ls --filter name=traefik_v3probe --format '{{.Replicas}}'"   # expect: empty
+ssh micro "stat -c '%s %Y %a %U' /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json"
+# expect: 301146 1791377596 600 root (unchanged)
+```
+
+| Check | Observed |
+|---|---|
+| probe service after `rm` | **0** services, **0** containers |
+| production `acme.json` | `301146 1791377596 600 root` — **byte-size and mtime identical to the baseline**; the probe never wrote it (no mount, throwaway storage, staging CA) |
+| live `traefik_traefik` | still `traefik:v2.11@sha256:d57faa4f…`, 17 args, publishes `80 443`, task `traefik_traefik.1` on `micro` Running (7 h, not restarted) |
+| live `:80`/`:443` service touched by Task 3 | **no** |
+
+### Gate verdict for Plan 31-01
+
+- v3.7.14 **boots** the converted config (1/1 in 10 s): PASS.
+- Swarm provider discovers the **complete** router set (every A.pre router present except the
+  never-discoverable `mosquitto-secure`, plus registry/db/influx): PASS.
+- "Every router `enabled`": **3 predicted failures remain** — they are the live `@docker` labels,
+  which can only be flipped at the cutover (flipping them under v2.11 breaks the same three routers
+  on production). The gate therefore re-runs **after Plan 03 Stage B2** against the live v3 service
+  (`/api/http/routers` filter must print nothing there), unless the operator chooses the zero-window
+  bridge noted under "Cutover mechanism" (unqualified refs), which would let the probe pass before any
+  cutover.
+- ACME neutralized, production `acme.json` untouched, probe torn down: PASS.
