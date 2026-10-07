@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@eb94be5bcbf64f6f43d290cd2a058b436a047eda generated:2026-10-06T19:51:02Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:6af4a0915c85122057ec167c7c908e7d5404f2b36c57a4f9cf60fbf64f48bfd7
+# GENERATED — do not edit. source: thinx-swarm@3e048a5d92fe07a1b3c11ffdf017f1be3a2124df generated:2026-10-07T12:23:49Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:ad3e04bc2739e5f4ccd63891f5fa8ac30288deb7a8e83fcf452d1114d697a7eb
 version: '3.7'
 
 services:
@@ -105,6 +105,14 @@ services:
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
       - --entrypoints.https.address=:443
+      # D-03 (Phase 30, EDGE-MIG-04): the vpn/mqtt/mqtts/thxp entrypoints below are VESTIGIAL —
+      # defined here but NOT host-published by Traefik (Traefik publishes only :80/:443).
+      # Device/MQTT traffic is published DIRECTLY, outside Traefik: :7442 (thxp) by thinx_api,
+      # :1883 (mqtt) and :8883 (mqtts) by thinx_mosquitto; :1194 (vpn) has no router at all.
+      # The dead `mosquitto-secure` TCP router (mqtts entrypoint, via thinx_mosquitto labels)
+      # receives no host traffic through Traefik today. Comments only, no functional change — the
+      # direct-publish model stays and :7442 plaintext + plain MQTT keep working for legacy
+      # __DISABLE_HTTPS__ devices (AGENTS.md keep-7442, D-02).
       # Create an entrypoint "vpn" listening on port 1194/udp
       - --entrypoints.vpn.address=:1194
       # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
@@ -126,8 +134,9 @@ services:
       - --log.level=ERROR
       # Enable the Dashboard and API
       - --api
-      # Traefik Pilot Token
-      - --pilot.token=<redacted>
+      # D-04 (Phase 30): the inert cleartext `--pilot.token` flag was REMOVED here. Traefik Pilot
+      # was discontinued (the flag is a no-op on v2.11 and is rejected by v3); removing it early
+      # de-risks the P31 v2->v3 cutover and drops a committed cleartext credential.
 
     networks:
       # Use the public network created to be shared between Traefik and

@@ -1,0 +1,118 @@
+# Phase 30 (EDGE-MIG-01 / D-04) — live Traefik edge snapshot captured 2026-10-07 from micro
+# (188.166.23.244) swarm manager, read-only. AUTHORITATIVE SOURCE = running task state (D-08).
+# Redacted + NOT executable per swarm-configs/README (secrets -> literal <redacted>, ${VAR} kept
+# templated, otherwise bit-faithful so a `diff` against the paired snapshot works).
+# Live traefik image: traefik:v2.11 (digest-pinned); stack service traefik_traefik, 1 running task.
+# STEP B PRE pilot-token cutover: the running task STILL carries the inert --pilot.token flag (below, redacted).
+
+traefik_service:
+  image: traefik:v2.11
+  # Published host ports — the traefik service itself publishes ONLY 80 and 443 (ingress).
+  published_ports:
+    - 80:80/tcp     # entrypoint http
+    - 443:443/tcp   # entrypoint https
+  # Resolved static command (Spec.TaskTemplate.ContainerSpec.Args), in live order:
+  command:
+    - --providers.docker
+    - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+    - --providers.docker.exposedbydefault=true            # WART -> fix-forward P33 (D-05: deferred)
+    - --providers.docker.swarmmode
+    - --entrypoints.http.address=:80
+    - --entrypoints.https.address=:443
+    - --entrypoints.vpn.address=:1194                     # vestigial: defined, NO router, NOT published by traefik
+    - --entrypoints.mqtt.address=:1883                    # vestigial: :1883 published directly by thinx_mosquitto
+    - --entrypoints.mqtts.address=:8883                   # vestigial: mosquitto-secure tcp router exists but traefik does NOT publish :8883
+    - --entrypoints.thxp.address=:7442                    # vestigial: :7442 published directly by thinx_api (AGENTS.md keep-7442)
+    - --certificatesresolvers.le.acme.email=${EMAIL}      # live resolves to a real operator address; kept templated in git (D-10)
+    - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+    - --certificatesresolvers.le.acme.tlschallenge=true
+    - --accesslog
+    - --log
+    - --log.level=ERROR                                   # WART -> fix-forward P34 (policy choice)
+    - --api                                               # WART -> fix-forward P33 (dashboard/API lockdown)
+    - --pilot.token=<redacted>                            # inert cleartext pilot token (UUID redacted) -> REMOVED in the POST snapshot (D-04)
+  mounts:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: true                                     # ro raw docker.sock -> fix-forward P34 (socket-proxy)
+    - type: volume
+      source: traefik_traefik-public-certificates         # swarm-namespaced; committed file names it traefik-public-certificates
+      target: /certificates
+  configs:
+    - config_name: tls-config-1                           # committed: name tls-config-${CONFIG:-1}, so CONFIG=1 live
+      target: /traefik/tls.toml
+      mode: "0444"
+  networks:
+    - traefik-public                                      # alias: traefik; external network
+  # Resolved deploy labels on the traefik service itself (basic-auth hash redacted):
+  labels:
+    traefik.enable: "true"
+    traefik.docker.network: traefik-public
+    traefik.constraint-label: traefik-public
+    traefik.http.middlewares.admin-auth.basicauth.users: ${USERNAME}:<redacted>   # apr1/bcrypt hash redacted (D-10)
+    traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+    traefik.http.middlewares.https-redirect.redirectscheme.permanent: "true"
+    traefik.http.middlewares.security-headers.headers.browserxssfilter: "true"
+    traefik.http.middlewares.security-headers.headers.contenttypenosniff: "true"
+    traefik.http.middlewares.security-headers.headers.forcestsheader: "true"
+    traefik.http.middlewares.security-headers.headers.framedeny: "true"
+    traefik.http.middlewares.security-headers.headers.stsincludesubdomains: "true"
+    traefik.http.middlewares.security-headers.headers.stspreload: "true"
+    traefik.http.middlewares.security-headers.headers.stsseconds: "31536000"
+    traefik.http.middlewares.error-pages-middleware.errors.status: 400-599
+    traefik.http.middlewares.error-pages-middleware.errors.service: errorpage
+    traefik.http.middlewares.error-pages-middleware.errors.query: /{status}.html
+    traefik.http.routers.traefik-public-http.rule: Host(`${DOMAIN}`)              # live DOMAIN=micro.thinx.cloud
+    traefik.http.routers.traefik-public-http.entrypoints: http
+    traefik.http.routers.traefik-public-http.middlewares: https-redirect
+    traefik.http.routers.traefik-public-https.rule: Host(`${DOMAIN}`)
+    traefik.http.routers.traefik-public-https.entrypoints: https
+    traefik.http.routers.traefik-public-https.tls: "true"
+    traefik.http.routers.traefik-public-https.service: api@internal
+    traefik.http.routers.traefik-public-https.tls.certresolver: le
+    traefik.http.routers.traefik-public-https.middlewares: admin-auth,error-pages-middleware
+    traefik.http.services.traefik-public.loadbalancer.server.port: "8080"
+
+# ---------------------------------------------------------------------------
+# Dynamic config — docker config tls-config-1, mounted at /traefik/tls.toml.
+# Byte-identical to committed thinx-swarm/traefik/tls.toml (zero drift; unchanged by the cutover).
+tls_toml: |
+  [tls]
+    [tls.options]
+      [tls.options.default]
+        minVersion = "VersionTLS12"
+        sniStrict = true
+        cipherSuites = [
+          "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+          "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+          "TLS_AES_128_GCM_SHA256",
+          "TLS_AES_256_GCM_SHA384",
+          "TLS_CHACHA20_POLY1305_SHA256"
+        ]
+
+# ---------------------------------------------------------------------------
+# Full entrypoint map (D-09 / AGENTS.md "keep 7442") — all six entrypoints present:
+entrypoints:
+  ":80  http":   { defined_in_traefik: true,  traefik_published: true,  notes: "HTTP -> https-redirect / API backend" }
+  ":443 https":  { defined_in_traefik: true,  traefik_published: true,  notes: "primary HTTPS edge, all http routers" }
+  ":1194 vpn":   { defined_in_traefik: true,  traefik_published: false, notes: "no router, no published port — vestigial entrypoint" }
+  ":1883 mqtt":  { defined_in_traefik: true,  traefik_published: false, notes: "plain MQTT; published DIRECTLY by thinx_mosquitto (*:1883-1884->1883-1884), NOT via traefik" }
+  ":8883 mqtts": { defined_in_traefik: true,  traefik_published: false, notes: "thinx_mosquitto has tcp router mosquitto-secure on mqtts AND publishes *:8883->8883 directly; traefik does NOT publish :8883" }
+  ":7442 thxp":  { defined_in_traefik: true,  traefik_published: false, notes: "legacy plaintext device port; published DIRECTLY by thinx_api (*:7442->7442), NOT via traefik — AGENTS.md keep-7442" }
+
+# Direct-publish device/MQTT model (D-02) — unaffected by the traefik cutover:
+direct_publish:
+  thinx_api:       { publishes: ["7442:7442/tcp"], note: "legacy plaintext thxp device port" }
+  thinx_mosquitto: { publishes: ["1883:1883/tcp", "1884:1884/tcp", "8883:8883/tcp"], note: "plain + TLS MQTT" }
+
+# ---------------------------------------------------------------------------
+# traefik_traefik: 1 task, state Running, update completed. Image (digest d57faa4f) + published ports
+# (:80/:443) + all six entrypoints (incl :7442) + admin-auth label are unchanged across the cutover;
+# the only resolved-Args difference between this PRE snapshot and the POST snapshot is --pilot.token.
