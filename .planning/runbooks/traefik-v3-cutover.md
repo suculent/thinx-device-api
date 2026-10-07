@@ -129,11 +129,11 @@ Chosen mechanism, in order (**traefik first, then app labels** — P30 D-06 disc
 
 | Stage | Command shape | Risk under the version running at that moment |
 |---|---|---|
-| **A — pre-cutover bridge (safe under v2.11, may run before the window)** | `docker service update --label-add traefik.swarm.network=traefik-public <svc>` on all 16 traefik-enabled services, KEEPING `traefik.docker.network` | none: v2.11 ignores `traefik.swarm.*`; v3 ignores `traefik.docker.*`; carrying both bridges the network label with a zero-length window |
+| **A — pre-cutover bridge (safe under v2.11, may run before the window)** | `docker service update --label-add traefik.swarm.network=traefik-public <svc>` on all 16 traefik-enabled services, KEEPING `traefik.docker.network` | none: v2.11 ignores `traefik.swarm.*`; v3 ignores `traefik.docker.*`; carrying both bridges the network label with a zero-length window — **CORRECTION (31-03 live, 2026-10-07 22:05Z): the second half is FALSE.** The v3 swarm provider refuses any service carrying both `traefik.docker.*` and `traefik.swarm.*` labels (`ERR Skip container error="both Docker and Swarm labels are defined" providerName=swarm`) and discovers nothing from it. Under v2.11 the bridge is harmless (confirmed live 21:53-22:04Z), but Stage C MUST land in the same breath as B1/B2, or Stage A must not be done at all (rename in B2 instead). See "Live cutover record". |
 | **B1 — the hop (maintenance window)** | `docker service update --image traefik:v3.7.14 --args '<17 converted flags>' --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public traefik_traefik` | the only one-way step; every router with an unqualified ref is enabled immediately; `thinx-api-https`, `thinx-api-ws`, `thinx-console-https` are in error state until B2 lands (seconds) |
 | **B2 — immediately after B1** | `docker service update --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm --label-add traefik.http.routers.thinx-api-ws.middlewares=sslheaders@swarm thinx_api` then `docker service update --label-add traefik.http.routers.thinx-console-https.middlewares=security-headers@swarm thinx_console` | closes the B1 window; `--label-add` on an existing key overwrites the value |
 | **Post-B2 gate (Plan 03 checklist item)** | re-run the router status filter from the boot-and-discover section against the **live** v3 service's `/api/http/routers` (the live service has no `--api.insecure`, so read it through the `admin-auth`-protected `traefik-public-https` router on `:443`, never by adding `--api.insecure` live): `jq -r '.[] \| select(.status!="enabled") \| .name + "  " + .status'` — **MUST print nothing**. This closes the 31-01 Task 3 "every router enabled" criterion deferred by operator decision A (2026-10-07). Any line printed = a dangling ref B2 missed -> fix with another `--label-add`, or roll back per 31-02. | none: read-only |
-| **C — post-cutover cleanup (any time after B)** | `docker service update --label-rm traefik.docker.network <svc>` on the other 15 services | none: the label is unread by v3 |
+| **C — post-cutover cleanup (any time after B)** | `docker service update --label-rm traefik.docker.network <svc>` on the other 15 services | none: the label is unread by v3 — **CORRECTION (31-03 live): NOT "any time" and NOT "unread".** While a service carries both label keys the v3 swarm provider skips it entirely, so after B1 every bridged service is undiscovered (all web hosts 404) until C removes `traefik.docker.network`. C is part of the cutover, not cleanup: run it detached immediately after B2 (15 label-only updates took 4 s live; no task restarts). |
 
 Rollback (Plan 31-02 stages it; P30 D-06 machinery): revert B1 (`--image traefik:v2.11.0 --args '<17 v2 flags>'`,
 `acme.json` restored from the fresh snapshot) and B2 (`--label-add …@docker`); Stage A/C labels are
@@ -528,7 +528,7 @@ ssh micro "docker service update \
 #         docker provider re-resolves sslheaders@docker / security-headers@docker and the three routers serve again
 ```
 - Stage A labels (`traefik.swarm.network` on all 16) are **not** touched — v2.11 ignores them.
-- **Only if Stage C already ran** (it removed `traefik.docker.network` from the other 15 services):
+- **Only if Stage C already ran** — **it HAS (31-03, 2026-10-07 22:06:39Z), so this step is now mandatory** (it removed `traefik.docker.network` from the other 15 services):
   re-add it on the five multi-network services, which the v2 docker provider needs to pick the
   `traefik-public` address — `docker service update --label-add traefik.docker.network=traefik-public <svc>`
   for `thinx_api`, `thinx_mosquitto`, `thinx_couchdb`, `thinx_influxdb`, `swarmpit_app` (Step 2
@@ -591,3 +591,116 @@ backup into the `docker service update` argument vector and never printed; the d
 fake-email copy under `umask 077` in `/tmp`, deleted at teardown. This runbook carries templated
 `${VAR}` forms and out-of-git paths only; the committed `traefik-edge.C.pre.yml` is the redacted
 twin of the snapshot.
+
+---
+
+## Live cutover record (31-03 Task 2, 2026-10-07 21:53 - 22:11 UTC)
+
+**Outcome: the production edge runs `traefik:v3.7.14` (swarm provider + `core.defaultRuleSyntax=v2`).
+Route parity, cert continuity and the direct-publish device paths are asserted below. Rollback was NOT
+needed and remains staged-ready (with Step 3's Stage-C clause now mandatory).** The hop cost a
+**~2-minute web outage (22:04:50Z - 22:06:45Z)** that the mechanism table had not predicted — root
+cause and correction under "Deviation". The legacy device/MQTT ports were unaffected throughout
+(published directly by `thinx_api` / `thinx_mosquitto`, D-05).
+
+Operator gate: Task 1 `checkpoint:decision` -> **proceed** (2026-10-07, blocking-human, orchestrator).
+Executor: `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020` (= `micro`), one `docker service update` per
+step, no `docker stack deploy`, no `restart.sh`. The dashboard `admin-auth` password was supplied by the
+operator in `micro:/root/.p31-traefik-admin` (600 root), read into a shell variable on the host only,
+verified against the live apr1 hash (`MATCH`, `/api/overview` 200 under v2.11 at 22:04Z) and the file
+deleted at the end of the task. No secret value appears in any output, log or committed file (P29 D-12).
+
+### Timeline (UTC, 2026-10-07)
+
+| Time | Stage | Command / observation |
+|---|---|---|
+| 21:52 | v2.11 baseline matrix | https app/console/rtm/thinx.cloud/swarmpit **200**; http console/rtm/thinx.cloud/swarmpit/micro **301** -> https; http app **200** (by design); https micro **401** unauth (dashboard); cert Let's Encrypt `YR2`, Sep 29 -> Dec 28 2026; `:7442/:1883/:8883` OPEN |
+| 21:53 | **A** | `--label-add traefik.swarm.network=traefik-public` on all 16 traefik-enabled services, `traefik.docker.network` kept; every task id unchanged; traefik still `v2.11@d57faa4f`, `Version.Index 38379296` |
+| 21:57 | v2.11 device-flow baseline | harness over `http://rtm.thinx.cloud:7442` + `mqtt://thinx.cloud:1883` **PASS**; over `https://app.thinx.cloud` **PASS**; WS upgrade probe `https://rtm.thinx.cloud/` 200 (v2.11 tolerated the dual labels for 11 min — the bridge IS safe under v2) |
+| 22:04:09 | pre-B1 re-check | image `d57faa4f`, 17 args, `Version.Index 38379296`, ports 80/443, task Running 9 h; `acme.json` `301146 1791377596 600 root`; snapshot files 600 root; `traefik:v3.7.14` present (`5a93040e…`); dry-printed rebuilt args **index-exact 17/17** vs `docker-compose.traefik.yml` (email masked), swarm x3 / docker x0 / BC x1 / thxp x1 |
+| **22:04:47** | **B1** | `docker service update --detach --image traefik:v3.7.14 --args "$(jq … map(@sh) …)" --label-rm traefik.docker.network traefik_traefik` -> rc 0 (args rebuilt on micro from the 600-root backup, indexes 0-3 rewritten) |
+| 22:04:50 | — | v2.11 task shut down (`accept tcp … use of closed network connection` for each entrypoint in its last log lines) |
+| 22:04:51 | — | v3.7.14 task **Running** on micro (converged in ~4 s, no crash-loop); v3 rewrote `acme.json` once at start (22:04:53) |
+| 22:04:52 | **B2a** | `--label-add thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm --label-add thinx-api-ws.middlewares=sslheaders@swarm thinx_api` -> converged, no task restart |
+| 22:04:57 | **B2b** | `--label-add thinx-console-https.middlewares=security-headers@swarm thinx_console` -> converged. **B1 -> B2 window: 10 s** |
+| 22:05:18 | gate attempt 1 | router filter printed nothing — but every `/api/*` path answered **`404 page not found`** (no router matched at all); log: `ERR Skip container error="both Docker and Swarm labels are defined" providerName=swarm` repeated for every bridged service (105 lines by 22:06) |
+| 22:06:35 | regression confirmed | https app/console/rtm **404**. Decision: Stage C immediately (staged command set, label-only, no restarts) before considering rollback |
+| 22:06:35-39 | **C** | `docker service update --detach --label-rm traefik.docker.network <svc>` on the 15 services still carrying it (downtime, errorpage, fotostim x2, igraczech, landing, registry, swarmpit_app, syxra, thinx_api/console/couchdb/influxdb/mosquitto/vue) — 4 s total |
+| 22:06:48 | recovery | https app/console/rtm/thinx.cloud **200**; filter empty; provider still re-polling (routers 17 -> 30 by 22:07:57). **Web outage ≈ 1 min 55 s.** 0 skip errors after C |
+| 22:07:57 | **post-B2 gate** | filter printed **nothing**; `/api/overview`: http routers **30 / 0 errors / 0 warnings**, services **18 / 0**, middlewares **7 / 0**, tcp 0, providers `["Swarm"]`; `thinx-api-https@swarm enabled sslheaders@swarm,security-headers@swarm`, `thinx-api-ws@swarm enabled sslheaders@swarm`, `thinx-console-https@swarm enabled security-headers@swarm`; `@docker` strings in `/api/rawdata`: **0** |
+| 22:07:57 | re-verify matrix | identical to baseline — see table below |
+| 22:08 | device flow post-cutover | over `:7442`+`:1883` **PASS**; over `https://app.thinx.cloud` **PASS** (register, OTT 200, firmware 380048 B md5Match, MQTT connected + both ACL topics granted, publish OK, disconnect); WS probe 200 |
+| 22:09 | acme.json continuity | 24/24 certificate blobs and 24/24 key blobs identical to the 31-02 snapshot; sole structural delta `le.Account.KeyType` dropped (= the 25-byte size change); served serial unchanged |
+| 22:09:51 | capture | `traefik-edge.C.post.yml` captured, redacted on micro |
+| 22:10:50 | plan `<verify>` | V1-V6 PASS (see "Acceptance") |
+
+**Deferred 31-01 Task 3 criterion CLOSED: post-B2 router filter printed nothing at 22:07:57Z** (first
+clean read after Stage C; the 22:05:18Z read was vacuous — the API itself was unrouted).
+
+Router count note: 30, not the probe's 32 — the probe ran `--api.insecure=true`, which adds
+`api@internal` + `dashboard@internal` (and 2 internal middlewares: 7 vs 9). Services 18 = 18. The 30
+names are exactly the probe's set minus those two.
+
+### Re-verify matrix (22:07:57Z, live v3.7.14) vs v2.11 baseline (21:52Z)
+
+| Check | v2.11 baseline | v3.7.14 live | Verdict |
+|---|---|---|---|
+| https app / console / rtm / thinx.cloud / swarmpit | 200 / 200 / 200 / 200 / 200 | 200 / 200 / 200 / 200 / 200 | identical |
+| https micro (dashboard, unauth) | 401 | 401 | identical |
+| http console / rtm / thinx.cloud / swarmpit / micro | 301 -> https://<host>/ | 301 -> https://<host>/ | identical |
+| http app | 200 (by design) | 200 | identical |
+| cert app.thinx.cloud | LE `YR2`, Sep 29 05:50:34 -> Dec 28 05:50:33 2026 | issuer `C=US, O=Let's Encrypt, CN=YR2`, **serial `051152D5A20BE36DEFA1B6FA83379CE42809`** = snapshot cert serial; `checkend 0` valid | no re-issuance |
+| cert rtm.thinx.cloud | — | serial `0535CC0C71E39D9378E72893F3A2141267B0` = snapshot; Dec 28 05:49:53 2026 | no re-issuance |
+| `:7442` / `:1883` / `:8883` TCP accept | OPEN | OPEN (also during the web outage: direct publish) | unaffected |
+| `thinx_api` / `thinx_mosquitto` published ports | 7442 / 1883,1884,8883 | 7442->7442 / 1883->1883 1884->1884 8883->8883 | unchanged |
+| `traefik_traefik` | `v2.11@d57faa4f`, 17 args, ports 80 443, `Version.Index 38379296` | `traefik:v3.7.14`, **17** args, ports **80/443 only**, `Version.Index 38379311`, 1 running task on micro | as designed |
+| Args grep | docker x4, swarm x0 | `providers.swarm` x3, `providers.docker` **0**, `core.defaultRuleSyntax=v2` x1, `thxp.address=:7442` x1 | as designed |
+| `acme.json` | `301146 1791377596 600 root` | `301121 1791410693 600 root` — v3 one-time rewrite, contents proven identical (above) | continuity |
+| WS upgrade probe `https://rtm.thinx.cloud/` | 200 | 200 | identical |
+| Stage C task ids (15 services) | — | pre-C == post-C for all 15 (label-only; e.g. `thinx_api 76cqo59s…`, `thinx_mosquitto siy2hyda…`) | no restarts |
+| Backend URLs (`/api/http/services`) | probe: all `10.0.1.x` | all 15 backends on `traefik-public` `10.0.1.0/24` (`thinx-api -> 10.0.1.83:7442`) | T-31-10 OK |
+| Label state | 16 `traefik.swarm.network`, 16 `traefik.docker.network`, 3 `@docker` refs | 16 / **0** / **0** | end state |
+
+### Deviation
+
+**[Rule 3 - Blocking] Stage C pulled forward into the cutover; ~2-minute web outage.** The mechanism
+table (31-01) stated that v3 "ignores `traefik.docker.*`", so Stage A carried both network-label keys as
+a zero-window bridge and Stage C was scheduled as "any time after B" cleanup. Live, Traefik v3's swarm
+provider rejects a service that defines both `traefik.docker.*` and `traefik.swarm.*` labels (`Skip
+container error="both Docker and Swarm labels are defined"`), so after B1 all 15 bridged services were
+undiscovered: every web host answered `404 page not found` from 22:04:50Z (v2 task gone) until the
+provider picked up Stage C (22:06:39-22:06:48Z). The traefik service itself was fine (B1 removed its
+docker key) but its dashboard router was the only one left, which is why the 22:05:18Z filter read was
+vacuous. Fix: Stage C executed immediately (detached, 15 label-only updates, 4 s, no task restarts) —
+inside the staged command set, no mechanism change, so no Rule-4 stop; rollback was not needed. Both
+mechanism-table rows carry a **CORRECTION** marker. Lesson for any future repeat (and for the P33/P34
+edits): under v3, never let a traefik-enabled service carry both key families, even briefly.
+
+Pre-existing, not caused by the hop: the one ACME log line after start is the renewal retry for the
+long-expired external cert #15 (`checkout.qooldata.com`, DNS -> 217.11.249.139, inventory
+`traefik-acme-inventory.2026-10-06.md`, P33 item). Single attempt, same failure as under v2.11; not a
+re-challenge storm (24/24 certs unchanged). Stale bookkeeping label `com.docker.stack.image=traefik:v2.11@…`
+remains on `traefik_traefik` (only a stack deploy rewrites it; cosmetic, noted in `C.post.yml`).
+
+### Acceptance (plan Task 2 `<verify>`, run 22:10:50Z)
+
+| # | Check | Result |
+|---|---|---|
+| V1 | live Args contain `--providers.swarm` and `--core.defaultRuleSyntax=v2` | PASS |
+| V2 | no `--providers.docker` in live Args | PASS |
+| V3 | `openssl … app.thinx.cloud:443 … -checkend 0` | PASS (`Certificate will not expire`) |
+| V4 | https app/console/rtm/thinx.cloud all 200 | PASS |
+| V5 | `:7442` / `:1883` / `:8883` accept TCP on micro | PASS |
+| V6 | `thinx_api` publishes 7442; `thinx_mosquitto` publishes 1883/8883 | PASS |
+| V7 | `traefik-edge.C.post.yml` committed, 0 hash/key markers | PASS (grep count 0 at commit) |
+| — | exactly one running `traefik_traefik` task | PASS (1) |
+
+### Live production state at hand-off (for the Task 3 human-verify gate)
+
+`traefik_traefik`: `traefik:v3.7.14` (digest `e849695b…`), 17 args, ports 80/443 only, 1 task
+`traefik_traefik.1` on `micro`, `Version.Index 38379311`, `acme.json` `301121 1791410693 600 root`
+(24 certs). Snapshot/backups untouched on micro. **Rollback (if the operator sees a regression):**
+runbook §Rollback Steps 1 -> 2 -> 3 above, Step 3 INCLUDING the five `--label-add
+traefik.docker.network=traefik-public` re-adds (`thinx_api thinx_mosquitto thinx_couchdb thinx_influxdb
+swarmpit_app`) because Stage C has run; `traefik.swarm.network` may stay (v2.11 ignores it — proven
+live 21:53-22:04Z).
