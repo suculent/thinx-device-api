@@ -361,3 +361,79 @@ ssh micro "stat -c '%s %Y %a %U' /var/lib/docker/volumes/traefik_traefik-public-
   filter MUST print nothing there (see the "Post-B2 gate" row in the cutover-mechanism table). The
   alternative zero-window bridge (unqualified refs, noted under "Cutover mechanism") was NOT chosen.
 - ACME neutralized, production `acme.json` untouched, probe torn down: PASS.
+
+---
+
+## Pre-cutover rollback snapshot (31-02 Task 1, D-02 / T-31-03, 2026-10-07 20:38 UTC)
+
+### Why this section exists
+
+D-02 is "staged-ready, roll back only on regression". The return path must be able to put the
+**working v2.11 edge** back in one command, with **cert continuity**: a rollback that loses the live
+`acme.json` forces 24 fresh ACME issuances and trips the Let's Encrypt duplicate-certificate rate
+limit (RESEARCH Pitfall 3, T-31-03). So the cert store and the resolved service spec are captured
+out-of-git on `micro` immediately before the hop, next to the P30 snapshot, and the redacted twin is
+committed as `traefik-edge.C.pre.yml`. **No live service was mutated by this task** — every command
+below is a read or a copy into `/mnt/data/edge-rollback/`.
+
+### Precondition (read-only, 20:36 UTC)
+
+```
+ssh micro "docker service inspect traefik_traefik --format '{{.Spec.TaskTemplate.ContainerSpec.Image}} args={{len .Spec.TaskTemplate.ContainerSpec.Args}}'"
+# expect: traefik:v2.11@sha256:d57faa4f… args=17   (the Plan 03 cutover has NOT happened)
+ssh micro "stat -c '%a %U' /mnt/data/edge-rollback/"
+# expect: root-owned; P30 dir traefik-2026-10-06/ present beside it
+```
+
+Observed: `traefik:v2.11@sha256:d57faa4f…`, `args=17`, publishes `80 443`, task `traefik_traefik.1`
+on `micro` Running 8 h (not restarted since the P30 cycle); `/mnt/data/edge-rollback/` `755 root`
+holding `traefik-2026-10-06/` (`700 root`) and `traefik-p30-prerolldemo-20261007T125012Z.json`
+(`600 root`); live `acme.json` `301146 1791377596 600 root` — size and mtime identical to the 31-01
+teardown baseline, i.e. no ACME activity since. PASS.
+
+### Capture (on `micro`, `umask 077`; real values never leave the host)
+
+```
+ssh micro "D=/mnt/data/edge-rollback/traefik-2026-10-07; mkdir -p \$D; chmod 700 \$D; \
+  cp -a /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json \$D/acme.json; chmod 600 \$D/acme.json"
+# expect: dir 700 root; acme.json 600 root, byte-identical to the live named-volume file
+ssh micro "docker service inspect traefik_traefik > /mnt/data/edge-rollback/traefik-p31-precutover-<UTC>.json; chmod 600 …"
+# expect: 600 root; full spec (Args, Labels, Mounts, Configs, Networks, Endpoint) — belt-and-suspenders restore source
+ssh micro "{ …docker service inspect --format over Args / Endpoint.Ports / Spec.Labels / ContainerSpec.Env / Mounts / Configs / Networks / Placement; \
+  docker config inspect tls-config-1 --format '{{json .Spec.Data}}' | tr -d '\"' | base64 -d; } > \$D/resolved-snapshot.yml; chmod 600 \$D/resolved-snapshot.yml"
+# expect: 600 root; keys service/image/rollback_image_tag/resolved_command/resolved_published_ports/resolved_labels/resolved_env/resolved_mounts/resolved_configs/resolved_networks/resolved_placement/resolved_tls_toml
+```
+
+| Artifact (out-of-git on `micro`, referenced by path only) | Mode | Observed |
+|---|---|---|
+| `/mnt/data/edge-rollback/traefik-2026-10-07/` | `700 root` | newest `traefik-*/` dir (`ls -d … \| sort \| tail -1`) |
+| `/mnt/data/edge-rollback/traefik-2026-10-07/acme.json` | `600 root` | `cmp` against the live named-volume file: **identical**; `jq '.le.Certificates \| length'` = **24** (matches `traefik-acme-inventory.2026-10-06.md`) |
+| `/mnt/data/edge-rollback/traefik-2026-10-07/resolved-snapshot.yml` | `600 root` | 92 lines; `resolved_command` = **17** args (the v2.11 set), `resolved_labels` carries the real `admin-auth` hash (1 key), `resolved_env` empty, `resolved_tls_toml` = the `tls-config-1` body |
+| `/mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json` | `600 root` | valid JSON; `.[0].Spec.TaskTemplate.ContainerSpec.Args` length **17**; image `traefik:v2.11@sha256:d57faa4f…` |
+
+These files hold REAL resolved secrets (the ACME email, the `admin-auth` apr1 hash, raw `acme.json`
+private keys). They are **never** committed and **never** scp'd into any repo (P29 D-12). The P30
+snapshot `traefik-2026-10-06/` stays in place as the older fallback; the 2026-10-07 dir is the
+Plan 31-02 rollback target because its `acme.json` is the newest confirmed-identical copy.
+
+### Committed redacted twin — `swarm-configs/traefik-edge.C.pre.yml`
+
+Next letter in the `traefik-edge.*` series (A = P29 reconciliation, B = P30 pilot-token cutover, C =
+P31 v3 hop). Structured exactly like `traefik-edge.B.pre.yml`: resolved command in live order, mounts,
+configs, networks, deploy labels, `tls.toml` body, entrypoint map, direct-publish model. Every secret
+is the literal `<redacted>`, `${EMAIL}` / `${USERNAME}` / `${DOMAIN}` / `${CONFIG}` stay templated.
+Checked against the live inspect on `micro` (redaction applied on the host with `sed` before the
+output was read): the 17 Args and the 27 `traefik.*` label keys/values are identical to
+`traefik-edge.B.post.yml` — the P30 end state is still the live state, so `.C.pre` ≡ `.B.post` apart
+from its header comments. Secret-marker scan over the committed file (apr1 / bcrypt hash prefixes,
+PEM armor headers): **0** hits.
+
+### Post-task no-side-effect check
+
+```
+ssh micro "docker service inspect traefik_traefik --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'; docker service ps traefik_traefik --filter desired-state=running --format '{{.Name}} {{.Node}} {{.CurrentState}}'"
+# expect: traefik:v2.11@sha256:d57faa4f…; traefik_traefik.1 micro "Running 8 hours ago" (same task, not restarted)
+```
+
+Observed: image unchanged, `traefik_traefik.1 micro Running 8 hours ago` — the same task as before
+the capture; the live edge was not updated, restarted or re-scheduled by Task 1.
