@@ -120,7 +120,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 3. Plaintext `:7442` + plain MQTT verified: legacy check-in, OTT redeem, and firmware download all succeed.
 4. Rollback to the Phase 29 snapshot is demonstrated.
 
-**Plans:** 2 plans (planned 2026-10-07) — 2/2 complete
+**Plans:** 2/2 plans complete (planned 2026-10-07) — 2/2 complete
 **Wave 1**
 - [x] 30-01-PLAN.md — Tracer: pilot-token removal live cutover (thinx-swarm edit → mirror → check → deploy → verify) + v2-syntax parity confirmation (EDGE-MIG-01); `:7442`/plain-MQTT preserved (EDGE-MIG-04) — ✅ 2026-10-07, see `30-01-SUMMARY.md` (live on v2.11, operator-verified)
 
@@ -186,7 +186,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete | 2026-10-03 |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete | 2026-10-05 |
 | 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete    | 2026-10-06 |
-| 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete | 30-02 complete 2026-10-07 (live rollback+restore cycle demonstrated; edge at P30 end state) |
+| 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete    | 2026-10-07 |
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 0/? | Pending | — |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 0/? | Pending | — |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 0/? | Pending | — |

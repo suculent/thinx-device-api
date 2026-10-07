@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
-current_phase: 30
-current_phase_name: v1→v2 Syntax Migration (parity)
-status: phase-complete
-stopped_at: Completed 30-02-PLAN.md (live rollback+restore cycle demonstrated; edge at P30 end state) — Phase 30 complete
-last_updated: "2026-10-07T13:00:00Z"
+current_phase: 31
+current_phase_name: v2→v3 Upgrade (backward-compat mode)
+status: planning
+stopped_at: Phase 30 complete, ready to plan Phase 31
+last_updated: "2026-10-07T13:17:16.753Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 30 complete — D-06 live rollback+restore cycle demonstrated and operator-verified, EDGE-MIG-01/04 re-verified, edge left at P30 end state
-state_head: 0859d6f81d39680b3faed1c54768a53e82e44ce5
+last_activity_desc: Phase 30 complete, transitioned to Phase 31
+state_head: 10270c97c3bf2b393169962998a6384b0d186061
 progress:
   total_phases: 6
   completed_phases: 15
   total_plans: 5
   completed_plans: 5
-  percent: 72
+  percent: 79
 ---
 
 # STATE — THiNX Device API
@@ -34,10 +34,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: 30 (v1→v2 Syntax Migration (parity)) — COMPLETE
-Plan: 2 of 2 complete (30-01 ✅, 30-02 ✅); Phase 30 done, ready for Phase 31 (v2→v3 upgrade)
-Status: Phase 30 complete — both plans done; milestone v1.15 continues
-Last activity: 2026-10-07 — 30-02 complete: D-06 LIVE rollback+restore cycle demonstrated on production traefik_traefik (rolled back to the Phase-29 snapshot, verified OLD config, re-applied P30), operator-verified at the blocking-human gate, edge left at the P30 end state; EDGE-MIG-01/04 re-verified; :7442 + plain MQTT preserved throughout
+Phase: 31 — v2→v3 Upgrade (backward-compat mode)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-07 — Phase 30 complete, transitioned to Phase 31
 
 ## Milestones
 
@@ -415,7 +415,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 30 context gathered
+**Stopped at:** Phase 30 complete, ready to plan Phase 31
 
 **Resume file:** .planning/phases/30-v1-v2-syntax-migration-parity/30-CONTEXT.md
 
