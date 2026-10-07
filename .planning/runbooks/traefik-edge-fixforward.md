@@ -30,3 +30,35 @@ TLS-enforce those paths.
 - The pilot token is referenced here **by name only** — its value is never written to any committed
   artifact (D-12). The resolved value lives only in the out-of-git 600 rollback snapshot on `micro`.
 - Source rows: the `documented` dispositions in `swarm-configs/traefik-edge-diff.2026-10-06.md`.
+
+## Phase 30 resolutions (2026-10-07)
+
+Phase 30 (EDGE-MIG-01 / EDGE-MIG-04) confirmed v2-syntax parity in the deploy source of truth and
+actioned exactly the P30-tagged rows. The committed deploy mirror (`docker-compose.traefik.yml`) and
+its thinx-swarm source match all four v2-syntax markers (`providers.docker`, `certificatesresolvers`,
+`http.routers`/`http.services`, `entrypoints.*.address=:`) and **zero** v1-era markers
+(`defaultentrypoints`, `Address::`, top-level `--docker=`/`--acme=`).
+
+- **Row #1 — Pilot token: RESOLVED / REMOVED in P30 on v2.11 (D-04).** The inert cleartext
+  `--pilot.token` flag was stripped from the committed thinx-swarm static command and deployed live
+  to the running `traefik_traefik` task (v2.11 tolerates its absence; v3 would reject it). Referenced
+  **by flag name only** — the resolved UUID value was never written to any committed artifact and
+  lives only in the out-of-git 600 rollback snapshot on `micro`. Exactly one flag removed; all six
+  entrypoints (incl. `:7442`) and every other wart preserved.
+- **Row #8 — Port-publishing / routing drift: RESOLVED, "stays direct" (D-02).** Decision: device and
+  MQTT traffic remain published **directly**, not routed through Traefik — `:7442` (thxp) by
+  `thinx_api`; `:1883`/`:8883` (mqtt/mqtts) by `thinx_mosquitto`; `:1194` (vpn) unrouted; Traefik keeps
+  publishing only `:80`/`:443`. The vestigial `vpn`/`mqtt`/`mqtts`/`thxp` entrypoints and the dead
+  `mosquitto-secure` TCP router are now **annotated in the committed thinx-swarm `traefik.yml`** (D-03,
+  comments only, no functional change). EDGE-MIG-04 is satisfied by preserving + verifying the direct
+  model, not by moving traffic.
+- **Row #2 — `--providers.docker.exposedbydefault=true`: CONFIRMED DEFERRED to P33 (D-05).** Not
+  changed in P30 — flipping it to `false` requires auditing every Traefik-enabled stack to add explicit
+  `traefik.enable=true`, which is exposure-tightening work (EDGE-API), not parity work. Kept `true`.
+
+Rows **#3 (`--api`/8080), #4 (ACME email/perms/renewal), #5 (TLS min + HSTS), #6 (`--log.level=ERROR`),
+#7 (raw `docker.sock:ro`)** are UNTOUCHED and remain assigned to P33/P34 as above.
+
+**Hard constraint restated:** the `:7442` plaintext device port and plain (non-TLS) MQTT must keep
+working for legacy `__DISABLE_HTTPS__` devices — verified reachable through the P30 cutover (operator
+confirmed the full check-in → OTT redeem → firmware download flow at the human-verify gate).
