@@ -130,7 +130,7 @@ Chosen mechanism, in order (**traefik first, then app labels** — P30 D-06 disc
 | Stage | Command shape | Risk under the version running at that moment |
 |---|---|---|
 | **A — pre-cutover bridge (safe under v2.11, may run before the window)** | `docker service update --label-add traefik.swarm.network=traefik-public <svc>` on all 16 traefik-enabled services, KEEPING `traefik.docker.network` | none: v2.11 ignores `traefik.swarm.*`; v3 ignores `traefik.docker.*`; carrying both bridges the network label with a zero-length window |
-| **B1 — the hop (maintenance window)** | `docker service update --image traefik:v3.7.14 --args '<18 converted flags>' --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public traefik_traefik` | the only one-way step; every router with an unqualified ref is enabled immediately; `thinx-api-https`, `thinx-api-ws`, `thinx-console-https` are in error state until B2 lands (seconds) |
+| **B1 — the hop (maintenance window)** | `docker service update --image traefik:v3.7.14 --args '<17 converted flags>' --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public traefik_traefik` | the only one-way step; every router with an unqualified ref is enabled immediately; `thinx-api-https`, `thinx-api-ws`, `thinx-console-https` are in error state until B2 lands (seconds) |
 | **B2 — immediately after B1** | `docker service update --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm --label-add traefik.http.routers.thinx-api-ws.middlewares=sslheaders@swarm thinx_api` then `docker service update --label-add traefik.http.routers.thinx-console-https.middlewares=security-headers@swarm thinx_console` | closes the B1 window; `--label-add` on an existing key overwrites the value |
 | **Post-B2 gate (Plan 03 checklist item)** | re-run the router status filter from the boot-and-discover section against the **live** v3 service's `/api/http/routers` (the live service has no `--api.insecure`, so read it through the `admin-auth`-protected `traefik-public-https` router on `:443`, never by adding `--api.insecure` live): `jq -r '.[] \| select(.status!="enabled") \| .name + "  " + .status'` — **MUST print nothing**. This closes the 31-01 Task 3 "every router enabled" criterion deferred by operator decision A (2026-10-07). Any line printed = a dangling ref B2 missed -> fix with another `--label-add`, or roll back per 31-02. | none: read-only |
 | **C — post-cutover cleanup (any time after B)** | `docker service update --label-rm traefik.docker.network <svc>` on the other 15 services | none: the label is unread by v3 |
@@ -157,8 +157,10 @@ The inspect output contained three live basic-auth hashes (`admin-auth`, `couch-
 ### `thinx-swarm/traefik.yml` — the forced static delta (D-04, RESEARCH rows 1-6)
 
 Committed in the external edge source repo as **`thinx-swarm@5e19c0003eec49faaead6e365d6e5f198db25772`**
-(parent `3e048a5`, the P30 end state). The command block went from 17 to **18** flags; nothing else
-in the block moved:
+(parent `3e048a5`, the P30 end state). The command block stays at **17** flags — two removed
+(`--providers.docker`, `--providers.docker.swarmmode`), two added (`--providers.swarm`,
+`--core.defaultRuleSyntax=v2`); nothing else in the block moved (count corrected by 31-02 from the
+mirror: `grep -c '^ *- --' docker-compose.traefik.yml` = 17; the earlier "18" was an off-by-one):
 
 | # | v2.11 (P30 end state, `traefik-edge.B.post.yml`) | v3 (committed now) |
 |---|---|---|
@@ -253,7 +255,7 @@ so neither the live v2.11 edge nor the probe itself discovers it.
 | convergence | **`1/1` at t=10 s** (`Running 4 seconds ago`, node `micro`) — the v3 static config parsed, no crash-loop |
 | `Endpoint.Ports` | `null` (no host port) |
 | mounts | `[{bind /var/run/docker.sock -> /var/run/docker.sock ro}]` only |
-| args | 19 (18 converted + `--api.insecure=true`) |
+| args | 19 (17 converted + probe-only `--api.insecure=true` + probe-only `--certificatesresolvers.le.acme.caserver=<staging>`; count corrected by 31-02) |
 
 ### Discovery — the gate
 
@@ -437,3 +439,155 @@ ssh micro "docker service inspect traefik_traefik --format '{{.Spec.TaskTemplate
 
 Observed: image unchanged, `traefik_traefik.1 micro Running 8 hours ago` — the same task as before
 the capture; the live edge was not updated, restarted or re-scheduled by Task 1.
+
+---
+
+## Rollback (v3 -> v2.11) — staged-ready, D-02 (31-02 Task 2, dry-verified 2026-10-07 20:42-20:45 UTC)
+
+**Status: STAGED-READY, not executed.** Per D-02 this return path is executed for real **only if the
+Plan 31-03 cutover shows a regression** (triggers below). Nothing in this section has touched the
+live `traefik_traefik` service; the quoting and the command shapes were proven on isolated
+scaled-to-zero throwaway services with FAKE values, exactly as P30 did before its live D-06 cycle.
+Non-executable audit record — the `ssh micro "…"` lines carry the `# expect:` convention; on the
+executor the `micro` alias is the operator endpoint from `~/.aliases`.
+
+**Rollback target (what "v2.11" means here):** the known-good edge is the image that has been serving
+production since Phase 29 — `traefik:v2.11@sha256:d57faa4f71afd4e29e6204de6535816a6f9b18402b2e21c3b8411ae9884c3a8e`
+(image id `32c7339c302b…`, created 2026-04-29), the digest the committed `traefik:v2.11.0` line of
+`thinx-swarm/traefik.yml` resolved to on `micro` and the one `traefik-edge.{A,B,C}.pre/post.yml` all
+record. On `micro` that image is present **by digest only** (`docker image inspect` finds it; the
+tag `traefik:v2.11.0` is not present locally, and neither is `traefik:v3.7.14` until Plan 03 pulls
+it). The rollback therefore names the **digest form** so the recovery path needs **no registry pull**
+and returns the exact binary that was running (P30 D-06 rolled back with this same reference). The
+tag form `traefik:v2.11.0` is the committed-file spelling of the same target (D-03) — usable if
+Docker Hub is reachable, but it would fetch and run a v2.11 build this edge has never run.
+
+### Snapshot the rollback keys to (31-02 Task 1, out-of-git on `micro`, by path only)
+
+| Input | Path |
+|---|---|
+| cert store (24 certs, byte-identical to live at capture) | `/mnt/data/edge-rollback/traefik-2026-10-07/acme.json` (600 root) |
+| resolved v2.11 command / labels / env / tls.toml | `/mnt/data/edge-rollback/traefik-2026-10-07/resolved-snapshot.yml` (600 root) |
+| full `docker service inspect traefik_traefik` (the `--args` source) | `/mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json` (600 root) |
+| older fallback (P30) | `/mnt/data/edge-rollback/traefik-2026-10-06/` + `traefik-p30-prerolldemo-20261007T125012Z.json` |
+
+### Return path — ordered (acme.json FIRST, then the hop revert, then the label revert)
+
+**Step 0 — pre-check (read-only).**
+```
+ssh micro "stat -c '%a %U' /mnt/data/edge-rollback/traefik-2026-10-07/acme.json /mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json"
+# expect: 600 root / 600 root
+ssh micro "docker service inspect traefik_traefik --format '{{.Spec.TaskTemplate.ContainerSpec.Image}} args={{len .Spec.TaskTemplate.ContainerSpec.Args}}'"
+# expect (regressed state): traefik:v3.7.14… args=17 — confirms you are rolling back FROM the hop, not from v2.11
+```
+
+**Step 1 — restore the cert store BEFORE the retag (Pitfall 3 / T-31-03).**
+```
+ssh micro "cp -a /mnt/data/edge-rollback/traefik-2026-10-07/acme.json \
+  /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json"
+# expect: 600 root, 301146 bytes; the restarted v2.11 task reads the restored store and serves every host
+#         instantly — no ACME re-challenge, no Let's Encrypt duplicate-certificate rate limit
+```
+Why first: `acme.json` round-trips v2<->v3 in format (RESEARCH §Rollback Safety), but restore-from-
+snapshot beats trusting v3's in-place writes. If v3 issued or renewed anything during the window
+that issuance is discarded — one cert re-issued later under v2.11 is cheap; 24 re-issuances is the
+rate limit. The volume is the authoritative store (`services/traefik/update.sh:37`); the task picks
+the file up at start, so the restore must land before Step 2 recreates the task.
+
+**Step 2 — the ONE COMMAND: image retag + static `--args` revert (undoes Stage B1).**
+```
+ssh micro "docker service update \
+  --image traefik:v2.11@sha256:d57faa4f71afd4e29e6204de6535816a6f9b18402b2e21c3b8411ae9884c3a8e \
+  --args \"\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \
+            /mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json)\" \
+  --label-add traefik.docker.network=traefik-public \
+  traefik_traefik"
+# expect: converges to exactly 1 running task on micro; Image = the d57faa4f digest; Args = the 17-flag v2.11 set
+#         (--providers.docker / .constraints / .exposedbydefault=true / .swarmmode — NO --providers.swarm, NO --core.*);
+#         served cert valid off the restored acme.json; :80/:443 still the only published ports
+```
+- The `--args` string is rebuilt **on `micro`** from the full-spec backup: `jq … map(@sh)` single-
+  quotes each element, which is exactly what `docker service update --args` (shlex) expects, so the
+  backtick-bearing `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)`
+  and the resolved `${EMAIL}` land verbatim without ever being typed or printed. (v2.11 does not know
+  `--providers.swarm*` or `--core.defaultRuleSyntax`; both are gone from the restored set.)
+- `--label-add traefik.docker.network=traefik-public` puts the v2 docker-provider network key back on
+  the traefik service; `traefik.swarm.network` is left in place (v2.11 ignores it) so the label has a
+  zero-length window — same bridge as Stage A, mirrored. Optional later: `--label-rm traefik.swarm.network`.
+- Image: digest reference => no tag resolution, no pull. Do not add `--force`; the image/args delta
+  already recreates the task.
+
+**Step 3 — app-stack label revert (undoes Stage B2; label-only, no task restart).**
+```
+ssh micro "docker service update \
+  --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@docker,security-headers@docker \
+  --label-add traefik.http.routers.thinx-api-ws.middlewares=sslheaders@docker thinx_api"
+ssh micro "docker service update \
+  --label-add traefik.http.routers.thinx-console-https.middlewares=security-headers@docker thinx_console"
+# expect: both updates complete with no task restart (.Spec.Labels is outside TaskTemplate); under v2.11 the
+#         docker provider re-resolves sslheaders@docker / security-headers@docker and the three routers serve again
+```
+- Stage A labels (`traefik.swarm.network` on all 16) are **not** touched — v2.11 ignores them.
+- **Only if Stage C already ran** (it removed `traefik.docker.network` from the other 15 services):
+  re-add it on the five multi-network services, which the v2 docker provider needs to pick the
+  `traefik-public` address — `docker service update --label-add traefik.docker.network=traefik-public <svc>`
+  for `thinx_api`, `thinx_mosquitto`, `thinx_couchdb`, `thinx_influxdb`, `swarmpit_app` (Step 2
+  touches only `traefik_traefik`, so this is the place). The eleven single-network services can
+  stay without it (auto-selection has one candidate).
+
+**Step 4 — verify the restored v2.11 edge (the P30 matrix, verbatim).**
+```
+ssh micro "docker service inspect traefik_traefik --format '{{len .Spec.TaskTemplate.ContainerSpec.Args}}'"            # expect: 17
+ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}' | grep -c 'providers.swarm'"   # expect: 0
+ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}' | grep -c 'thxp.address=:7442'" # expect: 1
+ssh micro "docker service ps traefik_traefik --filter desired-state=running -q | wc -l"                                 # expect: 1
+ssh micro "curl -sS -o /dev/null -w '%{http_code}' https://<host>/"            # app / console / rtm / thinx.cloud: 200
+ssh micro "curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' http://<host>/"   # console / rtm / thinx.cloud: 301 -> https; app: 200 by design
+ssh micro "echo | openssl s_client -connect app.thinx.cloud:443 -servername app.thinx.cloud | openssl x509 -noout -checkend 0"  # expect: valid
+ssh micro "timeout 5 bash -c 'exec 3<>/dev/tcp/127.0.0.1/<port>'"            # :7442 / :1883 / :8883 expect OPEN (direct publish, unaffected either way)
+ssh micro "stat -c '%s %a %U' /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json"  # expect: 301146 600 root
+```
+`mosquitto` caveat (carried): `--filter name=thinx_mosquitto`, the service filter is prefix-matched.
+
+### Regression triggers (when Plan 03 executes this for real)
+
+Any one of: the B1 task does not converge (v3 crash-loop / parse error — then Step 1 is still done,
+Step 2 is the whole rollback, Step 3 is moot); the post-B2 router filter prints a router no further
+`--label-add` fixes; the HTTPS matrix returns non-200 on app/console/rtm/landing or the redirect hosts
+stop redirecting; the served cert fails `checkend 0`; the dashboard router (`admin-auth`) stops
+answering. `:7442` / `:1883` / `:8883` are published directly by `thinx_api` / `thinx_mosquitto` and
+cannot regress from the hop (D-05) — if they are closed, look at those services, not at traefik.
+
+### Dry-verify record (isolated throwaways, FAKE values, 2026-10-07)
+
+Two throwaway services, both `--replicas 0`, pinned to a non-existent node label
+(`node.labels.gsd_never_schedule == true`), no published ports, no mounts, no overlay network,
+`--no-resolve-image` (nothing pulled), labelled `gsd.purpose=rollback-dry-verify`; ACME email
+`rollback-dryrun@example.invalid`. Tasks ever scheduled: **0** and **0**. Torn down the same minute.
+
+| Check | Run A (literal 17-flag string, `--image traefik:v2.11.0`) | Run B (the Step 2 form: digest image + `jq … map(@sh)` from a fake-email copy of the backup) |
+|---|---|---|
+| throwaway pre-state | `traefik:v3.7.14`, 17 args (`--providers.swarm` first), `traefik.swarm.network` set, `traefik.docker.network` absent | same |
+| post-rollback image | `traefik:v2.11.0` (tag, unresolved) | `traefik:v2.11@sha256:d57faa4f…` — equals the running digest: **yes** |
+| post-rollback args | 17 | 17 |
+| args vs the LIVE v2.11 Args (email masked both sides, `diff`) | **IDENTICAL 17/17** | **IDENTICAL 17/17** |
+| backtick constraint arg (`Args[1]`) | `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)` intact | intact |
+| fake email landed verbatim (`Args[10]`) | yes | yes |
+| network labels after | `docker.network=traefik-public`, `swarm.network` removed (`--label-rm` variant) | `docker.network=traefik-public` added, `swarm.network` kept (bridge variant, the documented Step 2) |
+| B2-revert labels (second throwaway `gsd_rbdry_app`) | `thinx-api-https=sslheaders@docker,security-headers@docker`; `thinx-api-ws=sslheaders@docker`; `thinx-console-https=security-headers@docker` — `--label-add` overwrote the `@swarm` values | — |
+| `acme.json` restore mechanics | `cp -a` snapshot -> scratch 700 dir: **600 root 301146**, `cmp` vs live volume file **identical**; scratch removed | — |
+| live `traefik_traefik` before/after (image, arg count, `Version.Index`) | `traefik:v2.11@sha256:d57faa4f… args=17 v=38379257` -> **identical** | **identical** (`v=38379257`) |
+| live task / `acme.json` after | `traefik_traefik.1 micro Running 8 hours ago`; `301146 1791377596 600 root` | same |
+| throwaways / containers left | 0 / 0 | 0 |
+
+Run A also exercised the plan's literal `traefik:v2.11.0` retag target; Run B is the form the
+operator executes (no pull, exact binary). Both prove the `--args` quoting round-trips through
+shlex with the backticks and the resolved email intact — the only thing P30 found could go wrong.
+
+### Secret hygiene (P29 D-12)
+
+The real ACME email and the `admin-auth` hash were read by `jq` on `micro` straight from the 600-root
+backup into the `docker service update` argument vector and never printed; the dry-run used a
+fake-email copy under `umask 077` in `/tmp`, deleted at teardown. This runbook carries templated
+`${VAR}` forms and out-of-git paths only; the committed `traefik-edge.C.pre.yml` is the redacted
+twin of the snapshot.
