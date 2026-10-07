@@ -46,3 +46,20 @@
   P33/P34 image-pin hygiene pass may want to record the digest in the committed file as a comment.
   status: open
   **Found during:** 31-02 Task 2 (rollback dry-verify pre-flight, read-only `docker image inspect`).
+
+## From phase close-out (2026-10-07 22:29 UTC, orchestrator)
+
+- **Gluster deploy files label-synced to v3; `thinx.yml` still lacks the committed `secrets:` block.** After
+  the cutover a side check found `/mnt/gluster/deployment/swarm/thinx.yml` (what `restart.sh` deploys) still
+  carried 3 `@docker` refs + 6 `traefik.docker.network` labels, and `landing/errorpage/downtime/swarmpit/registry.yml`
+  one `traefik.docker.network` each — a routine `docker stack deploy` would have re-added the dual labels that the
+  v3 swarm provider rejects and repeated the 31-03 outage. Operator chose a label-only in-place `sed`
+  (`@docker`→`@swarm`, `traefik.docker.network`→`traefik.swarm.network`) on all six files with backups
+  `*.bak.20261007222957.pre-v3-labels`; no redeploy. **Remaining gap:** the committed `docker-swarm.yml` additionally
+  declares a top-level `secrets:` block (13 external secrets incl. `INFLUXDB_TOKEN`) and attaches `ROLLBAR_SERVER_TOKEN`
+  to a service; gluster `thinx.yml` does not, so a full redeploy still drops those live-only mounts until the block is
+  synced (requires every external secret to exist in the swarm first). Also to carry into the runbook §Cutover
+  mechanism as a post-cutover checklist row (runbook left untouched here to keep the 31-VERIFICATION fingerprint valid;
+  add it in the WR-01/WR-02 fix pass).
+  status: open
+  **Found during:** phase 31 close-out (side-agent note, verified read-only by the orchestrator).
