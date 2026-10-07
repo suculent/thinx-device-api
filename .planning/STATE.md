@@ -4,18 +4,18 @@ milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
 current_phase: 30
 current_phase_name: v1→v2 Syntax Migration (parity)
-status: executing
-stopped_at: Completed 30-01-PLAN.md (pilot-token removed live on v2.11); 30-02 rollback demo pending
-last_updated: "2026-10-07T12:34:15Z"
+status: phase-complete
+stopped_at: Completed 30-02-PLAN.md (live rollback+restore cycle demonstrated; edge at P30 end state) — Phase 30 complete
+last_updated: "2026-10-07T13:00:00Z"
 last_activity: 2026-10-07
-last_activity_desc: Phase 30 plan 01 complete — --pilot.token cutover live, EDGE-MIG-01 v2-parity confirmed
-state_head: 11153540581259f16b0469a1cb1dfc5c442eadd4
+last_activity_desc: Phase 30 complete — D-06 live rollback+restore cycle demonstrated and operator-verified, EDGE-MIG-01/04 re-verified, edge left at P30 end state
+state_head: 0859d6f81d39680b3faed1c54768a53e82e44ce5
 progress:
   total_phases: 6
-  completed_phases: 14
+  completed_phases: 15
   total_plans: 5
-  completed_plans: 4
-  percent: 70
+  completed_plans: 5
+  percent: 72
 ---
 
 # STATE — THiNX Device API
@@ -34,10 +34,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 ## Current Position
 
-Phase: 30 (v1→v2 Syntax Migration (parity)) — EXECUTING
-Plan: 1 of 2 complete (30-01 ✅); 30-02 (D-06 live rollback demo) next
-Status: Executing Phase 30 — plan 30-01 done
-Last activity: 2026-10-07 — 30-01 complete: inert --pilot.token removed live on v2.11, mirror regenerated (MIRROR OK), pre/post edge snapshots captured, EDGE-MIG-01 v2-parity confirmed; :7442 + plain MQTT preserved (operator-verified)
+Phase: 30 (v1→v2 Syntax Migration (parity)) — COMPLETE
+Plan: 2 of 2 complete (30-01 ✅, 30-02 ✅); Phase 30 done, ready for Phase 31 (v2→v3 upgrade)
+Status: Phase 30 complete — both plans done; milestone v1.15 continues
+Last activity: 2026-10-07 — 30-02 complete: D-06 LIVE rollback+restore cycle demonstrated on production traefik_traefik (rolled back to the Phase-29 snapshot, verified OLD config, re-applied P30), operator-verified at the blocking-human gate, edge left at the P30 end state; EDGE-MIG-01/04 re-verified; :7442 + plain MQTT preserved throughout
 
 ## Milestones
 
@@ -182,6 +182,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 
 Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 
+- 2026-10-07 — Phase 30 plan 30-02 complete (EDGE-MIG-04 / EDGE-MIG-01), Phase 30 DONE. The D-06 LIVE rollback+restore cycle was demonstrated end-to-end on production `traefik_traefik` within the open P30 maintenance window: rolled the edge back to the Phase-29 out-of-git snapshot (`micro:/mnt/data/edge-rollback/traefik-2026-10-06/`) — re-introducing `--pilot.token` temporarily and restoring the snapshot `acme.json` onto the named volume — verified the full edge on that OLD config (routes 200, HTTP→HTTPS redirect on console/rtm/landing, valid cert off the restored store with no ACME re-challenge, `:7442`/`:1883`/`:8883` OPEN), then re-applied the P30 pilot-removed config and re-verified the P30 end state (0 pilot, six entrypoints incl `:7442`, exactly one running task, matches `traefik-edge.B.post.yml`). Executed as a surgical single-flag Args delta (`docker service update --args`, pinned image digest `d57faa4f…` unchanged); `--args` quoting proven on an isolated throwaway service with a FAKE token first. Operator approved at the blocking-human gate (all four checks incl. the legacy device flow). Redacted evidence in `traefik-edge.B.rollback-demo.md`; swarm.md carries the P30 section. The pilot UUID / admin-auth hash / raw acme.json stay out-of-git on `micro` at 600, never committed. Mosquitto verify caveat: use `--filter name=thinx_mosquitto` (prefix-matched). A pre-roll-demo full-spec backup also remains on `micro` (600 root).
 - 2026-10-07 — Phase 30 plan 30-01 complete (EDGE-MIG-01 / EDGE-MIG-04). The inert cleartext `--pilot.token` flag was removed LIVE from the running `traefik_traefik` task on v2.11 (D-04), referenced by flag name only (UUID never committed). The cutover deployed the edited COMMITTED thinx-swarm file (committed `3e048a5`) — NOT the stale pre-Phase-29 on-disk deploy file, which carried middleware drift — with the image pinned to the running digest (`sha256:d57faa4f…`), `--resolve-image=never`, and the live admin-auth hash reused, so the ONLY live service-spec delta was the removed flag. All six entrypoints incl `:7442` retained; Traefik publishes only :80/:443; `thinx_api` :7442 + `thinx_mosquitto` :1883/:8883 direct-publish intact (D-02). Vestigial entrypoints + dead `mosquitto-secure` router annotated (D-03, comments only). `exposedbydefault=true` confirmed DEFERRED to P33 (D-05). Mirror regenerated (`MIRROR OK`, banner SHA `3e048a5`); redacted pre/post snapshots captured. Operator confirmed the live edge + legacy device flow at the human-verify gate. Pre-P30 rollback backup at `micro:/mnt/gluster/deployment/swarm/traefik.yml.bak.20261007120354.pre-p30-pilot`.
 - 2026-10-07 — GPG signing gate (Phase 30 execution): non-interactive commits initially failed (`gpg: cannot open '/dev/tty'`; passphrase uncached, `pinentry-mac` unreachable from the executor context). Signing is mandatory (`commit.gpgsign=true`, 100% `G`), so `--no-gpg-sign` was NOT used; the operator cached the passphrase (8h agent TTL) and execution resumed. All Phase 30 commits are signed `G`.
 - 2026-09-29 — Phase 24 complete (SEC-CFG-02). The swarm secrets were added one service at a time with `docker service update --secret-add`. The env fallback is kept (removing it is SEC-CFG-03). `WORKER_SECRET` was rotated and proven by a real build, and `CSRF_SECRET` (64 hex) is mounted on `thinx_api`.
