@@ -4,18 +4,18 @@ milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
 current_phase: 31
 current_phase_name: v2→v3 Upgrade (backward-compat mode)
-status: executing
-stopped_at: Completed 31-02-PLAN.md
-last_updated: "2026-10-07T20:50:23.255Z"
+status: verifying
+stopped_at: Completed 31-03-PLAN.md
+last_updated: "2026-10-07T22:24:40.796Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 31 execution started
-state_head: b6064475a6ddf5ef399a8aa41b742929f91fece4
+state_head: f0302672ba76d20b59238cb22eb9ffe2cb3c8c18
 progress:
   total_phases: 6
   completed_phases: 15
   total_plans: 8
-  completed_plans: 7
-  percent: 88
+  completed_plans: 8
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
 
 Phase: 31 (v2→v3 Upgrade (backward-compat mode)) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-07 — Phase 31 execution started
 
 ## Milestones
@@ -304,6 +304,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 31]: Operator decision A (31-01 Task 3 blocking-human checkpoint): the 'every router enabled' boot-and-discover gate is deferred to Plan 03 post-Stage-B2 against the live v3 service; the 3 disabled @docker-ref routers are accepted as the tracer's falsification record; no production label touched, probe not re-run — The probe reads live labels, and the 3 @docker refs (thinx-api-https, thinx-api-ws, thinx-console-https) can only flip to @swarm at the hop; flipping them under v2.11 breaks the same routers on production. Probe result 29/32 enabled with the 3 disabled exactly matching the inventory, 0 service/middleware errors. The unqualified-ref zero-window bridge was not chosen; the committed files pin @swarm per the plan must-have. Post-B2 the live /api/http/routers status filter MUST print nothing (runbook cutover table).
 - [Phase 31]: 31-02: v3->v2.11 rollback image is named by the running digest traefik:v2.11@sha256:d57faa4f… (present on micro by digest only; traefik:v2.11.0 is the committed-tag spelling of the same target but is not present locally); the one-command rollback restores acme.json from the 2026-10-07 out-of-git snapshot FIRST, then rebuilds --args on micro from the 600-root full-spec backup via jq map(@sh), then re-adds the three @docker middleware labels — A rollback by the bare traefik:v2.11.0 tag would depend on a Docker Hub pull inside the recovery path and land a v2.11 build this edge never ran; the digest form needs no pull and is the exact binary P30 D-06 rolled back to live. Restoring acme.json before the task is recreated avoids 24 ACME re-issuances (Let's Encrypt duplicate-cert rate limit). Both forms were dry-verified on scaled-to-zero unschedulable throwaways with a fake email: 17/17 args identical to live, backtick constraint intact, 0 tasks scheduled, live Version.Index unchanged (38379257).
 - [Phase 31]: 31-02: the converted v3 static command is 17 flags (two removed: --providers.docker, --providers.docker.swarmmode; two added: --providers.swarm, --core.defaultRuleSyntax=v2), not 18 — the 31-01 runbook count was corrected so Plan 03 B1 builds --args from 17; the rollback keeps the Stage-A traefik.swarm.network bridge label and, if Stage C already ran, re-adds traefik.docker.network on the five multi-network services — grep -c '^ *- --' docker-compose.traefik.yml = 17; the 31-01 probe's 19 args were 17 + probe-only --api.insecure + probe-only staging --caserver. Under v2.11 the docker provider reads traefik.docker.network, so a post-Stage-C rollback would otherwise let it auto-select thinx_internal/swarmpit_net on thinx_api, thinx_mosquitto, thinx_couchdb, thinx_influxdb, swarmpit_app and 502 them.
+- [Phase 31]: Live edge cut over to traefik:v3.7.14 BC mode (swarm provider + core.defaultRuleSyntax=v2) via ordered surgical docker service updates (B1 22:04:47Z -> B2 22:04:57Z -> C 22:06:39Z, 2026-10-07) — operator-authorized at the Task 1 blocking-human gate; route/cert parity + 30/30 routers enabled; rollback staged but NOT needed — Boot-and-discover (31-01) proved the config, the 31-02 snapshot made the hop reversible in one command, and the operator was present in an open window. Surgical per-service updates were chosen over a stack deploy because no single committed file matched the live thinx stack (31-01 Pitfall 5). Post-hop: 17 args index-exact vs the committed mirror, cert serials and all 24 acme.json blobs unchanged, device flow over :7442 + :1883 PASS, operator approved + checked the console (2026-10-08).
+- [Phase 31]: Stage A/C "both-label bridge" is INVALID under Traefik v3's swarm provider — it skips any service carrying both traefik.docker.* and traefik.swarm.* labels; all future label migrations (P32-P34) are single-step --label-rm/--label-add updates per service, never bridged — The 31-01 mechanism table claimed v3 ignores traefik.docker.*; live, the provider logged "Skip container error=both Docker and Swarm labels are defined" for every bridged service, so after B1 all web hosts returned 404 for ~1 min 55 s until Stage C was pulled forward (15 label-only updates, 4 s, no restarts). Device/MQTT ports were unaffected (direct publish). Runbook rows carry CORRECTION markers; rollback Step 3 Stage-C clause is now mandatory.
+- [Phase 31]: Operator deferred the thinx-staging push at the 31-03 Task 3 gate — the CI mirror gate / image rollout runs on the operator's own timing; phase-31 commits stay local — The live edge is already on v3 and all repo artifacts are committed locally, so the cutover does not depend on CI; the plan's "push so the CI mirror gate runs" step is tracked as a Next Phase Readiness item, not a deviation. check-traefik-mirror passes locally (MIRROR OK files=1). thinx-swarm@5e19c000 is likewise unpushed.
 
 ### Todos
 
@@ -420,11 +423,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 31-02-PLAN.md
+**Stopped at:** Completed 31-03-PLAN.md
 
 **Resume file:** None
 
-**Last session:** 2026-10-07T20:49:57.791Z
+**Last session:** 2026-10-07T22:24:40.684Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -493,3 +496,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 28 P04 | 6min | 2 tasks | 2 files |
 | Phase 31 P01 | ~18 min | 3 tasks | 11 files |
 | Phase 31 P02 | 10 min | 2 tasks | 3 files |
+| Phase 31 P03 | 19 min | 3 tasks | 2 files |

@@ -15,9 +15,9 @@ Requirements for this milestone. Each maps to a roadmap phase. See `.planning/re
 ### Migration
 
 - [ ] **EDGE-MIG-01**: Traefik static config and Docker labels are migrated from v1 syntax to v2 syntax (entrypoints, `providers.docker`, `certificatesresolvers`, `http.routers`/`http.services` labels) on a current v2.x image, with every existing route serving identically.
-- [ ] **EDGE-MIG-02**: Traefik is upgraded from v2.x to current v3.x using the backward-compatibility switch (`core.defaultRuleSyntax: v2`) and the official three-phase rollout; each hop is independently rollback-able.
+- [x] **EDGE-MIG-02**: Traefik is upgraded from v2.x to current v3.x using the backward-compatibility switch (`core.defaultRuleSyntax: v2`) and the official three-phase rollout; each hop is independently rollback-able.
 - [ ] **EDGE-MIG-03**: Routing rules are converted to native v3 syntax and the BC switch is removed (or explicitly retained with documented rationale).
-- [ ] **EDGE-MIG-04**: The plaintext device entrypoint (`:7442`) and plain MQTT keep accepting legacy device check-in, OTT redemption, and firmware download after every migration hop (verified against a legacy `__DISABLE_HTTPS__` client path).
+- [x] **EDGE-MIG-04**: The plaintext device entrypoint (`:7442`) and plain MQTT keep accepting legacy device check-in, OTT redemption, and firmware download after every migration hop (verified against a legacy `__DISABLE_HTTPS__` client path).
 
 ### Dashboard & API Lockdown
 
@@ -61,8 +61,8 @@ Filled during roadmap creation.
 | EDGE-RECON-01 | Phase 29 | Pending |
 | EDGE-RECON-02 | Phase 29 | Pending |
 | EDGE-MIG-01 | Phase 30 | Pending |
-| EDGE-MIG-04 | Phase 30 | Pending |
-| EDGE-MIG-02 | Phase 31 | Pending |
+| EDGE-MIG-04 | Phase 30 | Complete |
+| EDGE-MIG-02 | Phase 31 | Complete |
 | EDGE-MIG-03 | Phase 32 | Pending |
 | EDGE-API-01 | Phase 33 | Pending |
 | EDGE-API-02 | Phase 33 | Pending |
