@@ -132,6 +132,7 @@ Chosen mechanism, in order (**traefik first, then app labels** — P30 D-06 disc
 | **A — pre-cutover bridge (safe under v2.11, may run before the window)** | `docker service update --label-add traefik.swarm.network=traefik-public <svc>` on all 16 traefik-enabled services, KEEPING `traefik.docker.network` | none: v2.11 ignores `traefik.swarm.*`; v3 ignores `traefik.docker.*`; carrying both bridges the network label with a zero-length window |
 | **B1 — the hop (maintenance window)** | `docker service update --image traefik:v3.7.14 --args '<18 converted flags>' --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public traefik_traefik` | the only one-way step; every router with an unqualified ref is enabled immediately; `thinx-api-https`, `thinx-api-ws`, `thinx-console-https` are in error state until B2 lands (seconds) |
 | **B2 — immediately after B1** | `docker service update --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm --label-add traefik.http.routers.thinx-api-ws.middlewares=sslheaders@swarm thinx_api` then `docker service update --label-add traefik.http.routers.thinx-console-https.middlewares=security-headers@swarm thinx_console` | closes the B1 window; `--label-add` on an existing key overwrites the value |
+| **Post-B2 gate (Plan 03 checklist item)** | re-run the router status filter from the boot-and-discover section against the **live** v3 service's `/api/http/routers` (the live service has no `--api.insecure`, so read it through the `admin-auth`-protected `traefik-public-https` router on `:443`, never by adding `--api.insecure` live): `jq -r '.[] \| select(.status!="enabled") \| .name + "  " + .status'` — **MUST print nothing**. This closes the 31-01 Task 3 "every router enabled" criterion deferred by operator decision A (2026-10-07). Any line printed = a dangling ref B2 missed -> fix with another `--label-add`, or roll back per 31-02. | none: read-only |
 | **C — post-cutover cleanup (any time after B)** | `docker service update --label-rm traefik.docker.network <svc>` on the other 15 services | none: the label is unread by v3 |
 
 Rollback (Plan 31-02 stages it; P30 D-06 machinery): revert B1 (`--image traefik:v2.11.0 --args '<17 v2 flags>'`,
@@ -353,8 +354,10 @@ ssh micro "stat -c '%s %Y %a %U' /var/lib/docker/volumes/traefik_traefik-public-
   never-discoverable `mosquitto-secure`, plus registry/db/influx): PASS.
 - "Every router `enabled`": **3 predicted failures remain** — they are the live `@docker` labels,
   which can only be flipped at the cutover (flipping them under v2.11 breaks the same three routers
-  on production). The gate therefore re-runs **after Plan 03 Stage B2** against the live v3 service
-  (`/api/http/routers` filter must print nothing there), unless the operator chooses the zero-window
-  bridge noted under "Cutover mechanism" (unqualified refs), which would let the probe pass before any
-  cutover.
+  on production). **DEFERRED by operator decision A (2026-10-07, blocking-human checkpoint):** the
+  3 disabled routers are accepted as the tracer's falsification record (the designed detection
+  working as intended); no production label is touched and the probe is not re-run. The gate
+  re-runs **after Plan 03 Stage B2** against the live v3 service — the `/api/http/routers` status
+  filter MUST print nothing there (see the "Post-B2 gate" row in the cutover-mechanism table). The
+  alternative zero-window bridge (unqualified refs, noted under "Cutover mechanism") was NOT chosen.
 - ACME neutralized, production `acme.json` untouched, probe torn down: PASS.
