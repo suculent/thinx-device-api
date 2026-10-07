@@ -5,11 +5,11 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 31
 current_phase_name: v2→v3 Upgrade (backward-compat mode)
 status: verifying
-stopped_at: Completed 31-03-PLAN.md
-last_updated: "2026-10-07T22:24:40.796Z"
+stopped_at: Phase 31 executed 3/3; verification human_needed (31-UAT.md) — run /gsd-verify-work 31
+last_updated: "2026-10-07T22:38:29.768Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 31 execution started
-state_head: f0302672ba76d20b59238cb22eb9ffe2cb3c8c18
+state_head: 8ac77d497cd1811cadeb6acf23f1f2d159672557
 progress:
   total_phases: 6
   completed_phases: 15
@@ -423,11 +423,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 31-03-PLAN.md
+**Stopped at:** Phase 31 executed 3/3; verification human_needed (31-UAT.md) — run /gsd-verify-work 31
 
-**Resume file:** None
+**Resume file:** .planning/phases/31-v2-v3-upgrade-backward-compat-mode/31-UAT.md
 
-**Last session:** 2026-10-07T22:24:40.684Z
+**Last session:** 2026-10-07T22:38:29.615Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
