@@ -157,6 +157,16 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Full route parity confirmed; plaintext `:7442` + MQTT re-verified.
 3. Repo config matches the deployed v3 config.
 
+**Plans:** 3 plans (planned 2026-10-08)
+**Wave 1**
+- [ ] 32-01-PLAN.md — Tracer: baseline + `D.pre.yml`, boot-and-discover the four native-v3 rules on a throwaway without the BC switch (D-02), then Stage 1 repo-first + live per-router conversion (`HeaderRegexp`, `PathPrefix(`/`)` + `ruleSyntax=v3` overrides, label-only) (EDGE-MIG-03)
+
+**Wave 2** *(blocked on Wave 1)*
+- [ ] 32-02-PLAN.md — Stage 2: remove `--core.defaultRuleSyntax=v2` repo-first (17→16 flags) then live `--args` under the D-10 auto-revert gate; Stage 3: strip the four `ruleSyntax=v3` overrides repo-first + live `--label-rm` (EDGE-MIG-03)
+
+**Wave 3** *(blocked on Wave 2)*
+- [ ] 32-03-PLAN.md — Full re-verify of the native-v3 end state (route parity vs baseline, serials, `:7442`/`:1883`/`:8883` + device-flow harness, WS 401, bare-IP), `D.post.yml` + runbook close-out, credential shred, then the single blocking-human console gate (EDGE-MIG-03; EDGE-MIG-04 re-verified)
+
 ### Phase 33: Dashboard Lockdown & TLS Hardening
 
 **Requirements**: EDGE-API-01, EDGE-API-02, EDGE-TLS-01, EDGE-TLS-02, EDGE-TLS-03
