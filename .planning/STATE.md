@@ -6,10 +6,10 @@ current_phase: 32
 current_phase_name: v3 Native Syntax & BC Removal
 status: executing
 stopped_at: Completed 32-02-PLAN.md
-last_updated: "2026-10-08T15:06:57.921Z"
+last_updated: "2026-10-08T15:08:06.806Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 32 execution started
-state_head: ce8b699a99436a18a8ca1599ef1f74cb267e052f
+state_head: 7ebfb864b52ebe437afbcc97d193bcdceed3ab69
 progress:
   total_phases: 6
   completed_phases: 16
@@ -310,6 +310,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 32]: 32-01: p32-rules throwaway ran at --replicas 1 (not D-02's scaled-to-zero), isolated by traefik.constraint-label=p32-probe; probe Run A also read the live routers read-only — A 0-replica service yields 0 tasks -> 0 routers, so a scaled-to-zero probe proves nothing (RESEARCH Pitfall 3); Run A recorded the exact 'unsupported function: HeadersRegexp' text and the enabled-but-dead {host:.+} catch-alls, which justify pairing every later gate with the bare-IP probe
 - [Phase 32]: 32-01: Stage 1 live done — four routers on native v3 rules with ruleSyntax=v3 overrides via one label-only update per service (errorpage -> downtime -> thinx_api), task ids unchanged, traefik_traefik untouched at 17 flags; under a v3 default the dashboard API omits ruleSyntax (reads absent, not v3) — Rule + override in ONE update avoids a parse-error window; the WS 401 probe is the final Stage 1 check; Stage 3 readback must expect the ruleSyntax field to be absent
 - [Phase 32]: 32-01: two plan <automated> verify commands reported as defects, not rewritten — Task 2 V4 (mirror regeneration rewrites the banner timestamp, git diff never empty) and Task 3 V8 (Swarmpit autoredeployed downtime/errorpage at 13:20/13:45Z after the operator's 498afa7 image rebuild, before any Stage 1 update) — Intent proven otherwise: MIRROR OK at 17 flags with banner = thinx-swarm HEAD; per-update task ids identical pre/post
+- [Phase 32]: 32-02: Stage 2 DONE — the v2 rule-syntax BC switch is removed from the live traefik_traefik (17 -> 16 flags, one --args update at 14:48:11Z, new task yudql1hqdnd9, Version.Index 38379738, image traefik:v3.7.14 unchanged) and from thinx-swarm traefik.yml (6c01b26, mirror 875c20c2); D-10 gate green on all four triggers (status filter empty, HTTPS matrix == baseline, WS 401 + X-Forwarded-Proto https both casings, bare-IP 301/200), revert staged from the 600-root backup traefik-p32-prestage2-20261008T144309Z.json and NOT fired — Stage 1 (32-01) had converted all four v2-only routers under explicit ruleSyntax=v3 overrides, so the switch could be removed with no parse-error window in either direction; the 16-flag args were rebuilt on micro from a fresh full-spec backup, dry-printed and diffed index-exact 16/16 against the committed mirror before the single update fired
+- [Phase 32]: 32-02: Stage 3 DONE — the four per-router ruleSyntax=v3 overrides are stripped live (three --label-rm updates at 15:00:26Z, task ids pre == post, 0 restarts) and removed from thinx-swarm 158f369 (thinx.yml/downtime.yml/errorpage.yml) and docker-swarm.yml (80625887); every one of the 30 routers is enabled under the inherited v3 default, the API omits the ruleSyntax field everywhere, committed files == micro checkout == live spec; EDGE-MIG-03 closes on the converted-and-removed branch (D-09), nothing retained — D-03/D-04 end state: no switch, no overrides, deployed file and live spec identical; under a v3 default the dashboard API reports inherited syntax as an absent field (32-01 Run A finding), so override removal is asserted on docker service inspect labels, not on the API echoing v3
+- [Phase 32]: 32-02: Version.Index for an --args update is recorded only after UpdateStatus.State=completed (38379727 mid-update -> 38379738 settled); the Stage 2 restart window was 15 s fire-to-Running (old task stop ~13 s, new task boot ~1 s) vs 4 s in 31-03; old-task drain 'middleware does not exist' ERR lines and the external fotostim-stack ACME renewal error (checkout.qooldata.com, deferred-items.md) are not D-10 triggers — The index advances once more when the swarm settles the update, and Task 3's verify compares the live index to the recorded line; the drain lines were emitted only by the stopping task with a partial dynamic config and the rule-parse scan on the new task is 0
 
 ### Todos
 
