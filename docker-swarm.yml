@@ -118,10 +118,8 @@ services:
           cpus: '0.1'
           memory: 64M
       labels:
-        - "traefik.tcp.services.mosquitto.loadbalancer.server.port=8883"
-        - "traefik.tcp.routers.mosquitto-secure.entrypoints=mqtts"
-        - "traefik.enable=true"
-        - "traefik.swarm.network=traefik-public"
+        # Phase 33 (EDGE-API-01, D-08): the rule-less MQTTS TCP router and its opt-in labels were removed — MQTT is
+        # direct-published by this service (:1883/:1884/:8883), never routed by Traefik (AGENTS.md keep plain MQTT).
         - "swarmpit.service.deployment.autoredeploy=true"
 
   couchdb:
@@ -239,8 +237,8 @@ services:
       - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
-    labels:
-      - traefik.backend.transformer.noexpose
+    # Phase 33 (D-08): the dead Traefik v1 `traefik.backend.*` container label was removed — a v1 (not deploy)
+    # label with no v3 effect; the service is on the internal network only and is never discovered by Traefik.
     deploy:
       resources:
         reservations:
@@ -376,7 +374,8 @@ services:
         # priority 200 beats the console router so WS upgrades reach the API; sslheaders (no Upgrade strip) preserves the handshake.
         # Reproduces the live thinx-api-ws router so a `docker stack deploy` does not silently drop it.
         # Phase 32 (EDGE-MIG-03, D-08): HeaderRegexp is the v3 name of the v2 matcher (rename only; unanchored, (?i) kept for legacy Upgrade: WebSocket clients).
-        - "traefik.http.routers.thinx-api-ws.rule=Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)"
+        # Phase 33 (EDGE-API-01, D-08): Host is ${WEB_HOSTNAME} (= rtm.thinx.cloud), NOT the api hostname variable (= app) — 32-REVIEW IN-05 as corrected by 33-RESEARCH §Q3
+        - "traefik.http.routers.thinx-api-ws.rule=Host(`${WEB_HOSTNAME}`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)"
         - "traefik.http.routers.thinx-api-ws.entrypoints=https"
         - "traefik.http.routers.thinx-api-ws.priority=200"
         - "traefik.http.routers.thinx-api-ws.service=thinx-api"
@@ -438,8 +437,7 @@ services:
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.frontend.headers.STSPreload=true"
-        - "traefik.frontend.headers.STSSeconds=31536000"
+        # Phase 33 (D-08): dead Traefik v1 header labels removed — HSTS comes from the entrypoint default middleware (Plan 02 Stage D)
 
   vue:
     depends_on:
@@ -488,8 +486,7 @@ services:
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.frontend.headers.STSPreload=true"
-        - "traefik.frontend.headers.STSSeconds=31536000"
+        # Phase 33 (D-08): dead Traefik v1 header labels removed — HSTS comes from the entrypoint default middleware (Plan 02 Stage D)
 
   worker:
     image: thinxcloud/worker:latest
@@ -506,8 +503,8 @@ services:
       - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
-    labels:
-      - traefik.backend.worker.noexpose
+    # Phase 33 (D-08): the dead Traefik v1 `traefik.backend.*` container label was removed — a v1 (not deploy)
+    # label with no v3 effect; the service is on the internal network only and is never discovered by Traefik.
     volumes:
       - '/mnt/gluster/thinx:/mnt/data/thinx'
       - '/mnt/gluster/thinx/deploy:/mnt/data/deploy'
