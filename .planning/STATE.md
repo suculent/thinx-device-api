@@ -6,10 +6,10 @@ current_phase: 32
 current_phase_name: v3 Native Syntax & BC Removal
 status: executing
 stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-10-08T14:28:23.983Z"
+last_updated: "2026-10-08T14:28:47.863Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 32 execution started
-state_head: db3bda26beb0ca182b185c6e507ee7312da58d89
+state_head: 0774eafb9b22a52868aa2c12c036a840cdf6c821
 progress:
   total_phases: 6
   completed_phases: 16
@@ -307,6 +307,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 31]: Live edge cut over to traefik:v3.7.14 BC mode (swarm provider + core.defaultRuleSyntax=v2) via ordered surgical docker service updates (B1 22:04:47Z -> B2 22:04:57Z -> C 22:06:39Z, 2026-10-07) — operator-authorized at the Task 1 blocking-human gate; route/cert parity + 30/30 routers enabled; rollback staged but NOT needed — Boot-and-discover (31-01) proved the config, the 31-02 snapshot made the hop reversible in one command, and the operator was present in an open window. Surgical per-service updates were chosen over a stack deploy because no single committed file matched the live thinx stack (31-01 Pitfall 5). Post-hop: 17 args index-exact vs the committed mirror, cert serials and all 24 acme.json blobs unchanged, device flow over :7442 + :1883 PASS, operator approved + checked the console (2026-10-08).
 - [Phase 31]: Stage A/C "both-label bridge" is INVALID under Traefik v3's swarm provider — it skips any service carrying both traefik.docker.* and traefik.swarm.* labels; all future label migrations (P32-P34) are single-step --label-rm/--label-add updates per service, never bridged — The 31-01 mechanism table claimed v3 ignores traefik.docker.*; live, the provider logged "Skip container error=both Docker and Swarm labels are defined" for every bridged service, so after B1 all web hosts returned 404 for ~1 min 55 s until Stage C was pulled forward (15 label-only updates, 4 s, no restarts). Device/MQTT ports were unaffected (direct publish). Runbook rows carry CORRECTION markers; rollback Step 3 Stage-C clause is now mandatory.
 - [Phase 31]: Operator deferred the thinx-staging push at the 31-03 Task 3 gate — the CI mirror gate / image rollout runs on the operator's own timing; phase-31 commits stay local — The live edge is already on v3 and all repo artifacts are committed locally, so the cutover does not depend on CI; the plan's "push so the CI mirror gate runs" step is tracked as a Next Phase Readiness item, not a deviation. check-traefik-mirror passes locally (MIRROR OK files=1). thinx-swarm@5e19c000 is likewise unpushed.
+- [Phase 32]: 32-01: p32-rules throwaway ran at --replicas 1 (not D-02's scaled-to-zero), isolated by traefik.constraint-label=p32-probe; probe Run A also read the live routers read-only — A 0-replica service yields 0 tasks -> 0 routers, so a scaled-to-zero probe proves nothing (RESEARCH Pitfall 3); Run A recorded the exact 'unsupported function: HeadersRegexp' text and the enabled-but-dead {host:.+} catch-alls, which justify pairing every later gate with the bare-IP probe
+- [Phase 32]: 32-01: Stage 1 live done — four routers on native v3 rules with ruleSyntax=v3 overrides via one label-only update per service (errorpage -> downtime -> thinx_api), task ids unchanged, traefik_traefik untouched at 17 flags; under a v3 default the dashboard API omits ruleSyntax (reads absent, not v3) — Rule + override in ONE update avoids a parse-error window; the WS 401 probe is the final Stage 1 check; Stage 3 readback must expect the ruleSyntax field to be absent
+- [Phase 32]: 32-01: two plan <automated> verify commands reported as defects, not rewritten — Task 2 V4 (mirror regeneration rewrites the banner timestamp, git diff never empty) and Task 3 V8 (Swarmpit autoredeployed downtime/errorpage at 13:20/13:45Z after the operator's 498afa7 image rebuild, before any Stage 1 update) — Intent proven otherwise: MIRROR OK at 17 flags with banner = thinx-swarm HEAD; per-update task ids identical pre/post
 
 ### Todos
 
