@@ -2,42 +2,42 @@
 gsd_state_version: "1.0"
 milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
-current_phase: 31
-current_phase_name: v2→v3 Upgrade (backward-compat mode)
-status: verifying
-stopped_at: Phase 31 executed 3/3; verification human_needed (31-UAT.md) — run /gsd-verify-work 31
-last_updated: "2026-10-07T22:38:29.768Z"
-last_activity: 2026-10-07
-last_activity_desc: Phase 31 execution started
-state_head: 8ac77d497cd1811cadeb6acf23f1f2d159672557
+current_phase: 32
+current_phase_name: v3 Native Syntax & BC Removal
+status: planning
+stopped_at: Phase 31 complete, ready to plan Phase 32
+last_updated: "2026-10-08T08:57:21.007Z"
+last_activity: 2026-10-08
+last_activity_desc: Phase 31 complete, transitioned to Phase 32
+state_head: 7025f376d1989c42ac35b8825651b81998cb049e
 progress:
   total_phases: 6
-  completed_phases: 15
+  completed_phases: 16
   total_plans: 8
   completed_plans: 8
-  percent: 100
+  percent: 84
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-10-05 (v1.14 shipped and archived to `.planning/milestones/`; awaiting next milestone)
+**Last updated:** 2026-10-08 (Phase 31 complete — production edge on Traefik v3.7.14 BC mode; Phase 32 ready to plan)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-05 after v1.14 milestone)
+See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** Planning next milestone (`/gsd-new-milestone`). v1.14 Backlog & Hardening Sweep shipped 2026-10-05 (24/24, audit `tech_debt`, `override_closeout`); candidates are listed in PROJECT.md § Next Milestone Goals and the Deferred Items table below.
+- **Current focus:** v1.15 Traefik Hardening — Phase 32 (v3 Native Syntax & BC Removal): convert routing rules to native v3 syntax and drop `core.defaultRuleSyntax=v2` (or document retention). Edge is live on `traefik:v3.7.14` since 2026-10-07; rollback staged (runbook `.planning/runbooks/traefik-v3-cutover.md`).
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: 31 (v2→v3 Upgrade (backward-compat mode)) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-10-07 — Phase 31 execution started
+Phase: 32 — v3 Native Syntax & BC Removal
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-08 — Phase 31 complete, transitioned to Phase 32
 
 ## Milestones
 
@@ -333,6 +333,13 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 
 - None.
 
+### Concerns carried from Phase 31
+
+- ⚠️ [Phase 31] `thinx-staging` (55 commits) and `~/Repositories/thinx-swarm@5e19c000` are unpushed by operator decision — the CI mirror gate has not run on the v3 config; the edge source of truth exists only on this workstation until pushed.
+- ⚠️ [Phase 31] Gluster deploy files were label-synced to `@swarm`/`traefik.swarm.network` (backups `*.bak.20261007222957.pre-v3-labels`), but gluster `thinx.yml` still lacks the committed `secrets:` block + `ROLLBAR_SERVER_TOKEN` attach — a full `restart.sh` redeploy still drops live-only secret mounts.
+- ⚠️ [Phase 31] No two-label bridge exists under v3's swarm provider (skips services with both label families) — Phase 32–34 label changes must be single-step `docker service update`s; rollback Step 3 must re-add `traefik.docker.network` on the five multi-network services (31-REVIEW WR-01/WR-02 still open).
+- ⚠️ [Phase 31] `registry.thinx.cloud` via Traefik returns 400 (backend terminates its own TLS, no `loadbalancer.server.scheme=https`) — pre-existing, P33/P34 inventory. `HeadersRegexp` in `docker-swarm.yml` depends on the BC switch — Phase 32 must rename to `HeaderRegexp`.
+
 ### Concerns carried from Phase 28
 
 - ⚠️ [Phase 28] Both nodes carry `swarmpit.db-data=true` and micro holds a stale 2022 `swarmpit_db-data`; a swarmpit_db reschedule to micro would start on stale data (runbook follow-up, not fixed).
@@ -423,9 +430,9 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 31 executed 3/3; verification human_needed (31-UAT.md) — run /gsd-verify-work 31
+**Stopped at:** Phase 31 complete, ready to plan Phase 32
 
-**Resume file:** .planning/phases/31-v2-v3-upgrade-backward-compat-mode/31-UAT.md
+**Resume file:** None
 
 **Last session:** 2026-10-07T22:38:29.615Z
 
@@ -446,7 +453,9 @@ Decided at plan time, not blocking the roadmap:
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- `/gsd-discuss-phase 32` then `/gsd-plan-phase 32` (v3 native syntax; `HeadersRegexp`→`HeaderRegexp`; consider per-router `ruleSyntax=v3` first)
+- Push `thinx-staging` and `~/Repositories/thinx-swarm` (master is also 1 behind origin) so the CI mirror gate runs
+- `/gsd-code-review 31 --fix` for runbook WR-01/WR-02; sync the `secrets:` block into gluster `thinx.yml` once all 13 external secrets exist
 
 ## Performance Metrics
 

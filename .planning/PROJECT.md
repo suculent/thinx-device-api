@@ -25,6 +25,8 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
+**In progress — v1.15 Traefik Hardening (Edge):** Phases 29–31 complete. The production edge runs **Traefik v3.7.14** (swarm provider, `core.defaultRuleSyntax=v2`, 17 flags, `:80/:443` only) since 2026-10-07 22:04Z; `docker-swarm.yml` is the authoritative committed thinx-stack source and `docker-compose.traefik.yml` is a generated mirror of `thinx-swarm/traefik.yml` (`check-traefik-mirror.js` → MIRROR OK). EDGE-MIG-02 and EDGE-MIG-04 validated in Phase 31 (`:7442` + plain MQTT survived the hop; operator-approved device-flow UAT). A v3→v2.11 rollback stays staged on micro (600-root snapshot + digest image). Known follow-ups: push `thinx-staging` + `thinx-swarm@5e19c000` (CI mirror gate not yet run), sync the `secrets:` block into the gluster `thinx.yml`, and the two runbook rollback warnings from the Phase 31 code review (WR-01/WR-02).
+
 **Shipped:** v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
 
 Previously: v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
@@ -234,6 +236,7 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 | Dormant connector shipped before the cutover (stats off without `INFLUXDB_TOKEN`) | Decouples the code deploy from the irreversible storage upgrade | ✓ Good — the first push caught a ms-timestamp collision bug in CI (#15564) before any data moved |
 | InfluxDB UI credentials: go-B (random admin password as an unmounted secret, UI via SSH tunnel) | Keeps edge basic-auth and InfluxDB credentials independent; no password-sync duty | ✓ Good |
 | 27 review CR-01 (API-key substring match, pre-existing) split out as quick task 261003-s59 | Outside the phase goal but a live auth bypass | — Pending |
+| Phase 31: v2→v3 cutover via ordered surgical `docker service update` (no stack deploy); operator chose to accept the B1→B2 window over an unqualified-ref bridge | Stack deploy drops the live-only `INFLUXDB_TOKEN` mount and resets edge auth hashes; plan must-haves pin `@swarm` refs | ✓ Good with a lesson — v3's swarm provider rejects services carrying both `traefik.docker.*` and `traefik.swarm.*` labels, so the Stage A "bridge" caused a ~2-min web outage until Stage C ran; future label migrations are single-step |
 
 ## Evolution
 
@@ -254,4 +257,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-06 after v1.15 milestone start*
+*Last updated: 2026-10-08 after Phase 31 (v2→v3 upgrade, BC mode)*
