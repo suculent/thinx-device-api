@@ -471,7 +471,13 @@ Docker Hub is reachable, but it would fetch and run a v2.11 build this edge has 
 | full `docker service inspect traefik_traefik` (the `--args` source) | `/mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json` (600 root) |
 | older fallback (P30) | `/mnt/data/edge-rollback/traefik-2026-10-06/` + `traefik-p30-prerolldemo-20261007T125012Z.json` |
 
-### Return path — ordered (acme.json FIRST, then the hop revert, then the label revert)
+### Return path — ordered (acme.json FIRST, then the five-service network-label flip while v3 still runs, then the hop revert, then the app label revert, then verify)
+
+Step order is load-bearing: **0 pre-check -> 1 `acme.json` restore -> 2 network-label flip on the five
+multi-network services (v3 still running) -> 3 image retag + `--args` revert -> 4 app-stack `@docker`
+label revert -> 5 verify.** Steps 2 and 4 were one prose bullet before the 31 review fix (WR-01);
+Step 2 now runs BEFORE the retag so the restored v2.11 task never sees a multi-network service
+without `traefik.docker.network`.
 
 **Step 0 — pre-check (read-only).**
 ```
@@ -492,9 +498,41 @@ Why first: `acme.json` round-trips v2<->v3 in format (RESEARCH §Rollback Safety
 snapshot beats trusting v3's in-place writes. If v3 issued or renewed anything during the window
 that issuance is discarded — one cert re-issued later under v2.11 is cheap; 24 re-issuances is the
 rate limit. The volume is the authoritative store (`services/traefik/update.sh:37`); the task picks
-the file up at start, so the restore must land before Step 2 recreates the task.
+the file up at start, so the restore must land before Step 3 recreates the task.
 
-**Step 2 — the ONE COMMAND: image retag + static `--args` revert (undoes Stage B1).**
+**Step 2 — flip the network label on the five multi-network services BEFORE the retag (v3 still
+running; reverses Stage C). MANDATORY — Stage C ran live (31-03, 2026-10-07 22:06:39Z), so these five
+carry only `traefik.swarm.network` today.**
+```
+for s in thinx_api thinx_mosquitto thinx_couchdb thinx_influxdb swarmpit_app; do
+  ssh micro "docker service update --detach --label-rm traefik.swarm.network \
+    --label-add traefik.docker.network=traefik-public $s"
+done
+# expect: 5x rc 0; no task restarts (label-only — .Spec.Labels is outside TaskTemplate, task ids unchanged);
+#         https app / console / rtm / thinx.cloud / swarmpit still 200 under v3 — the swarm provider auto-selects
+#         traefik-public for all five without the label (31-01 probe + live "Backend URLs" row, all on 10.0.1.0/24)
+ssh micro "docker service inspect <svc> --format '{{range \$k,\$v := .Spec.Labels}}{{\$k}}={{\$v}}{{\"\n\"}}{{end}}' | grep '\.network='"
+# expect, for each of the five: exactly one line, traefik.docker.network=traefik-public (no traefik.swarm.network line)
+```
+- **Why before the retag:** v2.11's docker provider needs `traefik.docker.network` on a service attached
+  to more than one overlay network to pick the `traefik-public` address. If the v2.11 task comes up
+  first (the pre-WR-01 order), it chooses heuristically on these five and a `thinx_internal` /
+  `swarmpit_net` pick yields 502 on `rtm` / `db` / `influx` / `swarmpit` until the label lands. Flipping
+  first closes that window.
+- **Why `--label-rm` + `--label-add` in ONE update:** v3's swarm provider skips any service carrying
+  both key families (`ERR Skip container error="both Docker and Swarm labels are defined"` — the 31-03
+  outage). A standalone `--label-add traefik.docker.network` under v3 would put five live services into
+  exactly that dual-label state and drop them from routing. One atomic `.Spec.Labels` update never
+  exposes it.
+- **Why safe under v3 without `traefik.swarm.network`:** the 31-01 probe and the live post-cutover
+  state proved the swarm provider auto-selects `traefik-public` for all five without the label. That
+  heuristic depends on network ordering and is not contractual — do not linger; go straight on to Step 3.
+- The eleven single-network services are **not** touched (they keep `traefik.swarm.network` only;
+  v2.11 ignores it and auto-selection has one candidate).
+- **Not dry-verified in this combined per-service form** (see the dry-verify table) — exercise it on a
+  throwaway before relying on it.
+
+**Step 3 — the ONE COMMAND: image retag + static `--args` revert (undoes Stage B1).**
 ```
 ssh micro "docker service update \
   --image traefik:v2.11@sha256:d57faa4f71afd4e29e6204de6535816a6f9b18402b2e21c3b8411ae9884c3a8e \
@@ -517,7 +555,7 @@ ssh micro "docker service update \
 - Image: digest reference => no tag resolution, no pull. Do not add `--force`; the image/args delta
   already recreates the task.
 
-**Step 3 — app-stack label revert (undoes Stage B2; label-only, no task restart).**
+**Step 4 — app-stack label revert (undoes Stage B2; label-only, no task restart).**
 ```
 ssh micro "docker service update \
   --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@docker,security-headers@docker \
@@ -527,15 +565,12 @@ ssh micro "docker service update \
 # expect: both updates complete with no task restart (.Spec.Labels is outside TaskTemplate); under v2.11 the
 #         docker provider re-resolves sslheaders@docker / security-headers@docker and the three routers serve again
 ```
-- Stage A labels (`traefik.swarm.network` on all 16) are **not** touched — v2.11 ignores them.
-- **Only if Stage C already ran** — **it HAS (31-03, 2026-10-07 22:06:39Z), so this step is now mandatory** (it removed `traefik.docker.network` from the other 15 services):
-  re-add it on the five multi-network services, which the v2 docker provider needs to pick the
-  `traefik-public` address — `docker service update --label-add traefik.docker.network=traefik-public <svc>`
-  for `thinx_api`, `thinx_mosquitto`, `thinx_couchdb`, `thinx_influxdb`, `swarmpit_app` (Step 2
-  touches only `traefik_traefik`, so this is the place). The eleven single-network services can
-  stay without it (auto-selection has one candidate).
+- Network labels are **not** touched here. The Stage-C reversal (re-adding `traefik.docker.network` on
+  the five multi-network services, which v2.11 needs to pick the `traefik-public` address) is
+  **Step 2**, deliberately placed before the retag — do not repeat or defer it to this step. The eleven
+  single-network services keep `traefik.swarm.network` only (v2.11 ignores it; one network candidate).
 
-**Step 4 — verify the restored v2.11 edge (the P30 matrix, verbatim).**
+**Step 5 — verify the restored v2.11 edge (the P30 matrix, verbatim).**
 ```
 ssh micro "docker service inspect traefik_traefik --format '{{len .Spec.TaskTemplate.ContainerSpec.Args}}'"            # expect: 17
 ssh micro "docker service inspect traefik_traefik --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}' | grep -c 'providers.swarm'"   # expect: 0
@@ -552,7 +587,8 @@ ssh micro "stat -c '%s %a %U' /var/lib/docker/volumes/traefik_traefik-public-cer
 ### Regression triggers (when Plan 03 executes this for real)
 
 Any one of: the B1 task does not converge (v3 crash-loop / parse error — then Step 1 is still done,
-Step 2 is the whole rollback, Step 3 is moot); the post-B2 router filter prints a router no further
+Step 2 is still required if Stage C has run, Step 3 is the whole hop revert, Step 4 is moot); the
+post-B2 router filter prints a router no further
 `--label-add` fixes; the HTTPS matrix returns non-200 on app/console/rtm/landing or the redirect hosts
 stop redirecting; the served cert fails `checkend 0`; the dashboard router (`admin-auth`) stops
 answering. `:7442` / `:1883` / `:8883` are published directly by `thinx_api` / `thinx_mosquitto` and
@@ -565,7 +601,7 @@ Two throwaway services, both `--replicas 0`, pinned to a non-existent node label
 `--no-resolve-image` (nothing pulled), labelled `gsd.purpose=rollback-dry-verify`; ACME email
 `rollback-dryrun@example.invalid`. Tasks ever scheduled: **0** and **0**. Torn down the same minute.
 
-| Check | Run A (literal 17-flag string, `--image traefik:v2.11.0`) | Run B (the Step 2 form: digest image + `jq … map(@sh)` from a fake-email copy of the backup) |
+| Check | Run A (literal 17-flag string, `--image traefik:v2.11.0`) | Run B (the Step 3 form: digest image + `jq … map(@sh)` from a fake-email copy of the backup) |
 |---|---|---|
 | throwaway pre-state | `traefik:v3.7.14`, 17 args (`--providers.swarm` first), `traefik.swarm.network` set, `traefik.docker.network` absent | same |
 | post-rollback image | `traefik:v2.11.0` (tag, unresolved) | `traefik:v2.11@sha256:d57faa4f…` — equals the running digest: **yes** |
@@ -573,7 +609,8 @@ Two throwaway services, both `--replicas 0`, pinned to a non-existent node label
 | args vs the LIVE v2.11 Args (email masked both sides, `diff`) | **IDENTICAL 17/17** | **IDENTICAL 17/17** |
 | backtick constraint arg (`Args[1]`) | `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)` intact | intact |
 | fake email landed verbatim (`Args[10]`) | yes | yes |
-| network labels after | `docker.network=traefik-public`, `swarm.network` removed (`--label-rm` variant) | `docker.network=traefik-public` added, `swarm.network` kept (bridge variant, the documented Step 2) |
+| network labels after | `docker.network=traefik-public`, `swarm.network` removed (`--label-rm` variant) | `docker.network=traefik-public` added, `swarm.network` kept (bridge variant, the documented Step 3) |
+| Step 2 five-service flip (`--label-rm traefik.swarm.network --label-add traefik.docker.network=traefik-public` in one update on `thinx_api` / `thinx_mosquitto` / `thinx_couchdb` / `thinx_influxdb` / `swarmpit_app`) | **NOT dry-verified** — the step was added by the 31 review fix (WR-01) after these runs. Run A only shows the same `--label-rm` / `--label-add` key pair landing in one update on a throwaway *traefik*; the per-app-service form and its live-v3 expectation (no task restart, hosts still 200) have not been exercised. **To be dry-verified on a throwaway (`--replicas 0`, pre-seeded with `traefik.swarm.network`) before use.** | — |
 | B2-revert labels (second throwaway `gsd_rbdry_app`) | `thinx-api-https=sslheaders@docker,security-headers@docker`; `thinx-api-ws=sslheaders@docker`; `thinx-console-https=security-headers@docker` — `--label-add` overwrote the `@swarm` values | — |
 | `acme.json` restore mechanics | `cp -a` snapshot -> scratch 700 dir: **600 root 301146**, `cmp` vs live volume file **identical**; scratch removed | — |
 | live `traefik_traefik` before/after (image, arg count, `Version.Index`) | `traefik:v2.11@sha256:d57faa4f… args=17 v=38379257` -> **identical** | **identical** (`v=38379257`) |
@@ -598,7 +635,8 @@ twin of the snapshot.
 
 **Outcome: the production edge runs `traefik:v3.7.14` (swarm provider + `core.defaultRuleSyntax=v2`).
 Route parity, cert continuity and the direct-publish device paths are asserted below. Rollback was NOT
-needed and remains staged-ready (with Step 3's Stage-C clause now mandatory).** The hop cost a
+needed and remains staged-ready (with the Stage-C reversal now its own mandatory Step 2, run before the
+retag).** The hop cost a
 **~2-minute web outage (22:04:50Z - 22:06:45Z)** that the mechanism table had not predicted — root
 cause and correction under "Deviation". The legacy device/MQTT ports were unaffected throughout
 (published directly by `thinx_api` / `thinx_mosquitto`, D-05).
@@ -700,7 +738,8 @@ remains on `traefik_traefik` (only a stack deploy rewrites it; cosmetic, noted i
 `traefik_traefik`: `traefik:v3.7.14` (digest `e849695b…`), 17 args, ports 80/443 only, 1 task
 `traefik_traefik.1` on `micro`, `Version.Index 38379311`, `acme.json` `301121 1791410693 600 root`
 (24 certs). Snapshot/backups untouched on micro. **Rollback (if the operator sees a regression):**
-runbook §Rollback Steps 1 -> 2 -> 3 above, Step 3 INCLUDING the five `--label-add
-traefik.docker.network=traefik-public` re-adds (`thinx_api thinx_mosquitto thinx_couchdb thinx_influxdb
-swarmpit_app`) because Stage C has run; `traefik.swarm.network` may stay (v2.11 ignores it — proven
-live 21:53-22:04Z).
+runbook §Rollback Steps 1 -> 2 -> 3 -> 4 -> 5 above. Step 2 (the combined `--label-rm
+traefik.swarm.network --label-add traefik.docker.network=traefik-public` flip on `thinx_api
+thinx_mosquitto thinx_couchdb thinx_influxdb swarmpit_app`) is mandatory and runs BEFORE the Step 3
+retag, because Stage C has run and v3 skips any dual-labelled service; `traefik.swarm.network` may
+stay only on the eleven single-network services (v2.11 ignores it — proven live 21:53-22:04Z).
