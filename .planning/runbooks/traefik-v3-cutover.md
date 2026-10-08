@@ -137,7 +137,14 @@ Chosen mechanism, in order (**traefik first, then app labels** — P30 D-06 disc
 
 Rollback (Plan 31-02 stages it; P30 D-06 machinery): revert B1 (`--image traefik:v2.11.0 --args '<17 v2 flags>'`,
 `acme.json` restored from the fresh snapshot) and B2 (`--label-add …@docker`); Stage A/C labels are
-harmless in either direction, so the rollback never has to touch them.
+harmless in either direction, so the rollback never has to touch them — **CORRECTION (31-03 live,
+2026-10-07 22:05Z): the last clause is FALSE.** The labels are harmless under v2.11 only; under v3 a
+service carrying both `traefik.docker.*` and `traefik.swarm.*` is skipped outright (the Stage A/C rows
+above). The rollback therefore MUST touch them, and in a fixed order: Rollback **Step 2** (the
+combined `--label-rm traefik.swarm.network --label-add traefik.docker.network=traefik-public` flip on
+the five multi-network services, run while v3 is still up) and the `--label-rm traefik.swarm.network`
+folded into **Step 3**'s retag of `traefik_traefik`. Read "Re-hop precondition" under Regression
+triggers before any second attempt at the hop from a rolled-back edge.
 
 Note for Plan 03 (not chosen here, plan locks `@swarm`): unqualified refs (`sslheaders,security-headers`)
 would resolve inside whichever provider discovers the router and would make B2 unnecessary; the
@@ -538,10 +545,12 @@ ssh micro "docker service update \
   --image traefik:v2.11@sha256:d57faa4f71afd4e29e6204de6535816a6f9b18402b2e21c3b8411ae9884c3a8e \
   --args \"\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \
             /mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json)\" \
+  --label-rm traefik.swarm.network \
   --label-add traefik.docker.network=traefik-public \
   traefik_traefik"
 # expect: converges to exactly 1 running task on micro; Image = the d57faa4f digest; Args = the 17-flag v2.11 set
 #         (--providers.docker / .constraints / .exposedbydefault=true / .swarmmode — NO --providers.swarm, NO --core.*);
+#         Spec.Labels: traefik.docker.network=traefik-public present, traefik.swarm.network ABSENT;
 #         served cert valid off the restored acme.json; :80/:443 still the only published ports
 ```
 - The `--args` string is rebuilt **on `micro`** from the full-spec backup: `jq … map(@sh)` single-
@@ -549,9 +558,14 @@ ssh micro "docker service update \
   backtick-bearing `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)`
   and the resolved `${EMAIL}` land verbatim without ever being typed or printed. (v2.11 does not know
   `--providers.swarm*` or `--core.defaultRuleSyntax`; both are gone from the restored set.)
-- `--label-add traefik.docker.network=traefik-public` puts the v2 docker-provider network key back on
-  the traefik service; `traefik.swarm.network` is left in place (v2.11 ignores it) so the label has a
-  zero-length window — same bridge as Stage A, mirrored. Optional later: `--label-rm traefik.swarm.network`.
+- `--label-rm traefik.swarm.network --label-add traefik.docker.network=traefik-public` puts the v2
+  docker-provider network key back on the traefik service and removes the swarm-provider key **in the
+  same update — mandatory, not optional** (31 review fix, WR-02). v2.11 does not read `traefik.swarm.*`,
+  so dropping it costs nothing now; leaving it would park `traefik_traefik` in the exact dual-label
+  state that made v3 skip services after B1 (31-03 Deviation), waiting to bite any later re-hop. The
+  pre-correction wording ("same bridge as Stage A, mirrored; optional later") is withdrawn. Dry-verify
+  coverage: Run A exercised this `--label-rm`/`--label-add` pair on a throwaway, Run B the digest +
+  `jq` rebuild; the two have not been exercised together in one command.
 - Image: digest reference => no tag resolution, no pull. Do not add `--force`; the image/args delta
   already recreates the task.
 
@@ -594,6 +608,17 @@ stop redirecting; the served cert fails `checkend 0`; the dashboard router (`adm
 answering. `:7442` / `:1883` / `:8883` are published directly by `thinx_api` / `thinx_mosquitto` and
 cannot regress from the hop (D-05) — if they are closed, look at those services, not at traefik.
 
+**Re-hop precondition (31 review fix, WR-02).** After a rollback, `traefik_traefik` (Step 3) and the
+five multi-network services (Step 2) carry `traefik.docker.network` again, while the eleven
+single-network services still carry only `traefik.swarm.network`. A second attempt at the hop must
+fold Stage C into the same breath as B1: on every service that carries `traefik.docker.network` at
+that moment, one combined `docker service update --detach --label-rm traefik.docker.network
+--label-add traefik.swarm.network=traefik-public <svc>` (B1's own form already does this for
+`traefik_traefik`), issued immediately after B1 — never as a separate later step, and never via the
+Stage A dual-label bridge, because the v3 swarm provider skips any service carrying both key families
+(31-03 Deviation). Walk all 16 traefik-enabled services and confirm the label state before B1 rather
+than trusting this paragraph's count.
+
 ### Dry-verify record (isolated throwaways, FAKE values, 2026-10-07)
 
 Two throwaway services, both `--replicas 0`, pinned to a non-existent node label
@@ -609,7 +634,7 @@ Two throwaway services, both `--replicas 0`, pinned to a non-existent node label
 | args vs the LIVE v2.11 Args (email masked both sides, `diff`) | **IDENTICAL 17/17** | **IDENTICAL 17/17** |
 | backtick constraint arg (`Args[1]`) | `--providers.docker.constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)` intact | intact |
 | fake email landed verbatim (`Args[10]`) | yes | yes |
-| network labels after | `docker.network=traefik-public`, `swarm.network` removed (`--label-rm` variant) | `docker.network=traefik-public` added, `swarm.network` kept (bridge variant, the documented Step 3) |
+| network labels after | `docker.network=traefik-public`, `swarm.network` removed (`--label-rm` variant) | `docker.network=traefik-public` added, `swarm.network` kept (bridge variant — the Step 3 form as documented BEFORE the WR-02 correction; Step 3 now mandates the Run A `--label-rm` form, so the digest + `jq` + `--label-rm` combination is not covered by either run) |
 | Step 2 five-service flip (`--label-rm traefik.swarm.network --label-add traefik.docker.network=traefik-public` in one update on `thinx_api` / `thinx_mosquitto` / `thinx_couchdb` / `thinx_influxdb` / `swarmpit_app`) | **NOT dry-verified** — the step was added by the 31 review fix (WR-01) after these runs. Run A only shows the same `--label-rm` / `--label-add` key pair landing in one update on a throwaway *traefik*; the per-app-service form and its live-v3 expectation (no task restart, hosts still 200) have not been exercised. **To be dry-verified on a throwaway (`--replicas 0`, pre-seeded with `traefik.swarm.network`) before use.** | — |
 | B2-revert labels (second throwaway `gsd_rbdry_app`) | `thinx-api-https=sslheaders@docker,security-headers@docker`; `thinx-api-ws=sslheaders@docker`; `thinx-console-https=security-headers@docker` — `--label-add` overwrote the `@swarm` values | — |
 | `acme.json` restore mechanics | `cp -a` snapshot -> scratch 700 dir: **600 root 301146**, `cmp` vs live volume file **identical**; scratch removed | — |
