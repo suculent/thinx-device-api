@@ -335,8 +335,8 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 
 ### Concerns carried from Phase 31
 
-- ⚠️ [Phase 31] `thinx-staging` (55 commits) and `~/Repositories/thinx-swarm@5e19c000` are unpushed by operator decision — the CI mirror gate has not run on the v3 config; the edge source of truth exists only on this workstation until pushed.
-- ⚠️ [Phase 31] Gluster deploy files were label-synced to `@swarm`/`traefik.swarm.network` (backups `*.bak.20261007222957.pre-v3-labels`), but gluster `thinx.yml` still lacks the committed `secrets:` block + `ROLLBAR_SERVER_TOKEN` attach — a full `restart.sh` redeploy still drops live-only secret mounts.
+- ⚠️ [Phase 31] `thinx-staging` (55+ commits) is unpushed by operator decision — the CI mirror gate (CircleCI in THIS repo, `check-traefik-mirror.js`) has not run on the v3 config. thinx-swarm itself triggers NO CI; its `master` was reconciled and pushed 2026-10-08 (`15ff004` = production deploy line + Phase 29–31 changes + origin merge; backup ref `backup/master-pre-reconcile-20261008` = old `5e19c00`).
+- ⚠️ [Phase 31] `/mnt/gluster/deployment/swarm` on micro IS the thinx-swarm git checkout (now at `15ff004`, clean). micro cannot reach GitHub (origin fetch fails), so it is updated by pushing from the workstation into it (`git push ssh://micro/mnt/gluster/deployment/swarm master:refs/heads/<tmp>` then `git merge --ff-only <tmp>` there). Its `thinx.yml` still lacks the committed `secrets:` block + `ROLLBAR_SERVER_TOKEN` attach that `docker-swarm.yml` has — a full `restart.sh` redeploy still drops live-only secret mounts.
 - ⚠️ [Phase 31] No two-label bridge exists under v3's swarm provider (skips services with both label families) — Phase 32–34 label changes must be single-step `docker service update`s; rollback Step 3 must re-add `traefik.docker.network` on the five multi-network services (31-REVIEW WR-01/WR-02 still open).
 - ⚠️ [Phase 31] `registry.thinx.cloud` via Traefik returns 400 (backend terminates its own TLS, no `loadbalancer.server.scheme=https`) — pre-existing, P33/P34 inventory. `HeadersRegexp` in `docker-swarm.yml` depends on the BC switch — Phase 32 must rename to `HeaderRegexp`.
 
@@ -454,7 +454,7 @@ Decided at plan time, not blocking the roadmap:
 ## Operator Next Steps
 
 - `/gsd-discuss-phase 32` then `/gsd-plan-phase 32` (v3 native syntax; `HeadersRegexp`→`HeaderRegexp`; consider per-router `ruleSyntax=v3` first)
-- Push `thinx-staging` and `~/Repositories/thinx-swarm` (master is also 1 behind origin) so the CI mirror gate runs
+- Push `thinx-staging` so the CI mirror gate runs (thinx-swarm has no CI; its master is already pushed and deployed to micro as `15ff004`)
 - `/gsd-code-review 31 --fix` for runbook WR-01/WR-02; sync the `secrets:` block into gluster `thinx.yml` once all 13 external secrets exist
 
 ## Performance Metrics

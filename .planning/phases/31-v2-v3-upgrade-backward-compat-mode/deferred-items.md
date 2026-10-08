@@ -63,3 +63,4 @@
   add it in the WR-01/WR-02 fix pass).
   status: open
   **Found during:** phase 31 close-out (side-agent note, verified read-only by the orchestrator).
+  **Update 2026-10-08:** the gluster dir is the thinx-swarm checkout; the in-place label sync + Phase 29/30 traefik.yml reconciliation were committed on top of the production deploy line (`d08aff8`), the Phase 31 v3 `traefik.yml` applied (`25d632e`), origin merged (`15ff004`), pushed to GitHub and fast-forwarded on micro. The `secrets:` block gap remains open.
