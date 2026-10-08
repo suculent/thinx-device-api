@@ -55,7 +55,7 @@ Current state (check the `FROM` line before trusting this list):
 |---|---|
 | `builders/nodemcu-docker-build` | `ubuntu:22.04` — verified building 2026-09-20 |
 | `builders/micropython-docker-build` | `ubuntu:22.04` |
-| `builders/mongoose-docker-build` | `dhi.io/debian-base:trixie-dev` (Debian 13.7) — moved off Ubuntu 2026-09-22 |
+| `builders/mongoose-docker-build` | `mgos/esp32-build:4.4.1-r7` (Ubuntu 22.04) + esp8266 toolchain from `mgos/esp8266-build:3.0.6_1391d154-r1` — local builds since 2026-10-08 |
 
 A bump to `ubuntu:26.04` was attempted and rolled back on 2026-06-28 — all three break, each for a
 different, non-trivial reason (verified by local `docker build` of each on `ubuntu:26.04`):
@@ -67,24 +67,30 @@ different, non-trivial reason (verified by local `docker build` of each on `ubun
   toolchain and `mpy-cross` at image build time, and adds python3/esptool for current MicroPython;
   before that the published image never had a built toolchain and could not produce firmware. The
   22.04 ceiling still applies (the SDK's crosstool-NG still needs python2-era host tooling).
-- **mongoose** — no longer applies: the image left the Ubuntu line entirely on 2026-09-22. The
-  `ppa:mongoose-os/mos` dependency (which publishes focal only, hence the 26.04 `404 … resolute
-  Release`) is gone — `mos` is now compiled from source in a `golang:1.27.1` stage and dropped
-  into a Debian 13 DHI base. See *mongoose builder — mos is built from source* below.
+- **mongoose** — no longer applies: the `ppa:mongoose-os/mos` dependency (which publishes focal
+  only, hence the 26.04 `404 … resolute Release`) is gone — `mos` is compiled from source. The
+  base is now the upstream SDK image, whose tag is dictated by `cesanta/mongoose-os`, so there is
+  no `FROM` line of ours to bump at all. See *mongoose builder — mos is built from source* and
+  *mongoose builder — builds locally* below.
 - **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
   host GCC/glibc: `configure: error: could not find a working compiler`. It builds clean on 22.04.
 
 **Trigger to reconsider:** only when the upstream esp-open-sdk toolchain gains a
 modern-Ubuntu-compatible release. Bumping past 22.04 requires replacing those toolchains, not just
-the `FROM` line. (This ceiling is about the two esp-open-sdk builders; arduino and mongoose are
-both on Debian 13 DHI.)
+the `FROM` line. (This ceiling is about the two esp-open-sdk builders; arduino is on Debian 13
+DHI and mongoose is on the upstream `mgos/*-build` SDK images.)
 
 ### mongoose builder — `mos` is built from source, not installed from the PPA
 
 `builders/mongoose-docker-build` compiles **`github.com/suculent/mos`** — our fork — at pinned
-commit `f612a4c` (branch `thinx/deps-2026-09`) in a `golang:1.27.1` stage and copies the binary
-into a `dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to
-`apt-get install mos-latest`, and do not point it at upstream `mongoose-os/mos`.
+commit `f612a4c` (branch `thinx/deps-2026-09`) and copies the binary into the runtime stage.
+Do not "simplify" this back to `apt-get install mos-latest`, and do not point it at upstream
+`mongoose-os/mos`.
+
+**The build stage is the SDK image plus a Go tarball, not `golang:1.27.1`** (since 2026-10-08).
+`mos` is cgo-linked, so it must be linked against the runtime's glibc: a binary built in
+`golang:1.27.1` (Debian 13) dies on Ubuntu 22.04 with `version GLIBC_2.3x not found`. Keep
+`GO_VERSION`/`GO_SHA256` in the Dockerfile on the same line as the other builders' `golang:` tag.
 
 The fork exists because upstream's tree still carries its 2021 dependency set (x/crypto, go-git
 v5.4.2, grpc v1.40, x/net), which grype scores at **77 findings, 11 critical**, and upstream has
@@ -106,8 +112,9 @@ are **all** `not-fixed` or `wont-fix` upstream — zero are actionable, so do no
 
 **Pin the Go stage to a supported line.** It was `golang:1.25.13` for a day; Go backports security
 fixes to the two most recent majors only, so with 1.27 released the 1.25 line is already done
-receiving them. Both builders track `golang:1.27.1`. Bump it when Go 1.29 ships, not before —
-and rerun the build-chain tests, since the toolchain is what links these binaries.
+receiving them. arduino tracks `golang:1.27.1`; mongoose pins the same version as a tarball
+(`GO_VERSION`/`GO_SHA256` args). Bump both when Go 1.29 ships, not before — and rerun the
+build-chain tests, since the toolchain is what links these binaries.
 
 Build-stage requirements: `python3` (the Makefile generates `version/version.go` via
 `tools/fw_meta.py`), plus `pkg-config libusb-1.0-0-dev libftdi1-dev libudev-dev` — `mos` links
@@ -115,7 +122,46 @@ libusb/libftdi through cgo (`gousb`, `cesanta/hid`, `cesanta/go-serial`). The ru
 therefore needs `libusb-1.0-0` and `libftdi1-2`, which the PPA package used to pull in as `Depends`.
 
 Verified 2026-09-22: the image builds and `mos build --arch=esp8266` produces `fw.zip` through
-`build.mongoose-os.com`.
+`build.mongoose-os.com`. Since 2026-10-08 the entrypoint builds locally instead — see the next
+section.
+
+### mongoose builder — builds locally, no `build.mongoose-os.com`, no Docker-in-Docker
+
+`cmd.sh` runs `mos build --local --platform=<arch>`. `mos --local` has two modes: outside an SDK
+container it runs `docker run docker.io/mgos/<platform>-build:<tag>` and `make` inside it, which
+cannot work here — THiNX build containers deliberately get no `docker.sock`
+(`services/worker/builder-lib.sh`, keep it that way) and the image has no `docker` binary.
+Inside an SDK container, signalled by **`MGOS_SDK_REVISION` being set in the environment**, `mos`
+calls `make` directly against `/opt/Espressif`. So the runtime stage *is*
+`docker.io/mgos/esp32-build:4.4.1-r7` (Ubuntu 22.04, sets that variable), with the esp8266 side
+copied in from `docker.io/mgos/esp8266-build:3.0.6_1391d154-r1`: `/opt/Espressif/xtensa-lx106-elf`
+**and** `/opt/Espressif/esp-open-sdk` plus the `ESP8266_NONOS_SDK -> esp-open-sdk/sdk` symlink.
+The toolchain alone links fine but fails at the final link with
+`cannot open linker script file ../ld/eagle.rom.addr.v6.ld` — the NONOS SDK lives in esp-open-sdk.
+That direction (esp32 base, esp8266 copied in) is forced: the esp8266 image is Ubuntu 18.04 and
+cannot run a `mos` linked on anything newer, while 22.04 runs 18.04's prebuilt gcc fine.
+
+The SDK tags are what `platforms/<arch>/sdk.version` in `cesanta/mongoose-os` names (fetched
+from `raw.githubusercontent.com/cesanta/mongoose-os/master/platforms/<arch>/sdk.version`; the
+`mongoose-os/mongoose-os` org name 404s). Bump them only together with the mongoose-os
+version the projects build against. Both images are frozen since 2022, so grype will report far
+more against this image than the 2 findings of the Debian 13 era; that base cannot move.
+
+Costs accepted with this: image is ~2.5 GB (was ~450 MB); lib sources and prebuilt `.a` archives
+are still fetched from `github.com/mongoose-os-libs` at build time, so the container needs
+outbound HTTPS — "local" removes the cloud builder, not the network.
+
+Verified 2026-10-08 against `mongoose-os-apps/demo-js` mounted at `/opt/workspace`, through the
+entrypoint: esp8266 (no `platform:` key, the default) and esp32 (`platform: esp32`) both report
+`THiNX BUILD SUCCESSFUL.` and write `build/fw.zip`.
+
+**Fixed alongside (2026-10-08), in `services/worker`:** the mongoose branch of `builder` ran
+`"$DCMD"` *quoted*, so bash looked for one executable literally named
+`docker run --cpus=1.0 …` and no non-swarm mongoose build ever started — and its output was not
+`tee`d into the log that the `THiNX BUILD SUCCESSFUL` grep reads. It also mounted the repository
+at `/opt/mongoose-builder` while `swarmbuild` mounts `/opt/workspace` like every other image, so
+swarm builds ran in an empty directory. The image's `WORKDIR` is now `/opt/workspace`, same as
+all builders; `builder.test.js` has a wiring test for both.
 
 **Fixed alongside the base move (2026-09-22):** `cmd.sh` used to call `/root/.mos/bin/mos update`
 under `set -e`, and `/root/.mos` has never existed in the published image — the entrypoint died
