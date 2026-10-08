@@ -64,3 +64,5 @@
   status: open
   **Found during:** phase 31 close-out (side-agent note, verified read-only by the orchestrator).
   **Update 2026-10-08:** the gluster dir is the thinx-swarm checkout; the in-place label sync + Phase 29/30 traefik.yml reconciliation were committed on top of the production deploy line (`d08aff8`), the Phase 31 v3 `traefik.yml` applied (`25d632e`), origin merged (`15ff004`), pushed to GitHub and fast-forwarded on micro. The `secrets:` block gap remains open.
+  **Update 2026-10-08 (secrets):** CLOSED for the deploy file — thinx-swarm `89b0f24` adds the `secrets:` block (13 external) and attaches the live set (api 10 / worker 2 / transformer 1); pushed + ff on micro. Open follow-ups: SEC-CFG-04 (3 unattached swarm secrets on api), `.env` fallback duplicates (9) and un-migrated secret-like keys (9), and `docker-swarm.yml` missing the live `CORS_ENFORCE=true` / `THINX_MQTT_DEVICE_WRITES=1` api env lines.
+  status: open
