@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@6dc974b5f64cafb011cc14a6ce959c02586c169a generated:2026-10-08T23:04:45Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:e6fed90c324d236a93b4d9585ea86334ce9248597d242d47300b78ad0d5c32b5
+# GENERATED — do not edit. source: thinx-swarm@efee92c568e0fea9a17b42d34849cfc046ccf093 generated:2026-10-08T23:10:07Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:b1e8f9f9cd7f8e7ac0f1fa0707885ae52bd5775b8f55d543086dc804ba4eb048
 version: '3.7'
 
 services:
@@ -96,8 +96,9 @@ services:
       - --providers.swarm
       # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
-      # Expose every constraint-matching service by default (P30 D-05: audit deferred to Phase 33)
-      - --providers.swarm.exposedbydefault=true
+      # Expose only services that opt in (P30 D-05 deferred the audit here; Phase 33 EDGE-API-01, D-07: flipped to false —
+      # every edge service carries traefik.enable=true, so the router inventory is identical before and after)
+      - --providers.swarm.exposedbydefault=false
       # Phase 32 (EDGE-MIG-03, D-09): the v2 rule-syntax backward-compat switch was removed here after the
       # four v2-only router rules (thinx-api-ws, downtime-http/https, error-router) were converted to native v3.
       # Create an entrypoint "http" listening on port 80
