@@ -5,11 +5,11 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Rollback Step 3's mandatory Stage-C re-add is prose-only, un-dry-verified, and leaves a v2.11 network mis-pick window on the five multi-network services"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Two rollback statements still assert the dual-label bridge is harmless, contradicting the live correction, and the rollback end state is the exact configuration that broke v3"
   - id: IN-01
     severity: info
@@ -35,17 +35,17 @@ findings:
     severity: info
     disposition: open
     title: "`HeadersRegexp` matcher depends entirely on the deprecated `core.defaultRuleSyntax=v2` switch"
-open: 8
+open: 6
 total: 8
-recorded: 2026-10-07T22:33:30.000Z
+recorded: 2026-10-08T11:18:17.000Z
 ---
 
 # Phase 31: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
+| WR-01 | warning | fixed | 31-REVIEW-FIX.md |
+| WR-02 | warning | fixed | 31-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
