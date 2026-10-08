@@ -377,7 +377,6 @@ services:
         # Reproduces the live thinx-api-ws router so a `docker stack deploy` does not silently drop it.
         # Phase 32 (EDGE-MIG-03, D-08): HeaderRegexp is the v3 name of the v2 matcher (rename only; unanchored, (?i) kept for legacy Upgrade: WebSocket clients).
         - "traefik.http.routers.thinx-api-ws.rule=Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)"
-        - "traefik.http.routers.thinx-api-ws.ruleSyntax=v3"
         - "traefik.http.routers.thinx-api-ws.entrypoints=https"
         - "traefik.http.routers.thinx-api-ws.priority=200"
         - "traefik.http.routers.thinx-api-ws.service=thinx-api"
