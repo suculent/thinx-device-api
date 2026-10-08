@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@17401bbf3f19015007b836d0812819f7bd4afd83 generated:2026-10-08T14:01:33Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:14fefbc49887505ab8b23aedc325f4c5ed8a61a45ca960bd220bd2f5d857af57
+# GENERATED — do not edit. source: thinx-swarm@6c01b2650d6fa54ef4e86aa620645b2ec5f1fb5a generated:2026-10-08T14:40:55Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:3a5c0d7060bea7cee92875d8056c99d37b1e585ed19733b2202b077ef355aa18
 version: '3.7'
 
 services:
@@ -105,9 +105,8 @@ services:
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Expose every constraint-matching service by default (P30 D-05: audit deferred to Phase 33)
       - --providers.swarm.exposedbydefault=true
-      # Backward-compat switch (official three-phase rollout, phase 3 deferred): router rules keep
-      # the v2 matcher syntax until Phase 32 (EDGE-MIG-03) converts them natively.
-      - --core.defaultRuleSyntax=v2
+      # Phase 32 (EDGE-MIG-03, D-09): the v2 rule-syntax backward-compat switch was removed here after the
+      # four v2-only router rules (thinx-api-ws, downtime-http/https, error-router) were converted to native v3.
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443

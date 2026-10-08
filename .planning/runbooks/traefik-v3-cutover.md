@@ -1023,9 +1023,47 @@ Per-router rollback was staged and NOT needed. The repo state (thinx-swarm `1740
 `fa72db3a`, mirror MIRROR OK at 17 flags) equals the live label state; the live static command is still
 the 17-flag set, so Plan 32-02 Stage 2 starts from here.
 
+### Stage 2 — converted static command (32-02 Task 1, 2026-10-08 14:38-14:41 UTC)
+
+Repo-first (D-04) for the switch removal (D-09). Committed in the edge source repo as
+**`thinx-swarm@6c01b2650d6fa54ef4e86aa620645b2ec5f1fb5a`** (parent `17401bb`, the Stage 1 commit): the
+`traefik.yml` command block drops from **17 to 16** flags — the single removed flag is the index-3
+backward-compat rule-syntax switch; its two comment lines were REWRITTEN to a `# Phase 32 (EDGE-MIG-03,
+D-09)` removal note that does not name the flag token (RESEARCH Pitfall 8 — the gates grep the token).
+Nothing else in the block moved (`--providers.swarm` x3 incl. the backtick constraint and
+`exposedbydefault=true`, all six entrypoints incl. `thxp=:7442` / `mqtt=:1883` / `mqtts=:8883`, the three
+`le` ACME lines with `${EMAIL}` templated, accesslog / log / log.level / api). Index shift: the
+`${EMAIL}` flag moves from index 10 to 9 — nothing reads the args by index (RESEARCH A5).
+
+| # (live order) | 17-flag command (Stage 1 end state, `traefik-edge.D.pre.yml`) | 16-flag command (committed now) |
+|---|---|---|
+| 0-2 | `--providers.swarm`, `…constraints=Label(\`traefik.constraint-label\`, \`traefik-public\`)`, `…exposedbydefault=true` | **unchanged** |
+| 3 | the v2 default-rule-syntax switch (BC, Phase 31 D-04) | **removed** |
+| 4-9 (was 5-10) | six `--entrypoints.*.address` (`:80 :443 :1194 :1883 :8883 :7442`) | unchanged (indexes -1) |
+| 10-12 (was 11-13) | three `--certificatesresolvers.le.acme.*` (`email=${EMAIL}`, storage, tlschallenge) | unchanged (indexes -1) |
+| 13-15 (was 14-17) | `--accesslog`, `--log`, `--log.level=ERROR`, `--api` | unchanged (indexes -1) |
+
+```
+cd ~/Repositories/thinx-swarm && git push origin master                              # 17401bb..6c01b26  master -> master
+GIT_SSH_COMMAND="ssh -i ~/.ssh/DOKey2 -p2020" git push ssh://root@188.166.23.244/mnt/gluster/deployment/swarm master:refs/heads/p32-stage2
+ssh micro "cd /mnt/gluster/deployment/swarm && git status --short | grep -v '^??' | wc -l; git merge --ff-only p32-stage2 && git branch -d p32-stage2 && git rev-parse HEAD"
+# expect: 0 ; Fast-forward 17401bb..6c01b26 ; 6c01b2650d6fa54ef4e86aa620645b2ec5f1fb5a (== workstation HEAD)
+node scripts/generate-traefik-mirror.js --swarm-repo "$HOME/Repositories/thinx-swarm" && node scripts/check-traefik-mirror.js --swarm-repo "$HOME/Repositories/thinx-swarm"
+# expect: MIRROR-GENERATED ok source=thinx-swarm@6c01b265… -> docker-compose.traefik.yml ; MIRROR OK files=1
+grep -c '^ *- --' docker-compose.traefik.yml                                           # expect: 16
+grep -v '^ *#' docker-compose.traefik.yml | grep -c 'core.defaultRuleSyntax'           # expect: 0
+```
+
+| Check (14:41Z) | Observed |
+|---|---|
+| `traefik.yml` | 0 lines (commented or not) carry the switch token; `# Phase 32 (EDGE-MIG-03` comment at line 106; **16** `- --` lines; `--providers.swarm`, `exposedbydefault=true`, `vpn=:1194`, `mqtt=:1883`, `mqtts=:8883`, `thxp=:7442` present |
+| origin / micro | `origin/master` = `6c01b26`; micro checkout `17401bb..6c01b26` Fast-forward, 0 tracked modifications, temp branch deleted, HEAD `6c01b2650d6f…` == workstation |
+| mirror | `MIRROR OK files=1`; banner `source: thinx-swarm@6c01b2650d6fa54ef4e86aa620645b2ec5f1fb5a`, `mirror-sha256:3a5c0d70…`; **16** flags; 0 uncommented switch lines; 0 `--providers.docker`; the only body delta vs the Stage 1 mirror is the removed flag + its rewritten comment (`git diff`: 4 insertions, 5 deletions incl. the banner) |
+| live `traefik_traefik` | **STILL `traefik:v3.7.14 args=17 idx=38379311`**, task `i7tpgo7vv0vj` — no live mutation in this task (the `--args` update is Task 2) |
+
 ### Stage 2 record (32-02)
 
-_Filled by Plan 32-02._
+_Filled by Plan 32-02 Task 2._
 
 ### Stage 3 record (32-02)
 
