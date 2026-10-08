@@ -157,7 +157,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Full route parity confirmed; plaintext `:7442` + MQTT re-verified.
 3. Repo config matches the deployed v3 config.
 
-**Plans:** 3/3 plans executed (planned 2026-10-08)
+**Plans:** 3/3 plans complete (planned 2026-10-08)
 **Wave 1**
 - [x] 32-01-PLAN.md — Tracer: baseline + `D.pre.yml`, boot-and-discover the four native-v3 rules on a throwaway without the BC switch (D-02), then Stage 1 repo-first + live per-router conversion (`HeaderRegexp`, `PathPrefix(`/`)` + `ruleSyntax=v3` overrides, label-only) (EDGE-MIG-03)
 
@@ -208,7 +208,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete    | 2026-10-06 |
 | 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete    | 2026-10-07 |
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
-| 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Pending | — |
+| 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 0/? | Pending | — |
 | 34. Ops Surface Reduction & SLA Close-out | v1.15 | 0/? | Pending | — |
 
