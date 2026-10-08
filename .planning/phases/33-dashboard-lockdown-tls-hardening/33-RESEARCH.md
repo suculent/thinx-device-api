@@ -776,12 +776,18 @@ done
 | A4 | `docker exec -i … nc` keeps a browser session usable for the dashboard's parallel asset requests with ssh ControlMaster | §Q1 | slow dashboard; JSON gates unaffected (tested with sequential curl only) |
 | A5 | `traefik.sh` is used only for first-time bootstrap (network/node label) and never run against the live edge | §Q9 | if someone runs it after the scrub, `EMAIL` must be exported first — the `:?` guard makes that loud |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All four items were resolved during planning (2026-10-08); the carrying plan is named per item.
 
 1. **D-02/D-10 wording vs. the provider finding (needs a user nod).** The locked text says "file-provider router to `api@internal`" and "the API router can only live in the file provider". Research shows the router **must** be in the `traefik_traefik` labels (or a phantom router appears) and that the port label must stay (contradicting D-01's "vestigial … removed"). Recommendation: amend D-01 (keep the port label) and D-02 (label router; file provider carries TLS only); alternatively keep the file router *and* add the label router. Both keep every security property of D-02 (loopback-only, no auth, ssh plane).
+   **RESOLVED** → `33-01-PLAN.md` research amendments 1 (visible deviation recorded in the plan) and Task 1 Steps 5/7: the `traefik-mgmt` router lives in the `traefik_traefik` labels, the `traefik-public` port label is KEPT with a LOAD-BEARING comment, and `--providers.file` rides in `33-02-PLAN.md` Stage C with `tls-config-2` (TLS options only). D-02's security properties (loopback-only, no auth, ssh plane) are unchanged.
 2. **`curvePreferences` set vs. omitted.** Setting `["X25519","CurveP256"]` (recommended, scannable) removes the X25519MLKEM768 hybrid the edge offers today; omitting keeps it. Operator preference — either satisfies D-14.
+   **RESOLVED** → `33-02-PLAN.md` Task 1 (discretion resolved: SET to `["X25519", "CurveP256"]`; the dropped X25519MLKEM768 hybrid is recorded in the Stage C record and in `33-03-PLAN.md` Task 2's `## Recorded for Phase 34`, where omitting the key restores the Go default).
 3. **`${WEB_HOSTNAME}` for the WS rule** (D-08 says `${THINX_HOSTNAME}`, which is `app`). Research is confident; confirm the env-var names in micro's deploy environment at execution (`grep -E '^(WEB_HOSTNAME|THINX_HOSTNAME)=' /mnt/gluster/deployment/swarm/.env` — do not print other variables).
+   **RESOLVED** → `33-01-PLAN.md` Task 1 Step 0 (live resolved-rule readback + the two-line `.env` grep, recorded as `WEB_HOSTNAME=rtm / THINX_HOSTNAME=app confirmed`) and Task 2 (the `thinx-api-ws` rule becomes `Host(\`${WEB_HOSTNAME}\`)`, file-only, no live change; research amendment 2).
 4. **Baseline router inventory before A2** — through the still-present public router with a re-staged credential (P32 Q6 recipe), or accept the 15:12Z `D.post.yml` list (30 routers, all enabled) as the baseline. Recommendation: the latter plus a `docker service inspect`-label count; no credential staging.
+   **RESOLVED** → `33-01-PLAN.md` Task 1 Step 0 / Step 2 (research amendment 4): the 30-name baseline is derived credential-free from the 16 services' `traefik.http.routers.<name>.` label keys and committed as `router_inventory_pre:` in `traefik-edge.E.pre.yml`; the A2 gate compares the loopback inventory to it (−2 public routers +1 `traefik-mgmt`). No credential is re-staged.
 
 ## Environment Availability
 
