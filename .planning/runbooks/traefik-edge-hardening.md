@@ -327,3 +327,61 @@ Repo state == live state after this task: thinx-swarm `6dc974b` (origin + micro)
 (`docker-swarm.yml` == `thinx.yml` traefik labels; mirror MIRROR OK at 17 flags); live labels on the seven
 services match the committed files; `traefik_traefik` untouched.
 
+### Stage B record (33-01 Task 3, 2026-10-08 23:08–23:13 UTC)
+
+**Outcome: the live `traefik_traefik` runs the 17-flag static command with `--providers.swarm.exposedbydefault=false`
+(one restart, fire 23:11:31Z → new task Running 23:11:46Z); the sorted router-name inventory read over the loopback
+API immediately before and after the flip is identical (inventory diff: empty — every edge service opts in with
+`traefik.enable=true`, D-07), every router enabled, every behavioural probe equals the pre-row, device ports open.
+No D-30 trigger fired; the staged revert was NOT used. End state of Plan 33-01: 17 Args (mgmt entrypoint,
+exposedbydefault=false), 29 routers enabled, ready for Plan 02 Stage C.**
+
+Precondition re-read (23:08Z): D-08 record present; live `downtime_downtime` / `errorpage_errorpage` carry
+`traefik.swarm.network` (0 v2 keys); loopback `29/0`; thinx-swarm HEAD == micro HEAD; the D-04 words are in the
+Stage A record above.
+
+Repo first (P32 D-04): thinx-swarm `efee92c` (`feat(edge): Phase 33 Stage B — exposedbydefault=false; traefik.sh
+scrubbed …`: `traefik.yml` flag flipped with the P30 D-05 comment rewritten and 0 `=true` tokens left anywhere in the
+file; `traefik.sh` keeps the two `docker network create` lines, `NODE_ID`, the node label and the `docker stack deploy
+-c ./traefik.yml traefik` line, loses every `export DOMAIN/USERNAME/PASSWORD/HASHED_PASSWORD` line and the
+password-step comment, and demands `EMAIL` from the environment with `: "${EMAIL:?…}"` + the bootstrap-only NOTE) →
+origin → micro `p33-stageB` ff-merge (dirty=0, 2 files 10+/15−) → mirror regenerated (`MIRROR-GENERATED ok
+source=thinx-swarm@efee92c…`, `MIRROR OK files=1`, 17 flags, 1 `exposedbydefault=false`, 0 `=true`) → this repo
+`1c5f5f53`. **D-04 closure:** the scrubbed `traefik.sh` carries no e-mail address and no password-like literal; git
+history keeps the old literals, but the live `admin-auth` middleware disappeared with Stage A2 and the committed
+`PASSWORD` literal never matched the live hash (`PASSWORD=NO-MATCH`), so rotation is moot — nothing to rotate.
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p33-preB-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args[]' \$B | grep -c '^--providers.swarm.exposedbydefault=true$'"
+# expect: 600 root; 17 ; 1 — this file is the Stage B revert source, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(if . == \"--providers.swarm.exposedbydefault=true\" then \"--providers.swarm.exposedbydefault=false\" else . end) | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/' | sort"
+# expect: 17 lines == the mirror's 17 `- --` lines sorted (e-mail masked both sides) — sorted-set compare
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(if . == \"--providers.swarm.exposedbydefault=true\" then \"--providers.swarm.exposedbydefault=false\" else . end) | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances; args=17 with exposedbydefault=false
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 23:10:31 | pre-flight backup | `/mnt/data/edge-rollback/traefik-p33-preB-20261008T231031Z.json` — `600 root`, 14999 B, Args length **17**, `exposedbydefault=true` present ×1; live task `v3znc0mq2jwz`, `idx=38379757` |
+| 23:10 | dry-print + sorted-set diff | 17 masked live-set lines (with `=false`) vs 17 mirror lines: **diff empty (17/17)**; thxp/mqtt/mqtts/mgmt address flags 4/4 |
+| 23:10:42 | pre-row | loopback **`29/0`**; live sorted names saved to the laptop (`/tmp/p33-preB-routers.txt`) — **29, == `routers_post_A2:`**; HTTPS matrix 17/17 == post-A2 baseline (micro 200); WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301` + `200` |
+| **23:11:31.6** | **B fire** | `docker service update --detach --args "<17 flags, =false>" traefik_traefik` → **rc 0** |
+| 23:11:31–23:11:46 | drain + start | old task `v3znc0mq2jwz` stopped; **new task `puse77wvt5xk`** `traefik:v3.7.14` micro **Running 23:11:46.7Z** (fire → Running ≈ 15 s); exactly **1** running task; `args=17 idx=38379801 upd=completed`; live Args contain `exposedbydefault=false` ×1 and no `=true` |
+| 23:11:52 | convergence | loopback status filter **`29/0`** 5 s after the new task started |
+| 23:11:52 | (2) identical inventory (D-07) | `diff /tmp/p33-preB-routers.txt <(live sorted names)` → **inventory diff: empty** (29/29) — no service dropped out of discovery under opt-in exposure |
+| 23:11:52 | (3) overview | **`[29,0,18,6,["Swarm"]]`** — unchanged |
+| 23:11:52 | (7) log scan | `port is missing\|does not exist\|error while parsing` since the fire: **0 on the new task** (13 transient `does not exist` lines on the stopping task `v3znc0mq2jwz`, same drain artefact as A1 / 32 Stage 2); **0 ERR lines** on the new task |
+| 23:11:52 | (8) ports + bind | `7442 OPEN 1883 OPEN 8883 OPEN`; in-task `ss -ltn` → `127.0.0.1:8080` only (mgmt bind survived the restart) |
+| 23:11:54 | (4)–(6) laptop | HTTPS matrix 17/17 **== pre-row**; WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200`; laptop `curl :8080` rc=7 |
+
+**D-30 trigger evaluation: none fired** ((1) `29/0`, (2) inventory diff empty, (3) overview unchanged, (4) matrix ==
+pre-row, (5) WS 101/401, (6) bare-IP 301/200, (7) log scan 0 on the new task, (8) ports open). The revert (`--args`
+with the 17 flags of `traefik-p33-preB-20261008T231031Z.json`, `=true` back) was staged and **not executed**.
+
+Version.Index post-Stage-B: 38379801
+
+Repo state == live state after this task: thinx-swarm `efee92c` (origin + micro), mirror `1c5f5f53` MIRROR OK at 17
+flags with `exposedbydefault=false`, live `traefik_traefik` 17 Args (sorted set == mirror), `traefik-mgmt` labels,
+29 routers enabled == `routers_post_A2:`. Plan 02 Stage C starts from here (17 → 18 flags, `tls-config-2`).
+
