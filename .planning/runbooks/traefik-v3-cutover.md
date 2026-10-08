@@ -768,3 +768,209 @@ traefik.swarm.network --label-add traefik.docker.network=traefik-public` flip on
 thinx_mosquitto thinx_couchdb thinx_influxdb swarmpit_app`) is mandatory and runs BEFORE the Step 3
 retag, because Stage C has run and v3 skips any dual-labelled service; `traefik.swarm.network` may
 stay only on the eleven single-network services (v2.11 ignores it — proven live 21:53-22:04Z).
+
+---
+
+## Native v3 rules + BC-switch removal (Phase 32 / EDGE-MIG-03, 2026-10-08)
+
+**Scope:** convert the four live routers that still use v2-only matcher syntax to native v3 syntax
+(Stage 1, per-router `ruleSyntax=v3` override, label-only), remove `--core.defaultRuleSyntax=v2` from
+the live static command (Stage 2, `--args` 17 -> 16, one task restart), then strip the four overrides
+(Stage 3, label-only). Repo first for every stage (D-04): thinx-swarm commit -> origin push -> micro
+fast-forward -> mirror regenerated + this repo committed -> THEN the matching `docker service update`.
+Decisions D-01..D-12 in `32-CONTEXT.md`; signal inventory in `32-RESEARCH.md` §Q3. Executor host form
+`ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020` (= `micro`); the dashboard `admin-auth` password lives
+only in `micro:/root/.p32-traefik-admin` (600 root, operator-staged per D-12), read into a host-side shell
+variable, verified against the live apr1 hash and shredded at the end of Plan 32-03. No secret value
+appears here (P29 D-12).
+
+The four v2-only routers (live inventory re-read 2026-10-08 13:44Z through the credentialed API — exactly
+4 of 30, assumption #2 of the plan held):
+
+| Router (service) | v2 rule (live before Stage 1) | priority | ruleSyntax (API) | Stage 1 v3 rule |
+|---|---|---|---|---|
+| `thinx-api-ws` (`thinx_api`) | ``Host(`rtm.thinx.cloud`) && HeadersRegexp(`Upgrade`, `(?i)websocket`)`` | 200 | `v2` (inherited) | ``Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)`` |
+| `downtime-http` (`downtime_downtime`) | ``HostRegexp(`{host:.+}`)`` | 2 | `v2` (inherited) | ``PathPrefix(`/`)`` |
+| `downtime-https` (`downtime_downtime`) | ``HostRegexp(`{host:.+}`)`` | 2 | `v2` (inherited) | ``PathPrefix(`/`)`` |
+| `error-router` (`errorpage_errorpage`) | ``HostRegexp(`{host:.+}`)`` | 1 | `v2` (inherited) | ``PathPrefix(`/`)`` |
+
+Priorities stay 1 / 2 / 200 (D-07 research verdict: explicit priorities are used verbatim in v3; rule
+length is only consulted when no priority is set).
+
+### Baseline (32-01 Task 1, 2026-10-08 13:44-13:46 UTC)
+
+Every later gate compares against this table (values observed, not assumed).
+
+| Check | Observed |
+|---|---|
+| D-12 credential `stat -c '%a %U %s' /root/.p32-traefik-admin` | `600 root 8`; apr1 check on micro `HASH=MATCH`; `/api/overview` -> `overview=200` |
+| live `traefik_traefik` | `traefik:v3.7.14 args=17 idx=38379311`; task `i7tpgo7vv0vj traefik_traefik.1 micro Running 16 hours ago` (the P31 task, never restarted) |
+| `/api/overview` (credentialed) | http routers **30 / 0 errors**, services 18, middlewares 7, providers `["Swarm"]` |
+| v2-only inventory filter (`HeadersRegexp\|\{host:`) | exactly 4: `thinx-api-ws@swarm`, `downtime-http@swarm`, `downtime-https@swarm`, `error-router@swarm` — all `enabled`, `syn=v2`, p=200/2/2/1 |
+| HTTPS matrix (from micro) | app / console / rtm / thinx.cloud / swarmpit **200**; micro **401** (dashboard, unauth) |
+| HTTPS externals (Host() values read live from the `fotostimcom/fotostimcz/igraczech/syxra-https@swarm` rules) | fotostim.com, www.fotostim.com, fotostim.cz, www.fotostim.cz, igraczech.com, www.igraczech.com, www.syxra.cz **200**; `igraczech.unitednewschannel.net` **does not resolve** (curl `000`, DNS) — pre-existing, record only |
+| HTTP redirect matrix | app **200** (by design); console / rtm / thinx.cloud / swarmpit / micro and all 7 resolvable externals **301 -> https://<host>/** |
+| bare-IP pair (workstation) | `http://188.166.23.244/` -> **`301 https://188.166.23.244/`**; `https://188.166.23.244/ -k` -> **`200`** (downtime page, `server: nginx`) |
+| hostless `GET / HTTP/1.0` on :80 | **`HTTP/1.0 404 Not Found`** (Traefik's own; D-06 expects this to change after Stage 1 — record only) |
+| WS upgrade probe `--http1.1`, `Upgrade: websocket`, `Cookie: foo=bar`, `https://rtm.thinx.cloud/p32probe` | **`HTTP/1.1 401 Unauthorized`** + **`X-Forwarded-Proto: https`**, no `Server: nginx` |
+| same with `Upgrade: WebSocket` (mixed case) | **`HTTP/1.1 401 Unauthorized`** + `X-Forwarded-Proto: https` |
+| cert serials (`openssl s_client … x509 -serial -checkend 0`) | app `051152D5A20BE36DEFA1B6FA83379CE42809`, rtm `0535CC0C71E39D9378E72893F3A2141267B0`, both `Certificate will not expire` (= P31 record) |
+| running task ids (`--filter desired-state=running`) | `thinx_api.1 9nitjbo580v8 micro` (Running 2 h); `errorpage_errorpage.1 5d7aukf4evft micro` (Running 24 min); `downtime_downtime.1 vzyg90j8f878 core` (Running 25 s) — see note |
+| ports on micro (`/dev/tcp`) | `7442 OPEN`, `1883 OPEN`, `8883 OPEN` |
+| published ports | `thinx_api 7442->7442`; `thinx_mosquitto 1883->1883 1884->1884 8883->8883` |
+| device-flow harness (`thinx-device-flow.mjs`) | `p32-base-7442` over `http://rtm.thinx.cloud:7442` + `mqtt://thinx.cloud:1883` **PASS**; `p32-base-https` over `https://app.thinx.cloud` **PASS** |
+| `acme.json` stat | `301121 1791410693 600 root` (unchanged since the P31 one-time rewrite), 24 certs |
+| `traefik-edge.D.pre.yml` | captured 13:46:31Z, redacted on micro; body identical to `C.post.yml` (17 flags incl. the switch) |
+
+**Task-id note (not caused by this phase):** the operator's thinx-swarm commit `498afa7` ("harden(nginx):
+pin downtime/errorpage to nginx:1.31.3-alpine") rebuilt both images and Swarmpit autoredeploy
+(`swarmpit.service.deployment.autoredeploy=true`) rolled `errorpage_errorpage` at 13:20:56Z and
+`downtime_downtime` at 13:45:31Z — the latter while the baseline was being read, which is why one
+`docker service ps` read showed no running downtime task. Both services were 1/1 again within seconds.
+The Stage 1 "task id pre == post" gate therefore re-reads the id immediately before each update.
+
+### Boot-and-discover (32-01 Task 1, D-02 tracer, 2026-10-08 13:48-13:52 UTC)
+
+Proves the four candidate v3 rules on an isolated throwaway BEFORE any live router is touched. Two
+corrections to the locked wording were applied (RESEARCH §Q2): the rules service runs at **1 replica**
+(a 0-replica service has 0 tasks -> 0 routers -> a vacuous "pass", Pitfall 3), and the throwaway is
+isolated by `traefik.constraint-label=p32-probe` so the live edge never discovers its catch-all
+(Pitfall 4). The probe's constraint also admits `traefik-public` so Run A observes the live v2 routers
+read-only (RESEARCH Open Q1).
+
+```
+ssh micro "docker service create --name p32-rules --detach --replicas 1 \
+  --constraint 'node.labels.Traefik == true' --network traefik-public --limit-memory 16M \
+  --label gsd.phase=32 --label gsd.purpose=rule-probe \
+  --label traefik.enable=true --label traefik.constraint-label=p32-probe --label traefik.swarm.network=traefik-public \
+  --label traefik.http.services.p32.loadbalancer.server.port=80 \
+  --label 'traefik.http.routers.p32-ws.rule=Host(\`rtm.thinx.cloud\`) && HeaderRegexp(\`Upgrade\`, \`(?i)websocket\`)' \
+  --label traefik.http.routers.p32-ws.entrypoints=https --label traefik.http.routers.p32-ws.priority=200 \
+  --label traefik.http.routers.p32-ws.service=p32 --label traefik.http.routers.p32-ws.tls=true \
+  --label 'traefik.http.routers.p32-downtime-http.rule=PathPrefix(\`/\`)' \
+  --label traefik.http.routers.p32-downtime-http.entrypoints=http --label traefik.http.routers.p32-downtime-http.priority=2 \
+  --label 'traefik.http.routers.p32-downtime-https.rule=PathPrefix(\`/\`)' \
+  --label traefik.http.routers.p32-downtime-https.entrypoints=https --label traefik.http.routers.p32-downtime-https.priority=2 \
+  --label traefik.http.routers.p32-downtime-https.tls=true \
+  --label 'traefik.http.routers.p32-error-router.rule=PathPrefix(\`/\`)' \
+  --label traefik.http.routers.p32-error-router.entrypoints=http --label traefik.http.routers.p32-error-router.priority=1 \
+  alpine:3.20 sleep 3600"
+# expect: 1/1; Endpoint.Ports == []; NO ruleSyntax label (the probe's default is v3, so `enabled` proves native-v3 parsing)
+ssh micro "EMAIL=\$(docker service inspect traefik_traefik --format '{{range .Spec.TaskTemplate.ContainerSpec.Args}}{{println .}}{{end}}' | grep acme.email= | cut -d= -f2); \
+  docker service create --name traefik_p32probe --detach \
+  --constraint 'node.labels.Traefik == true' --network traefik-public \
+  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly \
+  --limit-memory 256M --label gsd.phase=32 --label gsd.purpose=boot-and-discover-v3-native \
+  traefik:v3.7.14 \
+  --providers.swarm \
+  '--providers.swarm.constraints=Label(\`traefik.constraint-label\`, \`p32-probe\`) || Label(\`traefik.constraint-label\`, \`traefik-public\`)' \
+  --providers.swarm.exposedbydefault=true \
+  --entrypoints.http.address=:80 --entrypoints.https.address=:443 --entrypoints.vpn.address=:1194 \
+  --entrypoints.mqtt.address=:1883 --entrypoints.mqtts.address=:8883 --entrypoints.thxp.address=:7442 \
+  --certificatesresolvers.le.acme.email=\$EMAIL \
+  --certificatesresolvers.le.acme.storage=/tmp/acme-test.json \
+  --certificatesresolvers.le.acme.tlschallenge=true \
+  --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory \
+  --accesslog --log --log.level=ERROR --api --api.insecure=true; unset EMAIL"
+# expect: 1/1 in ~10 s; Endpoint.Ports == []; the only mount is docker.sock:ro; 18 args; NO --core.defaultRuleSyntax=v2
+```
+
+| Pre-flight / convergence | Observed |
+|---|---|
+| `docker service create` x2 (13:48:37Z) | `p32-rules` id `as03i2mo…` rc 0; `traefik_p32probe` id `zn99k2cp…` rc 0 |
+| convergence | both **1/1 within ~25 s** (`p32-rules.1 micro`, `traefik_p32probe.1 micro`) |
+| probe facts | `ports=[]`, `args=18`, mounts `/var/run/docker.sock:ro=true` only; `p32-rules` `ports=[]`, `replicas=1` |
+| `${EMAIL}` | read from the live Args into a shell variable on micro; never printed |
+
+#### Discovery — the gate (Run A: native v3 default, no switch)
+
+```
+ssh micro "T=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_p32probe | head -1); \
+  docker exec \$T wget -qO- http://localhost:8080/api/http/routers \
+  | jq -r '.[] | select(.name|startswith(\"p32-\")) | .name + \"  \" + .status + \"  p=\" + (.priority|tostring) + \"  syn=\" + (.ruleSyntax // \"-\") + \"  \" + .rule'"
+# expect: exactly 4 lines, every status == enabled, priorities 200/2/2/1, rules verbatim
+ssh micro "T=\$(…); docker exec \$T wget -qO- http://localhost:8080/api/http/routers \
+  | jq -r '.[] | select(.status!=\"enabled\") | .name + \"  \" + .status + \"  \" + (.error|tostring)'"
+# expect: exactly thinx-api-ws@swarm disabled … unsupported function: HeadersRegexp (the live v2 rule, read-only)
+```
+
+Observed (Run A, 13:49Z):
+```
+p32-downtime-http@swarm   enabled  p=2    syn=-  PathPrefix(`/`)
+p32-downtime-https@swarm  enabled  p=2    syn=-  PathPrefix(`/`)
+p32-error-router@swarm    enabled  p=1    syn=-  PathPrefix(`/`)
+p32-ws@swarm              enabled  p=200  syn=-  Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)
+thinx-api-ws@swarm  disabled  ["error while parsing rule Host(`rtm.thinx.cloud`) && HeadersRegexp(`Upgrade`, `(?i)websocket`): parsing rule Host(`rtm.thinx.cloud`) && HeadersRegexp(`Upgrade`, `(?i)websocket`): unsupported function: HeadersRegexp"]
+```
+
+| Run A check | Observed |
+|---|---|
+| p32- routers | **4 / 4 enabled**, priorities 200 / 2 / 2 / 1, rules verbatim |
+| `ruleSyntax` on the p32 routers | **field absent** (`-`) — under a v3 default the API does not echo the inherited value (`omitempty`); the v3 parse is proven by the matcher split below, and Run B shows the explicit value. (The plan expected the literal `v3`; recorded as observed.) |
+| probe-seen live `thinx-api-ws@swarm` | **disabled**, error text exactly as RESEARCH A1 predicted: `error while parsing rule …: parsing rule …: unsupported function: HeadersRegexp` (also logged at ERR level at 13:48:42Z, visible under `--log.level=ERROR`) |
+| probe-seen live `downtime-http@swarm` / `downtime-https@swarm` / `error-router@swarm` | **enabled** with the dead ``HostRegexp(`{host:.+}`)`` rule — the **silent-failure evidence** (RESEARCH §Q1): under native v3 the status filter cannot see an unconverted catch-all, hence the bare-IP behavioural probe in every later gate |
+| probe `/api/overview` | routers 36 (30 live + 4 p32 + api/dashboard@internal), **errors 1** (= thinx-api-ws), services 19, middlewares 9 |
+| LIVE `/api/overview` during the probe (credentialed) | **30 / 0**, `p32-` routers seen by the live edge: **0** — the constraint isolation held (T-32-01) |
+
+#### Run B — Stage 1's exact live condition (v2 default + per-router `ruleSyntax=v3`)
+
+```
+ssh micro "ARGS=\$(docker service inspect traefik_p32probe --format '{{json .Spec.TaskTemplate.ContainerSpec.Args}}' \
+  | jq -r '.[:3] + [\"--core.defaultRuleSyntax=v2\"] + .[3:] | map(@sh) | join(\" \")'); \
+  docker service update --detach --args \"\$ARGS\" traefik_p32probe"
+# expect: rc 0; the FULL 19-flag list (18 Run A flags + the switch at index 3) — `--args` replaces the whole list
+ssh micro "docker service update --detach --label-add traefik.http.routers.p32-ws.ruleSyntax=v3 \
+  --label-add traefik.http.routers.p32-downtime-http.ruleSyntax=v3 --label-add traefik.http.routers.p32-downtime-https.ruleSyntax=v3 \
+  --label-add traefik.http.routers.p32-error-router.ruleSyntax=v3 p32-rules"
+# expect: rc 0; probe 1/1 again with args=19; then the p32 filter -> 4 enabled, syn=v3 (explicit); thinx-api-ws@swarm enabled again
+```
+
+| Run B check (13:50:09Z) | Observed |
+|---|---|
+| `--args` update | rc 0; `n_args_to_apply=19`; update `completed` at t=18 s; probe `1/1` (`Running 6 seconds ago`); `probe_args=19`, `--core.defaultRuleSyntax=v2` count 1 |
+| `--label-add` x4 on `p32-rules` | rc 0 |
+| p32- routers | **4 / 4 enabled**, p=200/2/2/1, **`syn=v3` explicit**, rules verbatim |
+| non-enabled filter | prints **nothing** |
+| probe-seen live four | all **enabled**, `syn=v2` (v2 default restored; `thinx-api-ws@swarm` parses again) |
+| probe `/api/overview` | routers 36, **errors 0** |
+| LIVE `/api/overview` | **30 / 0** |
+
+#### Teardown + no-side-effect checks
+
+```
+ssh micro "docker service rm traefik_p32probe p32-rules"
+ssh micro "docker service ls --filter name=p32 --format '{{.Name}}'; docker service ls --filter name=traefik_p32probe --format '{{.Name}}'"   # expect: empty, empty
+ssh micro "stat -c '%s %Y %a %U' /var/lib/docker/volumes/traefik_traefik-public-certificates/_data/acme.json; \
+  docker service inspect traefik_traefik --format '{{.Version.Index}} {{len .Spec.TaskTemplate.ContainerSpec.Args}}'"
+# expect: 301121 1791410693 600 root (unchanged); 38379311 17 (live edge untouched)
+```
+
+| Check (13:52:01Z) | Observed |
+|---|---|
+| services after `rm` | `p32` filter **empty**, `traefik_p32probe` filter **empty**, `gsd.phase=32` containers **0** |
+| production `acme.json` | `301121 1791410693 600 root` — unchanged (no mount, throwaway storage, staging CA) |
+| live `traefik_traefik` | `traefik:v3.7.14 idx=38379311 args=17`, task `i7tpgo7vv0vj` still `Running 16 hours ago` (not restarted) |
+| live `/api/overview` | 30 / 0 |
+| bare-IP pair re-run | `301 https://188.166.23.244/` and `200` — = baseline |
+| WS probe re-run (`websocket` / `WebSocket`) | `HTTP/1.1 401 Unauthorized` + `X-Forwarded-Proto: https` both — = baseline |
+
+**Gate verdict (D-02 tracer):** the four native-v3 rules parse and report `enabled` under a Traefik v3.7.14
+booted WITHOUT the switch (Run A) and under Stage 1's exact live condition — v2 default + per-router
+`ruleSyntax=v3` (Run B). The live edge was never written and never discovered the throwaway. Stage 1 may
+proceed.
+
+### Mechanism (Phase 32)
+
+_Filled by 32-01 Task 3._
+
+### Stage 1 record (32-01 Task 3)
+
+_Filled by 32-01 Task 3._
+
+### Stage 2 record (32-02)
+
+_Filled by Plan 32-02._
+
+### Stage 3 record (32-02)
+
+_Filled by Plan 32-02._

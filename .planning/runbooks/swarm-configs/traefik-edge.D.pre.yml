@@ -1,0 +1,186 @@
+# Phase 32 (EDGE-MIG-03 / D-02, D-03, D-04) — live Traefik edge snapshot captured 2026-10-08 13:46:31 UTC from micro
+# (swarm manager), read-only. AUTHORITATIVE SOURCE = running task state (P30 D-08).
+# Redacted + NOT executable per swarm-configs/README (secrets -> literal <redacted>, ${VAR} kept
+# templated, otherwise bit-faithful so a `diff` against the paired traefik-edge.D.post.yml works).
+# Redaction was applied ON micro (sed over the inspect output) before anything was read off the host.
+# Live traefik image: traefik:v3.7.14 (exact tag, P31 D-03; resolved digest recorded below as a comment only).
+# STEP D PRE — the Phase 32 start state, captured BEFORE the D-02 boot-and-discover probe and BEFORE Stage 1
+# (Plan 32-01 Task 1). The static command still carries the backward-compat switch; the four v2-only router
+# rules (thinx-api-ws, downtime-http, downtime-https, error-router) are still live in their v2 form.
+# Delta vs traefik-edge.C.post.yml: none in the body — this is the Phase 31 end state re-captured as the
+# Phase 32 start state; only this header and the index/timestamp lines differ (Version.Index 38379311 and
+# Spec.UpdatedAt 2026-10-07T22:04:56Z are UNCHANGED since the P31 hop; the task has not restarted).
+# Rollback pair (REAL values, 600 root, never committed) is unchanged and still the P31 restore source:
+#   micro:/mnt/data/edge-rollback/traefik-2026-10-07/{acme.json,resolved-snapshot.yml}  (dir 700 root)
+#   micro:/mnt/data/edge-rollback/traefik-p31-precutover-20261007T203816Z.json          (full docker service inspect)
+
+traefik_service:
+  image: traefik:v3.7.14
+  # resolved on micro: traefik@sha256:e849695bc5c317da0cec22bfee4794fd9e15871fe554f864d31b625983e883ff
+  # image id sha256:5a93040e5abdf181145d7c242964eca7999ffd700e0447b242ef212f3ee44d55 (pre-pulled 2026-10-07 by Plan 31-03)
+  # Version.Index 38379311 (unchanged since P31 B1); Spec.UpdatedAt 2026-10-07T22:04:56Z; UpdateStatus completed;
+  # task traefik_traefik.1 on micro, container started 2026-10-07T22:04:51Z (Running 16 h at capture).
+  # Published host ports — the traefik service itself publishes ONLY 80 and 443 (ingress). UNCHANGED.
+  published_ports:
+    - 80:80/tcp     # entrypoint http
+    - 443:443/tcp   # entrypoint https
+  # Resolved static command (Spec.TaskTemplate.ContainerSpec.Args), in live order — the 17-flag v3 set, index-exact
+  # against the committed thinx-swarm/traefik.yml@677e3a9 / docker-compose.traefik.yml (diff empty, email masked).
+  # Phase 32 Stage 2 (Plan 32-02) removes exactly one line of this block: the BC switch (17 -> 16).
+  command:
+    - --providers.swarm                                   # v3 split provider (P31)
+    - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)   # value byte-identical, backticks intact
+    - --providers.swarm.exposedbydefault=true             # WART -> fix-forward P33 (value stays true)
+    - --core.defaultRuleSyntax=v2                         # BC switch (P31 D-04) — STILL LIVE at this capture; removed by Plan 32-02 Stage 2
+    - --entrypoints.http.address=:80
+    - --entrypoints.https.address=:443
+    - --entrypoints.vpn.address=:1194                     # vestigial: defined, NO router, NOT published by traefik
+    - --entrypoints.mqtt.address=:1883                    # vestigial: :1883 published directly by thinx_mosquitto
+    - --entrypoints.mqtts.address=:8883                   # vestigial: traefik does NOT publish :8883
+    - --entrypoints.thxp.address=:7442                    # vestigial: :7442 published directly by thinx_api (AGENTS.md keep-7442)
+    - --certificatesresolvers.le.acme.email=${EMAIL}      # live resolves to a real operator address; kept templated in git (P29 D-12)
+    - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+    - --certificatesresolvers.le.acme.tlschallenge=true
+    - --accesslog
+    - --log
+    - --log.level=ERROR                                   # WART -> fix-forward P34 (policy choice)
+    - --api                                               # WART -> fix-forward P33 (dashboard/API lockdown); NO --api.insecure live
+  mounts:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+      read_only: true                                     # ro raw docker.sock -> fix-forward P34 (socket-proxy); default swarm endpoint
+    - type: volume
+      source: traefik_traefik-public-certificates         # swarm-namespaced; committed file names it traefik-public-certificates
+      target: /certificates                               # acme.json: 24 certs (see acme_json below)
+  configs:
+    - config_name: tls-config-1                           # committed: name tls-config-${CONFIG:-1}, so CONFIG=1 live
+      target: /traefik/tls.toml
+      mode: "0444"                                        # sha256 7e43d8f9… == committed thinx-swarm/traefik/tls.toml (zero drift)
+  networks:
+    - traefik-public                                      # yw26fv3f…; alias: traefik; external network
+  placement:
+    - node.labels.Traefik == true                         # only micro carries the label
+  env: []                                                 # ContainerSpec.Env is null live (all values are flags/labels)
+  # Resolved deploy labels on the traefik service itself (basic-auth hash redacted; DOMAIN templated):
+  labels:
+    traefik.enable: "true"
+    traefik.swarm.network: traefik-public                # v3 swarm-provider key (P31)
+    traefik.constraint-label: traefik-public
+    traefik.http.middlewares.admin-auth.basicauth.users: ${USERNAME}:<redacted>   # apr1 hash redacted (P29 D-12); unchanged
+    traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+    traefik.http.middlewares.https-redirect.redirectscheme.permanent: "true"
+    traefik.http.middlewares.security-headers.headers.browserxssfilter: "true"
+    traefik.http.middlewares.security-headers.headers.contenttypenosniff: "true"
+    traefik.http.middlewares.security-headers.headers.forcestsheader: "true"
+    traefik.http.middlewares.security-headers.headers.framedeny: "true"
+    traefik.http.middlewares.security-headers.headers.stsincludesubdomains: "true"
+    traefik.http.middlewares.security-headers.headers.stspreload: "true"
+    traefik.http.middlewares.security-headers.headers.stsseconds: "31536000"
+    traefik.http.middlewares.error-pages-middleware.errors.status: 400-599
+    traefik.http.middlewares.error-pages-middleware.errors.service: errorpage
+    traefik.http.middlewares.error-pages-middleware.errors.query: /{status}.html
+    traefik.http.routers.traefik-public-http.rule: Host(`${DOMAIN}`)
+    traefik.http.routers.traefik-public-http.entrypoints: http
+    traefik.http.routers.traefik-public-http.middlewares: https-redirect
+    traefik.http.routers.traefik-public-https.rule: Host(`${DOMAIN}`)
+    traefik.http.routers.traefik-public-https.entrypoints: https
+    traefik.http.routers.traefik-public-https.tls: "true"
+    traefik.http.routers.traefik-public-https.service: api@internal
+    traefik.http.routers.traefik-public-https.tls.certresolver: le
+    traefik.http.routers.traefik-public-https.middlewares: admin-auth,error-pages-middleware
+    traefik.http.services.traefik-public.loadbalancer.server.port: "8080"
+  # Stack bookkeeping labels (not read by Traefik): com.docker.stack.namespace=traefik and
+  # com.docker.stack.image=traefik:v2.11@sha256:d57faa4f… — the latter is STALE (only `docker stack deploy` rewrites
+  # it; `docker service update --image` does not). Cosmetic; pre-existing; NOT touched by Phase 32.
+
+# ---------------------------------------------------------------------------
+# App-stack router labels that Phase 32 converts (the four v2-only rules of the 2026-10-08 live inventory),
+# as resolved live on 2026-10-08 13:45 UTC via `docker service inspect <svc>` (.Spec.Labels) and the
+# credentialed /api/http/routers readback (every one enabled, ruleSyntax reported as v2 = inherited default):
+app_stack_labels_pre_phase32:
+  thinx_api:
+    traefik.http.routers.thinx-api-ws.rule: Host(`rtm.thinx.cloud`) && HeadersRegexp(`Upgrade`, `(?i)websocket`)   # v2 matcher name; Stage 1 -> HeaderRegexp
+    traefik.http.routers.thinx-api-ws.priority: "200"
+    traefik.http.routers.thinx-api-ws.ruleSyntax: ABSENT (inherited v2)
+  downtime_downtime:
+    traefik.http.routers.downtime-http.rule: HostRegexp(`{host:.+}`)      # v2 host placeholder; Stage 1 -> PathPrefix(`/`)
+    traefik.http.routers.downtime-http.priority: "2"
+    traefik.http.routers.downtime-http.ruleSyntax: ABSENT (inherited v2)
+    traefik.http.routers.downtime-https.rule: HostRegexp(`{host:.+}`)     # v2 host placeholder; Stage 1 -> PathPrefix(`/`)
+    traefik.http.routers.downtime-https.priority: "2"
+    traefik.http.routers.downtime-https.ruleSyntax: ABSENT (inherited v2)
+  errorpage_errorpage:
+    traefik.http.routers.error-router.rule: HostRegexp(`{host:.+}`)       # v2 host placeholder; Stage 1 -> PathPrefix(`/`)
+    traefik.http.routers.error-router.priority: "1"
+    traefik.http.routers.error-router.ruleSyntax: ABSENT (inherited v2)
+  all_other_live_routers: "26 routers on plain Host() rules — valid v3 syntax, no ruleSyntax label anywhere (0/30)"
+  # Running tasks at capture (label-only Stage 1 must leave these ids unchanged): thinx_api.1 9nitjbo580v8 (micro,
+  # Running 2 h), downtime_downtime.1 vzyg90j8f878 (core — Swarmpit autoredeployed it at 13:45:31Z after the
+  # operator's thinx-swarm 498afa7 image rebuild, independent of this phase), errorpage_errorpage.1 5d7aukf4evft
+  # (micro — likewise autoredeployed at 13:20:56Z).
+
+# ---------------------------------------------------------------------------
+# Dynamic config — docker config tls-config-1, mounted at /traefik/tls.toml.
+# Byte-identical to committed thinx-swarm/traefik/tls.toml (sha256 7e43d8f919317184…; zero drift; untouched by Phase 32).
+tls_toml: |
+  [tls]
+    [tls.options]
+      [tls.options.default]
+        minVersion = "VersionTLS12"
+        sniStrict = true
+        cipherSuites = [
+          "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+          "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+          "TLS_AES_128_GCM_SHA256",
+          "TLS_AES_256_GCM_SHA384",
+          "TLS_CHACHA20_POLY1305_SHA256"
+        ]
+
+# ---------------------------------------------------------------------------
+# ACME store continuity — the named-volume acme.json at the Phase 32 start (Plan 32-03 compares D.post against these):
+acme_json:
+  stat_pre:  "301121 1791410693 600 root"   # unchanged since the P31 one-time v3 rewrite (mtime 2026-10-07T22:04:53Z)
+  certificates: 24                          # unchanged
+  served_app_thinx_cloud: "Let's Encrypt YR2, serial 051152D5A20BE36DEFA1B6FA83379CE42809, valid (checkend 0) — same serial as the P31 record"
+  served_rtm_thinx_cloud: "Let's Encrypt YR2, serial 0535CC0C71E39D9378E72893F3A2141267B0, valid (checkend 0) — same serial as the P31 record"
+  # The catch-all routers carry no Host() in either form, so no ACME domain is ever derived from them (RESEARCH Pitfall 9).
+
+# ---------------------------------------------------------------------------
+# Full entrypoint map (AGENTS.md "keep 7442") — all six entrypoints present, UNCHANGED by Phase 32:
+entrypoints:
+  ":80  http":   { defined_in_traefik: true,  traefik_published: true,  notes: "HTTP -> https-redirect / API backend" }
+  ":443 https":  { defined_in_traefik: true,  traefik_published: true,  notes: "primary HTTPS edge, all http routers" }
+  ":1194 vpn":   { defined_in_traefik: true,  traefik_published: false, notes: "no router, no published port — vestigial entrypoint" }
+  ":1883 mqtt":  { defined_in_traefik: true,  traefik_published: false, notes: "plain MQTT; published DIRECTLY by thinx_mosquitto (*:1883-1884->1883-1884), NOT via traefik" }
+  ":8883 mqtts": { defined_in_traefik: true,  traefik_published: false, notes: "thinx_mosquitto publishes *:8883->8883 directly; the mosquitto-secure TCP router is still filtered out by the provider constraint (tcp routers: 0)" }
+  ":7442 thxp":  { defined_in_traefik: true,  traefik_published: false, notes: "legacy plaintext device port; published DIRECTLY by thinx_api (*:7442->7442), NOT via traefik — AGENTS.md keep-7442" }
+
+# Direct-publish device/MQTT model (P31 D-05) — verified at the Phase 32 baseline (device flow PASS over :7442+:1883 and over HTTPS):
+direct_publish:
+  thinx_api:       { publishes: ["7442:7442/tcp"], note: "legacy plaintext thxp device port; :7442 OPEN" }
+  thinx_mosquitto: { publishes: ["1883:1883/tcp", "1884:1884/tcp", "8883:8883/tcp"], note: "plain + TLS MQTT; :1883 and :8883 OPEN" }
+
+# ---------------------------------------------------------------------------
+# Discovered state under the swarm provider (dashboard API via the admin-auth traefik-public-https router, 13:44 UTC):
+# http routers 30 (0 errors, 0 warnings), services 18 (0 errors), middlewares 7 (0 errors), tcp routers 0,
+# providers ["Swarm"]. Every router status==enabled; exactly 4 rules are v2-only (listed above), all reporting
+# ruleSyntax v2 (inherited from --core.defaultRuleSyntax=v2). traefik_traefik: 1 task on micro, update completed.
+#
+# Phase 32 baseline behavioural probes (recorded 2026-10-08 13:45 UTC; Plan 32-01 Task 3 and Plan 32-02 gate on them):
+#   http://188.166.23.244/  (bare IP, :80)   -> 301 https://188.166.23.244/   (downtime-http matched the bare IP under v2 too; https-redirect)
+#   https://188.166.23.244/ (bare IP, :443)  -> 200 (downtime page, server nginx)
+#   GET / HTTP/1.0 with no Host header on :80 -> HTTP/1.0 404 Not Found (Traefik's own; D-06 accepts that PathPrefix(`/`) changes this)
+#   HTTP/1.1 WebSocket upgrade, Upgrade: websocket, Cookie without x-thx-core, https://rtm.thinx.cloud/p32probe
+#                                            -> HTTP/1.1 401 Unauthorized + X-Forwarded-Proto: https (API raw reject via sslheaders; no Server: nginx)
+#   same with Upgrade: WebSocket (mixed case) -> HTTP/1.1 401 Unauthorized + X-Forwarded-Proto: https ((?i) honoured under v2)
+#   HTTPS matrix: app/console/rtm/thinx.cloud/swarmpit 200, micro 401 (dashboard, unauth); external Host() routers
+#   fotostim.com, www.fotostim.com, fotostim.cz, www.fotostim.cz, igraczech.com, www.igraczech.com, www.syxra.cz all 200;
+#   igraczech.unitednewschannel.net does not resolve in DNS (curl 000 — pre-existing, recorded only).
+#   HTTP matrix: app 200 (by design); every other host above 301 -> https://<host>/.
