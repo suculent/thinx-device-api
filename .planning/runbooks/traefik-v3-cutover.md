@@ -1116,6 +1116,70 @@ Repo state == live state after this task: thinx-swarm `6c01b26` (origin + micro)
 (mirror MIRROR OK at 16 flags), live `traefik_traefik` 16 flags index-exact to the mirror. The four
 `ruleSyntax=v3` overrides are still live and committed — Stage 3 (Task 3) strips them.
 
-### Stage 3 record (32-02)
+### Stage 3 record (32-02 Task 3, 2026-10-08 14:55-15:02 UTC)
 
-_Filled by Plan 32-02._
+**Outcome: zero `ruleSyntax` overrides live or in git; the four routers run their native v3 rules under the
+inherited v3 default; nothing restarted; `traefik_traefik` untouched at `args=16 idx=38379738`; committed
+files == micro's checkout == live spec (D-03, D-04). End state of Plan 32-02.**
+
+Repo first (D-04): thinx-swarm **`158f36981c6f128dbc4b0dcd2f6d378124852e6f`** (parent `6c01b26`) deletes
+exactly the four Stage 1 override lines (`errorpage.yml` 1, `downtime.yml` 2, `thinx.yml` 1); v3 rules,
+priorities 1/2/2/200 and the Phase 32 comments untouched. Pushed to `origin/master`, pushed to micro as
+`p32-stage3`, `git merge --ff-only` (`6c01b26..158f369`, 0 tracked modifications, temp branch deleted).
+This repo: `docker-swarm.yml` minus its one `ruleSyntax` line (WS block byte-identical to `thinx.yml`),
+mirror regenerated — `MIRROR OK files=1`, banner `source: thinx-swarm@158f369…`, still 16 flags, body
+unchanged (Pitfall 6: the banner SHA tracks every thinx-swarm commit).
+
+```
+ssh micro "docker service update --detach --label-rm traefik.http.routers.error-router.ruleSyntax errorpage_errorpage"
+ssh micro "docker service update --detach --label-rm traefik.http.routers.downtime-http.ruleSyntax --label-rm traefik.http.routers.downtime-https.ruleSyntax downtime_downtime"
+ssh micro "docker service update --detach --label-rm traefik.http.routers.thinx-api-ws.ruleSyntax thinx_api"
+# expect each: rc 0; task id pre == post (label-only); label readback = v3 rule + priority, NO ruleSyntax line
+ssh micro "for s in thinx_api downtime_downtime errorpage_errorpage; do docker service inspect \$s --format '{{range \$k,\$v := .Spec.Labels}}{{\$k}}={{\$v}}{{println}}{{end}}'; done | grep -c ruleSyntax"
+# expect: 0
+```
+
+| Time (UTC) | Update | rc | Task id pre == post | Label readback after |
+|---|---|---|---|---|
+| 15:00:26 | **(1) errorpage_errorpage** `--label-rm error-router.ruleSyntax` | 0 | `5d7aukf4evft` == `5d7aukf4evft` (micro, Running 2 h) | `error-router.rule=PathPrefix(\`/\`)`, `priority=1`, no `ruleSyntax` |
+| 15:00:26 | **(2) downtime_downtime** `--label-rm downtime-http.ruleSyntax --label-rm downtime-https.ruleSyntax` (one update) | 0 | `vzyg90j8f878` == `vzyg90j8f878` (core, Running ~1 h) | both rules ``PathPrefix(`/`)``, priorities 2 / 2, no `ruleSyntax` |
+| 15:00:26 | **(3) thinx_api** `--label-rm thinx-api-ws.ruleSyntax` | 0 | `8v3ype7pftzh` == `8v3ype7pftzh` (micro, Running 44 min — the 14:15:41Z Swarmpit autoredeploy predates this plan) | ``thinx-api-ws.rule=Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)``, `priority=200`, no `ruleSyntax` |
+
+Live `ruleSyntax` label count across the three services after (3): **0**. No `thinx-staging` push during
+the window (Pitfall 7).
+
+#### Stage 3 end check (15:00:56Z - 15:01:28Z) vs the Stage 2 record / 13:44Z baseline
+
+| Check | Expected | Observed | Verdict |
+|---|---|---|---|
+| provider convergence | the four routers stop reporting the explicit `v3` | at 15:00:56Z (first read, 30 s after the updates) `syn=-` on all four | converged |
+| the four routers (API) | `enabled`, p=200/2/2/1, v3 rules | `downtime-http@swarm enabled p=2`, `downtime-https@swarm enabled p=2`, `error-router@swarm enabled p=1`, `thinx-api-ws@swarm enabled p=200`, rules verbatim, `ruleSyntax` **absent** | enabled under the inherited v3 default |
+| `ruleSyntax` histogram over all 30 routers | field absent everywhere (v3 default, `omitempty` — 32-01 Run A finding) | **`{"-": 30}`** (Stage 2 read was 26 absent + 4 explicit `v3`) | no override anywhere |
+| status filter `select(.status!="enabled")` | empty | **empty** | identical |
+| `/api/overview` | 30 / 0 | **30 / 0 errors / 0 warnings**, services 18, middlewares 7 | identical |
+| HTTPS matrix (14 hosts, from micro) | == baseline | app / console / rtm / thinx.cloud / swarmpit 200, micro 401, 7 externals 200, `igraczech.unitednewschannel.net` 000 (DNS) | identical |
+| HTTP redirect matrix | == baseline | app 200; console / rtm / thinx.cloud / swarmpit / micro 301 -> https://<host>/ | identical |
+| bare-IP `http://188.166.23.244/` / `https://…/ -k` | `301 https://188.166.23.244/` / `200` | **`301 https://188.166.23.244/`** / **`200`** | catch-alls alive without overrides |
+| WS probe `--http1.1` `websocket` / `WebSocket` | 401 + `X-Forwarded-Proto: https`, no nginx | **401** + `X-Forwarded-Proto: https` / **401** + `X-Forwarded-Proto: https`, no `Server: nginx` | WS router matches natively without override |
+| hostless `GET / HTTP/1.0` on :80 | `301` (Stage 1 end state, D-06) | `HTTP/1.0 301 Moved Permanently` | identical |
+| cert serials / `checkend 0` | app `051152D5…`, rtm `0535CC0C…` | app `051152D5A20BE36DEFA1B6FA83379CE42809`, rtm `0535CC0C71E39D9378E72893F3A2141267B0`, both valid | identical |
+| `traefik_traefik` | `traefik:v3.7.14 args=16 idx=38379738` (not re-updated) | **`traefik:v3.7.14 args=16 idx=38379738`**, task `yudql1hqdnd9` (Running 12 min = the Stage 2 restart) | untouched in Stage 3 |
+| task ids thinx_api / downtime / errorpage | pre == post | `8v3ype7pftzh` / `vzyg90j8f878` / `5d7aukf4evft` — same as before each update | **no restarts** (label-only) |
+| live log `error while parsing rule\|unsupported function` (5 min) | 0 | **0** | no parse errors |
+| `:7442` / `:1883` / `:8883` | OPEN | OPEN / OPEN / OPEN | unaffected |
+
+Plan `<verify>` for Task 3: V1-V4, V6 PASS as written. V5 (`grep '^enabled syn=v3$' … -eq 4`) does
+**not** pass as written: under the v3 default the dashboard API omits the `ruleSyntax` field instead of
+echoing `v3` (the `omitempty` behaviour recorded in the 32-01 Run A table and called out in Plan 32-02's
+own task text) — the four lines read `enabled syn=-`; the v3 parse is proven by `enabled` + the behavioural
+probes, and the override absence by the label readback (V4). V7's negated `Running N minutes ago` grep
+matches `thinx_api` (45 min) because Swarmpit autoredeployed it at 14:15:41Z, before this plan started;
+the per-update task ids above are the evidence that Stage 3 restarted nothing. Both recorded as
+plan-command defects in 32-02-SUMMARY, not rewritten.
+
+**Phase 32 live end state (hand-off to Plan 32-03):** `traefik_traefik` `traefik:v3.7.14`, 16 flags
+(no backward-compat switch), `Version.Index 38379738`, task `yudql1hqdnd9`; the four converted routers
+enabled with no `ruleSyntax` label; thinx-swarm `158f369` == origin/master == micro checkout; this repo
+mirror `MIRROR OK` at 16 flags (banner `158f369`); `docker-swarm.yml` WS block == `thinx.yml`; 17-flag
+revert source `micro:/mnt/data/edge-rollback/traefik-p32-prestage2-20261008T144309Z.json` (600 root,
+out of git); dashboard credential `/root/.p32-traefik-admin` still in place for 32-03 (shredded there).
