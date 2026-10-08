@@ -62,7 +62,7 @@ traefik_service:
     traefik.http.middlewares.error-pages-middleware.errors.status: 400-599
     traefik.http.middlewares.error-pages-middleware.errors.service: errorpage
     traefik.http.middlewares.error-pages-middleware.errors.query: /{status}.html
-    traefik.http.routers.traefik-public-http.rule: Host(`${DOMAIN}`)              # live DOMAIN=micro.thinx.cloud
+    traefik.http.routers.traefik-public-http.rule: Host(`${DOMAIN}`)
     traefik.http.routers.traefik-public-http.entrypoints: http
     traefik.http.routers.traefik-public-http.middlewares: https-redirect
     traefik.http.routers.traefik-public-https.rule: Host(`${DOMAIN}`)
