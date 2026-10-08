@@ -4,18 +4,18 @@ milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
 current_phase: 32
 current_phase_name: v3 Native Syntax & BC Removal
-status: executing
-stopped_at: Completed 32-02-PLAN.md
-last_updated: "2026-10-08T15:08:06.806Z"
+status: verifying
+stopped_at: Completed 32-03-PLAN.md
+last_updated: "2026-10-08T15:35:57.824Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 32 execution started
-state_head: 7ebfb864b52ebe437afbcc97d193bcdceed3ab69
+state_head: 2455cdb021e0f5b11a9503404ecec8be1af219b7
 progress:
   total_phases: 6
   completed_phases: 16
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
 
 Phase: 32 (v3 Native Syntax & BC Removal) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-08 — Phase 32 execution started
 
 ## Milestones
@@ -313,6 +313,10 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 32]: 32-02: Stage 2 DONE — the v2 rule-syntax BC switch is removed from the live traefik_traefik (17 -> 16 flags, one --args update at 14:48:11Z, new task yudql1hqdnd9, Version.Index 38379738, image traefik:v3.7.14 unchanged) and from thinx-swarm traefik.yml (6c01b26, mirror 875c20c2); D-10 gate green on all four triggers (status filter empty, HTTPS matrix == baseline, WS 401 + X-Forwarded-Proto https both casings, bare-IP 301/200), revert staged from the 600-root backup traefik-p32-prestage2-20261008T144309Z.json and NOT fired — Stage 1 (32-01) had converted all four v2-only routers under explicit ruleSyntax=v3 overrides, so the switch could be removed with no parse-error window in either direction; the 16-flag args were rebuilt on micro from a fresh full-spec backup, dry-printed and diffed index-exact 16/16 against the committed mirror before the single update fired
 - [Phase 32]: 32-02: Stage 3 DONE — the four per-router ruleSyntax=v3 overrides are stripped live (three --label-rm updates at 15:00:26Z, task ids pre == post, 0 restarts) and removed from thinx-swarm 158f369 (thinx.yml/downtime.yml/errorpage.yml) and docker-swarm.yml (80625887); every one of the 30 routers is enabled under the inherited v3 default, the API omits the ruleSyntax field everywhere, committed files == micro checkout == live spec; EDGE-MIG-03 closes on the converted-and-removed branch (D-09), nothing retained — D-03/D-04 end state: no switch, no overrides, deployed file and live spec identical; under a v3 default the dashboard API reports inherited syntax as an absent field (32-01 Run A finding), so override removal is asserted on docker service inspect labels, not on the API echoing v3
 - [Phase 32]: 32-02: Version.Index for an --args update is recorded only after UpdateStatus.State=completed (38379727 mid-update -> 38379738 settled); the Stage 2 restart window was 15 s fire-to-Running (old task stop ~13 s, new task boot ~1 s) vs 4 s in 31-03; old-task drain 'middleware does not exist' ERR lines and the external fotostim-stack ACME renewal error (checkout.qooldata.com, deferred-items.md) are not D-10 triggers — The index advances once more when the swarm settles the update, and Task 3's verify compares the live index to the recorded line; the drain lines were emitted only by the stopping task with a partial dynamic config and the rule-parse scan on the new task is 0
+- [Phase 32]: EDGE-MIG-03 closes on the converted-and-removed branch (D-09): switch gone from live Args, traefik.yml and mirror; no per-router override remains — Plan 32-03 evidence bundle (Task 1 V1-V12 PASS, matrices == 13:44Z baseline, serials unchanged, repo == deployed at thinx-swarm 158f369) plus operator approval at the D-11 gate; nothing is retained, so no retention rationale exists
+- [Phase 32]: Human gate approved on the native-v3 end state; D-06 hostless/bare-IP behaviour change accepted as recorded — Operator confirmed console render + live WS updates in the browser (console-retest checklist) on 2026-10-08; hostless HTTP/1.0 GET now 301 from downtime-http instead of Traefik's bare 404 - static pages only, host routers win on priority
+- [Phase 32]: D-12 dashboard credential shredded on micro (15:16:48Z) right after the last credentialed readback, before the human gate — The gate's revert path needs no credential (behavioural probes + HTTPS matrix); any later credentialed /api/http/routers re-check requires the operator to re-stage /root/.p32-traefik-admin (600 root)
+- [Phase 32]: thinx-staging deliberately not pushed in Phase 32 (12-commit local lead); operator pushes when ready — 31-03 precedent: every push rolls thinx_api via Swarmpit (~6 min); check-traefik-mirror.js passes locally so the CI mirror gate will pass
 
 ### Todos
 
@@ -436,11 +440,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 32-02-PLAN.md
+**Stopped at:** Completed 32-03-PLAN.md
 
 **Resume file:** None
 
-**Last session:** 2026-10-08T15:06:57.801Z
+**Last session:** 2026-10-08T15:35:35.743Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -513,3 +517,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 31 P03 | 19 min | 3 tasks | 2 files |
 | Phase 32 P01 | 40 min | 3 tasks | 8 files |
 | Phase 32 P02 | 25 min | 3 tasks | 7 files |
+| Phase 32 P03 | 22 min | 2 tasks | 4 files |
