@@ -17,6 +17,7 @@ Swarm stack files and the config files they bind-mount use a per-step pattern:
 
 - `swarmpit-stack.<step>.{pre,post}.yml` — the Swarmpit stack file (`/mnt/gluster/deployment/swarm/swarmpit.yml`) captured before and after each Phase 28 step. Steps: `0` (only if the D-17 drift check found drift and the file was reconciled), `A` (stats trim), `B` (1.10 upgrade).
 - `swarmpit-influxdb*.A.pre.conf` — copies of `swarmpit/influxdb.conf` (and its `.bak.*` sibling) taken before Step A deletes them; the restore source for the Step A rollback.
+- `traefik-edge.<step>.{pre,post}.yml` — the Traefik edge service (`traefik_traefik`: resolved static command, mounts, configs, labels, plus the app-stack router labels the step touches, ACME continuity and the discovered router state) captured before/after each edge step, redacted on micro before being read off the host. Steps: `A`/`B` (Phase 30, provider/label reconciliation), `C` (Phase 31 v2.11 -> v3.7.14 hop, BC mode: 17-flag command with the v2 rule-syntax switch), `D` (Phase 32 native-v3 rules + BC-switch removal: 16-flag command, four routers on `HeaderRegexp` / ``PathPrefix(`/`)``, zero `ruleSyntax` labels). Each `.post.yml` is an immutable phase record; the next phase opens a new step pair instead of editing it.
 
 Future OPS phases targeting additional hosts (e.g., mosquitto edge) extend the same pattern.
 

@@ -1183,3 +1183,91 @@ enabled with no `ruleSyntax` label; thinx-swarm `158f369` == origin/master == mi
 mirror `MIRROR OK` at 16 flags (banner `158f369`); `docker-swarm.yml` WS block == `thinx.yml`; 17-flag
 revert source `micro:/mnt/data/edge-rollback/traefik-p32-prestage2-20261008T144309Z.json` (600 root,
 out of git); dashboard credential `/root/.p32-traefik-admin` still in place for 32-03 (shredded there).
+
+### Re-verify matrix (Phase 32, 2026-10-08 15:12-15:14 UTC) vs the Plan 01 baseline (13:44Z)
+
+The full RESEARCH §Q3 suite, run top to bottom by Plan 32-03 Task 1 against the native-v3 end state
+(`args=16`, 0 overrides) — every value observed, none assumed. The credentialed rows were read at
+15:12:34Z with the D-12 credential (`HASH=MATCH`, dashboard host read from the live label), which was
+shredded at 15:16:48Z after the capture (`ls` -> `No such file`). No live mutation other than the shred.
+
+| Check | Baseline (32-01, 13:44Z) | End state (32-03, 15:12-15:14Z) | Verdict |
+|---|---|---|---|
+| router status filter `select(.status!="enabled")` | empty | **empty** | identical |
+| `/api/overview` | 30 http routers / 0 errors / 0 warnings; services 18; middlewares 7; tcp 0; providers `["Swarm"]` | **30 / 0 / 0**; 18; 7; 0; `["Swarm"]` | identical |
+| the four routers (API) | `enabled`, p=200/2/2/1, `syn=v2` (inherited), v2 rules | `thinx-api-ws@swarm enabled p=200`, `downtime-http@swarm enabled p=2`, `downtime-https@swarm enabled p=2`, `error-router@swarm enabled p=1`; rules ``Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)`` / ``PathPrefix(`/`)`` x3; `ruleSyntax` field **absent** (`syn=-`, inherited v3) | converted, enabled, no override |
+| `ruleSyntax` histogram (30 routers) | — (v2 inherited everywhere) | **`{"-": 30}`** | no override anywhere |
+| live `traefik_traefik` | `traefik:v3.7.14 args=17 idx=38379311`, task `i7tpgo7vv0vj` | **`traefik:v3.7.14 args=16 idx=38379738 update=completed`**, task `yudql1hqdnd9` (micro, Running 25 min), exactly **1** running task; `grep -c core.defaultRuleSyntax` over the live Args -> **0**; `PreviousSpec` = same image with 17 Args | switch removed; one restart in the phase (Stage 2) |
+| label readback (thinx_api / downtime_downtime / errorpage_errorpage) | v2 rules, 0 `ruleSyntax` | v3 rules + priorities 200/2/2/1, **0 `ruleSyntax` lines**, 3 ``PathPrefix(`/`)`` + 1 `HeaderRegexp` | end state (D-03) |
+| HTTPS matrix (from micro) | app/console/rtm/thinx.cloud/swarmpit 200; micro 401 | app/console/rtm/thinx.cloud/swarmpit **200**; micro **401** | identical |
+| HTTPS externals (Host() values read live from the `fotostimcom/fotostimcz/igraczech/syxra-https@swarm` rules) | fotostim.com, www.fotostim.com, fotostim.cz, www.fotostim.cz, igraczech.com, www.igraczech.com, www.syxra.cz 200; `igraczech.unitednewschannel.net` 000 (DNS) | all seven **200**; `igraczech.unitednewschannel.net` **000** (DNS, pre-existing) | identical line for line |
+| HTTP redirect matrix | app 200; console/rtm/thinx.cloud/swarmpit/micro + 7 externals 301 -> https://<host>/ | app **200**; every other host **301 -> https://<host>/** | identical |
+| bare-IP pair (workstation) | `301 https://188.166.23.244/` / `200` (server nginx) | **`301 https://188.166.23.244/`** / **`200`** (`server: nginx`) | catch-alls alive under native v3 |
+| hostless `GET / HTTP/1.0` on :80 (D-06, record only) | `HTTP/1.0 404 Not Found` (Traefik) | **`HTTP/1.0 301 Moved Permanently`** (downtime-http + https-redirect) | D-06 accepted change, as recorded since Stage 1 |
+| WS probe `--http1.1`, `Upgrade: websocket`, `Cookie: foo=bar`, `/p32probe` | `HTTP/1.1 401` + `X-Forwarded-Proto: https`, no nginx | **`HTTP/1.1 401 Unauthorized`** + **`X-Forwarded-Proto: https`**, no `Server:` header | WS router matches natively |
+| same with `Upgrade: WebSocket` | `401` + `X-Forwarded-Proto: https` | **`HTTP/1.1 401 Unauthorized`** + `X-Forwarded-Proto: https` | `(?i)` honoured (D-08) |
+| cert serials / `checkend 0` | app `051152D5A20BE36DEFA1B6FA83379CE42809`, rtm `0535CC0C71E39D9378E72893F3A2141267B0` | app **`051152D5A20BE36DEFA1B6FA83379CE42809`** (YR2, notAfter Dec 28 05:50:33 2026), rtm **`0535CC0C71E39D9378E72893F3A2141267B0`** (YR2, Dec 28 05:49:53 2026), both `Certificate will not expire` | no re-issuance across the phase |
+| `acme.json` | `301121 1791410693 600 root`, 24 certs | **`301121 1791470908 600 root`**, **24** certs — size unchanged, mtime = the Stage 2 one-time start rewrite | continuity |
+| `tls-config-1` | sha256 `7e43d8f9…` == committed `tls.toml` | **`7e43d8f919317184…`** | zero drift |
+| `:7442` / `:1883` / `:8883` TCP accept (micro) | OPEN x3 | **OPEN / OPEN / OPEN** | unaffected (EDGE-MIG-04) |
+| published ports | `thinx_api 7442->7442`; `thinx_mosquitto 1883->1883 1884->1884 8883->8883`; traefik 80/443 | **`7442->7442`**; **`1883->1883 1884->1884 8883->8883`**; **`80->80 443->443`** only | direct-publish model untouched |
+| device-flow harness (`/tmp/p31-device-flow/thinx-device-flow.mjs`) | `p32-base-7442` PASS; `p32-base-https` PASS | **`p32-7442` PASS** (15:13:16-25Z: register OK over `http://rtm.thinx.cloud:7442`, status, OTT 200, firmware 380048 B `md5Match`, MQTT `mqtt://thinx.cloud:1883` connected + both ACL grants, publish, recent, disconnect); **`p32-https` PASS** (15:13:25-29Z over `https://app.thinx.cloud`, same 8 steps) | EDGE-MIG-04 re-verified |
+| live log scan `error while parsing rule\|unsupported function` (since the Stage 2 restart, `--since 2026-10-08T14:48:00Z`) | 0 | **0** | no parse errors |
+| task ids thinx_api / downtime / errorpage | (Stage 3 pre == post) | `8v3ype7pftzh` (micro) / `vzyg90j8f878` (core) / `5d7aukf4evft` (micro) — unchanged since Stage 3 | no restarts since |
+| repo == deployed | thinx-swarm `677e3a9` (start) | workstation HEAD == micro `/mnt/gluster/deployment/swarm` HEAD == `origin/master` == mirror banner == **`158f36981c6f128dbc4b0dcd2f6d378124852e6f`**; `check-traefik-mirror.js` -> **`MIRROR OK files=1`**; `traefik.yml` 16 / mirror **16** `- --` lines; `docker-swarm.yml` thinx-api-ws block diff vs `thinx.yml` **empty**; 0 uncommented `ruleSyntax` lines across the four files; 0 uncommented switch lines in `traefik.yml` / mirror | success criterion 3 |
+| working trees | — | this repo: only the pre-existing ` M services/worker` submodule pointer; thinx-swarm: only the pre-existing ` M landing` submodule pointer — neither touched by Phase 32 (recorded, not reset) | no plan-generated dirt |
+| `traefik-edge.D.post.yml` | — | captured 15:14:20Z, redacted on micro; 16 flags, no switch line, 4 v3 rules, `ruleSyntax labels: ABSENT`, both serials, 0 hash/key markers, 0 e-mail matches; `C.post.yml` / `D.pre.yml` unchanged | committed with this section |
+| D-12 credential `/root/.p32-traefik-admin` | `600 root 8` | `600 root 8` at 15:12Z (`HASH=MATCH`, overview 200); **shredded 15:16:48Z**, `ls` -> `No such file` | gone |
+
+Verdict: every row identical to the baseline or at its designed end-state value; nothing to revert.
+
+### Live production state at hand-off (Phase 32, for the Task 2 human-verify gate)
+
+`traefik_traefik`: `traefik:v3.7.14` (image id `5a93040e…`, unchanged since P31), **16 args** (no
+backward-compat switch, no placeholder), ports 80/443 only, 1 task `yudql1hqdnd9` on `micro` (Running since
+14:48:26Z), `Version.Index 38379738`, `acme.json` `301121 1791470908 600 root` (24 certs, serials unchanged).
+The four converted routers run native v3 rules with **no** `ruleSyntax` override: `thinx-api-ws`
+``Host(`rtm.thinx.cloud`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)`` p=200; `downtime-http` /
+`downtime-https` ``PathPrefix(`/`)`` p=2; `error-router` ``PathPrefix(`/`)`` p=1. 30/30 routers enabled,
+`ruleSyntax` absent everywhere. `:7442` / `:1883` / `:8883` OPEN and direct-published by `thinx_api` /
+`thinx_mosquitto` (Traefik publishes only 80/443); device flow PASS over plaintext and HTTPS.
+
+Repo state == live state: thinx-swarm `158f369` (origin/master == micro checkout == mirror banner), this
+repo `875c20c2` / `5e58a669` / `80625887` / `ce8b699a` + this plan's commit, `docker-compose.traefik.yml`
+`MIRROR OK` at 16 flags, `docker-swarm.yml` WS block == `thinx.yml`. **`thinx-staging` is NOT pushed:** the
+local lead over `origin/thinx-staging` is the 11 Phase 32 commits (32-01 + 32-02) plus this one; the CI
+mirror gate (`check-traefik-mirror.js`) passes locally, so the push is safe whenever the operator times it
+(31-03 precedent — every push rolls `thinx_api` via Swarmpit, ~6 min). Dashboard credential shredded; a
+credentialed re-check needs the operator to re-stage `/root/.p32-traefik-admin` (600 root) first — the
+gate's failure path below needs **no** credential (behavioural probes + HTTPS matrix only).
+
+**Ordered revert, should the operator reject the gate (order matters — after Stage 3 the v2 default alone
+would disable `thinx-api-ws`, because `HeaderRegexp` is not a v2 matcher name; ``PathPrefix(`/`)`` parses
+under both):**
+
+```
+# (a) FIRST re-add the four ruleSyntax=v3 overrides — label-only, no task restart, no credential needed
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-add traefik.http.routers.error-router.ruleSyntax=v3 errorpage_errorpage"
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-add traefik.http.routers.downtime-http.ruleSyntax=v3 --label-add traefik.http.routers.downtime-https.ruleSyntax=v3 downtime_downtime"
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-add traefik.http.routers.thinx-api-ws.ruleSyntax=v3 thinx_api"
+# expect each: rc 0; task id pre == post; label readback shows the v3 rule + ruleSyntax=v3 (= the Stage 1 end state)
+# (b) THEN re-add the switch with the 17-flag set from the pre-Stage-2 backup — ONE --args update, one ~15 s task restart (web only)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "B=/mnt/data/edge-rollback/traefik-p32-prestage2-20261008T144309Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: 17 ; rc 0; new task Running within ~15 s; `docker service inspect traefik_traefik --format '{{len .Spec.TaskTemplate.ContainerSpec.Args}}'` -> 17; the switch at index 3
+# (c) re-check without a credential: bare-IP pair, WS 401 x2, HTTPS matrix (and :7442/:1883/:8883 OPEN)
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -m 15 http://188.166.23.244/; curl -sk -o /dev/null -w '%{http_code}\n' -m 15 https://188.166.23.244/
+# expect: 301 https://188.166.23.244/ ; 200
+K=dGhlIHNhbXBsZSBub25jZQ==; for U in websocket WebSocket; do curl -s --http1.1 -D - -o /dev/null -m 10 -H "Connection: upgrade" -H "Upgrade: $U" -H "Sec-WebSocket-Key: $K" -H "Sec-WebSocket-Version: 13" -H "Cookie: foo=bar" https://rtm.thinx.cloud/p32probe | grep -iE '^HTTP/|^x-forwarded-proto'; done
+# expect: HTTP/1.1 401 Unauthorized + X-Forwarded-Proto: https, twice
+for H in app.thinx.cloud console.thinx.cloud rtm.thinx.cloud thinx.cloud swarmpit.thinx.cloud micro.thinx.cloud; do ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "curl -sS -o /dev/null -w '$H %{http_code}\n' https://$H/"; done
+# expect: 200 x5, micro 401 (plus the 7 external hosts 200 as in the Baseline table)
+# (d) repo revert in both repos (Stage 3 then Stage 2 commits), mirror regenerated, micro fast-forwarded
+git -C ~/Repositories/thinx-swarm revert --no-edit 158f369 6c01b26 && git -C ~/Repositories/thinx-swarm push origin master
+git -C ~/Repositories/thinx-swarm push ssh://root@188.166.23.244:2020/mnt/gluster/deployment/swarm master:refs/heads/p32-revert   # then on micro: git merge --ff-only p32-revert && git branch -d p32-revert
+git revert --no-edit 80625887 875c20c2 && node scripts/generate-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm && node scripts/check-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm && git add docker-compose.traefik.yml && git commit -m "revert(32): mirror back to 17 flags"
+# expect: MIRROR OK files=1 at 17 flags; thinx-swarm HEAD == micro HEAD; the live spec == the Stage 1 end state (v2 default + four ruleSyntax=v3 overrides + v3 rules)
+```
+
+After (a)-(d) the edge is at the Plan 32-01 Stage 1 end state (v2 default, v3 rules under explicit
+overrides) — a fully verified intermediate state, not the Phase 31 start state. EDGE-MIG-03 then stays
+open; it is not re-labelled "retained with rationale" without the operator's explicit decision.
