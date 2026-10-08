@@ -38,6 +38,8 @@ Snapshots are checked in as-is — no reformatting, no comment stripping, no sec
 
 **Exception for YAML stack snapshots and copied config files (Phase 28, D-17).** Stack snapshots (`*-stack.<step>.{pre,post}.yml`) and copied config files have every secret value replaced by the literal `<redacted>` and are otherwise bit-exact, so `diff` against the live file and the rollback restore still work (restore the redacted values from the live backup on the manager, never from git). `swarmpit/couchdb-logging.ini` carries the CouchDB admin hash and is never copied, snapshotted or committed, in any form.
 
+**`${VAR}` interpolation stays templated (Phase 31, Traefik edge captures `traefik-edge.<step>.{pre,post}.yml`).** Every `${DOMAIN}` / `${EMAIL}` / `${USERNAME}` / `${HASHED_PASSWORD}` reference is kept templated and its resolved value is not written into an adjacent comment either — `${DOMAIN}` is a public DNS name, not a D-12 secret class, but the captures stay consistent so a `diff` across the pair and against future captures carries no resolved values.
+
 The snapshots are NOT executable. They are configuration text, not scripts.
 
 ## Established by
