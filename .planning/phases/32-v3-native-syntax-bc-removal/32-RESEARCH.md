@@ -767,19 +767,27 @@ placeholders, `core.defaultRuleSyntax`/`ruleSyntax` (deprecated). `[CITED: migra
 | A4 | No OS-registered state (cron/systemd) references Traefik rule syntax | Runtime State Inventory | Very low — nothing outside swarm services drives the edge |
 | A5 | `${EMAIL}` index shift (10 → 9) after removing the flag has no consumer that hard-codes the index | Runtime State Inventory | Low — all Phase 31 tooling reads args by content, not index |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the probe also observe the live services (`|| Label(… traefik-public)`)?**
+1. **Should the probe also observe the live services (`|| Label(… traefik-public)`)?** — **RESOLVED — yes,
+   adopted:** Plan 32-01 Task 1 Step 4 boots `traefik_p32probe` with the constraint
+   ``Label(`traefik.constraint-label`, `p32-probe`) || Label(`traefik.constraint-label`, `traefik-public`)``
+   so probe Run A observes the live routers read-only (records the `HeadersRegexp` parse-error text and the
+   enabled-but-dead catch-alls as the silent-failure evidence); the evidence lands in the runbook
+   boot-and-discover record and the `D.pre.yml` footer.
    - What we know: it would record the exact failure text for the live `HeadersRegexp` router and show the
      catch-alls enabled-but-dead under native v3 — read-only for the live edge.
    - What's unclear: whether the planner wants that extra evidence in `D.post.yml`.
    - Recommendation: yes, in the first probe run; it costs nothing and documents the silent-failure mode.
-2. **Stage 2 in the same window as Stage 1, or a separate window?**
+2. **Stage 2 in the same window as Stage 1, or a separate window?** — **RESOLVED — one window, single
+   gate:** Plans 32-01 -> 32-02 -> 32-03 run back-to-back (Stage 1, Stage 2, Stage 3, re-verify) with the
+   ONE `checkpoint:human-verify` at the end of 32-03 (D-11); no per-stage human pause.
    - What we know: Stage 2 is one ~4 s task restart (web only; device ports unaffected); Stage 1 is
      restart-free.
    - Recommendation: one window, one human gate at the end (D-11), as CONTEXT's "Specific Ideas" asks.
 3. **Backlog (out of scope):** the API accepts a WebSocket upgrade that carries no `Cookie` header at all
-   (`thinx-core.js:500-522`). Not a Phase 32 item; capture as a todo for a later security phase.
+   (`thinx-core.js:500-522`). — **RESOLVED — backlog, out of scope:** not a Phase 32 item and no plan task
+   references it; captured as a todo for a later security phase.
 
 ## Environment Availability
 
