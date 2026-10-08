@@ -337,7 +337,7 @@ The v1.13-era notes below (2026-09-21) are kept for reference: each is either re
 
 - ✅ [Phase 31] `thinx-staging` pushed 2026-10-08 (`88846166`); CircleCI green incl. the mirror gate; Swarmpit rolled `thinx_api` to `bc899239…` at 10:06:40Z with 10 secret mounts and `@swarm` labels intact, edge + :7442 serving. thinx-swarm itself triggers NO CI; its `master` was reconciled and pushed 2026-10-08 (`15ff004` = production deploy line + Phase 29–31 changes + origin merge; backup ref `backup/master-pre-reconcile-20261008` = old `5e19c00`).
 - ⚠️ [Phase 31] `/mnt/gluster/deployment/swarm` on micro IS the thinx-swarm git checkout (now `89b0f24`, clean). micro cannot reach GitHub, so update it by pushing from the workstation into it and `git merge --ff-only` there. **Secrets gap closed 2026-10-08:** `thinx.yml` declares the 13 external Docker secrets and attaches exactly the live mounts (api 10, worker 2, transformer 1). Still open (SEC-CFG-04): COUCHDB_USER/COUCHDB_PASS/REDIS_PASSWORD exist as swarm secrets but are unattached (api reads them from `.env`); `.env` keeps 9 fallback duplicates of swarm secrets and 9 secret-like keys with no swarm counterpart (COUCHDB_COOKIE/PASSWORD/SECRET, INFLUXDB_PASSWORD, MOSQUITTO_PASSWORD, ROLLBAR_ACCESS_TOKEN, VUE_APP_ROLLBAR_ACCESS_TOKEN, GOOGLE_MAPS_APIKEY, SNYK_TOKEN). `docker-swarm.yml` env parity restored 2026-10-08 (`615cc31d`); sole remaining diff vs deployed `thinx.yml` is the 3 SEC-CFG-04 api secret attachments.
-- ⚠️ [Phase 31] No two-label bridge exists under v3's swarm provider (skips services with both label families) — Phase 32–34 label changes must be single-step `docker service update`s; rollback Step 3 must re-add `traefik.docker.network` on the five multi-network services (31-REVIEW WR-01/WR-02 still open).
+- ⚠️ [Phase 31] No two-label bridge exists under v3's swarm provider (skips services with both label families) — Phase 32–34 label changes must be single-step `docker service update`s; rollback runbook corrected 2026-10-08 (WR-01/WR-02 fixed: label flip on the five multi-network services is now mandatory Step 2 before the retag; the combined form is NOT yet dry-verified — do it on a throwaway before any real rollback).
 - ⚠️ [Phase 31] `registry.thinx.cloud` via Traefik returns 400 (backend terminates its own TLS, no `loadbalancer.server.scheme=https`) — pre-existing, P33/P34 inventory. `HeadersRegexp` in `docker-swarm.yml` depends on the BC switch — Phase 32 must rename to `HeaderRegexp`.
 
 ### Concerns carried from Phase 28
@@ -454,7 +454,7 @@ Decided at plan time, not blocking the roadmap:
 ## Operator Next Steps
 
 - `/gsd-discuss-phase 32` then `/gsd-plan-phase 32` (v3 native syntax; `HeadersRegexp`→`HeaderRegexp`; consider per-router `ruleSyntax=v3` first)
-- `/gsd-code-review 31 --fix` for runbook WR-01/WR-02; decide SEC-CFG-04 (attach COUCHDB_USER/PASS + REDIS_PASSWORD to api after confirming secret values == .env) and prune `.env` fallbacks
+- Decide SEC-CFG-04 (attach COUCHDB_USER/PASS + REDIS_PASSWORD to api after confirming secret values == .env) and prune `.env` fallbacks
 
 ## Performance Metrics
 
