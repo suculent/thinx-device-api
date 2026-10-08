@@ -309,6 +309,8 @@ services:
       - "GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}"
       # Phase 25: CSRF_MODE legacy|observe|signed; roll back with CSRF_MODE=legacy. CSRF_ENFORCE stays true.
       - "CSRF_ENFORCE=true"
+      - "CORS_ENFORCE=true"
+      - "THINX_MQTT_DEVICE_WRITES=1"
       - "CSRF_MODE=signed"
     ports:
       - 7442:7442
