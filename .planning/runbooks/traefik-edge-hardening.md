@@ -271,3 +271,59 @@ routers_post_A2:
   - thinx-vue-console-https@swarm
   - traefik-mgmt@swarm
 
+### D-08 label clean-up record (33-01 Task 2, 2026-10-08 23:00–23:07 UTC)
+
+**Outcome: the seven D-08 live label updates landed — five label-only on edge services (task ids identical
+pre/post), two container-label removals that restarted `thinx_transformer` / `thinx_worker` once each (accepted,
+not edge services); the router inventory is unchanged at 29/0 and byte-identical to `routers_post_A2:`, the
+catch-alls survived the `downtime`/`errorpage` network-key flip, MQTT stays published and open, and
+`traefik_traefik` was not touched (`args=17`, Version.Index 38379757 == post-Stage-A2).**
+
+Precondition re-read (23:00Z): Stage A record present with `Version.Index post-Stage-A2: 38379757` == live;
+loopback status filter `29/0`; thinx-swarm HEAD == micro HEAD (`93036a8`, then `6dc974b` after the repo step).
+
+Repo first (P32 D-04): thinx-swarm `6dc974b` (`chore(edge): Phase 33 D-08 label clean-up — …`: `thinx.yml` mosquitto
+TCP router/service + opt-in labels removed with `ports:` untouched, dead v1 `traefik.frontend.headers.*` on
+console/vue and the v1 `traefik.backend.*` container labels on transformer/worker removed, `thinx-api-ws` rule host
+→ `${WEB_HOSTNAME}` file-only; `vault.yml` → `traefik.swarm.network`) → origin → micro `p33-d08` ff-merge (dirty=0,
+2 files 12+/14−) → mirror regenerated (`MIRROR-GENERATED ok source=thinx-swarm@6dc974b…`, `MIRROR OK files=1`,
+still 17 flags) → this repo `a68a02ff` (`docker-swarm.yml` with the identical edits — comment-stripped traefik-label
+parity diff empty — plus the mirror). The plan's WS-rule `grep` passes under `/usr/bin/grep` (BRE, 2/2 files);
+the laptop's `grep` shell function wraps ugrep 7.8.4, which reads `${…}` / `(?i)` as regex — recorded, not a
+content difference (`grep -F` and `/usr/bin/grep` both match).
+
+```
+ssh micro "docker service update --detach --label-rm traefik.tcp.routers.mosquitto-secure.entrypoints --label-rm traefik.tcp.services.mosquitto.loadbalancer.server.port --label-rm traefik.enable --label-rm traefik.swarm.network thinx_mosquitto"
+ssh micro "docker service update --detach --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public downtime_downtime"
+ssh micro "docker service update --detach --label-rm traefik.docker.network --label-add traefik.swarm.network=traefik-public errorpage_errorpage"
+ssh micro "docker service update --detach --label-rm traefik.frontend.headers.STSPreload --label-rm traefik.frontend.headers.STSSeconds thinx_console"
+ssh micro "docker service update --detach --label-rm traefik.frontend.headers.STSPreload --label-rm traefik.frontend.headers.STSSeconds thinx_vue"
+ssh micro "docker service update --detach --container-label-rm traefik.backend.transformer.noexpose thinx_transformer"
+ssh micro "docker service update --detach --container-label-rm traefik.backend.worker.noexpose thinx_worker"
+# expect (1)-(5): rc 0; task id pre == post (label-only); readback = keys gone, downtime/errorpage exactly one traefik.swarm.network and zero v2 key
+# expect (6)-(7): rc 0; ONE task restart each (ContainerSpec change), one Running task afterwards, 0 noexpose container labels
+```
+
+| Time (UTC) | Update | Task id pre → post | Readback |
+|---|---|---|---|
+| 23:05:37 | (1) `thinx_mosquitto` `--label-rm` ×4 | `siy2hydafq9y` → `siy2hydafq9y` (unchanged) | `traefik.` label keys **0**; published ports still `1883 1884 8883` |
+| 23:05:37 | (2) `downtime_downtime` network-key flip (ONE update) | `vzyg90j8f878` → `vzyg90j8f878` (unchanged) | `traefik.swarm.network=traefik-public` **1**, `traefik.docker.network` **0** |
+| 23:05:37 | (3) `errorpage_errorpage` network-key flip (ONE update) | `5d7aukf4evft` → `5d7aukf4evft` (unchanged) | `traefik.swarm.network=traefik-public` **1**, `traefik.docker.network` **0** |
+| 23:05:37 | (4) `thinx_console` v1 STS labels | `4kznxokagqek` → `4kznxokagqek` (unchanged) | `traefik.frontend` keys **0** |
+| 23:05:38 | (5) `thinx_vue` v1 STS labels | `og84ysuwhv97` → `og84ysuwhv97` (unchanged) | `traefik.frontend` keys **0** |
+| 23:05:38–23:05:53 | (6) `thinx_transformer` `--container-label-rm` | `40zuy7aoq0ot` → **`o4oh3xu52822`** (restarted, Running 23:05:53) | `noexpose` container labels **0** |
+| 23:05:53–23:06:08 | (7) `thinx_worker` `--container-label-rm` | `nuvdfke2zhq8` → **`ppfx56ozhnbn`** (restarted, Running 23:06:08) | `noexpose` container labels **0**; transformer + worker **2** running tasks |
+| 23:06:38 | gate (loopback, after 30 s) | — | status filter **`29/0`**; sorted names **== `routers_post_A2:` (diff empty, 29)** — the catch-alls `downtime-http/https@swarm`, `error-router@swarm` present; overview **`[29,0,18,6,["Swarm"]]`**; live `thinx-api-ws.rule` still `Host(\`rtm.thinx.cloud\`) && HeaderRegexp(\`Upgrade\`, \`(?i)websocket\`)` (file-only edit, resolved value unchanged — no live update needed) |
+| 23:06:38 | gate (traefik_traefik untouched) | `v3znc0mq2jwz` (unchanged since A1) | `traefik:v3.7.14 args=17 idx=38379757` == `Version.Index post-Stage-A2`; log scan `port is missing\|does not exist\|error while parsing` (3 min) **0**; `7442 OPEN 1883 OPEN 8883 OPEN` |
+| 23:06:39 | gate (laptop) | — | bare-IP `301 https://188.166.23.244/` + `200` (catch-alls alive after the flip); WS `101` / `401` + `X-Forwarded-Proto: https`; HTTPS matrix 17/17 **== post-A2 baseline** (micro 200) |
+
+**Triggers: none fired** — no revert needed (revert source for each service: `traefik-edge.E.pre.yml`
+`d08_live_labels_pre` + `docker service inspect … PreviousSpec`). The three external stacks
+(`fotostim_landing-com`, `fotostim_landing-cz`, `igraczech-com_web`, `syxra-cz_web`) were **NOT touched** by this
+plan — no D-08 decision requires a label change on them (D-09); their pre-change label-key dump is
+`external_stack_labels:` in `traefik-edge.E.pre.yml`, and the edge-wide stages reach them inevitably.
+
+Repo state == live state after this task: thinx-swarm `6dc974b` (origin + micro), this repo `a68a02ff`
+(`docker-swarm.yml` == `thinx.yml` traefik labels; mirror MIRROR OK at 17 flags); live labels on the seven
+services match the committed files; `traefik_traefik` untouched.
+
