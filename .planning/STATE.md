@@ -5,17 +5,17 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 33
 current_phase_name: Dashboard Lockdown & TLS Hardening
 status: executing
-stopped_at: Phase 33 context gathered
-last_updated: "2026-10-08T19:37:46.923Z"
-last_activity: 2026-10-08
-last_activity_desc: Phase 32 complete, transitioned to Phase 33
-state_head: 5c138b929dccadc38b0f597c2a8167f85bda48ab
+stopped_at: Completed 33-01-PLAN.md
+last_updated: "2026-10-08T23:17:44.753Z"
+last_activity: 2026-10-09
+last_activity_desc: Phase 33 execution started
+state_head: 546137c740fef3c46a8c68b8ae534c60f9afc134
 progress:
   total_phases: 6
   completed_phases: 17
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 12
+  percent: 86
 ---
 
 # STATE — THiNX Device API
@@ -34,10 +34,10 @@ See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
 
 ## Current Position
 
-Phase: 33 (Dashboard Lockdown & TLS Hardening) — READY TO EXECUTE
-Plan: Not started
+Phase: 33 (Dashboard Lockdown & TLS Hardening) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-10-08 — Phase 32 complete, transitioned to Phase 33
+Last activity: 2026-10-09 — Phase 33 execution started
 
 ## Milestones
 
@@ -317,6 +317,9 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 32]: Human gate approved on the native-v3 end state; D-06 hostless/bare-IP behaviour change accepted as recorded — Operator confirmed console render + live WS updates in the browser (console-retest checklist) on 2026-10-08; hostless HTTP/1.0 GET now 301 from downtime-http instead of Traefik's bare 404 - static pages only, host routers win on priority
 - [Phase 32]: D-12 dashboard credential shredded on micro (15:16:48Z) right after the last credentialed readback, before the human gate — The gate's revert path needs no credential (behavioural probes + HTTPS matrix); any later credentialed /api/http/routers re-check requires the operator to re-stage /root/.p32-traefik-admin (600 root)
 - [Phase 32]: thinx-staging deliberately not pushed in Phase 32 (12-commit local lead); operator pushes when ready — 31-03 precedent: every push rolls thinx_api via Swarmpit (~6 min); check-traefik-mirror.js passes locally so the CI mirror gate will pass
+- [Phase 33]: 33-01: traefik-mgmt router lives in the traefik_traefik labels and the traefik-public port label is KEPT (load-bearing); --providers.file deferred to Plan 02 Stage C; live edge at 17 Args with the mgmt entrypoint bound 127.0.0.1:8080 in-task, public dashboard routers + admin-auth gone (EDGE-API-01/02)
+- [Phase 33]: 33-01: D-04 recorded HASH-LITERAL=NO-MATCH / PASSWORD=NO-MATCH (committed traefik.sh literals never matched the live hash; both HASHED_PASSWORD exports were command substitutions); traefik.sh scrubbed, EMAIL from env; rotation moot since the live middleware is gone
+- [Phase 33]: 33-01: overlay negative probe joins an existing traefik-public peer netns (--network container:<errorpage task>) because the network is not attachable; exposedbydefault=false live with an identical 29-router inventory; WS rule host is ${WEB_HOSTNAME} (file-only); micro.thinx.cloud HTTPS baseline is 200 after A2
 
 ### Todos
 
@@ -440,11 +443,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Phase 33 context gathered
+**Stopped at:** Completed 33-01-PLAN.md
 
-**Resume file:** .planning/phases/33-dashboard-lockdown-tls-hardening/33-CONTEXT.md
+**Resume file:** None
 
-**Last session:** 2026-10-08T17:42:10.905Z
+**Last session:** 2026-10-08T23:17:44.641Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -518,3 +521,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 32 P01 | 40 min | 3 tasks | 8 files |
 | Phase 32 P02 | 25 min | 3 tasks | 7 files |
 | Phase 32 P03 | 22 min | 2 tasks | 4 files |
+| Phase 33 P01 | 39 min | 3 tasks | 10 files |
