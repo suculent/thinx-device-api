@@ -961,11 +961,67 @@ proceed.
 
 ### Mechanism (Phase 32)
 
-_Filled by 32-01 Task 3._
+Every live change is one `docker service update`; repo first (D-04) before each stage. No stack deploy,
+no `restart.sh`, no `--api.insecure` on the live service.
 
-### Stage 1 record (32-01 Task 3)
+| Stage | Command shape | Risk under the version running at that moment |
+|---|---|---|
+| **1 — native v3 rules (label-only, 3 updates, no restart)** | per service: `docker service update --detach --label-add '<router>.rule=<v3 rule>' --label-add <router>.ruleSyntax=v3 <svc>` — rule AND override in ONE update: `errorpage_errorpage` (error-router) -> `downtime_downtime` (downtime-http + downtime-https, four `--label-add` in one update) -> `thinx_api` (thinx-api-ws) | none while the live default is still v2: the override makes the v3 parser handle that router alone. Splitting rule and override across two updates opens a parse-error window (v2 rule + v3 parser = disabled router; v3 `HeaderRegexp` + v2 parser = disabled). Per-router rollback (while the switch is live) = `--label-add '<v2 rule>' --label-rm <router>.ruleSyntax <svc>` in ONE update |
+| **2 — remove the BC switch (`--args`, 17 -> 16, ONE task restart ~4 s)** | `docker service update --detach --args "<16 flags via jq map(@sh) from the 600-root full-spec backup, index 3 deleted>" traefik_traefik` (Plan 32-02) | the only restart of the phase (web only; `:7442`/`:1883`/`:8883` are direct-published). Safe in both directions because Stage 1 already converted all four routers under explicit overrides: with the switch back, they still parse as v3 via the override. Gate = status filter + bare-IP 301/200 + WS 401 + HTTPS matrix vs baseline; revert = the same command with the 17-flag set |
+| **3 — strip the four overrides (label-only, 3 updates, no restart)** | `docker service update --detach --label-rm <router>.ruleSyntax <svc>` per service (Plan 32-02) | functionally a no-op once the default is v3; required so the live spec equals the committed files (D-03/D-04). API `ruleSyntax` is then inherited (the field is omitted under a v3 default — observed in the 32-01 probe Run A) |
 
-_Filled by 32-01 Task 3._
+**Rules that still apply (31-03 lessons):** never let a traefik-enabled service carry both
+`traefik.docker.*` and `traefik.swarm.*` labels, even briefly (the v3 swarm provider skips it) — every
+label migration is single-step; never `docker stack deploy` / `restart.sh` for an edge change (drops the
+live-only secret mounts, resets the edge auth hashes); the status filter alone is blind to a dead
+``HostRegexp(`{host:.+}`)`` catch-all under native v3 — always pair it with the bare-IP probe; do not push
+`thinx-staging` while a Stage touches `thinx_api` (Swarmpit rollout gives `thinx-api-ws` 0 servers mid-probe).
+
+### Stage 1 record (32-01 Task 3, 2026-10-08 14:02-14:06 UTC)
+
+**Outcome: all four live routers run their native v3 rules under per-router `ruleSyntax=v3` overrides; every
+router enabled; no task restarted; `traefik_traefik` untouched (17 flags, `Version.Index 38379311`).**
+Precondition re-read before the first update: micro checkout `17401bb` == workstation thinx-swarm HEAD
+(Task 2 commit, origin/master too); live `args=17 idx=38379311`. Provider refresh is 15 s; each gate was
+read 25 s after its update.
+
+| Time (UTC) | Update | Command shape / rc | Task id pre == post | Readback (label / API) | Behavioural probe |
+|---|---|---|---|---|---|
+| 14:02:55 | **(1) errorpage_errorpage** — error-router | `--label-add 'error-router.rule=PathPrefix(\`/\`)' --label-add error-router.ruleSyntax=v3`; rc 0 | `5d7aukf4evft` == `5d7aukf4evft` (micro, Running 42 min) | label: rule ``PathPrefix(`/`)``, `ruleSyntax=v3`, priority 1; API: `error-router@swarm enabled p=1 syn=v3`, err null; status filter empty; routers 30 | bare-IP `301 https://188.166.23.244/` + `200`; hostless `GET / HTTP/1.0` -> **`HTTP/1.0 302 Found`** (was 404 — error-router now answers hostless requests, D-06) |
+| 14:04:01 | **(2) downtime_downtime** — downtime-http + downtime-https in ONE update | 4x `--label-add` (both rules + both overrides); rc 0 | `vzyg90j8f878` == `vzyg90j8f878` (core, Running 18-19 min) | label: both rules ``PathPrefix(`/`)``, both `ruleSyntax=v3`, priorities 2/2; API: both `enabled p=2 syn=v3`, err null; status filter empty; routers 30 | bare-IP `301` + `200`; hostless -> **`HTTP/1.0 301 Moved Permanently`** (downtime-http at priority 2 now beats error-router — D-06, record only) |
+| 14:04:53 | **(3) thinx_api** — thinx-api-ws | `--label-add 'thinx-api-ws.rule=Host(\`rtm.thinx.cloud\`) && HeaderRegexp(\`Upgrade\`, \`(?i)websocket\`)' --label-add thinx-api-ws.ruleSyntax=v3`; rc 0 | `9nitjbo580v8` == `9nitjbo580v8` (micro, Running 2 h) | label: v3 rule, `ruleSyntax=v3`, priority 200; API: `thinx-api-ws@swarm enabled p=200 syn=v3`, mw `sslheaders@swarm`, err null; status filter empty; overview 30 / 0 errors / 0 warnings, services 18 | WS `--http1.1` probe: `Upgrade: websocket` -> **`HTTP/1.1 401 Unauthorized` + `X-Forwarded-Proto: https`**; `Upgrade: WebSocket` -> **401** + `X-Forwarded-Proto: https`; no `Server: nginx` |
+
+#### Stage 1 end check (14:05:36Z) vs the 13:44Z baseline
+
+| Check | Baseline | After Stage 1 | Verdict |
+|---|---|---|---|
+| status filter `select(.status!="enabled")` | empty | **empty** | identical |
+| `/api/overview` | 30 / 0 | **30 / 0 / 0 warnings**, services 18 | identical |
+| the four routers (API) | `enabled syn=v2`, v2 rules | **`enabled syn=v3`** x4, v3 rules, p=200/2/2/1 | converted |
+| live labels | 4 v2 rules, 0 `ruleSyntax` | 3x ``PathPrefix(`/`)`` + 1x `HeaderRegexp`, **4x `ruleSyntax=v3`**, 0 `HeadersRegexp`, 0 `{host:` | converted |
+| HTTPS app / console / rtm / thinx.cloud / swarmpit / micro | 200 / 200 / 200 / 200 / 200 / 401 | 200 / 200 / 200 / 200 / 200 / 401 | identical |
+| HTTPS externals (7 resolvable) | all 200; `igraczech.unitednewschannel.net` DNS-unresolvable | all 200; same name unresolvable | identical |
+| HTTP redirects (console/rtm/thinx.cloud/swarmpit/micro + 7 externals) | 301 -> https://<host>/ | 301 -> https://<host>/ | identical |
+| HTTP app | 200 | 200 | identical |
+| bare-IP `http://188.166.23.244/` / `https://…/ -k` | `301 https://188.166.23.244/` / `200` | `301 https://188.166.23.244/` / `200` | catch-alls alive |
+| hostless `GET / HTTP/1.0` on :80 | `HTTP/1.0 404 Not Found` (Traefik) | `HTTP/1.0 301 Moved Permanently` (downtime-http) | D-06 accepted change (record only) |
+| WS probe `websocket` / `WebSocket` | 401 + `X-Forwarded-Proto: https` / 401 | 401 + `X-Forwarded-Proto: https` / 401 | identical (native v3 HeaderRegexp, case-insensitive) |
+| `:7442` / `:1883` / `:8883` | OPEN | OPEN | unaffected (direct publish) |
+| task ids thinx_api / downtime / errorpage | `9nitjbo580v8` / `vzyg90j8f878` / `5d7aukf4evft` | same / same / same | **no restarts** (label-only) |
+| `traefik_traefik` | `traefik:v3.7.14 args=17 idx=38379311`, task `i7tpgo7vv0vj` | same, same task (Running 16 h) | untouched (Stage 2 is Plan 32-02) |
+| `acme.json` | `301121 1791410693 600 root` | same | untouched |
+| live log `error while parsing rule\|unsupported function` (5 min) | — | **0** | no parse errors |
+
+Plan `<verify>` for Task 3: V1-V7 PASS as written. V8 (negated `Running N minutes ago` grep) does not
+pass **as written** because `downtime_downtime` (23 min) and `errorpage_errorpage` (47 min) were
+autoredeployed by Swarmpit at 13:45:31Z / 13:20:56Z after the operator's `498afa7` image rebuild —
+before any Stage 1 update (see the Baseline task-id note); the per-update pre == post task ids above are
+the evidence that Stage 1 restarted nothing. Recorded as a plan-command defect in 32-01-SUMMARY, not
+rewritten.
+
+Per-router rollback was staged and NOT needed. The repo state (thinx-swarm `17401bb`, this repo
+`fa72db3a`, mirror MIRROR OK at 17 flags) equals the live label state; the live static command is still
+the 17-flag set, so Plan 32-02 Stage 2 starts from here.
 
 ### Stage 2 record (32-02)
 
