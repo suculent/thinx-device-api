@@ -1061,9 +1061,60 @@ grep -v '^ *#' docker-compose.traefik.yml | grep -c 'core.defaultRuleSyntax'    
 | mirror | `MIRROR OK files=1`; banner `source: thinx-swarm@6c01b2650d6fa54ef4e86aa620645b2ec5f1fb5a`, `mirror-sha256:3a5c0d70…`; **16** flags; 0 uncommented switch lines; 0 `--providers.docker`; the only body delta vs the Stage 1 mirror is the removed flag + its rewritten comment (`git diff`: 4 insertions, 5 deletions incl. the banner) |
 | live `traefik_traefik` | **STILL `traefik:v3.7.14 args=17 idx=38379311`**, task `i7tpgo7vv0vj` — no live mutation in this task (the `--args` update is Task 2) |
 
-### Stage 2 record (32-02)
+### Stage 2 record (32-02 Task 2, 2026-10-08 14:43-14:51 UTC)
 
-_Filled by Plan 32-02 Task 2._
+**Outcome: the live `traefik_traefik` runs the 16-flag static command WITHOUT the backward-compat switch
+on `traefik:v3.7.14`; one task restart (fire 14:48:11Z -> new task Running 14:48:26Z); every router enabled
+under the native v3 default; every behavioural probe and both matrices identical to the baseline; no D-10
+trigger fired; the revert was staged and NOT used.**
+
+Precondition re-read (14:42Z): four routers `enabled syn=v3` (API), status filter empty, `/api/overview`
+30 / 0, `ruleSyntax=v3` labels 1 + 2 + 1 across thinx_api / downtime_downtime / errorpage_errorpage,
+credential `600 root 8`, micro checkout `6c01b26` == workstation == origin/master (Task 1).
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p32-prestage2-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args[3]' \$B"
+# expect: 17 ; the BC switch flag (index 3) — this file is the 17-flag revert source, 600 root, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | del(.[3]) | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/'"
+# expect: 16 lines, index-exact vs `grep '^ *- --' docker-compose.traefik.yml` (leading '- ' stripped, e-mail line masked to end of line on both sides)
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | del(.[3]) | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances; args=16; 0 switch lines in the live Args
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 14:43:09 | pre-flight backup | `/mnt/data/edge-rollback/traefik-p32-prestage2-20261008T144309Z.json` — `600 root`, 16020 B; Args length **17**, `.[3]` = the BC switch; live `traefik:v3.7.14 args=17 idx=38379311`, task `i7tpgo7vv0vj` (micro, Running 17 h); `acme.json` `301121 1791410693 600 root` |
+| 14:43 | dry-print + index-exact diff | rebuilt 16 flags printed masked (`<masked>` e-mail); diff vs the 16 mirror lines **16/16 identical** (first attempt false-mismatched on the e-mail line only because the `[^ ]+` mask stopped at the space inside `${EMAIL?Variable not set}`; masked to end of line on both sides -> empty diff); swarm x3 / docker x0 / BC x0 / thxp x1 |
+| 14:46:38 | "pre" gate row | status filter **empty**; bare-IP `301 https://188.166.23.244/` + `200`; WS `--http1.1` `websocket` / `WebSocket` -> **401** + `X-Forwarded-Proto: https`, no nginx; hostless `HTTP/1.0 301`; HTTPS matrix (14 hosts) == baseline |
+| **14:48:11.5** | **fire** | `docker service update --detach --args "<16 flags>" traefik_traefik` (args rebuilt on micro from the 14:43:09 backup, `n_args_to_apply=16`) -> **rc 0** |
+| 14:48:11-24 | drain | `docker service ps --filter desired-state=running` **empty** for ~13 s while `i7tpgo7vv0vj` stopped; the OLD task logged 13 transient `ERR … middleware "https-redirect@swarm" / "security-headers@swarm" does not exist` lines at 14:48:23Z (a partial dynamic config delivered to the stopping task; none on the new task; not a rule-parse error) |
+| 14:48:25 / **14:48:26** | new task | `yudql1hqdnd9` `traefik:v3.7.14` micro **Starting** -> **Running** (fire -> Running ≈ 15 s; 31-03 B1 was ~4 s — the difference is the old task's stop time, not the new task's boot); exactly **1** running task; no crash-loop |
+| 14:48:28 | acme.json | rewritten once at start (mtime -> `1791470908`), **size unchanged `301121`**, `600 root` — same one-time rewrite as 31-03; served serials unchanged (below) |
+| 14:48:31 | update status | `UpdateStatus.State=completed`; **`Version.Index` 38379311 -> 38379727 (updating) -> 38379738 (completed)** |
+| 14:48:34 | new-task log | one `ERR Error renewing ACME certificate: {checkout.qooldata.com [checkout.fotostim.com checkout.fotostim.cz]} … invalid authorization … 400` — the start-time renewal pass for an EXTERNAL fotostim-stack certificate whose domain fails ACME authorization; unrelated to rule syntax, not a D-10 signal (recorded; backlog for the stack owner) |
+| 14:48:57 | convergence (first credentialed read) | `/api/overview` **30 / 0 errors / 0 warnings**, services 18, middlewares 7 |
+| 14:48:57 | **(1) status filter** | prints **nothing** — no trigger |
+| 14:48:57 | four routers (API) | `downtime-http@swarm enabled p=2 syn=v3`, `downtime-https@swarm enabled p=2 syn=v3`, `error-router@swarm enabled p=1 syn=v3`, `thinx-api-ws@swarm enabled p=200 syn=v3` (explicit overrides still set — expected until Stage 3); `ruleSyntax` across all 30 routers: **26 absent (inherited v3 default), 4 explicit `v3`** — the 26 formerly `v2 (inherited)` routers now parse as v3 (plain `Host()` rules, as predicted) |
+| 14:49 | **(2) HTTPS matrix** (from micro) | app / console / rtm / thinx.cloud / swarmpit **200**, micro **401**; fotostim.com, www.fotostim.com, fotostim.cz, www.fotostim.cz, igraczech.com, www.igraczech.com, www.syxra.cz **200**; `igraczech.unitednewschannel.net` `000` (DNS, pre-existing) — **== baseline line for line** — no trigger |
+| 14:50:17 | **(3) WS probe** `--http1.1` | `Upgrade: websocket` -> **`HTTP/1.1 401 Unauthorized`** + **`X-Forwarded-Proto: https`**, no `Server: nginx`; `Upgrade: WebSocket` -> **401** + `X-Forwarded-Proto: https` — no trigger |
+| 14:50:17 | **(4) bare-IP pair** | `http://188.166.23.244/` -> **`301 https://188.166.23.244/`**; `https://188.166.23.244/ -k` -> **`200`** — catch-alls alive under native v3 — no trigger; hostless `GET / HTTP/1.0` -> `HTTP/1.0 301 Moved Permanently` (= Stage 1 end state, D-06) |
+| 14:50 | HTTP redirect matrix (from micro) | app **200**; console / rtm / thinx.cloud / swarmpit / micro + the 7 resolvable externals **301 -> https://<host>/** — == baseline |
+| 14:50 | cert serials / validity | app `051152D5A20BE36DEFA1B6FA83379CE42809`, rtm `0535CC0C71E39D9378E72893F3A2141267B0` (= D.pre.yml / P31), both `Certificate will not expire` (`checkend 0`) |
+| 14:50 | live log scan `error while parsing rule\|unsupported function` (30 min) | **0** |
+| 14:50 | static args readback | `traefik:v3.7.14 args=16 idx=38379738 update=completed`; Args contain `--providers.swarm` (x3 incl. constraint + `exposedbydefault=true`), `thxp.address=:7442`, `mqtt.address=:1883`, `mqtts.address=:8883`; `--providers.docker` 0; switch 0 |
+| 14:50 | device ports (EDGE-MIG-04 guard) | `7442 OPEN`, `1883 OPEN`, `8883 OPEN`; published `thinx_api 7442->7442`, `thinx_mosquitto 1883->1883 1884->1884 8883->8883`, `traefik 80->80 443->443` — unchanged |
+| 14:50 | other services | `downtime_downtime.1 vzyg90j8f878` (core), `errorpage_errorpage.1 5d7aukf4evft` (micro) unchanged since Stage 1; **`thinx_api.1` is now `8v3ype7pftzh`** — Swarmpit autoredeployed `thinx_api` at 14:15:41Z (new image digest `15bab212…`, between Plan 32-01's Stage 1 and this plan — not caused by Phase 32); Stage 3 re-reads the id immediately before its update |
+
+**D-10 trigger evaluation: none fired** ((1) filter empty, (2) HTTPS matrix == baseline, (3) WS 401 +
+`X-Forwarded-Proto: https` both casings, (4) bare-IP 301 / 200). The 17-flag revert (`--args` from the
+14:43:09 backup, switch back at index 3) was staged and **not executed**.
+
+Version.Index post-Stage-2: 38379738
+
+Repo state == live state after this task: thinx-swarm `6c01b26` (origin + micro), this repo `875c20c2`
+(mirror MIRROR OK at 16 flags), live `traefik_traefik` 16 flags index-exact to the mirror. The four
+`ruleSyntax=v3` overrides are still live and committed — Stage 3 (Task 3) strips them.
 
 ### Stage 3 record (32-02)
 
