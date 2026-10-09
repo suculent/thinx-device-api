@@ -1262,3 +1262,66 @@ D-10 trigger evaluation: none fired ((1), (3), (4), (5), (6), (7), (8) all at th
 one-update rollback from `traefik-p34-preB2-20261009T151619Z.json` was staged before the fire and **not executed**.
 
 Version.Index post-P34-B2: 38380156
+
+**Post-cutover proof (34-02 Task 2, 15:20–15:23 UTC).** Read-only except the two label updates on `errorpage_errorpage`.
+
+Deny from inside Traefik (BusyBox `wget` in task `651uqwu11dsx`, API version `1.56`): `/_ping` → `OK`;
+`GET /v1.56/secrets` → `HTTP/1.1 403`; `POST /v1.56/services/create` → `HTTP/1.1 405`; `ls /var/run/docker.sock` → `No such
+file`; an allowed `GET /v1.56/services` returns the 22 services (the path the provider uses). The two refusals are the
+proxy's only `blocked` lines since the fire (`path not allowed` ×1, `method not allowed` ×1, ~15:20Z, deliberate — so a
+`--since 20m` blocked count reads 2, not 0, until ~15:40Z).
+
+deny_from_traefik: ping=OK secrets=403 post=405 sock=absent
+
+Live provider test (D-10; unreferenced middleware `p34-provider-probe`, label-only, `errorpage_errorpage` task
+`5d7aukf4evft` unchanged throughout, service Version.Index 38379808 → 38380157 → 38380158): `--label-add
+traefik.http.middlewares.p34-provider-probe.headers.customresponseheaders.X-P34-Probe=1` at 15:21:17Z →
+`/api/http/middlewares/p34-provider-probe@swarm` `enabled` and overview middlewares **7** at 15:21:27Z (9.9 s, the
+first refresh cycle); `--label-rm …X-P34-Probe` at 15:21:37Z → the probe middleware API answers `404` and middlewares
+**6** at 15:21:43Z (6.7 s). Afterwards: probe labels on the service 0, `29/0`, overview `[29,0,18,6,["Swarm","File"]]`,
+provider-error lines since the fire 0. Traefik sees label changes through the proxy.
+
+provider_test: 6 -> 7 (10 s) -> 6 (7 s)
+
+Device-flow harness (recreated byte-identical, see the precondition paragraph; `THINX_AUTO_UPDATE=false`, run from
+`~/Repositories/thinx-mcp-device`):
+
+| Run | Path | Steps 1–3 (register, status, OTT) | Step 4 (OTT redeem) | Steps 5–8 (MQTT connect + 2 ACL grants, publish, recent, disconnect) | Result |
+|---|---|---|---|---|---|
+| `p34b-pre-https` 15:13Z (pre-row) | `https://app.thinx.cloud` + `mqtt://thinx.cloud:1883` | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL |
+| `p34b-pre-7442` 15:14Z (pre-row) | `http://rtm.thinx.cloud:7442` + `mqtt://thinx.cloud:1883` | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL |
+| `p34b-https` 15:21:53Z (post) | as pre | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL — steps == pre-row |
+| `p34b-7442` 15:22Z (post) | as pre | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL — steps == pre-row |
+
+harness_b2: https=PARITY 7442=PARITY (not PASS: step 4 OTT_UPDATE_NOT_AVAILABLE pre == post; every other step OK)
+
+Why step 4 fails, before and after the cutover alike: at 09:41Z today (after the P33 harness PASS at 09:21Z) the
+emulated device's local config in `thinx-mcp-device` was switched to a different owner (uncommitted operator edit of
+`thinx-device.config.json`). Under that owner the device registered as a new UDID that has no deployed build, so the
+API's OTT redeem (`lib/thinx/device.js`) finds the token in redis, passes the ownership check, and then
+`deploy.latestFirmwarePath()` comes back empty → `OTT_UPDATE_NOT_AVAILABLE`. The redeem request therefore reaches
+`thinx_api` over both `:7442` and the HTTPS edge. This is application state, not the edge, and Plan 02's rollback rule
+("a FAIL → staged rollback") was **not** applied: the failure predates the change, and a revert would neither cause nor
+cure it. The executor did not reuse the retired owner's credential and did not write the operator's device state to
+force a PASS. A full PASS needs an operator action: attach a build to the new device, or restore the committed config.
+Recorded as a 34-02 deviation.
+
+**Interruption guarantees (must_haves A4, EDGE-OPS-02 concurrency probe).** (a) The cutover is ONE service update, so
+swarm applies network-add, mount-rm and the new Args together under one spec version (Version.Index 38380131 →
+38380145 updating → 38380156 completed). The old task runs the old spec (raw socket, no endpoint) until it stops, and the
+new task starts with the new spec (proxy endpoint, no socket). At no instant is a task configured with both
+Docker-API paths or with neither. (b) An ssh drop after `docker service update` returns does not stop the
+update; it is server-side (the orchestrator drives it to `completed`). An ssh drop before submission changes nothing.
+(c) If the work stops between Plan 01 (Stage B1) and this plan, Traefik still runs on the raw socket and the idle proxy is
+harmless. Repo == live at that point by the per-stage commit split (`ff30585` / `fcafee0`). (d) While Traefik runs, a proxy
+outage leaves it on its last provider configuration: existing routers keep serving, and new or changed services are not
+seen until the proxy returns. The provider retries. (e) A Traefik **restart** while the proxy is down starts with no swarm
+routers (404 on every swarm-routed host). So `traefik_socket-proxy` must be 1/1 before any later Traefik restart; that is a
+precondition of Plans 03–05. Rollback in every case is the one update staged above.
+
+Repo state == live state after this plan: thinx-swarm `fcafee0` == origin/master == micro `/mnt/gluster/deployment/swarm`
+HEAD == the mirror banner; `check-traefik-mirror.js` → `MIRROR OK files=1`, **24** flags in `traefik.yml` and the mirror;
+live `traefik_traefik` 24 Args (sorted set == mirror), Mounts = certificates volume only, networks `traefik-public` +
+`traefik-socket`, task `651uqwu11dsx`, Version.Index 38380156; `traefik_socket-proxy` 1/1 (task `iqrs4f7agcyl`,
+unchanged since B1); `traefik-socket` members = exactly the traefik task + the proxy task (+ the network's LB endpoint);
+29 routers enabled == `routers_post_A2:`; `7442 OPEN 1883 OPEN 8883 OPEN`.
