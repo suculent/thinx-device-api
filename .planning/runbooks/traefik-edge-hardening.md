@@ -884,7 +884,8 @@ scan capture `## Reported, not gating (after)`):
   in one remote command); none has a router, so nothing is re-requested.
 - **fotostim stack owner notification:** `checkout.qooldata.com` (+ SANs `checkout.fotostim.com` / `checkout.fotostim.cz`)
   is no longer certificate-managed by this edge (pruned in Stage E; `qooldata_router_refs` 0/0, so Traefik will not
-  re-request it). Carried from the Phase 32 deferred item — the operator notifies the owner.
+  re-request it). Carried from the Phase 32 deferred item. **Closed 2026-10-09:** the operator is the fotostim
+  stack owner, so no separate notification is needed.
 - **`tls-config-1` recreate path** (removed 2026-10-09 09:31:45Z; no revert step needs it):
   `git -C /mnt/gluster/deployment/swarm show 158f369:traefik/tls.toml | docker config create tls-config-1 -`.
 - **Unchanged Phase 34 scope** (fix-forward rows #6/#7 + SLA): `--log.level=ERROR` → INFO/WARN (EDGE-OPS-01; note no
@@ -924,3 +925,5 @@ scan capture `## Reported, not gating (after)`):
     `traefik.yml.bak.20261007120354.pre-p30-pilot`, still carries one `--pilot.token=` line (count only, value not
     read) — move it under `/mnt/data/edge-rollback/` (600 root) or delete it. No other tracked `*.bak*` file
     carries a token, apr1/bcrypt or key marker.
+    **Closed 2026-10-09:** the operator deleted it; micro's deploy checkout now holds 0 `traefik.yml.bak*` files and
+    0 files with a `--pilot.token=` line.
