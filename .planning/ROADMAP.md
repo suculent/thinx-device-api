@@ -198,7 +198,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
 3. push → CI → Swarmpit measured ≤5 minutes end-to-end on an edge change; swarm runbook updated.
 
-**Plans:** 2/5 plans executed (planned 2026-10-09; revised after plan-check — Stage B2 split out)
+**Plans:** 3/5 plans executed (planned 2026-10-09; revised after plan-check — Stage B2 split out)
 **Wave 1**
 - [x] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
 
@@ -206,7 +206,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 - [x] 34-02-PLAN.md — Tracer Stage B2: ONE update moves Traefik to `tcp://socket-proxy:2375` and drops the raw socket bind (D-10 auto-revert); deny-from-Traefik, live provider test, harness (EDGE-OPS-02)
 
 **Wave 3** *(blocked on Wave 2)*
-- [ ] 34-03-PLAN.md — Tracer Stage C: `tls-config-3` (security-headers in the file provider, Go-default curves incl. X25519MLKEM768) + `security-headers@file` default in one update; Stage D: swarm-label copy retired, db/registry `:80` redirect-only (folded D-15..D-17; EDGE-OPS-03 final edge)
+- [x] 34-03-PLAN.md — Tracer Stage C: `tls-config-3` (security-headers in the file provider, Go-default curves incl. X25519MLKEM768) + `security-headers@file` default in one update; Stage D: swarm-label copy retired, db/registry `:80` redirect-only (folded D-15..D-17; EDGE-OPS-03 final edge)
 
 **Wave 4** *(blocked on Wave 3)*
 - [ ] 34-04-PLAN.md — Tracer Stage E: prune the seven retired ACME entries (scan HOSTS 17 → 16); operator checkpoint for the new basic-auth password; couch-auth/influx-auth rotation (historic literal proven dead) + vault.yml re-pin (folded D-18..D-20)
@@ -236,7 +236,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete    | 2026-10-09 |
-| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 2/5 | Pending | — |
+| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 3/5 | Pending | — |
 
 ---
 *v1.15 Traefik Hardening (Edge) started 2026-10-06: 14 requirements across 6 phases (29–34). Next: `/gsd-discuss-phase 29`.*
