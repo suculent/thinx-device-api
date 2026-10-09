@@ -1764,3 +1764,30 @@ on `thinx_couchdb` at 16:18Z; task `pcj2qs3o8yjt` unchanged, Version.Index 38380
 `http://db.thinx.cloud/` 301 to https. Revert: the same `--label-add` with `5985` (+ git revert of `2a479a0` / `2af2b3ed`).
 
 db_port_fix: thinx-db 5985 -> 5984 (thinx-swarm 2a479a0, thinx-device-api 2af2b3ed, thinx_couchdb idx 38380191, task unchanged)
+
+### P34 SLA run 1 (34-05 Task 1, 2026-10-09 16:21Z)
+
+D-11/D-12/D-13: a real thinx-staging push of this signed evidence commit, timed from `git push` to the first response
+served through Traefik by the new `thinx_api` task (JSON access-log `ServiceAddr` marker). Legs: L1 = push → CircleCI
+`Push to private registry` end_time, L2 = push_end → new task Running (`{{json .Status.Timestamp}}`), L3 = Running → first
+2xx/3xx `thinx-api*` access-log line on the new task's `:7442`. Budget 300 s total.
+
+Readiness (16:2xZ, read-only):
+
+final_edge: args=24 log=WARN accesslog=json drop=RequestPath,RequestLine,ClientUsername docker_api=tcp://socket-proxy:2375 tls=tls-config-3 hsts=security-headers@file routers=29/0
+
+- `traefik_traefik` idx 38380188, Configs `tls-config-3`, Mounts = certificates volume only, 2 networks; overview
+  `[29,0,18,6,["Swarm","File"]]`; `traefik_socket-proxy` 1/1.
+- Swarmpit `/version` `1.10-SNAPSHOT`, statistics false, API 1.44; `swarmpit_app` container last logged
+  `Swarmpit running on port 8080` at 2026-10-05 11:30:08Z (≫ 60 s; autoredeploy lines in the last 30 min: 60 — polling).
+- CircleCI thinx-staging: 0 jobs running/queued.
+- Pre: `thinx_api` task `xaf4k4p5uasz` (micro, Running ≈3 h), digest `44a739f698c5`, `thinx-api@swarm` server
+  `http://10.0.1.24:7442`.
+- Git: base `origin/thinx-staging` = `322e74c8f885`; base..HEAD 38 commits, all `G`; diff hygiene over added lines in
+  `.planning/`, `AGENTS.md`, `scripts/`, `docker-*.yml`: apr1/bcrypt/PEM/pilot-token shapes 0, canary values 0, e-mail
+  addresses 0; skip-ci markers in messages 0. Non-planning diff: the mirror, `docker-swarm.yml`, `scripts/traefik-edge-scan.sh`;
+  `services/console` diff **empty** after `7de9ebc0` restored the gitlink that merge `66eef220` had rolled back to `d5c09e7b`.
+- **Known risk before the push:** the base revision `322e74c8` has `test` **failed 4/4** (builds 15810, 15826, 15828,
+  15833 — `03-RsakeySpec` "revoke … RSA Keys" 2 failures + global coverage thresholds not met, `TEST failed. Should not
+  deploy this commit.`), so no `api-registry` ran for it; the last green `test` → `api-registry` is `75e083eb` (13:10Z).
+  This push carries the same application code, so a red `test` → NO-MEASUREMENT is expected and will be recorded as such.
