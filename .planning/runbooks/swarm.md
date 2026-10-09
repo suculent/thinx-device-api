@@ -385,6 +385,47 @@ the mirror (`MIRROR OK`).
 - **OPS-02** (REQUIREMENTS.md) — Stale swarm membership entry `b356ad8e1d60` / `10.133.0.4`. Defer; cleanup is the Rung 3 procedure.
 - **OPS-03** (REQUIREMENTS.md) — Malformed image-tag specs on `thinx_chronograf` / `thinx_couchdb` / `thinx_influxdb` / `thinx_worker` cause autoredeploy HTTP 400 on those services. Pre-existing config issues unrelated to OPS-01.
 
+## MQTT / MQTTS on `thinx_mosquitto` (Phase 34 — 2026-10-09)
+
+`thinx_mosquitto` publishes **:1883** (plain MQTT — required for legacy devices, never TLS-enforce it) and **:8883**
+(MQTT over TLS, cert `thinx.cloud`). The websockets listener **:1884 was removed** (no consumer in any repo, 0
+established connections at removal). Full change record: `traefik-edge-hardening.md` § P34 MQTTS 8883 record.
+
+- **Config** `/mnt/gluster/thinx/mosquitto/config/mosquitto.conf` — gluster deploy state, not in git (carries the redis
+  password; never print it). `listener 8883` with `certfile /mqtt/ssl/thinx_cloud_cert.pem`,
+  `keyfile /mqtt/ssl/thinx_cloud_key.pem`, `tls_version tlsv1.2` (minimum; TLS 1.3 offered) and the edge's
+  ECDHE + AES-GCM / CHACHA20 cipher list. `per_listener_settings` is unset, so `allow_anonymous false` and go-auth cover
+  both listeners. Back it up `600 root` under `/mnt/data/edge-rollback/` before any edit; the broker reads it only at start.
+- **Cert pair** `/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_cert.pem` (full chain, `0644 root:root`) and
+  `thinx_cloud_key.pem` (`0640 root:1883`), bind-mounted read-only per file. Mosquitto 2.0.21 loads TLS files **after**
+  dropping to uid/gid 1883 — a `0600 root` key makes it exit with `Unable to load server certificate … Permission denied`.
+- **Renewal cron** `/etc/cron.d/mosquitto-cert-renew` on micro (root, 0644, `40 4 * * *`) runs
+  `/mnt/gluster/deployment/swarm/scripts/mosquitto-cert-renew.sh` from the thinx-swarm checkout (source:
+  `scripts/mosquitto-cert-renew.{sh,cron}`). Daily: export `thinx.cloud` from Traefik's acme.json (read-only), validate
+  (SAN, key↔cert, notAfter > now+1d), compare with the installed cert; **unchanged → one log line, exit 0**; changed →
+  back up the old pair to `/mnt/data/edge-rollback/mosquitto-cert-renew-<ts>/` (600), install atomically,
+  `timeout 120 docker service update --detach=false --force thinx_mosquitto`, check `:8883` serves the new leaf and
+  `:1883` returns a CONNACK, else restore the old pair and force-update again. `flock`-guarded, micro + manager only.
+  Mosquitto never reloads certs itself; the restart is the only way (~every 60 days, a few seconds of MQTT reconnects).
+  ```
+  ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'tail -3 /var/log/mosquitto-cert-renew.log'
+  # expect: one line per day: "<ts> unchanged thinx.cloud fp=… notAfter=…" (or "renewed …"); any "ERROR" needs a look
+  ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 '/mnt/gluster/deployment/swarm/scripts/mosquitto-cert-renew.sh; echo rc=$?; tail -1 /var/log/mosquitto-cert-renew.log'
+  # manual run; rc=0 and no output when unchanged
+  ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'rm /etc/cron.d/mosquitto-cert-renew'
+  # disable / remove the job (the cert then expires 2026-12-28 unless renewed by hand)
+  ```
+- **Gate** — from the laptop, against the public IP (micro's loopback reports :8883 open with no listener behind it):
+  ```
+  openssl s_client -connect 188.166.23.244:8883 -servername thinx.cloud </dev/null 2>/dev/null | openssl x509 -noout -subject -enddate
+  # expect: subject=CN=thinx.cloud ; -tls1_2 / -tls1_3 negotiate ; -tls1_1 -cipher 'DEFAULT:@SECLEVEL=0' -> alert 70 ; -cipher ECDHE-RSA-AES128-SHA -> alert 40
+  ( printf '\x10\x16\x00\x04MQTT\x04\x02\x00\x3c\x00\x0agatecheck0'; sleep 2 ) | nc -w 5 188.166.23.244 1883 | head -c 4 | od -An -tx1
+  # expect: 20 02 00 05 (CONNACK, not authorized) — same bytes through `openssl s_client -quiet` on :8883
+  ```
+- The older root-crontab job `renew_registry_cert.sh` (1st of month, 03:00) still refreshes the `app.thinx.cloud`
+  `traefik_*` files in the same directory and force-updates `thinx_mosquitto` when they change; mosquitto no longer
+  reads them (harmless extra restart).
+
 ---
 
 *Runbook initialized: 2026-05-26 (Phase 3 close-out)*

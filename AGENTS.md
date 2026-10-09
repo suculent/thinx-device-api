@@ -22,6 +22,12 @@ in, redeem OTT tokens and download firmware over them. Operator decision 2026-10
 redirect or TLS-enforce them as a "hardening" fix; any hardening on these paths must keep plaintext
 clients working.
 
+MQTT over TLS is `thinx_mosquitto` **:8883** (cert `thinx.cloud`, TLS 1.2+ AEAD-only, same go-auth as :1883); the
+websockets listener :1884 is gone (2026-10-09). The cert is synced from Traefik's acme.json by
+`/etc/cron.d/mosquitto-cert-renew` on micro (thinx-swarm `scripts/mosquitto-cert-renew.sh`, restarts mosquitto only
+on change). Probe ports against the public IP `188.166.23.244` from the laptop — micro's loopback reports :8883 open
+even with no listener. See `.planning/runbooks/swarm.md` § MQTT / MQTTS.
+
 ## Traefik dashboard/API access — ssh plane only (Phase 33)
 
 There is **no public Traefik dashboard or API route** on any hostname and **no basic-auth credential on any

@@ -2156,6 +2156,123 @@ review_fixes: WR-03 influx removeheader (thinx_influxdb 38380190->38380302, task
 Version.Index post-P34-review: traefik_traefik 38380330, traefik_socket-proxy 38380315, thinx_influxdb 38380302
 ```
 
+### P34 MQTTS 8883 record (thinx_mosquitto; 2026-10-09 20:10–20:25 UTC)
+
+Operator request: `thinx_mosquitto` serves MQTT over TLS on **:8883** with the **thinx.cloud** cert instead of the
+websockets listener on :1884; `:1883` unchanged (keep-7442 spirit). Not an edge (Traefik) change — Traefik untouched.
+
+**Found (read-only, before the change)**
+- Live spec (Version.Index `38379808`, task `tcxkzf3j0jzt` on **core**): mounts config / data / auth **and**
+  `/mnt/gluster/thinx/ssl:/mqtt/ssl` (rw — the whole dir with every domain's key, 0644 files); ports 1883 / 1884 / 8883
+  ingress. Inside the task only 1883 and 1884 listened (the `#listener 8883` block was commented out) — that is the
+  "8883 down" item from `### P34 review fixes record`. **Every earlier Phase 34 gate's "8883 OPEN" came from probing micro's
+  loopback (docker-proxy accepts there); future gates probe the public IP `188.166.23.244` from the laptop.**
+- `:1884` consumers: **none**. No `1884` / `ws://…mqtt` reference in this repo's code (only `docker-compose*.yml` local
+  dev mappings and `services/broker` image defaults), `services/console`, `thinx-mcp-device`, or the `thinx-firmware-*`
+  THiNXLib dirs (all use 1883, esp32 lib also 8883); 0 established connections on 1884 in the task netns (3 on 1883).
+- mosquitto **2.0.21**, OpenSSL 3.5.7; broker runs as uid/gid **1883** (`user mosquitto`), entrypoint/tini as root;
+  no env, no secrets (legacy mode: the mounted conf is used as-is). Throwaway-container test on core (`--network none`):
+  **mosquitto loads TLS files after dropping privileges** — key `0600 root` → exit `Unable to load server certificate …
+  Permission denied`; key `0640 root:1883` → TLS 1.2 (ECDHE-RSA-AES128-GCM-SHA256) and TLS 1.3 handshake, CBC refused.
+  No `cafile` needed (certfile carries the chain).
+- acme.json (micro, resolver `le`, 16 certs) has `domain.main=thinx.cloud`, sans `www.thinx.cloud`.
+- Existing renewal: root crontab `0 3 1 * * renew_registry_cert.sh` → `/mnt/gluster/thinx/ssl/update_all.sh` exports
+  `app.thinx.cloud` as `traefik_*` and copies it to `mosquitto/ssl/`, force-updating mosquitto on change. No thinx.cloud export.
+
+**Changes**
+1. Cert pair exported on micro (jq one-off, temp dir 700): `/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_cert.pem`
+   (full chain, 3 certs, `0644 root:root`) + `thinx_cloud_key.pem` (`0640 root:1883`). Subject `CN=thinx.cloud`, SAN
+   `DNS:thinx.cloud, DNS:www.thinx.cloud`, issuer Let's Encrypt `YR1`, notAfter **Dec 28 05:51:41 2026 GMT**, leaf
+   sha256 `FF:1E:2D:96:E9:AC:C6:D8…`; cert pubkey sha256 == key pubkey sha256 (`0339d312…98c7dc`). Old `ca.pem` /
+   `traefik_*` files left as they were.
+2. Backups (dir 700, files 600 root): `/mnt/data/edge-rollback/p34-mqtts-20261009T201544Z/{mosquitto.conf,thinx_mosquitto.spec.json}`.
+3. `mosquitto.conf` (gluster deploy state, not in git) — diff, no secret line touched:
+   ```
+   -#listener 8883
+   -#certfile /mqtt/ssl/traefik_cert.pem
+   -#cafile /mqtt/ssl/ca.pem
+   -#keyfile /mqtt/ssl/traefik_key.pem
+   -#ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:AES256-GCM-SHA384:… (CBC suites)
+   -#tls_version tlsv1.2
+   +# Phase 34 MQTTS (2026-10-09): … (5 comment lines)
+   +listener 8883
+   +certfile /mqtt/ssl/thinx_cloud_cert.pem
+   +keyfile /mqtt/ssl/thinx_cloud_key.pem
+   +tls_version tlsv1.2
+   +ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305
+   -listener 1884
+   -protocol websockets
+   ```
+   `listener 1883` untouched; `per_listener_settings` unset, so `allow_anonymous false` + go-auth (redis) apply to 8883.
+4. Repo first: thinx-swarm `31ac7ea` (thinx.yml mosquitto ports 1883 + 8883, the two per-file `:ro` mounts replacing
+   the rw `/mnt/gluster/thinx/ssl` dir mount, comment; `scripts/mosquitto-cert-renew.{sh,cron}`; README) → origin
+   `master`, micro checkout ff `51ff67f..31ac7ea`. This repo: `docker-swarm.yml` mirror of the same block, traefik mirror
+   regenerated (`MIRROR OK files=1` at `31ac7ea`).
+5. Live, ONE update at 20:18:12Z (conf swapped in place seconds before):
+   ```
+   docker service update --detach=false --mount-rm /mqtt/ssl \
+     --mount-add type=bind,source=/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_cert.pem,target=/mqtt/ssl/thinx_cloud_cert.pem,readonly \
+     --mount-add type=bind,source=/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_key.pem,target=/mqtt/ssl/thinx_cloud_key.pem,readonly \
+     --publish-rm published=1884,target=1884 thinx_mosquitto
+   ```
+   Converged; task `0882jqc5nstc` (container `41d6d2848b28`) on core; listeners `1883` + `8883` only.
+6. Renewal cron (operator approved 2026-10-09): `/etc/cron.d/mosquitto-cert-renew` (root, 0644, trailing newline,
+   Phase 26 cron.d pattern) = `40 4 * * * root /mnt/gluster/deployment/swarm/scripts/mosquitto-cert-renew.sh`.
+   Log `/var/log/mosquitto-cert-renew.log` (600). Behaviour: `swarm.md` § MQTT / MQTTS.
+
+```
+Version.Index thinx_mosquitto: 38379808 (pre) -> 38380361 (the update) -> 38380372 (UpdateStatus completed 20:18:23Z; same task, no restart)
+```
+
+**Gate (all from the laptop against `188.166.23.244` unless noted)**
+
+| check | result |
+|---|---|
+| `s_client :8883 -servername thinx.cloud` | `CN=thinx.cloud`, SAN thinx.cloud + www, notAfter Dec 28 2026, `Verify return code: 0 (ok)`, default TLSv1.3 `TLS_AES_256_GCM_SHA384`; no SNI also serves thinx.cloud |
+| `-tls1_2` / `-tls1_3` | `ECDHE-RSA-AES128-GCM-SHA256` / `TLS_AES_256_GCM_SHA384` |
+| `-tls1_1 -cipher DEFAULT:@SECLEVEL=0` | refused by the server: `tlsv1 alert protocol version` (alert 70) |
+| `-tls1_2 -cipher ECDHE-RSA-AES128-SHA` (CBC) | refused: `handshake failure` (alert 40) |
+| unauthenticated MQTT CONNECT on `:1883` / `:8883` (TLS) | `20 02 00 05` both — CONNACK *not authorized*: broker up, go-auth enforced on 8883 |
+| authenticated MQTTS (harness copy with `mqtts`, port 8883) | `p34mqtts-8883` **PASS**, broker `mqtts://thinx.cloud:8883` connected, publish OK |
+| device-flow harness (`:1883`) | `p34mqtts-7442` (`http://rtm.thinx.cloud 7442 thinx.cloud 1883`) **PASS**; `p34mqtts-https` **PASS** (steps 1–8 incl. OTT redeem) |
+| `:1884` on micro and core public IPs | CLOSED |
+| `:1883` / `:7442` TCP | OPEN / OPEN |
+| `docker logs --since 20m` new task (core) | no cert/load/listener errors; 3 OpenSSL lines = the gate probes (unsupported protocol, no shared cipher, probe EOF) |
+| Traefik overview | `[29,0,18,6,["Swarm","File"]]`; no non-enabled router |
+| renew script manual run (cert unchanged) | rc 0, no output, log `unchanged thinx.cloud fp=FF:1E:2D:96:E9:AC:C6:D8 notAfter="Dec 28 05:51:41 2026 GMT"` |
+
+**Renew script, changed-path tests** (scratch dir under `/root/mcr-test.*` on micro, `SSL_DIR` / `BACKUP_ROOT` /
+`LOG_FILE` / `LOCK_FILE` overridden, live dir untouched; no live restart — `MCR_TEST_SKIP_RESTART=1` or a non-existent
+`SERVICE`; the post-install probes ran against the live ports):
+A — installed pair = a self-signed thinx.cloud cert, real acme.json → `renewed`, rc 0, installed == live pair, modes
+0644 root:root / 0640 root:1883, backup dir 700 with 600 files, no temp leftovers. B — re-run → `unchanged`, rc 0.
+C — scratch acme.json with a *different* self-signed thinx.cloud cert → installed, `:8883` probe mismatched for ~60 s →
+old pair restored and re-verified, rc 1 `ERROR … restored old pair`. D — `SERVICE` that does not exist → restart fails →
+old pair restored, rc 1. E — acme entry whose SAN lacks thinx.cloud → `ERROR exported cert SAN lacks thinx.cloud`,
+installed pair untouched. F — overlapping run while the lock is held → `SKIP`, rc 0. The one path not exercised
+end-to-end is the real `docker service update --force thinx_mosquitto` inside the script (that restart is the same command
+the gate effectively proved; it first fires at the next LE renewal, ~late November 2026).
+
+**Revert set** (newest first; run only what you need)
+```
+# (r1) stop the renewal job
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'rm /etc/cron.d/mosquitto-cert-renew'
+# (r2) conf back (restores the websockets listener, drops 8883)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'install -m 644 -o root -g root /mnt/data/edge-rollback/p34-mqtts-20261009T201544Z/mosquitto.conf /mnt/gluster/thinx/mosquitto/config/mosquitto.conf'
+# (r3) ONE service update back to the pre spec (PreviousSpec is the pre spec while nothing else updated the service:
+#      `docker service rollback thinx_mosquitto` is equivalent then)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'timeout 180 docker service update --detach=false --mount-rm /mqtt/ssl/thinx_cloud_cert.pem --mount-rm /mqtt/ssl/thinx_cloud_key.pem --mount-add type=bind,source=/mnt/gluster/thinx/ssl,target=/mqtt/ssl --publish-add published=1884,target=1884 thinx_mosquitto'
+# expect: listeners 1883 + 1884 in the task; :1884 OPEN, :8883 closed from the laptop; harness PASS on :1883
+# (r4) repos: git revert 31ac7ea in thinx-swarm (origin push + micro ff) and the P34-MQTTS commit here (mirror regenerated)
+# the thinx_cloud_* files and the backup dir can stay; they are inert without the listener
+```
+
+**Seen, not fixed (out of scope)**: `mosquitto.conf` is `0644` and carries the redis password (`0600` would break a
+SIGHUP reload, which runs as uid 1883 — `0640 root:1883` would work); `/mnt/gluster/thinx/ssl/` is mode `0666` with
+`0644` key files for every exported domain, and `mosquitto/ssl/traefik_key.pem` is `0754`; `/etc/cron.d/clean_docker`
+line 2 starts with `docker service restart` (not a command), so its monthly `update_all.sh` chain never runs (the root
+crontab `renew_registry_cert.sh` does that job).
+
 ## Recorded for later (after Phase 34)
 
 Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT `<deferred>`, the Phase 34 records):
@@ -2185,9 +2302,8 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
   stdlib CVEs, none reachable on the internal plain-HTTP path); rescan with a current DB first. The laptop grype DB is
   frozen (schema 5, 2026-03-09) — the operator upgrades it.
 - **WR-05 `vault.yml`** — image re-pin / delete decision moved to v1.17 VAULT-01 (Phase 39 owns `vault.yml`).
-- **mosquitto `:8883` (TLS MQTT) listener down** — found while gating the review fixes (`### P34 review fixes record`):
-  the mosquitto task answers 1883/1884 but not 8883; pre-existing, app-side, not an edge change. Fix in the mosquitto
-  config/certificate; `:8883` stays plain TLS MQTT, direct-published, never redirected.
+- ~~**mosquitto `:8883` (TLS MQTT) listener down**~~ — **resolved 2026-10-09** (`### P34 MQTTS 8883 record`): 8883
+  serves the thinx.cloud cert with go-auth, 1884 websockets removed, daily cert-sync cron on micro.
 - **Edge basic-auth hash → bcrypt `$2y$`** (34-REVIEW WR-06): needs the plaintext again (shredded 16:08:38Z); operator
   re-places it at `/root/.p34-basicauth`; hash on micro with python3 `bcrypt` (prefix rewritten to `$2y$`), store in the
   env file, label-only update of `couch-auth` / `influx-auth`, shred. Optional: move the deploy secret out of the tree

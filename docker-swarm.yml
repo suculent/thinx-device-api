@@ -96,9 +96,10 @@ services:
   mosquitto:
     image: thinxcloud/mosquitto:latest
     # password is injected through the thinx.pw file in test - files backend must be enabled there; otherwise uses Redis/GoAuth plugin
+    # Phase 34 MQTTS (2026-10-09): 1883 plain MQTT stays for legacy devices (AGENTS.md); 8883 is MQTT over TLS
+    # (cert thinx.cloud, see thinx-swarm scripts/mosquitto-cert-renew.sh); the 1884 websockets listener was removed (no consumers).
     ports:
       - 1883:1883
-      - 1884:1884
       - 8883:8883
     networks:
       - traefik-public
@@ -107,7 +108,10 @@ services:
       - '/mnt/gluster/thinx/mosquitto/config/mosquitto.conf:/etc/mosquitto/mosquitto.conf'
       - '/mnt/gluster/thinx/mosquitto/data:/mqtt/data'
       - '/mnt/gluster/thinx/mosquitto/auth:/mqtt/auth'
-      - '/mnt/gluster/thinx/ssl:/mqtt/ssl'
+      # Only the thinx.cloud pair, read-only, per file (was the whole rw /mnt/gluster/thinx/ssl dir with every domain key).
+      # Key is 0640 root:1883 — mosquitto loads TLS files after dropping to uid 1883.
+      - '/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_cert.pem:/mqtt/ssl/thinx_cloud_cert.pem:ro'
+      - '/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_key.pem:/mqtt/ssl/thinx_cloud_key.pem:ro'
 
     deploy:
       resources:
@@ -119,7 +123,7 @@ services:
           memory: 64M
       labels:
         # Phase 33 (EDGE-API-01, D-08): the rule-less MQTTS TCP router and its opt-in labels were removed — MQTT is
-        # direct-published by this service (:1883/:1884/:8883), never routed by Traefik (AGENTS.md keep plain MQTT).
+        # direct-published by this service (:1883 plain, :8883 TLS), never routed by Traefik (AGENTS.md keep plain MQTT).
         - "swarmpit.service.deployment.autoredeploy=true"
 
   couchdb:
