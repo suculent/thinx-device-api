@@ -1174,3 +1174,91 @@ live `traefik_traefik` 23 Args (sorted set == mirror, Stage A end state), `traef
 YAML, `traefik-socket` internal / not attachable / `10.234.34.0/24` with only the proxy attached. **Plan 02 (Stage B2)
 starts from here:** args=23, proxy 1/1, deny matrix recorded; it must first recreate the device-flow harness
 (`/tmp/p31-device-flow/thinx-device-flow.mjs` was lost with the 12:38Z workstation reboot).
+
+### P34 Stage B2 record (34-02 Task 1, 2026-10-09 15:11–15:20 UTC)
+
+**Outcome: the live `traefik_traefik` reads the Docker API only through `traefik_socket-proxy` — ONE `docker service
+update` (fire 15:17:40.4Z → new task `651uqwu11dsx` Running 15:17:55.7Z, ≈15 s) added the network `traefik-socket`,
+removed the Docker socket bind and set `--providers.swarm.endpoint=tcp://socket-proxy:2375` (Args 23 → 24). The task has
+no Docker socket mount, sits on exactly `traefik-public` + `traefik-socket`, and discovers the full 29-router inventory
+through the proxy (`29/0`, names == `routers_post_A2:`, overview unchanged). Every behavioural probe equals the pre-row;
+0 provider-error lines and 0 blocked proxy requests since the fire. No D-10 trigger fired; the staged rollback below was
+NOT executed. EDGE-OPS-02 closes here (Task 2 adds the provider test and the deny-from-Traefik proof).**
+
+Precondition re-read (15:11–15:13Z, read-only): B1 record present; live `traefik:v3.7.14 args=23 idx=38380131
+upd=completed` (== `Version.Index post-P34-A:`), task `qrxfpvipnuau`, Mounts = the read-only Docker socket bind + the
+certificates volume, networks = `traefik-public` only; `traefik_socket-proxy` 1/1 (task `iqrs4f7agcyl`, micro);
+`traefik-socket` internal / not attachable / `10.234.34.0/24`, members = the proxy + `traefik-socket-endpoint`;
+thinx-swarm `ff30585` == micro HEAD == origin/master, micro tracked-dirty 0. Device-flow harness recreated at
+`/tmp/p31-device-flow/thinx-device-flow.mjs` — byte-identical (3010 B) to the Phase 31 original, recovered from the
+31-03 executor's own Write call in the local session transcript (no rewrite, no new code). Harness baseline (pre-row,
+15:13–15:14Z): see "harness pre-row" under the Task 2 block — steps 1–3 and 5–8 OK on both paths, step 4 already
+fails with an application answer before any change.
+
+Repo first (P32 D-04): thinx-swarm `fcafee0` (`feat(edge): Phase 34 Stage B2 — Traefik reads Docker via the
+socket-proxy, raw socket bind removed (EDGE-OPS-02 D-07, D-09)`: the traefik service loses the Docker socket volume and
+its comment (certificates volume kept), the Phase 31 "default unix socket" justification is replaced by the Phase 34
+proxy comment, `- --providers.swarm.endpoint=tcp://socket-proxy:2375` follows `- --providers.swarm`, and `- traefik-socket`
+joins the traefik service's `networks:`; 24 `- --` lines; the socket-proxy region keeps its one read-only bind; `docker
+stack config` parses) → `git push origin master` → pushed to micro as `p34-stageB2`, `--ff-only` (tracked dirty 0, 1 file
+8+/8−), branch deleted, micro HEAD `fcafee0` == workstation == origin → mirror regenerated here (`MIRROR-GENERATED ok
+source=thinx-swarm@fcafee0…`, `MIRROR OK files=1`, **24** flags) and committed (`feat(34): Stage B2 — mirror regenerated
+at 24 flags`, `8a0a1d7d`).
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p34-preB2-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  stat -c '%s %a %U %n' \$B; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Mounts[].Source' \$B; jq '.[0].Spec.TaskTemplate.Networks | length' \$B"
+# expect: 600 root; 23; the Docker socket + the certificates volume; 1 — the B2 revert source, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--providers.swarm.endpoint=tcp://socket-proxy:2375\"] | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/' | LC_ALL=C sort"
+# expect: 24 lines == the mirror's 24 traefik `- --` lines (e-mail masked both sides, LC_ALL=C sort) — diff empty; thxp/mqtt/mqtts/mgmt 4/4; no insecure API flag
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--providers.swarm.endpoint=tcp://socket-proxy:2375\"] | map(@sh) | join(\" \")' \$B); \
+  docker service update --detach --network-add traefik-socket --mount-rm /var/run/docker.sock --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances once to completed; args=24; Mounts = certificates only; networks traefik-public + traefik-socket
+```
+
+**Staged rollback — written BEFORE the fire (D-09; one update, re-adds the socket bind, restores the 23 pre-B2 flags,
+which drops the endpoint flag, and leaves the overlay):**
+
+```
+ssh micro "B=/mnt/data/edge-rollback/traefik-p34-preB2-20261009T151619Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; \
+  ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); \
+  docker service update --detach --network-rm traefik-socket --mount-add type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly --args \"\$ARGS\" traefik_traefik"
+# expect: 23 ; rc 0; ONE restart; args=23 without the endpoint flag; Mounts = socket bind (ro) + certificates; networks = traefik-public only; 29/0
+# + git revert of thinx-swarm fcafee0 (origin + micro ff) and of the mirror commit here (MIRROR OK at 23)
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 15:11–15:13 | precondition + harness | as above; `args=23 idx=38380131`, proxy 1/1, heads `ff30585`; harness recreated (3010 B) |
+| 15:13–15:14 | harness pre-row | both paths: steps 1–3, 5–8 OK; step 4 `OTT_UPDATE_NOT_AVAILABLE` (pre-existing, see Task 2 block) |
+| 15:15 | repo first | thinx-swarm `fcafee0` on origin + micro (ff, tracked dirty 0); mirror `8a0a1d7d` MIRROR OK at 24 |
+| 15:16:19 | pre-flight backup | `/mnt/data/edge-rollback/traefik-p34-preB2-20261009T151619Z.json` — `600 root`, 15124 B, Args **23**, Mounts socket bind (ro) + certificates, 1 network, Version.Index 38380131 |
+| 15:16 | dry-print + sorted-set diff | 24 masked live-set lines vs 24 mirror lines: **diff empty (24/24)**; thxp/mqtt/mqtts/mgmt 4/4; insecure API 0 |
+| 15:16:57–15:17:1x | pre-row | laptop: HTTPS matrix rtm/app/console/thinx.cloud/www/swarmpit 200, registry 400, db 401, influx 401, 7 externals 200, micro 200; WS `101` / `401`; bare-IP `301 https://188.166.23.244/` + `200`; micro: loopback `29/0`, overview `[29,0,18,6,["Swarm","File"]]`, names == `routers_post_A2:` (29), `endpoint_flag=0`, provider-error lines 0, proxy blocked 0, `7442 OPEN 1883 OPEN 8883 OPEN`, traefik-socket members = proxy + LB endpoint |
+| 15:17:2x | rollback staged | the command block above written into this record before the fire |
+| **15:17:40.4** | **B2 fire** | `docker service update --detach --network-add traefik-socket --mount-rm /var/run/docker.sock --args "<24 flags>" traefik_traefik` → **rc 0** |
+| 15:17:40–15:17:55.7 | drain + start | old task `qrxfpvipnuau` Shutdown; **new task `651uqwu11dsx`** micro **Running 15:17:55.7Z** (fire → Running ≈ 15 s); exactly **1** running task; `idx=38380145 upd=updating` → **`idx=38380156 upd=completed`** by 15:18:01Z; args=24, image `traefik:v3.7.14` unchanged |
+| 15:18:01 | (1)(2)(7)(8)(9)(10) micro | `29/0`, overview unchanged, names hash == pre-row (29), provider-error lines 0, proxy blocked 0; Mounts = certificates only; networks `traefik-public traefik-socket`; endpoint flag 1; ports OPEN ×3; traefik-socket members = traefik task + proxy task + LB endpoint |
+| 15:18:10 | (3)(4)(5) laptop | HTTPS matrix 17/17, WS `101` / `401`, bare-IP `301` + `200` — the whole laptop row **== pre-row (diff empty)** |
+| 15:18:40–15:19:00 | 60-s observation window closes | micro row repeated: identical; non-JSON lines since the fire = 33: **25 ERR on the stopping task** `qrxfpvipnuau` at 15:17:44Z (`middleware "security-headers@swarm"` ×14 / `"https-redirect@swarm"` ×11 `does not exist` — the drain artefact, 25 as in Stage A) + **8 WRN on the new task** (the 7 + 1 start-up baseline of Stage A); the new task wrote **0** lines mentioning swarm / provider / docker / endpoint / socket |
+| 15:19 | plan verify 1–4 | PASS ×4 |
+
+Gate (D-10):
+
+| # | Check | Result |
+|---|---|---|
+| 1 | loopback status filter + names | **`29/0`**, enabled names == `routers_post_A2:` (diff empty, 29) |
+| 2 | overview | **`[29,0,18,6,["Swarm","File"]]`** |
+| 3 | HTTPS matrix | == pre-row (17/17) |
+| 4 | WS pair | `101` / `401` |
+| 5 | bare IP | `301 https://188.166.23.244/` / `200` |
+| 6 | non-JSON Traefik lines since the fire matching `providerName=swarm\|Cannot connect\|permission denied\|403\|Forbidden` | **0** |
+| 7 | router count | **29** |
+| 8 | proxy `blocked` lines since the fire | **0** |
+| 9 | spec | no Docker socket mount (certificates volume only); networks == `traefik-public` + `traefik-socket`; `--providers.swarm.endpoint=tcp://socket-proxy:2375` present (args 24) |
+| 10 | device ports | `7442 OPEN 1883 OPEN 8883 OPEN` |
+
+D-10 trigger evaluation: none fired ((1), (3), (4), (5), (6), (7), (8) all at their pre-row / designed value). The
+one-update rollback from `traefik-p34-preB2-20261009T151619Z.json` was staged before the fire and **not executed**.
+
+Version.Index post-P34-B2: 38380156
