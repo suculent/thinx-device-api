@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@94da01cd1b5a649d367894a7030be1e021ac0fea generated:2026-10-09T07:59:23Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:fd25846a0a99ea5f5eb431a4777f5c80ce8bc355d1704e07a98017f1919c9033
+# GENERATED — do not edit. source: thinx-swarm@1578d2fa5dc980c446e3cc015a7db2a649ac0d87 generated:2026-10-09T08:25:21Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:982423e30e551f171767623e190f49fe3caff071217206c00ffc17b428a6a629
 version: '3.7'
 
 services:
@@ -105,6 +105,12 @@ services:
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
       - --entrypoints.https.address=:443
+      # Phase 33 (EDGE-TLS-02, D-17..D-19): default middleware for EVERY router on :443, present and future, external
+      # stacks included — HSTS max-age=31536000 (one year) + includeSubDomains + preload directive (header only;
+      # thinx.cloud is NOT submitted to the preload list), nosniff, frame-deny. Informational 1xx responses (the
+      # WebSocket 101) bypass the headers middleware by construction (Traefik ResponseModifier), so thinx-api-ws is
+      # unaffected. The http entrypoint gets no headers middleware (HSTS is a :443 response header, D-20).
+      - --entrypoints.https.http.middlewares=security-headers@swarm
       # D-03 (Phase 30, EDGE-MIG-04): the vpn/mqtt/mqtts/thxp entrypoints below are VESTIGIAL —
       # defined here but NOT host-published by Traefik (Traefik publishes only :80/:443).
       # Device/MQTT traffic is published DIRECTLY, outside Traefik: :7442 (thxp) by thinx_api,
