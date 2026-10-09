@@ -5,7 +5,7 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 34
 current_phase_name: Ops Surface Reduction & SLA Close-out
 status: executing
-stopped_at: Phase 34 plans 34-01..34-04 complete; 34-05 (SLA deploy + close-out) next
+stopped_at: Phase 34 all 5 plans executed; EDGE-OPS-03 SLA open gap (CI red + CircleCI degraded); verification next
 last_updated: "2026-10-09T16:15:45.667Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 34 execution started
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09 after Phase 33)
 
 Phase: 34 (Ops Surface Reduction & SLA Close-out) — EXECUTING
 Plan: 5 of 5
-Status: Executing 34-05 (SLA push->CI->Swarmpit run, F.post, scan After, docs)
+Status: All plans executed — verification pending (EDGE-OPS-03 open gap, WINDOWS #19; full clean scan owed, WINDOWS #20)
 Last activity: 2026-10-09 — Phase 34 execution started
 
 ## Milestones
