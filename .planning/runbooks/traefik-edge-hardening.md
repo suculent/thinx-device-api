@@ -645,3 +645,59 @@ Repo state == live state after this task: thinx-swarm `c03c529` (origin + micro,
 label change), mirror `4fccd9bc` MIRROR OK at 19 flags, live `traefik_traefik` 19 Args (sorted set == mirror), acme.json
 23 entries `600 root`, 29 routers enabled == `routers_post_A2:`. Plan 03 captures `traefik-edge.E.post.yml`
 (`acme_json:` 24 → 23, influx serial NEW, `re_challenges_in_phase: 1`), re-runs the scan and removes `tls-config-1`.
+
+### Evidence bundle (33-03 Task 1, 2026-10-09 09:16–09:32 UTC)
+
+**Outcome: the D-31 evidence bundle — fifteen read-only items gathered from micro and the laptop against the Phase 33
+end state — is green on every item; the laptop scan prints `EDGE-SCAN OK` (0 `FAIL ` lines, exit 0) and is committed as
+`## After (post-Stage-E, 2026-10-09T09:21:31Z)` in `swarm-configs/traefik-edge-scan.2026-10-08.md`; the redacted
+end-state capture `swarm-configs/traefik-edge.E.post.yml` is committed; the unreferenced swarm config `tls-config-1`
+was then removed (the plan's one permitted live mutation — rm 09:31:45Z, service untouched). No revert was staged or
+needed. Task 2 turns the values below into the re-verify matrix.**
+
+Precondition re-read (09:16Z): Stage E record present with `Version.Index post-Stage-E: 38379946` == live
+(`traefik:v3.7.14 args=19 idx=38379946 upd=completed`, task `k47479ipt1mb` micro Running since 09:00:30Z); acme.json
+`291145 600 root`, 23 entries; `docker config ls` lists `tls-config-1` and `tls-config-2`, the service mounts
+`tls-config-2`; harness `/tmp/p31-device-flow/thinx-device-flow.mjs` present (3010 B); nmap 7.94, sslscan, OpenSSL,
+jq, node, socat on the laptop PATH.
+
+| # | Item | Observed (09:17–09:24Z unless noted) |
+|---|---|---|
+| 1 | static args | `traefik:v3.7.14 args=19 idx=38379946 upd=completed`; the four Phase 33 flags present (`mgmt.address=127.0.0.1:8080`, `exposedbydefault=false`, `file.filename=/traefik/tls.toml`, `https.http.middlewares=security-headers@swarm`); `api.insecure\|providers.docker` **0**; `example.com` **0**; `acme.email=` **1**; thxp/mqtt/mqtts flags verbatim |
+| 2 | mgmt bind | in-task `ss -ltn` → exactly `LISTEN 0 4096 127.0.0.1:8080 0.0.0.0:*` (no wildcard); overlay probe from the `errorpage_errorpage` task netns `nc -z traefik 8080` → **CLOSED** (control `:80` OPEN); host `curl 127.0.0.1:8080` → **rc=7**; laptop `curl 188.166.23.244:8080` → **rc=7** |
+| 3 | loopback API | status filter **`29/0`**; sorted names **== `routers_post_A2:`** (29, diff empty); overview **`[29,0,0,18,6,["Swarm","File"]]`**; middlewares exactly `couch-auth@swarm error-pages-middleware@swarm https-redirect@swarm influx-auth@swarm security-headers@swarm sslheaders@swarm` (six — no ipAllowList / rateLimit, D-05); `/api/entrypoints`: `mgmt` at `127.0.0.1:8080`, `https` default chain `["security-headers@swarm"]`, `http` none; `traefik-mgmt@swarm` `{enabled, [mgmt], api@internal, PathPrefix(\`/\`)}`; `/` → `302 Found` + `Location: /dashboard/`; `/dashboard/` → 200, `APIUrl` **1**; `ls /root/.p3*-traefik-admin` → `No such file` (D-03: no credential pre-staged) |
+| 4 | labels on traefik_traefik | router keys exactly `traefik.http.routers.traefik-mgmt.{entrypoints,rule,service}`; service key `traefik.http.services.traefik-public.loadbalancer.server.port=8080` (LOAD-BEARING, kept); middleware definitions https-redirect ×2, security-headers ×7, error-pages-middleware ×3; **0** admin-auth / traefik-public-http / traefik-public-https keys |
+| 5 | config | Configs `{"n":"tls-config-2","t":"/traefik/tls.toml","m":292}`; in-task `sha256sum /traefik/tls.toml` = decoded `Spec.Data` sha = committed `shasum -a 256 traefik/tls.toml` = **`bb0cba95ea22e9738f7e12b97d374129e15380db9ee428b7dc058933476c3ab6`** |
+| 6 | TLS (rtm/app/console) | `-tls1_2` → `TLSv1.2` `ECDHE-RSA-AES128-GCM-SHA256` verify 0; `-tls1_3` → `TLSv1.3` `TLS_AES_128_GCM_SHA256` verify 0; `-tls1_1` → refused, 0 completed; `-tls1_2 -cipher ECDHE-RSA-AES128-SHA` → `handshake failure` ×3 (CBC refused); `-curves P-384` → `handshake failure` ×3; nmap (via the scan) TLS 1.2 set on all 17 hosts **exactly** the three ECDHE_RSA AEAD suites on `secp256r1`, `TLSv1.3:` present on `ecdh_x25519`, no SSLv3/TLSv1.0/TLSv1.1 sections, `least strength: A` |
+| 7 | HSTS | exact-directive count **1 on all 17 hosts (17/17)**, none 0, none 2; `http://188.166.23.244/` → **0** STS lines (D-20) |
+| 8 | HTTPS matrix (17 hosts) | rtm/app/console/thinx.cloud/www/swarmpit **200**, registry **400**, db **401**, influx **401**, fotostim ×4 / igraczech ×2 / syxra **200**, micro **200** — **== the post-A2 baseline** (Stage A record); `/api/overview` not Traefik JSON on all 17; `/dashboard/` `APIUrl` **0** on all 17; `/dashboard/` → 404 ×13, 400 registry, **302 micro** (≠ 401, D-06), 401 db/influx only (backend basic-auth, exempt) |
+| 9 | WS pair | cookie-less upgrade → **`HTTP/1.1 101 Switching Protocols`** with **0** STS lines; `Cookie: foo=bar` `/p33probe` → **`HTTP/1.1 401 Unauthorized`** + `X-Forwarded-Proto: https` |
+| 10 | bare-IP pair | `http://188.166.23.244/` → **`301 https://188.166.23.244/`**; `https://188.166.23.244/` (-k) → **`200`** |
+| 11 | ports + publishers (micro) | **`7442 OPEN 1883 OPEN 8883 OPEN`**; `thinx_api 7442->7442`, `traefik_traefik 80->80 443->443`, `thinx_mosquitto 1883->1883 1884->1884 8883->8883` (read with `tr -s ' '`) |
+| 12 | device-flow harness (09:19–09:21Z) | `p33-7442` over `http://rtm.thinx.cloud:7442` + `mqtt://thinx.cloud:1883` → **`RESULT: PASS`** (`/tmp/p33-harness-7442.log`); `p33-https` over `https://app.thinx.cloud` → **`RESULT: PASS`** (`/tmp/p33-harness-https.log`) — keep-7442 and the HTTPS device path both hold under the AEAD-only options + HSTS |
+| 13 | ACME | `acme.json` **`291145 600 root`** (mtime 09:00:35.99Z), **23** entries, influx **1**, qooldata **0**, volume holds **1** file (`_acme.json`/`__acme.json` absent); served rtm `0535CC0C71E39D9378E72893F3A2141267B0` and app `051152D5A20BE36DEFA1B6FA83379CE42809` **== E.pre.yml**, console `05F8CEE45A7D64783AA80214569810CBF905` unchanged, influx **`05806B4C8B028F41EC3ACCC00DF3C6A50B04`** (YR1, notAfter Jan 7 2027) == the Stage E record; `-checkend 0` → will not expire ×4; ACME failure lines since the Stage E fire on task `k47479ipt1mb` → **0** (the one line in a 60-minute window is the OLD task `36ssa5zcgpv0`'s pre-prune start-time pass at 08:26:43Z — `checkout.qooldata.com`, gone for good after the prune, D-24); provider-error scan **0** |
+| 14 | repo == deployed | thinx-swarm `c03c529` == micro `/mnt/gluster/deployment/swarm` HEAD (dirty 0) == `origin/master` == mirror banner; `check-traefik-mirror.js` → **`MIRROR OK files=1`**; **19** `- --` lines in the mirror; comment-stripped traefik-label parity diff `docker-swarm.yml` vs `thinx.yml` → **empty**; mirror working copy clean |
+| 15 | external stacks (D-09) | `fotostim_landing-com` / `fotostim_landing-cz` / `igraczech-com_web` / `syxra-cz_web` label KEYS + router rule/entrypoints/middlewares values **identical to `external_stack_labels:` in E.pre.yml** — no label of theirs changed in Phase 33; they received TLS options + HSTS + the exposure flip edge-wide (HSTS 1 on all seven of their hosts, 3 AEAD suites, 200) |
+
+**External scan (criterion 4, D-26..D-29):** `scripts/traefik-edge-scan.sh` 09:21:31Z → 09:23:28Z → **`EDGE-SCAN OK`**,
+rc 0, **0** `FAIL ` lines (Before: `EDGE-SCAN FAIL 32`); port sweep `80 open, 443 open, 8080 closed, 8443 closed`,
+`port 7442 rtm.thinx.cloud open`, no-SNI `CN=TRAEFIK DEFAULT CERT`. Appended to the capture as `## After` (verdict,
+per-host matrix, full stdout) + `## Reported, not gating (after)` (D-20 redirects, D-16 no-SNI, X25519MLKEM768 no longer
+offered — sslscan `Curve 25519 DHE 253`, groups `x25519`/`secp256r1` only —, CBC now refused, 8080/8443 closed before
+and after, keep-7442). Hygiene on the capture and on `E.post.yml`: secret markers **0**, e-mail addresses **0**;
+`E.post.yml` 19 `- --` lines, 0 admin-auth / traefik-public-http / traefik-public-https tokens; `D.post.yml` and
+`E.pre.yml` unchanged (`git diff --quiet HEAD`). `swarm-configs/README.md` names step `E` and the scan capture.
+
+```
+# the only live mutation of Plan 33-03 (after every item above was green; 09:31:45Z):
+ssh micro "docker config rm tls-config-1; docker config ls --filter name=tls-config-1 -q | wc -l; docker config ls --filter name=tls-config-2 -q | wc -l; docker service inspect traefik_traefik --format '{{range .Spec.TaskTemplate.ContainerSpec.Configs}}{{.ConfigName}}{{end}} {{.Version.Index}}'"
+# observed: rc 0; 0 ; 1 ; tls-config-2 38379946 — same task k47479ipt1mb, args=19, loopback 29/0, in-task tls.toml sha unchanged (no restart: a config object removal does not touch the service)
+# recreate path (only to re-mount the historical Phase 31/32 file, which NO revert step requires — dropping --providers.file.filename makes any mounted file inert):
+ssh micro "git -C /mnt/gluster/deployment/swarm show 158f369:traefik/tls.toml | docker config create tls-config-1 -"
+```
+
+Version.Index post-Task-1: 38379946 (unchanged — no service update in this task)
+
+Repo state == live state after this task: thinx-swarm `c03c529` (origin + micro), mirror MIRROR OK at 19 flags, live
+`traefik_traefik` 19 Args (sorted set == mirror), `tls-config-2` the only tls-config in the swarm, 29 routers enabled ==
+`routers_post_A2:`, acme.json 23 entries `600 root`. Task 2 writes the matrix, the hand-off and the Phase 34 record.

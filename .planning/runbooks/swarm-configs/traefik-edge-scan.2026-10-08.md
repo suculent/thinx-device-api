@@ -274,3 +274,248 @@ EDGE-SCAN FAIL 32
 - **D-16 no-SNI:** `openssl s_client -connect 188.166.23.244:443 -noservername` receives
   `CN=TRAEFIK DEFAULT CERT` (falls through to the catch-all pages). Unchanged by this phase (`sniStrict=false`).
 - **keep-7442:** `nc -z rtm.thinx.cloud 7442` open — the plaintext device port is outside Traefik and stays.
+
+## After (post-Stage-E, 2026-10-09T09:21:31Z)
+
+Run 09:21:31Z → 09:23:28Z (2 min), same script, same laptop, same 17 hosts, against the Phase 33 end state
+(`traefik:v3.7.14 args=19`, task `k47479ipt1mb`, `Version.Index 38379946`, taken AFTER Stage E — the last live
+mutation — and BEFORE `tls-config-1` was removed and before the D-31 human gate). **Verdict: `EDGE-SCAN OK`**, exit
+0, **0 `FAIL ` lines** — every D-28 predicate holds on every host:
+
+- TLS 1.2 set on all 17 hosts is exactly the three observable ECDHE_RSA AEAD suites
+  (`TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+  TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256`) — the two CBC-SHA1 suites of the `## Before` run are gone
+  (Stage C, `tls-config-2` loaded by the file provider).
+- HSTS `max-age=31536000; includeSubDomains; preload` exactly once on all 17 HTTPS hosts (was 3/17) — registry's 400,
+  the db/influx 401s, the three external stacks and micro's catch-all included (Stage D entrypoint default).
+- No `legacy-tls`, `no-tls13` or `sslscan-legacy` line anywhere (TLS 1.0/1.1 refused, 1.3 offered — unchanged).
+- **0** `dashboard-401`, **0** `dashboard-open`, **0** `api-exposed` on all 17 hosts: `micro.thinx.cloud/dashboard/`
+  now answers 302 (catch-all path) instead of the former basic-auth 401 (Stage A2, D-06); db/influx still 401 on every
+  path (backend basic-auth, exempt by design); `APIUrl` signature 0 everywhere; `/api/overview` never Traefik JSON.
+- Port sweep: `80 open`, `443 open`, **`8080 closed`**, **`8443 closed`**; `7442` open (keep-7442).
+- No-SNI client still receives `CN=TRAEFIK DEFAULT CERT` (D-16, recorded).
+- Serials: 16 of 17 unchanged vs `## Before`; **influx.thinx.cloud `05B91929…8247` → `05806B4C8B028F41EC3ACCC00DF3C6A50B04`**
+  (the Stage E forced TLS-ALPN reissue, notAfter 2027-01-07).
+
+### Per-host matrix (after)
+
+| host | https code | HSTS | TLS1.0/1.1 | TLS1.2 suites | TLS1.3 | cert serial | `http://` redirect (D-20, reported) |
+|---|---|---|---|---|---|---|---|
+| rtm.thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 0535CC0C71E39D9378E72893F3A2141267B0 | 301 https://rtm.thinx.cloud/ |
+| app.thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 051152D5A20BE36DEFA1B6FA83379CE42809 | 200 (known gap: `thinx-api-http` has no redirect — Phase 34) |
+| console.thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 05F8CEE45A7D64783AA80214569810CBF905 | 301 https://console.thinx.cloud/ |
+| thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 05985238756DDB1D8FE88F15C2780670FB6D | 301 https://thinx.cloud/ |
+| www.thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 05985238756DDB1D8FE88F15C2780670FB6D | 301 https://www.thinx.cloud/ |
+| swarmpit.thinx.cloud | 200 | yes (1) | refused | 3 AEAD only | offered | 05F241E17BADFEFAB79078069E218FB5D282 | 301 https://swarmpit.thinx.cloud/ |
+| registry.thinx.cloud | 400 | yes (1) | refused | 3 AEAD only | offered | 05BDB7A8495E98A507BD392073F1D2306425 | 400 (known gap: registry http router has no redirect — Phase 34) |
+| db.thinx.cloud | 401 | yes (1) | refused | 3 AEAD only | offered | 05ABDB813970665925BBF3986D858437F8C2 | 401 (couch-auth on the http router too) |
+| influx.thinx.cloud | 401 | yes (1) | refused | 3 AEAD only | offered | **05806B4C8B028F41EC3ACCC00DF3C6A50B04** (NEW, Stage E) | 301 https://influx.thinx.cloud/ |
+| www.fotostim.com | 200 | yes (1) | refused | 3 AEAD only | offered | 05CA722C72F15D90F21C62D2042992CAB37A | 301 https://www.fotostim.com/ |
+| www.fotostim.cz | 200 | yes (1) | refused | 3 AEAD only | offered | 059B763F7AAA69FEBA932265DAB2215F3A92 | 301 https://www.fotostim.cz/ |
+| fotostim.com | 200 | yes (1) | refused | 3 AEAD only | offered | 068859B1E2768CC50E6AA79CBBC559958C13 | 301 https://fotostim.com/ |
+| fotostim.cz | 200 | yes (1) | refused | 3 AEAD only | offered | 058A2108047618D8AE8BAEE94DFD9656C275 | 301 https://fotostim.cz/ |
+| igraczech.com | 200 | yes (1) | refused | 3 AEAD only | offered | 069BB404CE5F1F729812C79096FEB2F867A7 | 301 https://igraczech.com/ |
+| www.igraczech.com | 200 | yes (1) | refused | 3 AEAD only | offered | 069BB404CE5F1F729812C79096FEB2F867A7 | 301 https://www.igraczech.com/ |
+| www.syxra.cz | 200 | yes (1) | refused | 3 AEAD only | offered | 0584ABE5714F7F196979A72B1C74C87CB60F | 301 https://www.syxra.cz/ |
+| micro.thinx.cloud | 200 (downtime catch-all; was 401) | yes (1) | refused | 3 AEAD only | offered | 055AA7B98C8710DE6D85012BE3C983F11294 | 301 https://micro.thinx.cloud/ |
+
+Diff vs the `## Before` matrix: the **TLS1.2 suites** column (5 incl. 2 CBC-SHA1 → 3 AEAD) and the **HSTS** column
+(3 yes → 17 yes) changed on every host; the **https code** column changed on exactly one host (micro 401 → 200, D-06);
+the **cert serial** column changed on exactly one host (influx, Stage E). TLS1.0/1.1, TLS1.3 and the redirect column
+are identical line for line. `/dashboard/` answers 404 on 13 hosts, 400 on registry, 401 on db/influx (backend auth)
+and **302 on micro** (was 401 — the dashboard router is gone); `APIUrl` signature count 0 everywhere.
+
+### Script stdout (after)
+
+```
+## Port sweep 188.166.23.244
+80/tcp   open   http
+443/tcp  open   https
+8080/tcp closed http-proxy
+8443/tcp closed https-alt
+port 7442 rtm.thinx.cloud open
+nosni-subject CN=TRAEFIK DEFAULT CERT
+## rtm.thinx.cloud
+https rtm.thinx.cloud 200
+hsts rtm.thinx.cloud 1
+tls12 rtm.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 rtm.thinx.cloud yes
+legacy rtm.thinx.cloud none
+dashboard rtm.thinx.cloud 404 sig=0
+redirect rtm.thinx.cloud 301 https://rtm.thinx.cloud/
+serial rtm.thinx.cloud 0535CC0C71E39D9378E72893F3A2141267B0
+## app.thinx.cloud
+https app.thinx.cloud 200
+hsts app.thinx.cloud 1
+tls12 app.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 app.thinx.cloud yes
+legacy app.thinx.cloud none
+dashboard app.thinx.cloud 404 sig=0
+redirect app.thinx.cloud 200 
+serial app.thinx.cloud 051152D5A20BE36DEFA1B6FA83379CE42809
+## console.thinx.cloud
+https console.thinx.cloud 200
+hsts console.thinx.cloud 1
+tls12 console.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 console.thinx.cloud yes
+legacy console.thinx.cloud none
+dashboard console.thinx.cloud 404 sig=0
+redirect console.thinx.cloud 301 https://console.thinx.cloud/
+serial console.thinx.cloud 05F8CEE45A7D64783AA80214569810CBF905
+## thinx.cloud
+https thinx.cloud 200
+hsts thinx.cloud 1
+tls12 thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 thinx.cloud yes
+legacy thinx.cloud none
+dashboard thinx.cloud 404 sig=0
+redirect thinx.cloud 301 https://thinx.cloud/
+serial thinx.cloud 05985238756DDB1D8FE88F15C2780670FB6D
+## www.thinx.cloud
+https www.thinx.cloud 200
+hsts www.thinx.cloud 1
+tls12 www.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.thinx.cloud yes
+legacy www.thinx.cloud none
+dashboard www.thinx.cloud 404 sig=0
+redirect www.thinx.cloud 301 https://www.thinx.cloud/
+serial www.thinx.cloud 05985238756DDB1D8FE88F15C2780670FB6D
+## swarmpit.thinx.cloud
+https swarmpit.thinx.cloud 200
+hsts swarmpit.thinx.cloud 1
+tls12 swarmpit.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 swarmpit.thinx.cloud yes
+legacy swarmpit.thinx.cloud none
+dashboard swarmpit.thinx.cloud 404 sig=0
+redirect swarmpit.thinx.cloud 301 https://swarmpit.thinx.cloud/
+serial swarmpit.thinx.cloud 05F241E17BADFEFAB79078069E218FB5D282
+## registry.thinx.cloud
+https registry.thinx.cloud 400
+hsts registry.thinx.cloud 1
+tls12 registry.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 registry.thinx.cloud yes
+legacy registry.thinx.cloud none
+dashboard registry.thinx.cloud 400 sig=0
+redirect registry.thinx.cloud 400 
+serial registry.thinx.cloud 05BDB7A8495E98A507BD392073F1D2306425
+## db.thinx.cloud
+https db.thinx.cloud 401
+hsts db.thinx.cloud 1
+tls12 db.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 db.thinx.cloud yes
+legacy db.thinx.cloud none
+dashboard db.thinx.cloud 401 sig=0
+redirect db.thinx.cloud 401 
+serial db.thinx.cloud 05ABDB813970665925BBF3986D858437F8C2
+## influx.thinx.cloud
+https influx.thinx.cloud 401
+hsts influx.thinx.cloud 1
+tls12 influx.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 influx.thinx.cloud yes
+legacy influx.thinx.cloud none
+dashboard influx.thinx.cloud 401 sig=0
+redirect influx.thinx.cloud 301 https://influx.thinx.cloud/
+serial influx.thinx.cloud 05806B4C8B028F41EC3ACCC00DF3C6A50B04
+## www.fotostim.com
+https www.fotostim.com 200
+hsts www.fotostim.com 1
+tls12 www.fotostim.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.fotostim.com yes
+legacy www.fotostim.com none
+dashboard www.fotostim.com 404 sig=0
+redirect www.fotostim.com 301 https://www.fotostim.com/
+serial www.fotostim.com 05CA722C72F15D90F21C62D2042992CAB37A
+## www.fotostim.cz
+https www.fotostim.cz 200
+hsts www.fotostim.cz 1
+tls12 www.fotostim.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.fotostim.cz yes
+legacy www.fotostim.cz none
+dashboard www.fotostim.cz 404 sig=0
+redirect www.fotostim.cz 301 https://www.fotostim.cz/
+serial www.fotostim.cz 059B763F7AAA69FEBA932265DAB2215F3A92
+## fotostim.com
+https fotostim.com 200
+hsts fotostim.com 1
+tls12 fotostim.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 fotostim.com yes
+legacy fotostim.com none
+dashboard fotostim.com 404 sig=0
+redirect fotostim.com 301 https://fotostim.com/
+serial fotostim.com 068859B1E2768CC50E6AA79CBBC559958C13
+## fotostim.cz
+https fotostim.cz 200
+hsts fotostim.cz 1
+tls12 fotostim.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 fotostim.cz yes
+legacy fotostim.cz none
+dashboard fotostim.cz 404 sig=0
+redirect fotostim.cz 301 https://fotostim.cz/
+serial fotostim.cz 058A2108047618D8AE8BAEE94DFD9656C275
+## igraczech.com
+https igraczech.com 200
+hsts igraczech.com 1
+tls12 igraczech.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 igraczech.com yes
+legacy igraczech.com none
+dashboard igraczech.com 404 sig=0
+redirect igraczech.com 301 https://igraczech.com/
+serial igraczech.com 069BB404CE5F1F729812C79096FEB2F867A7
+## www.igraczech.com
+https www.igraczech.com 200
+hsts www.igraczech.com 1
+tls12 www.igraczech.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.igraczech.com yes
+legacy www.igraczech.com none
+dashboard www.igraczech.com 404 sig=0
+redirect www.igraczech.com 301 https://www.igraczech.com/
+serial www.igraczech.com 069BB404CE5F1F729812C79096FEB2F867A7
+## www.syxra.cz
+https www.syxra.cz 200
+hsts www.syxra.cz 1
+tls12 www.syxra.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.syxra.cz yes
+legacy www.syxra.cz none
+dashboard www.syxra.cz 404 sig=0
+redirect www.syxra.cz 301 https://www.syxra.cz/
+serial www.syxra.cz 0584ABE5714F7F196979A72B1C74C87CB60F
+## micro.thinx.cloud
+https micro.thinx.cloud 200
+hsts micro.thinx.cloud 1
+tls12 micro.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 micro.thinx.cloud yes
+legacy micro.thinx.cloud none
+dashboard micro.thinx.cloud 302 sig=0
+redirect micro.thinx.cloud 301 https://micro.thinx.cloud/
+serial micro.thinx.cloud 055AA7B98C8710DE6D85012BE3C983F11294
+EDGE-SCAN OK
+```
+
+## Reported, not gating (after)
+
+- **D-20 redirect gaps** (`http://<host>/`): unchanged — `app.thinx.cloud` answers 200 (the `thinx-api-http`
+  router still has no `https-redirect`; the plaintext API path legacy devices use), `registry.thinx.cloud` answers
+  400 (no middleware on the registry http router), `db.thinx.cloud` answers 401 (couch-auth); every other host
+  301 → `https://<host>/`. HSTS is never sent on the `http` entrypoint (`http://188.166.23.244/` → 0 STS lines).
+  Recorded for Phase 34, not fixed here (EDGE-TLS-02 does not require it).
+- **D-16 no-SNI:** `openssl s_client -connect 188.166.23.244:443 -noservername` still receives
+  `CN=TRAEFIK DEFAULT CERT` (falls through to the catch-all pages). `sniStrict` stays `false` in `tls-config-2`
+  until a scan window shows no no-SNI clients — Phase 34 revisit.
+- **Curve policy (`curvePreferences = ["X25519", "CurveP256"]`, Stage C):** the Go-default post-quantum hybrid
+  **X25519MLKEM768 is no longer offered** — `sslscan` now reports `Curve 25519 DHE 253` on every negotiated suite and
+  the supported groups `x25519` / `secp256r1 (NIST P-256)` only (the `## Before` baseline, per 33-RESEARCH §Q7,
+  preferred TLS 1.3 with X25519MLKEM768); `nmap` shows TLS 1.3 on `ecdh_x25519` and TLS 1.2 on `secp256r1`
+  (grade A, `least strength: A`); P-384 handshakes are refused. An explicit, scannable policy was traded for the
+  hybrid (T-33-12 accepted). Phase 34 may omit the key to restore the Go default (X25519MLKEM768 + X25519 + P-256
+  + P-384 + P-521).
+- **CBC suites now refused:** `ECDHE-RSA-AES128-SHA` on TLS 1.2 → `handshake failure` on rtm/app/console (accepted
+  in the `## Before` run — the two CBC-SHA1 suites appeared in every host's TLS 1.2 set). This is the D-14 change
+  the `tls12-set` predicate gates on; recorded here because it is also a client-compatibility change (TLS 1.2-only
+  clients without AEAD support can no longer connect; ESP8266 BearSSL and ESP32 mbedTLS both offer AES-GCM — the
+  device-flow harness passed over `https://app.thinx.cloud` after Stage C and again at the end state).
+- **8080/8443 closed before and after:** the dashboard lockdown was never a port-publish issue — Traefik never
+  published 8080 (`traefik_traefik 80->80 443->443` only, before and after). What changed is the public **route**:
+  `micro.thinx.cloud/dashboard/` 401 (basic-auth dashboard router) → 302 (catch-all), and `api@internal` is now
+  reachable only on the loopback `mgmt` entrypoint inside the task (D-06).
+- **keep-7442:** `nc -z rtm.thinx.cloud 7442` open — unchanged; the plaintext device port is outside Traefik and
+  stays (AGENTS.md operator decision 2026-10-04). Harness PASS x2 at the end state (`:7442` + `:1883`, and HTTPS).
