@@ -892,3 +892,35 @@ scan capture `## Reported, not gating (after)`):
   `/var/run/docker.sock:ro` bind → read-only socket-proxy (EDGE-OPS-02), SLA close-out.
 - **Not scheduled (product decisions):** HSTS preload-list submission for `thinx.cloud` (header carries `preload`, the
   list is NOT submitted — D-19); a management VPN on the swarm (`:1194` stays vestigial).
+- **33-REVIEW deferrals (code review fix pass, 2026-10-09).** Each needs a coordinated live edge change (repo
+  first in thinx-swarm, then ONE `docker service update`, gated by the loopback router inventory) or an operator
+  action, so none was done in the review fix:
+  - **WR-02 credential rotation (operator).** Rotate the `couch-auth` / `influx-auth` basic-auth credential pair:
+    it has the same `USERNAME`/`HASHED_PASSWORD` lineage as the retired dashboard password, whose plaintext stays
+    retrievable from thinx-swarm history at `158f369` (`traefik.sh`). New password → `openssl passwd -apr1` → `.env`
+    on micro → `--label-add traefik.http.middlewares.couch-auth.basicauth.users=…` on `thinx_couchdb` (same for
+    `influx-auth`), values over ssh stdin only, never printed or committed; then one line in `traefik.sh`/README
+    "credential rotated on <date>; the historic literal in git history is dead". Optional: `git filter-repo
+    --replace-text` on the private repo (origin + micro are the only remotes).
+  - **WR-03 HSTS default middleware is a single point of failure.** `--entrypoints.https.http.middlewares=security-headers@swarm`
+    makes every `:443` router depend on labels of `traefik_traefik`; losing them (a `--label-rm` typo, the
+    LOAD-BEARING port label, an empty swarm config on provider restart) disables all 28 public routers (404
+    everywhere). Fix: define `[http.middlewares.security-headers.headers]` (browserXssFilter, contentTypeNosniff,
+    forceSTSHeader, frameDeny, stsIncludeSubdomains, stsPreload, stsSeconds = 31536000) in `traefik/tls.toml`
+    (file provider, `tls-config-3` rotation per README §TLS options), switch the static flag to
+    `security-headers@file` in the same `--args` update, then retire or keep the `@swarm` copy.
+  - **WR-04 `couch-auth` challenges on plaintext `:80`.** `traefik.http.routers.thinx-db-http.middlewares=couch-auth,https-redirect`
+    answers 401 Basic on `http://db.thinx.cloud/` before the redirect, so clients send the credential in
+    cleartext. Change it to `https-redirect` only in BOTH `docker-swarm.yml` (thinx-device-api) and thinx-swarm
+    `thinx.yml`, then apply live with `--label-add` on `thinx_couchdb` (label-only, no restart), gated by the
+    router-inventory check; `couch-auth` stays on the https router. Overlaps the D-20 redirect-gap item above.
+  - **WR-05 `vault.yml` leftovers.** The dormant stack file is deploy-safe since thinx-swarm `b04f066` (no
+    host-published `:8200`, `vault-http` redirects). Still open: the `vault:1.5.5` image pin (2020, unmaintained —
+    pin a maintained `hashicorp/vault` tag) and whether to delete `vault.yml` (+ `vault.conf`) outright; if it is
+    ever deployed, add `vault.thinx.cloud` to `scripts/traefik-edge-scan.sh` `HOSTS` (not before — no live router
+    exists, the scan would fail).
+  - **WR-01 follow-up (operator).** The four tracked `traefik.yml.bak.*` copies with the cleartext Pilot token are
+    gone from HEAD (thinx-swarm `d156e79`); an untracked copy in micro's deploy checkout,
+    `traefik.yml.bak.20261007120354.pre-p30-pilot`, still carries one `--pilot.token=` line (count only, value not
+    read) — move it under `/mnt/data/edge-rollback/` (600 root) or delete it. No other tracked `*.bak*` file
+    carries a token, apr1/bcrypt or key marker.
