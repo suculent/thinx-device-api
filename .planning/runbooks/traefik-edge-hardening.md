@@ -865,7 +865,7 @@ scan capture `## Reported, not gating (after)`):
   `10.0.0.2`; the loopback middleware list stays at the six known names).
   **Phase 34 disposition:** deferred — 34-CONTEXT `<deferred>` (operator chose not to fold, 2026-10-09); carried in `## Recorded for later (after Phase 34)`. No `ipAllowList` / `rateLimit` was added in Phase 34 either (overview middlewares stay six).
 - **Operator-supplied allow-list candidates, recorded for the Phase 34 `ipAllowList` design (not applicable in Phase 33
-  because of the ingress NAT):** `86.49.234.236`, `194.213.34.194`, `194.213.34.193`.
+  because of the ingress NAT):** `86.49.234.236`, `194.213.34.194`, `194.213.34.193`, `104.28.114.11` (added 2026-10-09; Cloudflare-owned, likely a shared WARP / Private Relay egress — confirm it is still the operator's before enforcing).
   **Phase 34 disposition:** deferred together with D-05 (34-CONTEXT `<deferred>`); the three addresses are carried in `## Recorded for later (after Phase 34)`.
 - **D-20 `:80` → `:443` redirect gaps.** `thinx-api-http` carries no `https-redirect` (plain `http://app.thinx.cloud/`
   answers the API directly — the plaintext API path legacy devices use, so any redirect must spare device
@@ -2173,7 +2173,7 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
   only as a composite of two runs, because the laptop's uplink dropped out at the tail of each run (1.1.1.1 lost in
   the same seconds). One clean `scripts/traefik-edge-scan.sh` run should be appended to `traefik-edge-scan.2026-10-09.md`.
 - **Real client IPs at the edge** (D-05): host-mode publishing of `:80` / `:443` on micro or PROXY protocol; then an
-  `ipAllowList` on the ops hosts with the operator addresses `86.49.234.236`, `194.213.34.194`, `194.213.34.193`, and
+  `ipAllowList` on the ops hosts with the operator addresses `86.49.234.236`, `194.213.34.194`, `194.213.34.193`, `104.28.114.11` (Cloudflare-shared egress, re-confirm), and
   rate limits. Both key on the client IP, which is `10.0.0.2` for every client today.
 - **`sniStrict=true`** — only with evidence that no legacy client connects without SNI (`tls-config-4` rotation;
   run the IN-07 parse check from `### P34 review fixes record` on the new file before `docker config create`).
