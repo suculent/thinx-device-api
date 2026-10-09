@@ -1987,7 +1987,7 @@ ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach 
 ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-rm traefik.http.middlewares.influx-auth.basicauth.removeheader thinx_influxdb"
 # expect: rc 0; task mulafi7tbk6u unchanged; influx-auth removeHeader absent; InfluxDB receives the edge header again
 # (r-repo) thinx-swarm: git revert 51ff67f 4cc2168 9204a8e a365644 (3040c06 = WR-01 loader, repo-only — keep unless it is the problem);
-#   this repo: git revert 06eb7e9e 052f8b48, regenerate the mirror, MIRROR OK; origin push + micro ff as in (h)
+#   this repo: git revert 61befe53 06eb7e9e 052f8b48, regenerate the mirror, MIRROR OK; origin push + micro ff as in (h)
 
 # (a) label-only changes on thinx_couchdb / thinx_influxdb, newest first (no restart)
 #  (a1) couch-auth removeHeader (orchestrator 16:29Z)
@@ -2051,8 +2051,8 @@ Per-finding outcomes and commits: `phases/34-ops-surface-reduction-sla-close-out
 thinx-swarm: `3040c06` (WR-01) → `a365644` (WR-03) → `9204a8e` (WR-02, IN-01..IN-05, IN-07) → `4cc2168` (WR-06 doc) →
 `51ff67f` (IN-01 start-first); each push went to origin and to micro (`p34-review-fix`, `--ff-only`, branch deleted).
 **thinx-swarm `51ff67f` == origin/master == micro checkout** (tracked-dirty 0). This repo: mirror regenerated from
-`4cc2168` (`06eb7e9e`, `MIRROR OK files=1`, 24 flags; `51ff67f` changes only the proxy's `deploy` block, which the
-mirror carries too — regenerated again with the docs commit), `docker-swarm.yml` `052f8b48`.
+`4cc2168` (`06eb7e9e`) and again from `51ff67f` (`61befe53`; that commit changes only the proxy's `deploy` block, which
+the mirror carries too) — `MIRROR OK files=1`, 24 flags; `docker-swarm.yml` `052f8b48`.
 
 **Live change 1 — WR-03 `influx-auth` removeHeader (label-only, 17:51:54Z).** Backup
 `/mnt/data/edge-rollback/p34rf-influxrh-thinx_influxdb-20261009T175153Z.json` (`9780 600 root`, label absent).
