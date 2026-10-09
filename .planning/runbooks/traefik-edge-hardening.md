@@ -1446,3 +1446,111 @@ Repo state == live state after this task: thinx-swarm `8a7a693` == origin/master
 `MIRROR OK files=1` at 24 flags; live `traefik_traefik` 24 Args (sorted set == mirror) with `tls-config-3` mounted and
 loaded, task `l7z1nflaqdim`; 29 routers enabled == `routers_post_A2:`; `7442 OPEN 1883 OPEN 8883 OPEN`. Stage D starts
 from here (the seven `security-headers.*` labels still on `traefik_traefik`, 0 references).
+
+### P34 Stage D record (34-03 Task 2, 2026-10-09 15:41–15:48 UTC)
+
+**Outcome: one label-only pass, no restart (task ids of `traefik_traefik`, `thinx_couchdb` and `registry_registry`
+unchanged). The `security-headers@swarm` copy is gone: after a three-way count proved 0 references (live labels, live
+router chains, stack files), the seven `traefik.http.middlewares.security-headers.*` labels were removed from
+`traefik_traefik`. HSTS stays exactly once on 17/17 hosts, now only from `security-headers@file`. `http://db.thinx.cloud/`
+answers `301 https://db.thinx.cloud/` with 0 `WWW-Authenticate` lines (no Basic challenge over plaintext — WR-04), and
+`couch-auth` still guards `https://db.thinx.cloud/` (401). `http://registry.thinx.cloud/` answers `301
+https://registry.thinx.cloud/` (D-20 gap closed). `http://app.thinx.cloud/` stays plaintext (200, not redirected) for
+legacy `__DISABLE_HTTPS__` devices, and no entrypoint-level redirect exists. Overview is back to `[29,0,18,6,["Swarm","File"]]`
+with the six expected middleware names; `29/0` == `routers_post_A2:` throughout. No D-10 trigger fired; the staged
+rollback below was NOT executed.**
+
+Precondition re-read (15:41Z): Stage C record present with `Version.Index post-P34-C: 38380172` == live; HSTS 17/17
+from `security-headers@file`; `security_headers_swarm_chains: 0`.
+
+Reference counts (read-only, 15:41Z; must be 0 before any label is removed):
+
+| Count | Where | Result |
+|---|---|---|
+| (a) | label lines matching `middlewares=` that contain `security-headers`, summed over all 22 services in `docker service ls` (thinx, external fotostim / igraczech / syxra stacks, registry, swarmpit, …) | **0** |
+| (b) | `/api/http/routers` chains containing the swarm copy | **0** |
+| (c) | non-comment occurrences of the swarm copy in thinx-swarm `thinx.yml` + this repo's `docker-swarm.yml` | **0** |
+
+security_headers_swarm_refs: 0/0/0
+
+Live pre values (read-only): registry service name `registry_registry`; `thinx_couchdb`
+`traefik.http.routers.thinx-db-http.middlewares` = `couch-auth,https-redirect`; `registry_registry` has no
+`registry-http.middlewares` label; `thinx_api` has no `thinx-api-http.middlewares` label; `traefik_traefik` carries 7
+`security-headers` label keys. :80 pre-row (laptop, 15:42:42Z): `http://db.thinx.cloud/` **401 with 1
+`WWW-Authenticate`** (the WR-04 challenge), `http://registry.thinx.cloud/` 400, `http://app.thinx.cloud/` 200.
+
+Repo first (P32 D-04): thinx-swarm `3d3a31b` (`chore(edge): Phase 34 Stage D — retire the security-headers swarm copy;
+:80 redirect-only for db and registry (D-16, D-17)`: `traefik.yml` drops the seven label lines and the Phase 29 comment
+above them for the one-line D-16 comment, and keeps the https-redirect (2), error-pages-middleware (3), traefik-mgmt (3)
+and LOAD-BEARING port labels byte-identical; `thinx.yml` sets `thinx-db-http.middlewares=https-redirect` with the D-17 /
+WR-04 comment, and the thinx-api-http lines are untouched; `registry.yml` adds `registry-http.middlewares=https-redirect`
+after the rule line; `docker stack config` parses traefik.yml and registry.yml) → origin → micro `p34-stageD` ff
+(tracked dirty 0, 3 files 5+/13−), branch deleted, HEAD equal → this repo `a9734a3d` (`docker-swarm.yml` identical
+db-http edit; comment-stripped traefik-label parity diff vs `thinx.yml` **empty**; mirror regenerated, banner `3d3a31b`,
+still **24** flags, `MIRROR OK files=1`).
+
+```
+ssh micro "umask 077; TS=\$(date -u +%Y%m%dT%H%M%SZ); B=/mnt/data/edge-rollback/traefik-p34-preD-\$TS.json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  docker service inspect thinx_couchdb > /mnt/data/edge-rollback/thinx_couchdb-p34-preD-\$TS.json && chmod 600 /mnt/data/edge-rollback/thinx_couchdb-p34-preD-\$TS.json; \
+  docker service inspect registry_registry > /mnt/data/edge-rollback/registry_registry-p34-preD-\$TS.json && chmod 600 /mnt/data/edge-rollback/registry_registry-p34-preD-\$TS.json"
+# expect: three 600-root files (the label revert sources, never leave micro, never committed); traefik backup has 7 security-headers keys
+ssh micro "docker service update --detach --label-add traefik.http.routers.thinx-db-http.middlewares=https-redirect thinx_couchdb"
+ssh micro "docker service update --detach --label-add traefik.http.routers.registry-http.middlewares=https-redirect registry_registry"
+ssh micro "RM=''; for k in browserxssfilter contenttypenosniff forcestsheader framedeny stsincludesubdomains stspreload stsseconds; do RM=\"\$RM --label-rm traefik.http.middlewares.security-headers.headers.\$k\"; done; docker service update --detach \$RM traefik_traefik"
+# expect each: rc 0; task id pre == post; >= 20 s later loopback 29/0; after the last: 0 security-headers label keys, overview middlewares 6
+```
+
+**Staged rollback — written BEFORE the first update (label-only, no restart; revert only the step just taken):**
+
+```
+# (3) re-add the seven security-headers labels, values read by jq ON micro from the pre-D backup (one update):
+ssh micro "B=/mnt/data/edge-rollback/traefik-p34-preD-20261009T154243Z.json; \
+  ADD=\$(jq -r '.[0].Spec.Labels | to_entries[] | select(.key|startswith(\"traefik.http.middlewares.security-headers.\")) | \"--label-add \" + (.key + \"=\" + .value | @sh)' \$B | tr '\n' ' '); \
+  eval docker service update --detach \$ADD traefik_traefik"
+# expect: rc 0; task id unchanged; 7 security-headers label keys; overview middlewares 7
+# (2) registry: drop the new key
+ssh micro "docker service update --detach --label-rm traefik.http.routers.registry-http.middlewares registry_registry"
+# (1) couchdb: restore the previous value, read from its pre-D backup ON micro
+ssh micro "V=\$(jq -r '.[0].Spec.Labels[\"traefik.http.routers.thinx-db-http.middlewares\"]' /mnt/data/edge-rollback/thinx_couchdb-p34-preD-20261009T154243Z.json); \
+  docker service update --detach --label-add \"traefik.http.routers.thinx-db-http.middlewares=\$V\" thinx_couchdb"
+# expect each: rc 0; task id unchanged; 29/0
+# + git revert of thinx-swarm 3d3a31b (origin + micro ff) and of a9734a3d here (MIRROR OK at 24)
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 15:41 | reference counts | 0 / 0 / 0 (above); live pre values recorded |
+| 15:41–15:42 | repo first | thinx-swarm `3d3a31b` on origin + micro (ff, tracked dirty 0); `a9734a3d` here (parity diff empty, MIRROR OK at 24) |
+| 15:42:43 | backups + :80 pre-row | `/mnt/data/edge-rollback/traefik-p34-preD-20261009T154243Z.json` (15367 B), `thinx_couchdb-p34-preD-20261009T154243Z.json` (10323 B), `registry_registry-p34-preD-20261009T154243Z.json` (13764 B), all `600 root`; traefik backup: 7 `security-headers` keys; pre idx/task: traefik `38380172` / `l7z1nflaqdim`, couchdb `38379808` / `pcj2qs3o8yjt`, registry `38379808` / `sefavt5sikwk` |
+| 15:42:5x | rollback staged | the block above written into this record before the first update |
+| **15:43:04** | **(1) `thinx_couchdb`** | `--label-add …thinx-db-http.middlewares=https-redirect` → rc 0; idx 38379808 → **38380173**, task **`pcj2qs3o8yjt` unchanged**; +22 s: `29/0`; chain `thinx-db-http@swarm` `["https-redirect@swarm"]`, `thinx-db-https@swarm` `["security-headers@file","couch-auth@swarm","error-pages-middleware@swarm"]`; wire `http://db.thinx.cloud/` → `301 https://db.thinx.cloud/`, 0 `WWW-Authenticate`; `https://db.thinx.cloud/` 401 |
+| **15:43:34** | **(2) `registry_registry`** | `--label-add …registry-http.middlewares=https-redirect` → rc 0; idx 38379808 → **38380174**, task **`sefavt5sikwk` unchanged**; +22 s: `29/0`; chain `registry-http@swarm` `["https-redirect@swarm"]`; wire `http://registry.thinx.cloud/` → `301 https://registry.thinx.cloud/`; `https://registry.thinx.cloud/` 400 |
+| **15:44:06.8** | **(3) `traefik_traefik`** | ONE update with seven `--label-rm traefik.http.middlewares.security-headers.headers.*` → rc 0; idx 38380172 → **38380175**, task **`l7z1nflaqdim` unchanged**, args 24; +22 s: label keys `security-headers` **0**, https-redirect 2, error-pages-middleware 3, traefik-mgmt 3, port label 1; `29/0`; overview `[29,0,18,6,["Swarm","File"]]`; middlewares `couch-auth@swarm error-pages-middleware@swarm https-redirect@swarm influx-auth@swarm security-headers@file sslheaders@swarm` |
+| 15:44:41–15:45:03 | laptop gate | the full laptop row (matrix, HSTS, nosniff/DENY, WS, bare-IP, TLS rows) **== the Stage C post-row (diff empty)**; HSTS exact directive **1 on 17/17**; X25519MLKEM768 still negotiated; :80 rows below; GET matrix rtm/app/console/thinx.cloud/www/swarmpit 200, registry 400, db 401, influx 401, 7 externals 200, micro 200 |
+| 15:45–15:46 | micro gate | names == `routers_post_A2:` (29); task ids of all three services == pre; `7442 OPEN 1883 OPEN 8883 OPEN`; Traefik non-JSON lines since 15:43:00Z **0** (no `does not exist` / provider / parse line); proxy `blocked` since 15:23:30Z **0**; proxy 1/1 |
+
+:80 wire rows (laptop, after the pass):
+
+| URL | Before | After |
+|---|---|---|
+| `http://db.thinx.cloud/` | `401`, 1 `WWW-Authenticate` (Basic challenge over plaintext) | **`301 https://db.thinx.cloud/`, 0 `WWW-Authenticate`** |
+| `http://registry.thinx.cloud/` | `400` (no middleware) | **`301 https://registry.thinx.cloud/`** |
+| `http://app.thinx.cloud/` | `200` (plaintext API) | `200` — **not redirected** (legacy `__DISABLE_HTTPS__` devices; keep-7442 spirit, D-17) |
+| `https://db.thinx.cloud/` | `401` | `401` (`couch-auth` stays on the https router) |
+| `https://registry.thinx.cloud/` | `400` | `400` |
+
+D-10 trigger evaluation: none fired ((1) `29/0` + names after every step, (2) overview 6 with the six expected names,
+(3) label keys as designed, task ids unchanged, (4) :80 rows as designed with app not redirected, (5) HSTS 17/17 exactly
+once after the swarm copy was retired, WS 101/401, bare-IP 301/200, matrix == Stage C post-row, ports OPEN ×3). The
+staged label rollback was **not executed**. Backups by name: `traefik-p34-preD-20261009T154243Z.json`,
+`thinx_couchdb-p34-preD-20261009T154243Z.json`, `registry_registry-p34-preD-20261009T154243Z.json` (micro
+`/mnt/data/edge-rollback/`, 600 root).
+
+Version.Index post-P34-D: 38380175
+
+Repo state == live state after this task: thinx-swarm `3d3a31b` == origin/master == micro HEAD == the mirror banner;
+`MIRROR OK files=1` at 24 flags; `docker-swarm.yml` == `thinx.yml` traefik labels (parity diff empty); live
+`traefik_traefik` 24 Args, `tls-config-3`, 0 `security-headers` label keys, task `l7z1nflaqdim`; live `thinx_couchdb`
+`thinx-db-http.middlewares=https-redirect` and `registry_registry` `registry-http.middlewares=https-redirect` == the
+committed files; 29 routers enabled == `routers_post_A2:`; `7442 OPEN 1883 OPEN 8883 OPEN`. This is the final edge that
+Plan 05 measures the SLA on (D-13); Plan 04 (ACME prune, credential rotation) starts from here.
