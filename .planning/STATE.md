@@ -2,42 +2,42 @@
 gsd_state_version: "1.0"
 milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
-current_phase: 33
-current_phase_name: Dashboard Lockdown & TLS Hardening
-status: verifying
-stopped_at: Completed 33-03-PLAN.md (Phase 33 complete)
-last_updated: "2026-10-09T10:21:17.104Z"
+current_phase: 34
+current_phase_name: Ops Surface Reduction & SLA Close-out
+status: planning
+stopped_at: Phase 33 complete, ready to plan Phase 34
+last_updated: "2026-10-09T11:03:03.633Z"
 last_activity: 2026-10-09
-last_activity_desc: Phase 33 execution started
-state_head: d5898167721ebe92bd23577d6c4d8fe4b945d17b
+last_activity_desc: Phase 33 complete, transitioned to Phase 34
+state_head: 3e487af764c8a5a7787f600043ea2b7a1a1cc800
 progress:
   total_phases: 6
-  completed_phases: 17
+  completed_phases: 18
   total_plans: 14
   completed_plans: 14
-  percent: 100
+  percent: 95
 ---
 
 # STATE — THiNX Device API
 
-**Last updated:** 2026-10-08 (Phase 31 complete — production edge on Traefik v3.7.14 BC mode; Phase 32 ready to plan)
+**Last updated:** 2026-10-09 (Phase 33 complete — dashboard/API loopback-only, AEAD-only TLS 1.2+, edge-wide HSTS, ACME renewal proven; Phase 34 ready to plan)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
+See: `.planning/PROJECT.md` (updated 2026-10-09 after Phase 33)
 
 - **Core value:** The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
-- **Current focus:** v1.15 Traefik Hardening — Phase 32 (v3 Native Syntax & BC Removal): convert routing rules to native v3 syntax and drop `core.defaultRuleSyntax=v2` (or document retention). Edge is live on `traefik:v3.7.14` since 2026-10-07; rollback staged (runbook `.planning/runbooks/traefik-v3-cutover.md`).
+- **Current focus:** v1.15 Traefik Hardening — Phase 34 (Ops Surface Reduction & SLA Close-out): production log level, read-only Docker socket-proxy for Traefik, and a measured ≤5-minute push → CI → Swarmpit SLA on an edge change. Phase 33 left Phase 34 items in `.planning/runbooks/traefik-edge-hardening.md` `## Recorded for Phase 34` (real client IPs, `ipAllowList` with operator-supplied IPs, credential rotation, HSTS middleware in the file provider, public `:8883`).
 - **Production 2026-09-29 (swarm-observed):** `thinx_api` (`sha256:3beaf4f0…`, parent `fc070578`) and `thinx_worker` (1 replica, `sha256:3abe50a2…`, worker `d6ca153`) both run on **micro**. Placement floats, so always query it.
 - **Production (CORRECTED 2026-09-21 by direct swarm inspection):** `thinx_api` runs on **core**, `thinx_console` on **micro**, `thinx_vue` on **core** — api and classic console are the reverse of what was recorded on 2026-09-19. Original (now stale) note follows: api + transformer run on `micro`, not `core`. Classic console image `registry.thinx.cloud:5000/thinx/console:swarm@sha256:27b1ca72` on node `core`, serving the CSP build with no inline scripts; rollback digest `sha256:1906bd5f`. `thinx-staging` publishes to the private registry, `main` to Docker Hub — one registry per branch since `3cfd0666`.
 - **Sibling project:** `services/console/.planning/` — Vue console GSD workspace. In v1.14, Phase 22 (Vue hostname var), Phase 25 (image `default.conf` header mirror) and Phase 26 (Vue log paging UI) touch the console submodule; coordinate each pointer bump with the phase deploy.
 
 ## Current Position
 
-Phase: 33 (Dashboard Lockdown & TLS Hardening) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-10-09 — Phase 33 execution started
+Phase: 34 — Ops Surface Reduction & SLA Close-out
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-09 — Phase 33 complete, transitioned to Phase 34
 
 ## Milestones
 
@@ -453,7 +453,7 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 33-03-PLAN.md (Phase 33 complete)
+**Stopped at:** Phase 33 complete, ready to plan Phase 34
 
 **Resume file:** None
 

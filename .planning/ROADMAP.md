@@ -178,7 +178,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 3. ACME uses the real operator email (not `admin@example.com`); `acme.json` is `600`; renewal verified.
 4. An external scan confirms no open dashboard and the expected TLS posture.
 
-**Plans:** 3/3 plans executed (planned 2026-10-08)
+**Plans:** 3/3 plans complete (planned 2026-10-08)
 **Wave 1**
 - [x] 33-01-PLAN.md — Tracer: scan script + `## Before` capture + `E.pre.yml` baseline, D-04 credential compare, Stage A1/A2 (loopback `mgmt` entrypoint `127.0.0.1:8080` + `traefik-mgmt` router to `api@internal`, public dashboard routers + basic-auth removed) proven through the loopback API gate; then the D-08 label bundle (repo-first, label-only live) and Stage B `exposedbydefault=false` under the identical-inventory gate (EDGE-API-01, EDGE-API-02)
 
@@ -219,7 +219,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete    | 2026-10-07 |
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
-| 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Pending | — |
+| 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete    | 2026-10-09 |
 | 34. Ops Surface Reduction & SLA Close-out | v1.15 | 0/? | Pending | — |
 
 ---
