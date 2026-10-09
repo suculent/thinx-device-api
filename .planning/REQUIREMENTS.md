@@ -1,6 +1,6 @@
 # Requirements — v1.16 Console Usability & Deploy Keys
 
-Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acceptance and publication are still pending; see v1.16-VERIFICATION.md.
+Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acceptance and release CI are still pending; see v1.16-VERIFICATION.md.
 
 - [x] **UI-01**: Remove template alert, duplicate logout, and Inbox; rename My Account to My Profile.
 - [x] **UI-02**: Show device action buttons with icons at the top, including environment editing, and stack sections in a single column.

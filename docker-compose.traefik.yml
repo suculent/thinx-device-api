@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@677e3a9350e68c1bac203c1ae472c1fd7f99cfd1 generated:2026-10-08T11:26:00Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:14fefbc49887505ab8b23aedc325f4c5ed8a61a45ca960bd220bd2f5d857af57
+# GENERATED — do not edit. source: thinx-swarm@b04f066dee01661e10a52153f16a7cc111855551 generated:2026-10-09T10:48:09Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:982423e30e551f171767623e190f49fe3caff071217206c00ffc17b428a6a629
 version: '3.7'
 
 services:
@@ -36,9 +36,10 @@ services:
         # That way you can add other internal Traefik instances per stack if needed
         - traefik.constraint-label=traefik-public
 
-        # admin-auth middleware with HTTP Basic auth
-        # Using the environment variables USERNAME and HASHED_PASSWORD
-        - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        # Phase 33 (EDGE-API-01/02, D-01, D-04): the basic-auth middleware that guarded the public dashboard
+        # router was removed together with that router — nothing consumes USERNAME / HASHED_PASSWORD / DOMAIN
+        # any more (traefik.sh no longer exports them). The API is reachable only on the loopback mgmt
+        # entrypoint below (ssh + docker exec plane), so no credential exists on the edge at all.
 
         # https-redirect middleware to redirect HTTP to HTTPS
         # It can be re-used by other stacks in other Docker Compose files
@@ -58,29 +59,21 @@ services:
         - traefik.http.middlewares.security-headers.headers.stspreload=true
         - traefik.http.middlewares.security-headers.headers.stsseconds=31536000
 
-        # traefik-http set up only to use the middleware to redirect to https
-        # Uses the environment variable DOMAIN
-        - traefik.http.routers.traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
-        - traefik.http.routers.traefik-public-http.entrypoints=http
-        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
-
-        # traefik-https the actual router using HTTPS
-        # Uses the environment variable DOMAIN
-        - traefik.http.routers.traefik-public-https.rule=Host(`${DOMAIN?Variable not set}`)
-        - traefik.http.routers.traefik-public-https.entrypoints=https
-        - traefik.http.routers.traefik-public-https.tls=true
-
-        # Use the special Traefik service api@internal with the web UI/Dashboard
-        - traefik.http.routers.traefik-public-https.service=api@internal
-        
-        # Use the "le" (Let's Encrypt) resolver created below
-        - traefik.http.routers.traefik-public-https.tls.certresolver=le
-        
-        # Define the port inside of the Docker service to use
+        # LOAD-BEARING (Phase 33 research): the v3 swarm provider skips any traefik-enabled service
+        # without an explicit service port ("port is missing") and would drop the shared middlewares
+        # above/below (https-redirect, security-headers, error-pages-middleware) for every router that
+        # references them. api@internal ignores this service; the provider does not. Keep it.
         - traefik.http.services.traefik-public.loadbalancer.server.port=8080
 
-        # Using custom pages for traefik as well...
-        - traefik.http.routers.traefik-public-https.middlewares=admin-auth,error-pages-middleware
+        # Phase 33 (EDGE-API-01/02, D-01..D-03): the public dashboard routers (micro hostname) and their
+        # basic-auth are gone. The API/dashboard is reachable ONLY inside the task on the loopback `mgmt`
+        # entrypoint (--entrypoints.mgmt.address=127.0.0.1:8080):
+        #   ssh micro -> docker exec <task> wget -qO- http://127.0.0.1:8080/api/...
+        # Declared here (not in the file provider) so the provider does not synthesise a default
+        # Host(`traefik-traefik`) router on every entrypoint for the port-only service above.
+        - traefik.http.routers.traefik-mgmt.rule=PathPrefix(`/`)
+        - traefik.http.routers.traefik-mgmt.entrypoints=mgmt
+        - traefik.http.routers.traefik-mgmt.service=api@internal
 
         # Dynamic Custom Error Page for 5XX Status Code
         - "traefik.http.middlewares.error-pages-middleware.errors.status=400-599"
@@ -103,15 +96,21 @@ services:
       - --providers.swarm
       # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
-      # Expose every constraint-matching service by default (P30 D-05: audit deferred to Phase 33)
-      - --providers.swarm.exposedbydefault=true
-      # Backward-compat switch (official three-phase rollout, phase 3 deferred): router rules keep
-      # the v2 matcher syntax until Phase 32 (EDGE-MIG-03) converts them natively.
-      - --core.defaultRuleSyntax=v2
+      # Expose only services that opt in (P30 D-05 deferred the audit here; Phase 33 EDGE-API-01, D-07: flipped to false —
+      # every edge service carries traefik.enable=true, so the router inventory is identical before and after)
+      - --providers.swarm.exposedbydefault=false
+      # Phase 32 (EDGE-MIG-03, D-09): the v2 rule-syntax backward-compat switch was removed here after the
+      # four v2-only router rules (thinx-api-ws, downtime-http/https, error-router) were converted to native v3.
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
       - --entrypoints.https.address=:443
+      # Phase 33 (EDGE-TLS-02, D-17..D-19): default middleware for EVERY router on :443, present and future, external
+      # stacks included — HSTS max-age=31536000 (one year) + includeSubDomains + preload directive (header only;
+      # thinx.cloud is NOT submitted to the preload list), nosniff, frame-deny. Informational 1xx responses (the
+      # WebSocket 101) bypass the headers middleware by construction (Traefik ResponseModifier), so thinx-api-ws is
+      # unaffected. The http entrypoint gets no headers middleware (HSTS is a :443 response header, D-20).
+      - --entrypoints.https.http.middlewares=security-headers@swarm
       # D-03 (Phase 30, EDGE-MIG-04): the vpn/mqtt/mqtts/thxp entrypoints below are VESTIGIAL —
       # defined here but NOT host-published by Traefik (Traefik publishes only :80/:443).
       # Device/MQTT traffic is published DIRECTLY, outside Traefik: :7442 (thxp) by thinx_api,
@@ -128,6 +127,10 @@ services:
       - --entrypoints.mqtts.address=:8883
       # Create an entrypoint "thxp" listening on port 7442
       - --entrypoints.thxp.address=:7442
+      # Phase 33 (EDGE-API-01, D-02): loopback-only management entrypoint for api@internal — bound to 127.0.0.1
+      # inside the task netns, reachable only via ssh micro + docker exec (no overlay, no host, no internet;
+      # nothing is host-published). See thinx-device-api/.planning/runbooks/traefik-edge-hardening.md.
+      - --entrypoints.mgmt.address=127.0.0.1:8080
 
       # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
       - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
@@ -135,12 +138,18 @@ services:
       - --certificatesresolvers.le.acme.storage=/certificates/acme.json
       # Use the TLS Challenge for Let's Encrypt
       - --certificatesresolvers.le.acme.tlschallenge=true
+      # Phase 33 (EDGE-TLS-01, D-13..D-16): load the mounted TLS options file — default option = TLS 1.2+,
+      # six ECDHE AEAD suites, X25519/P-256, sniStrict false; TLS options cannot be set via swarm labels.
+      # The file is the docker config `tls-config-${CONFIG}` (see `configs:` below) — never edit it in place.
+      - --providers.file.filename=/traefik/tls.toml
       # Enable the access log, with HTTP requests
       - --accesslog
       # Enable the Traefik log, for configurations and errors
       - --log
       - --log.level=ERROR
-      # Enable the Dashboard and API
+      # Enable the Dashboard and API — Phase 33 (EDGE-API-01/02, D-02/D-03): served ONLY on the loopback `mgmt`
+      # entrypoint above through the traefik-mgmt router label; there is no public route and no basic-auth any
+      # more. Never --api.insecure (that would open an unauthenticated :8080 on every interface).
       - --api
       # D-04 (Phase 30): the inert cleartext `--pilot.token` flag was REMOVED here. Traefik Pilot
       # was discontinued (the flag is a no-op on v2.11 and is rejected by v3); removing it early
@@ -169,5 +178,10 @@ networks:
 # https://medium.com/@jakub.hajek/container-orchestration-with-traefik-2-x-and-docker-swarm-with-canary-deployment-27e7ea62af6f
 configs:
   tls-config:
-    name: tls-config-${CONFIG:-1}
+    # Phase 33 (EDGE-TLS-01, D-13): swarm configs are immutable — to change tls.toml bump CONFIG,
+    # `docker config create tls-config-<N>` the new name FROM the micro checkout
+    # (/mnt/gluster/deployment/swarm/traefik/tls.toml after the ff-merge, so deployed bytes == committed bytes),
+    # then `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`
+    # (+ one task restart). Never `docker stack deploy` for this.
+    name: tls-config-${CONFIG:-2}
     file: ./traefik/tls.toml # or /mnt/data/ingress/traefik/tls.toml

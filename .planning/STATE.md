@@ -21,7 +21,7 @@ v1.16 phases 35–38 implemented and locally verified from Google Drive THiNX/TO
 
 ## Preserved Work
 
-v1.15 remains unfinished and paused; its original state/roadmap/requirements are in milestones/v1.15-*-IN-PROGRESS.md. Phases 29–34 remain untouched. Resume its phase 32 after this independent console milestone.
+v1.15 remains unfinished and paused; its original state/roadmap/requirements are in milestones/v1.15-*-IN-PROGRESS.md. Concurrent staging work completed phases 32–33. Latest v1.15 state, roadmap and requirements are preserved; resume Phase 34 after this independent console milestone.
 
 ## Decisions
 
@@ -29,8 +29,8 @@ Use thinx-staging baseline, paired console branch and parent submodule pointer. 
 
 ## Verification
 
-Local unit/regression checks, builds, source security checks, and lint pass. GitHub connector write access restored; paired feature branches are being published with draft PRs to thinx-staging. CLI credentials remain unavailable. Browser validation could not run because Chromium downloads were invalid. CI and production acceptance pending. See v1.16-VERIFICATION.md.
+Local unit/regression checks, builds, source security checks, and lint pass. GitHub connector write access restored; console PR #32 is merged and API PR #572 is approved for thinx-staging. CLI credentials remain unavailable. Browser validation could not run because Chromium downloads were invalid. CI and production acceptance pending. See v1.16-VERIFICATION.md.
 
 ## Next Action
 
-Check feature-branch CI and review paired PRs. Deployment builds run only after changes reach thinx-staging. Verify registry build results and live rollout before closing v1.16.
+Merge API PR #572 after preserving concurrent v1.15 progress. Monitor staging test and registry image jobs, then verify live rollout before closing v1.16.

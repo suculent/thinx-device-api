@@ -12,6 +12,7 @@
 - User-provided server access:
   - `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
   - Swarm path: `/mnt/gluster/deployment/swarm`
+- Edge (Traefik) changes: docker service update only (args / labels / configs) — never restart.sh or docker stack deploy; see "Traefik dashboard/API access" below.
 
 ## Legacy plaintext device port — keep 7442
 
@@ -20,6 +21,29 @@ The plaintext HTTP device port **7442** (next to HTTPS 7443) and plain (non-TLS)
 in, redeem OTT tokens and download firmware over them. Operator decision 2026-10-04. Do not close,
 redirect or TLS-enforce them as a "hardening" fix; any hardening on these paths must keep plaintext
 clients working.
+
+## Traefik dashboard/API access — ssh plane only (Phase 33)
+
+There is **no public Traefik dashboard or API route** on any hostname and **no basic-auth credential**
+anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal` is served by the
+`traefik-mgmt` router only on the loopback `mgmt` entrypoint `127.0.0.1:8080` **inside the Traefik task**
+— not on the overlay, not on the host, not on the internet. The only path is ssh to micro + `docker exec`:
+
+- JSON API gate (used by every edge verification):
+  `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); docker exec \$C wget -qO- http://127.0.0.1:8080/api/overview"`
+  (the image has `wget` and `nc`, no `curl`; `/api/http/routers | jq -r '.[] | select(.status!="enabled") | .name'` must print nothing).
+- Browser dashboard — laptop bridge, nothing installed on micro:
+  `C=$(ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1"); socat TCP-LISTEN:8080,bind=127.0.0.1,reuseaddr,fork EXEC:"ssh root@188.166.23.244 -i $HOME/.ssh/DOKey2 -p2020 docker exec -i $C nc 127.0.0.1 8080"`
+  then open `http://127.0.0.1:8080/dashboard/`; Ctrl-C the socat to close the bridge (it binds the laptop loopback only).
+  `/dashboard` without the trailing slash returns 404 from `api@internal`; use `/dashboard/` or open `http://127.0.0.1:8080/` which redirects.
+- Never `--api.insecure`, never publish 8080, never `docker stack deploy` / `restart.sh` for edge changes
+  (they drop the live-only secret mounts) — every live edge change is one `docker service update`
+  (`--args` / `--label-*` / `--config-*` / `--force`), repo-first in `thinx-swarm`, with a 600-root backup on micro.
+- TLS options live in `thinx-swarm/traefik/tls.toml`, mounted as the immutable docker config `tls-config-<N>`
+  (`tls-config-2` today; AEAD-only TLS 1.2+, HSTS edge-wide via the `https` entrypoint default middleware): to change
+  them bump `CONFIG`, `docker config create tls-config-<N>` FROM micro's fast-forwarded checkout, then
+  `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`.
+- See `.planning/runbooks/traefik-edge-hardening.md` (gate recipes, mechanism table, stage records, the ordered revert set).
 
 ## Local Verification
 - Build command:

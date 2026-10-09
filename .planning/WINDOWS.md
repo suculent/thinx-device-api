@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 13
+open_count: 16
 waived_count: 0
 fixed_count: 1
-total_count: 14
-last_updated: 2026-10-07T20:31:35.630Z
+total_count: 17
+last_updated: 2026-10-09T09:12:46.280Z
 ---
 
 # Broken Windows Ledger
@@ -29,6 +29,9 @@ last_updated: 2026-10-07T20:31:35.630Z
 | 12 | quick-261004-l7q | unrun-verify | spec/jasmine/ZZ-RouterTransferSpec.js |  | 261004-l7q ZZ edits (opaque request answer + id read from Redis, sender's POST accept/decline answer like an unknown transfer, accept III through the recipient's GET e-mail link) and the TransferSpec (00) third-argument id not run locally: they need real Redis/CouchDB; ZZ specs are deleted before CI; binding pinned locally by TransferRecipientSpec | open |  | 2026-10-04T13:36:30.251Z |  |
 | 13 | quick-261004-l9f | unrun-verify | spec/jasmine/ZZ-CSRFEnforceSpec.js | 207 | 261004-l9f ZZ edit (case 5 also asserts a non-empty body, because a failed Bearer now answers an empty 401 that not.equal(403) no longer catches) not run locally: needs real Redis/CouchDB; ZZ specs are deleted before CI; 401 pinned locally by BearerVerifyStatusSpec | open |  | 2026-10-04T14:12:59.534Z |  |
 | 14 | 31 | deviation | .planning/runbooks/traefik-v3-cutover.md |  | 31-01 Task 3 'every router enabled' gate deferred to Plan 03 post-B2 (operator decision A); live /api/http/routers status filter must print nothing after B2 | open |  | 2026-10-07T20:31:35.630Z |  |
+| 15 | 33 | deviation | .planning/runbooks/traefik-edge-hardening.md |  | 33-01: overlay negative probe runs via --network container:<traefik-public peer> because traefik-public is not attachable (plan recipe refused) | open |  | 2026-10-08T23:17:41.841Z |  |
+| 16 | 33 | deviation | .planning/runbooks/traefik-edge-hardening.md |  | 33-02 Task 1: Version.Index precondition drift (38379808 vs post-Stage-B 38379801) caused by a swarm leader election re-saving all services; content unchanged, treated as met in substance | open |  | 2026-10-09T09:12:46.010Z |  |
+| 17 | 33 | unrun-verify | .planning/phases/33-dashboard-lockdown-tls-hardening/33-02-PLAN.md |  | 33-02 Task 1: rawdata TLS-options jq literal cannot pass on Traefik v3.7.14 (API does not expose TLS options); proven on the wire + in-task config sha instead (deferred-items.md) | open |  | 2026-10-09T09:12:46.280Z |  |
 
 ````json
 [
@@ -211,6 +214,45 @@ last_updated: 2026-10-07T20:31:35.630Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-10-07T20:31:35.630Z",
+    "resolved_at": null,
+    "milestone": "v1.15"
+  },
+  {
+    "id": 15,
+    "kind": "deviation",
+    "phase": "33",
+    "file": ".planning/runbooks/traefik-edge-hardening.md",
+    "line": null,
+    "description": "33-01: overlay negative probe runs via --network container:<traefik-public peer> because traefik-public is not attachable (plan recipe refused)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-08T23:17:41.841Z",
+    "resolved_at": null,
+    "milestone": "v1.15"
+  },
+  {
+    "id": 16,
+    "kind": "deviation",
+    "phase": "33",
+    "file": ".planning/runbooks/traefik-edge-hardening.md",
+    "line": null,
+    "description": "33-02 Task 1: Version.Index precondition drift (38379808 vs post-Stage-B 38379801) caused by a swarm leader election re-saving all services; content unchanged, treated as met in substance",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-09T09:12:46.010Z",
+    "resolved_at": null,
+    "milestone": "v1.15"
+  },
+  {
+    "id": 17,
+    "kind": "unrun-verify",
+    "phase": "33",
+    "file": ".planning/phases/33-dashboard-lockdown-tls-hardening/33-02-PLAN.md",
+    "line": null,
+    "description": "33-02 Task 1: rawdata TLS-options jq literal cannot pass on Traefik v3.7.14 (API does not expose TLS options); proven on the wire + in-task config sha instead (deferred-items.md)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-10-09T09:12:46.280Z",
     "resolved_at": null,
     "milestone": "v1.15"
   }
