@@ -55,6 +55,7 @@
 | Encrypting keys with a secret stored in CouchDB/Redis | Same trust boundary as the key store; does not meet the core value. |
 | Public `vault.thinx.cloud` route | D-03 — internal overlay only. |
 | Storing private keys in Vault KV | D-01 — moves the backup problem into Vault storage. |
+| Destroying legacy-passphrase backups (KEYMIG-01 pre-migration copy, pre-migration Gluster backups, DO VM snapshots) | Accepted residual risk (operator, 2026-10-09): those copies stay decryptable with the old `thinx` passphrase until they expire naturally. |
 | Changing the plaintext device port 7442 / plain MQTT | Required for legacy non-TLS devices (operator decision 2026-10-04). |
 | `docker stack deploy` / `restart.sh` for edge changes | Edge rule: `docker service update` only; Vault is its own stack, Traefik untouched. |
 
@@ -62,12 +63,29 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| VAULT-01 | Phase 39 | Pending |
+| VAULT-02 | Phase 39 | Pending |
+| VAULT-03 | Phase 39 | Pending |
+| VAULT-04 | Phase 39 | Pending |
+| VAULT-05 | Phase 39 | Pending |
+| VAULT-06 | Phase 39 | Pending |
+| VAULT-07 | Phase 39 | Pending |
+| VAULT-08 | Phase 39 | Pending |
+| KEYENC-01 | Phase 40 | Pending |
+| KEYENC-02 | Phase 40 | Pending |
+| KEYENC-03 | Phase 40 | Pending |
+| KEYENC-04 | Phase 40 | Pending |
+| KEYENC-05 | Phase 40 | Pending |
+| KEYENC-06 | Phase 40 | Pending |
+| KEYMIG-01 | Phase 41 | Pending |
+| KEYMIG-02 | Phase 41 | Pending |
+| KEYMIG-03 | Phase 41 | Pending |
 
 **Coverage:**
 - v1 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17 (Phase 39: 8, Phase 40: 6, Phase 41: 3)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-09*
-*Last updated: 2026-10-09 after initial definition*
+*Last updated: 2026-10-09 after roadmap creation (Phases 39–41)*
