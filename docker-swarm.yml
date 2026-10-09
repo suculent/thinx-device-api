@@ -194,6 +194,8 @@ services:
         - "traefik.http.routers.thinx-db-https.middlewares=couch-auth,error-pages-middleware"
 
         - traefik.http.middlewares.couch-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        # strip the edge Basic header before CouchDB so it does not read it as a CouchDB login (Fauxton has its own)
+        - "traefik.http.middlewares.couch-auth.basicauth.removeheader=true"
 
   thinx-redis:
     networks:
