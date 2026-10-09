@@ -346,7 +346,8 @@ services:
         - "traefik.http.routers.thinx-api-https.entrypoints=https"
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm,security-headers@swarm"
+        # Phase 33 (EDGE-TLS-02, D-17): security headers now come from the https entrypoint default middleware — the per-router reference was redundant and is dropped; sslheaders stays (X-Forwarded-Proto for the API).
+        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm"
         - "swarmpit.service.deployment.autoredeploy=true"
 
         # NGINX Entrypoint for WSS
@@ -433,7 +434,7 @@ services:
         - "traefik.http.routers.thinx-console-https.entrypoints=https"
         - "traefik.http.routers.thinx-console-https.tls=true"
         - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-console-https.middlewares=security-headers@swarm"
+        # Phase 33 (EDGE-TLS-02, D-17): security headers now come from the https entrypoint default middleware — the per-router reference was redundant and is removed.
 
         - swarmpit.service.deployment.autoredeploy=true
 
