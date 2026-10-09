@@ -5,17 +5,17 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 33
 current_phase_name: Dashboard Lockdown & TLS Hardening
 status: executing
-stopped_at: Completed 33-01-PLAN.md
-last_updated: "2026-10-08T23:17:44.753Z"
+stopped_at: Completed 33-02-PLAN.md
+last_updated: "2026-10-09T09:12:50.994Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 33 execution started
-state_head: 546137c740fef3c46a8c68b8ae534c60f9afc134
+state_head: ccb68f4ce52fb50b49dc0002f6a627f7db9052b7
 progress:
   total_phases: 6
   completed_phases: 17
   total_plans: 14
-  completed_plans: 12
-  percent: 86
+  completed_plans: 13
+  percent: 93
 ---
 
 # STATE — THiNX Device API
@@ -35,7 +35,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
 ## Current Position
 
 Phase: 33 (Dashboard Lockdown & TLS Hardening) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-10-09 — Phase 33 execution started
 
@@ -320,6 +320,11 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 33]: 33-01: traefik-mgmt router lives in the traefik_traefik labels and the traefik-public port label is KEPT (load-bearing); --providers.file deferred to Plan 02 Stage C; live edge at 17 Args with the mgmt entrypoint bound 127.0.0.1:8080 in-task, public dashboard routers + admin-auth gone (EDGE-API-01/02)
 - [Phase 33]: 33-01: D-04 recorded HASH-LITERAL=NO-MATCH / PASSWORD=NO-MATCH (committed traefik.sh literals never matched the live hash; both HASHED_PASSWORD exports were command substitutions); traefik.sh scrubbed, EMAIL from env; rotation moot since the live middleware is gone
 - [Phase 33]: 33-01: overlay negative probe joins an existing traefik-public peer netns (--network container:<errorpage task>) because the network is not attachable; exposedbydefault=false live with an identical 29-router inventory; WS rule host is ${WEB_HOSTNAME} (file-only); micro.thinx.cloud HTTPS baseline is 200 after A2
+- [Phase 33]: 33-02: curvePreferences SET to [X25519, CurveP256] — explicit scannable policy; the Go-default X25519MLKEM768 PQ hybrid is no longer offered (Phase 34 revisit, T-33-12 accepted); alpnProtocols/preferServerCipherSuites/maxVersion omitted so acme-tls/1 stays advertised
+- [Phase 33]: 33-02: D-18 per-router fallback NOT needed — WebSocket 101 carries 0 STS lines after the entrypoint default middleware; redundant per-router security-headers refs removed after the 17/17 HSTS gate
+- [Phase 33]: 33-02: D-22 renewal evidence = pre-edit acme.json mtime + served notAfter 2026-12-28 (Traefik logs at ERROR); forced reissue host influx.thinx.cloud — new serial 05806B4C8B028F41EC3ACCC00DF3C6A50B04 within ~11 s of the --force restart
+- [Phase 33]: 33-02: D-24 decided by measurement — qooldata_router_refs 0 (E.pre.yml) / 0 (live); checkout.qooldata.com pruned, not re-requested, Phase 32 deferred item resolved with owner-notification note
+- [Phase 33]: 33-02: a swarm raft leader election (06:49Z core->micro) bumps every service's Version.Index without changing content; post-Stage-X index gates compare against each stage's own recorded index
 
 ### Todos
 
@@ -443,11 +448,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 33-01-PLAN.md
+**Stopped at:** Completed 33-02-PLAN.md
 
 **Resume file:** None
 
-**Last session:** 2026-10-08T23:17:44.641Z
+**Last session:** 2026-10-09T09:12:50.869Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -522,3 +527,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 32 P02 | 25 min | 3 tasks | 7 files |
 | Phase 32 P03 | 22 min | 2 tasks | 4 files |
 | Phase 33 P01 | 39 min | 3 tasks | 10 files |
+| Phase 33 P02 | 79min | 3 tasks | 8 files |
