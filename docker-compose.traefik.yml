@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@ff305855e91be7ec10482cb300f0b66bb8a6e1bd generated:2026-10-09T13:58:25Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:a70a83bebc8e4de53796034c492e255fffd05f9645eba4ff3a357464f99fa307
+# GENERATED — do not edit. source: thinx-swarm@fcafee0bd0b0ee92a2f8a242f4804bd7689052e8 generated:2026-10-09T15:15:58Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:10f4c8bc8fac31664a4c9f0a4e8c5925e590ed73f5e07baba62cf91dfa04162f
 version: '3.7'
 
 services:
@@ -82,18 +82,16 @@ services:
 
 
     volumes:
-      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount the volume to store the certificates
       - traefik-public-certificates:/certificates
     command:
-      # Phase 31 (EDGE-MIG-02, D-04 minimum-to-boot): Traefik v3 splits the Docker provider —
-      # the v2 `providers.docker` + `providers.docker.swarmmode` flags are replaced by the separate
-      # swarm provider. Its resources are namespaced @swarm, so every app-stack middleware ref moved
-      # from sslheaders@docker / security-headers@docker to @swarm and every v2 docker-network label
-      # became traefik.swarm.network. No --providers.swarm.endpoint on purpose: the default unix
-      # socket is exactly the docker.sock:ro mount below.
+      # Phase 34 (EDGE-OPS-02, D-06..D-09): the swarm provider reads the Docker API ONLY through the read-only
+      # socket-proxy service below (GET-only allow-list, internal overlay traefik-socket). Traefik has no Docker
+      # socket mount — never re-add one; the rollback is the one-command revert in thinx-device-api
+      # .planning/runbooks/traefik-edge-hardening.md. Phase 31 history: the v2 docker-provider flags became
+      # --providers.swarm and every middleware ref moved to @swarm.
       - --providers.swarm
+      - --providers.swarm.endpoint=tcp://socket-proxy:2375
       # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Expose only services that opt in (P30 D-05 deferred the audit here; Phase 33 EDGE-API-01, D-07: flipped to false —
@@ -169,6 +167,8 @@ services:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
+      # Phase 34 (D-06): Docker API path to socket-proxy only — never shared with traefik-public stacks
+      - traefik-socket
 
   socket-proxy:
     # Phase 34 (EDGE-OPS-02, D-05..D-08): read-only Docker API for the swarm provider — GET-only allow-list of exactly
