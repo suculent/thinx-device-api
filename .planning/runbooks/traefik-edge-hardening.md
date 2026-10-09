@@ -1966,12 +1966,29 @@ mirror banner), mirror `MIRROR OK` at 24 flags, `docker-swarm.yml` == `thinx.yml
 **Ordered revert set, newest first.** Revert only as far as the failure requires. Each step is one command (or a
 short group of label updates) followed by the gate: loopback `29/0` + names, HTTPS matrix, WS 101/401, bare-IP 301/200,
 `7442/1883/8883 OPEN`. **Before any step that restarts Traefik ((b), (d), (e), (g)), assert `traefik_socket-proxy`
-1/1** unless (e) has already put Traefik back on the raw socket. Backups are `600 root` on micro
+1/1** (and, since the review fixes, `(healthy)`) unless (e) has already put Traefik back on the raw socket. Steps
+(r1)–(r3) undo the Phase 34 review fixes (`### P34 review fixes record`) and come first. The (d) pre-C Args still name
+the old endpoint `tcp://socket-proxy:2375`, which resolves through the proxy's `socket-proxy` alias on `traefik-socket`
+— keep that alias while any pre-review backup may be replayed. Backups are `600 root` on micro
 (`/mnt/data/edge-rollback/`), never leave the host, and are read by `jq` there; Args are rebuilt with `map(@sh)`, never
 typed. Order constraints: (c) before (d) (the pre-C Args name `security-headers@swarm`, whose labels (c) re-adds);
 `tls-config-2` recreated before (d); (e) before (f); everything live before (h).
 
 ```
+# (r1) review fix WR-02 — endpoint back to the bare alias (ONE --args update, one restart; proxy 1/1 asserted first)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "[ \"\$(docker service ls --filter name=traefik_socket-proxy --format '{{.Replicas}}')\" = '1/1' ] || exit 3; B=/mnt/data/edge-rollback/p34rf-wr02-traefik_traefik-20261009T175450Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: 24 ; rc 0; one restart; endpoint tcp://socket-proxy:2375; 29/0, names == routers_post_A2:
+# (r2) review fix IN-01 — proxy healthcheck + start-first back to the pre-fix spec (one proxy task replacement; Traefik keeps its last config)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --no-healthcheck --update-order stop-first traefik_socket-proxy"
+# expect: rc 0; new proxy task Running; Healthcheck {Test:[NONE]} (disabled — equivalent to the pre-fix null); 29/0
+#   exact-spec form instead (byte-identical to the backup): jq '.[0].Spec' /mnt/data/edge-rollback/p34rf-in01-traefik_socket-proxy-20261009T175322Z.json
+#   > /root/r.json, then POST it to /services/<ID>/update?version=<current idx> over /var/run/docker.sock (curl --unix-socket), rm /root/r.json
+# (r3) review fix WR-03 — influx-auth removeheader off (label-only, no restart)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-rm traefik.http.middlewares.influx-auth.basicauth.removeheader thinx_influxdb"
+# expect: rc 0; task mulafi7tbk6u unchanged; influx-auth removeHeader absent; InfluxDB receives the edge header again
+# (r-repo) thinx-swarm: git revert 51ff67f 4cc2168 9204a8e a365644 (3040c06 = WR-01 loader, repo-only — keep unless it is the problem);
+#   this repo: git revert 06eb7e9e 052f8b48, regenerate the mirror, MIRROR OK; origin push + micro ff as in (h)
+
 # (a) label-only changes on thinx_couchdb / thinx_influxdb, newest first (no restart)
 #  (a1) couch-auth removeHeader (orchestrator 16:29Z)
 ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service update --detach --label-rm traefik.http.middlewares.couch-auth.basicauth.removeheader thinx_couchdb"
@@ -2025,6 +2042,120 @@ After (a)–(h) the edge is at the Phase 33 end state (`traefik-edge.F.pre.yml`)
 swarm-label copy, `couch-auth` on plaintext `:80`, 23-entry store. Partial reverts are fine (e.g. (a1) alone, or (e)+(f)
 via the swarm.md "keep current Args" form).
 
+### P34 review fixes record (34-REVIEW WR-01..WR-06, IN-01..IN-08; 2026-10-09 17:40–18:00 UTC)
+
+All 14 findings of `34-REVIEW.md` (operator: "Fix all"). Repo first in both repositories; three live changes, each
+with a `600 root` spec backup in `/mnt/data/edge-rollback/`, a dry-run diff reviewed before the apply, and a green gate.
+Per-finding outcomes and commits: `phases/34-ops-surface-reduction-sla-close-out/34-REVIEW-FIX.md`.
+
+thinx-swarm: `3040c06` (WR-01) → `a365644` (WR-03) → `9204a8e` (WR-02, IN-01..IN-05, IN-07) → `4cc2168` (WR-06 doc) →
+`51ff67f` (IN-01 start-first); each push went to origin and to micro (`p34-review-fix`, `--ff-only`, branch deleted).
+**thinx-swarm `51ff67f` == origin/master == micro checkout** (tracked-dirty 0). This repo: mirror regenerated from
+`4cc2168` (`06eb7e9e`, `MIRROR OK files=1`, 24 flags; `51ff67f` changes only the proxy's `deploy` block, which the
+mirror carries too — regenerated again with the docs commit), `docker-swarm.yml` `052f8b48`.
+
+**Live change 1 — WR-03 `influx-auth` removeHeader (label-only, 17:51:54Z).** Backup
+`/mnt/data/edge-rollback/p34rf-influxrh-thinx_influxdb-20261009T175153Z.json` (`9780 600 root`, label absent).
+`docker service update --detach --label-add traefik.http.middlewares.influx-auth.basicauth.removeheader=true thinx_influxdb`
+→ rc 0; Version.Index **38380190 → 38380302**; task `mulafi7tbk6u` **unchanged** (no restart). Gate: `influx-auth@swarm`
+`removeHeader: true`; overview `[29,0,18,6,["Swarm","File"]]`; router-name md5 `218439c68631` (== F.pre list), 0 not
+enabled; `https://influx.thinx.cloud/` **401 + Basic challenge**, `http://` **301** → https; db unchanged (401 + challenge /
+301); rtm/app/csrf 200. Revert: (r3).
+
+**Live change 2 — IN-01 proxy healthcheck + start-first (Engine API update, 17:53:28Z).** The image is `FROM scratch`
+(no `/bin/sh`), and `docker service update --health-cmd` always writes `CMD-SHELL`, which would mark the proxy
+unhealthy forever; the exec form `["CMD", "/healthcheck"]` can only be set through the API. Facts first: `docker exec
+<proxy> /healthcheck` → rc 0. Backup `/mnt/data/edge-rollback/p34rf-in01-traefik_socket-proxy-20261009T175322Z.json`
+(`3933 600 root`, Env 0). Dry run (separate command, nothing applied) — the full spec diff was exactly:
+`+ Healthcheck {Test ["CMD","/healthcheck"], Interval 30s, Timeout 5s, Retries 2, StartPeriod 5s}` and
+`UpdateConfig.Order stop-first → start-first`. Apply: `curl --unix-socket /var/run/docker.sock -X POST
+…/services/<ID>/update?version=38380136` with that reviewed file → `{"Warnings":null}`. Rollout: new task
+**`2p48l57isdvn` Running, `(healthy)`**, old `iqrs4f7agcyl` stopped ~3 s **after** the new one was up (start-first, no
+gap); `UpdateStatus completed`; Version.Index **38380136 → 38380315**. Gate: proxy 1/1 healthy; in-task
+`/_ping` → `OK`, `/v1.44/secrets` → **403** (one proxy `blocked` line = that probe: `reason="path not allowed"
+URL=/v1.44/secrets`); Traefik (not restarted, task `vtdqxehcuul8`) logged **0** lines since 17:53:20Z (0 provider
+errors); overview and router md5 unchanged. Revert: (r2).
+
+**Live change 3 — WR-02 endpoint by full service name (ONE `--args` update, 17:54:56Z).** Facts first, from inside the
+Traefik task: `nslookup traefik_socket-proxy` → only **`10.234.34.2`** (the `traefik-socket` VIP), `nc -z` 2375 OPEN;
+`socket-proxy` → `10.234.34.2` too (alias). `traefik-public` aliases checked across all 22 services: none named
+`socket-proxy` today, but `igraczech-com_web` and `syxra-cz_web` **both** carry the alias `web` there — the collision
+class WR-02 describes is real on this network. Backup `/mnt/data/edge-rollback/p34rf-wr02-traefik_traefik-20261009T175450Z.json`
+(`14072 600 root`, idx 38380188, Args 24, 1 endpoint flag). Dry run (separate command): Args diff exactly
+`- --providers.swarm.endpoint=tcp://socket-proxy:2375` / `+ --providers.swarm.endpoint=tcp://traefik_socket-proxy:2375`,
+24 → 24. Apply in ONE remote command after asserting proxy `1/1` + `(healthy)` + new Args length 24:
+`docker service update --detach --args "<24, map(@sh)>" traefik_traefik` → rc 0. Rollout: task **`vtdqxehcuul8` →
+`23q5m86cc7zc`** (started 17:55:01Z), `UpdateStatus completed`, Version.Index **38380188 → 38380330**, Args **24**.
+
+| Gate (after WR-02) | Before (17:50:56Z) | After (17:55–17:57Z) |
+|---|---|---|
+| overview | `[29,0,18,6,["Swarm","File"]]` | `[29,0,18,6,["Swarm","File"]]` |
+| router names (md5 of sorted names) / not enabled | `218439c68631` / 0 | `218439c68631` / 0 |
+| endpoint | `tcp://socket-proxy:2375` | `tcp://traefik_socket-proxy:2375` |
+| Traefik log since 17:54:50Z (time-bounded `docker logs`, new container) | — | 8 lines, all the normal start-up `WRN`; **0 provider / connect errors, 0 ERR** |
+| in-task `nslookup traefik_socket-proxy` | `10.234.34.2` | `10.234.34.2` only |
+| `7442 / 1883 / 8883` (micro-local probe, as in every Phase 34 gate) | OPEN ×3 | OPEN ×3 |
+| rtm `/`, app `/`, `/api/v2/csrf-token` | 200 / 200 / 200 | 200 / 200 / 200 |
+| db / influx https, http | 401+challenge / 401+challenge; 301 / 301 | identical |
+| device-flow harness | `p34rf-pre-7442` PASS, `p34rf-pre-https` PASS | **`p34rf-post-7442` PASS, `p34rf-post-https` PASS** |
+
+Revert: (r1).
+
+**Pre-existing, found while gating, NOT changed (recorded for the operator): `thinx_mosquitto` does not listen on
+`:8883`.** From the laptop `:8883` is CLOSED on `rtm.thinx.cloud` and the edge IP (laptop egress to `portquiz.net:8883`
+works); from micro `127.0.0.1:8883` connects (docker-proxy accepts), but `188.166.23.244:8883` is CLOSED, and from the
+Traefik task over the overlay `tasks.mosquitto` answers **1883 and 1884 but not 8883**. Host rules are fine (ufw allows
+8883 tcp/udp, DNAT to the ingress sandbox exists, `docker-proxy` listens on `0.0.0.0:8883`, ingress publish
+`8883:8883 tcp`). So the TLS MQTT listener inside the mosquitto task (`tcxkzf3j0jzt` on core, Running since ≈06:50Z,
+i.e. before Phase 34 started) is down — app/config side (likely its TLS listener or certificate), not the edge, and
+untouched by Phase 34 and by these fixes. The "8883 OPEN" in every Phase 34 gate was the micro-local docker-proxy
+probe, which cannot see this. Plaintext `:7442` and `:1883` work (harness PASS). Not fixed here (out of scope; keep-7442
+rules apply to any fix: `:8883` must come back as plain TLS MQTT, never redirected).
+
+**Repo-only fixes (no live change):**
+
+- **WR-01** — `restart.sh` / `thinx.sh` read `/mnt/gluster/thinx/.env` literally (line reader, first `=`, `export
+  "$k=$v"`, no eval/sourcing/expansion), drop an inherited `HASHED_PASSWORD`, fail closed on a missing/unreadable/empty
+  file with one message, and accept only a bare apr1 or bcrypt `$2y$` hash — in `thinx.sh` before `docker stack rm`.
+  `env -i HOME=<scratch> PATH=/usr/bin:/bin` matrix on copies (docker/sleep stubbed, synthetic values, sha prefixes only),
+  under bash 3.2 and 5.2: **20/20 PASS** (per script: missing, empty, unreadable → rc 1, 0 stdout, 0 env lines, docker
+  not called; single-/double-quoted, `$$`-escaped → rc 1; stale inherited + no file line → rc 1; stale inherited + valid
+  file line → rc 0 with the **file's** sha; valid apr1, valid bcrypt with CRLF and no trailing newline → rc 0; a value
+  `$HOME/$(id)` stays literal; `FOO=bar baz` keeps the space). Render parity on micro (in memory, sha only, nothing
+  deployed): `docker stack config -c ./thinx.yml` with the old `export $(cat …)` loader and with the new loader →
+  **482 lines, sha `e82ca19d11fc` both**; the live hash passes the new check (0 loader messages).
+- **WR-04** — `scripts/traefik-edge-scan.sh`: `RETIRED_HOSTS="micro.thinx.cloud"` gets the exposure probes only, `curl -k`
+  (Traefik API JSON on `/api/overview` / `/api/http/routers`, dashboard `APIUrl`, `/dashboard/` 401 → FAIL; curl/jq
+  errors fail closed); `HOSTS` stays 16. Live run of the block: `retired micro.thinx.cloud api=302 dashboard=302 sig=0`
+  (nginx catch-all), `EDGE-SCAN OK`.
+- **WR-05 / IN-08** — see 34-REVIEW-FIX.md (application code and specs).
+- **WR-06** — wording in AGENTS.md and thinx-swarm README: `600 root:root` keeps out non-root users only; root on the
+  nodes and root containers binding the `thinx` tree (`thinx_worker`) can read the hash. **bcrypt pending the
+  operator** (the plaintext was shredded at 16:08:38Z): micro has **no `htpasswd`**; it has **python3 `bcrypt` 3.2.2**
+  (emits `$2b$`; same algorithm as `$2y$`, so the prefix is rewritten to `$2y$`, the form the WR-01 check accepts).
+  Proven with synthetic values in a `--network none` throwaway `traefik:v3.7.14` (file-provider basicAuth): both `$2y$` and
+  `$2b$` hashes → right password 200, wrong 401, none 401, 0 error lines.
+- **IN-02** — `traefik.sh` refuses to deploy unless `stat -c %g /var/run/docker.sock` == the gid in `traefik.yml`
+  (scratch test: 998 → proceeds, 999 → rc 1, docker not called). Live micro: `docker.sock gid=998 group=docker` (matches).
+- **IN-03 / IN-04 / IN-05** — `traefik.yml` comments + README + swarm.md (`:ro` cosmetic, allow-list is the boundary;
+  residual `/services` `/tasks` exposure; stale security-headers / curve comments).
+- **IN-06** — AGENTS.md opening sentence scoped to dashboard/API routes.
+- **IN-07** — TLS rotation parse check (thinx-swarm README § TLS options step 2), proven on micro:
+
+```
+timeout 60 docker run --rm --network none -v /mnt/gluster/deployment/swarm/traefik/tls.toml:/t/tls.toml:ro --entrypoint sh traefik:v3.7.14 -c \
+  'traefik --providers.file.filename=/t/tls.toml --api.insecure --entrypoints.traefik.address=127.0.0.1:8080 --log.level=ERROR >/tmp/l 2>&1 & sleep 4; \
+   wget -qO- http://127.0.0.1:8080/api/http/middlewares/security-headers@file | grep -c "\"status\":\"enabled\""; grep -ciE "error|cannot" /tmp/l; true'
+# expect: 1 then 0. Observed 2026-10-09: tls-config-3 file (sha 45d010483d0e1d50…) -> 1 / 0; a /tmp copy with one broken
+# TOML header -> 0 (404 on the middleware) / 1. --api.insecure is confined to the throwaway's own loopback (--network none,
+# no port, no socket, no swarm provider); never on traefik_traefik.
+```
+
+```
+review_fixes: WR-03 influx removeheader (thinx_influxdb 38380190->38380302, task same) ; IN-01 proxy healthcheck+start-first (traefik_socket-proxy 38380136->38380315, task iqrs4f7agcyl->2p48l57isdvn healthy) ; WR-02 endpoint tcp://traefik_socket-proxy:2375 (traefik_traefik 38380188->38380330, task vtdqxehcuul8->23q5m86cc7zc, args 24)
+Version.Index post-P34-review: traefik_traefik 38380330, traefik_socket-proxy 38380315, thinx_influxdb 38380302
+```
+
 ## Recorded for later (after Phase 34)
 
 Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT `<deferred>`, the Phase 34 records):
@@ -2044,7 +2175,8 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
 - **Real client IPs at the edge** (D-05): host-mode publishing of `:80` / `:443` on micro or PROXY protocol; then an
   `ipAllowList` on the ops hosts with the operator addresses `86.49.234.236`, `194.213.34.194`, `194.213.34.193`, and
   rate limits. Both key on the client IP, which is `10.0.0.2` for every client today.
-- **`sniStrict=true`** — only with evidence that no legacy client connects without SNI (`tls-config-4` rotation).
+- **`sniStrict=true`** — only with evidence that no legacy client connects without SNI (`tls-config-4` rotation;
+  run the IN-07 parse check from `### P34 review fixes record` on the new file before `docker config create`).
 - **Entrypoint-level `:80` → `:443` redirect** — not done; `thinx-api-http` must stay plaintext for legacy
   `__DISABLE_HTTPS__` devices (keep-7442 spirit), so any redirect needs a device-path exemption.
 - **Swarmpit's raw `docker.sock` mount** — outside EDGE-OPS-02 (Traefik only); a second proxy or a different
@@ -2053,6 +2185,13 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
   stdlib CVEs, none reachable on the internal plain-HTTP path); rescan with a current DB first. The laptop grype DB is
   frozen (schema 5, 2026-03-09) — the operator upgrades it.
 - **WR-05 `vault.yml`** — image re-pin / delete decision moved to v1.17 VAULT-01 (Phase 39 owns `vault.yml`).
+- **mosquitto `:8883` (TLS MQTT) listener down** — found while gating the review fixes (`### P34 review fixes record`):
+  the mosquitto task answers 1883/1884 but not 8883; pre-existing, app-side, not an edge change. Fix in the mosquitto
+  config/certificate; `:8883` stays plain TLS MQTT, direct-published, never redirected.
+- **Edge basic-auth hash → bcrypt `$2y$`** (34-REVIEW WR-06): needs the plaintext again (shredded 16:08:38Z); operator
+  re-places it at `/root/.p34-basicauth`; hash on micro with python3 `bcrypt` (prefix rewritten to `$2y$`), store in the
+  env file, label-only update of `couch-auth` / `influx-auth`, shred. Optional: move the deploy secret out of the tree
+  `thinx_worker` mounts (`/root/…`, read by `restart.sh` / `thinx.sh`) or narrow the worker's mount.
 - **CouchDB / InfluxDB backend admin accounts** were not rotated (only the edge basic-auth was); the operator allows
   them to share the edge password when they are.
 - **errorpage autoredeploy blips** — each thinx-swarm `master` push rebuilds `thinx/error-page`, Swarmpit replaces the

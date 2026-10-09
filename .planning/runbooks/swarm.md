@@ -292,13 +292,21 @@ Committed artifacts name them by path only and redact every secret to `<redacted
 
 ## Traefik Docker API socket-proxy (Phase 34 / EDGE-OPS-02)
 
-**What it is.** Traefik reads the Docker API **only** through `traefik_socket-proxy` (service alias `socket-proxy`,
-image `wollomatic/socket-proxy:1.13.1` by tag), via `--providers.swarm.endpoint=tcp://socket-proxy:2375`. The proxy
-mounts `/var/run/docker.sock` read-only, runs as `65534:998` with a read-only root filesystem and every capability
+**What it is.** Traefik reads the Docker API **only** through `traefik_socket-proxy` (image
+`wollomatic/socket-proxy:1.13.1` by tag), via `--providers.swarm.endpoint=tcp://traefik_socket-proxy:2375` — the **full
+service name** since the Phase 34 review fixes (34-REVIEW WR-02, 2026-10-09). Traefik also sits on the shared
+`traefik-public` network, where Docker DNS would answer the bare name `socket-proxy` for any other stack's service or
+alias of that name, and a rogue endpoint would hand Traefik its whole routing table. Swarm service names are
+cluster-unique. The proxy still carries the alias `socket-proxy` on `traefik-socket`; nothing uses it. The proxy
+mounts `/var/run/docker.sock` (the `:ro` is cosmetic — the anchored allow-list is the security boundary, IN-03), runs as
+`65534:998` (998 = `stat -c %g /var/run/docker.sock` on micro; `traefik.sh` refuses a mismatch, IN-02) with a read-only root filesystem and every capability
 dropped, publishes no port, and answers only a GET allow-list: `_ping`, `version`, `services`, `networks`, `tasks`,
 `nodes/<id>`, plus HEAD `_ping`. Everything else gets 403 (path) or 405 (method). It lives on the **internal** overlay
 `traefik-socket` (`10.234.34.0/24`, not attachable). The only members are the proxy, Traefik and the network's LB
 endpoint, and `-allowfrom=10.234.34.0/24` admits only that subnet. `traefik_traefik` has **no** Docker socket mount.
+**Residual exposure (IN-04):** `GET /services` and `/tasks` are the provider's minimum and return full specs, including
+`ContainerSpec.Env` (interpolated secrets such as `WORKER_SECRET`) and the `basicauth.users` hash labels; a compromised
+Traefik can read them (it could before, with the raw socket). Never add a second consumer of the proxy.
 
 **Where it is defined.** thinx-swarm `traefik.yml` (the `socket-proxy` service and `traefik-socket: external: true`)
 and `traefik.sh` (creates the `traefik-socket` network with `--internal --subnet=10.234.34.0/24`). Live, it was
@@ -314,12 +322,15 @@ the proxy returns, and the provider retries. A **Traefik restart while the proxy
 **Health check:**
 
 ```bash
-ssh micro "docker service ps traefik_socket-proxy --filter desired-state=running --format '{{.ID}} {{.Node}} {{.CurrentState}}'"
-# expect: one task on micro, Running
+ssh micro "docker service ps traefik_socket-proxy --filter desired-state=running --format '{{.ID}} {{.Node}} {{.CurrentState}}'; \
+  docker ps --filter label=com.docker.swarm.service.name=traefik_socket-proxy --format '{{.Status}}'"
+# expect: one task on micro, Running; status "Up … (healthy)"
 ssh micro "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); \
-  docker exec \$C wget -qO- http://socket-proxy:2375/_ping; echo; \
-  docker exec \$C wget -S -O /dev/null http://socket-proxy:2375/v1.56/secrets 2>&1 | grep -m1 'HTTP/'"
-# expect: OK ; HTTP/1.1 403 Forbidden   (API version: `docker version --format '{{.Server.APIVersion}}'`, 1.56 today)
+  docker exec \$C nslookup traefik_socket-proxy 2>&1 | grep -E '^Address' | grep -v '#53'; \
+  docker exec \$C wget -qO- http://traefik_socket-proxy:2375/_ping; echo; \
+  docker exec \$C wget -S -O /dev/null http://traefik_socket-proxy:2375/v1.56/secrets 2>&1 | grep -m1 'HTTP/'"
+# expect: ONLY a 10.234.34.x address (10.234.34.2, the VIP) ; OK ; HTTP/1.1 403 Forbidden
+#   (API version: `docker version --format '{{.Server.APIVersion}}'`, 1.56 today; the 403 probe itself logs one `blocked` line)
 ssh micro "P=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_socket-proxy | head -1); timeout 20 docker logs --since 1h \$P 2>&1 | grep -c blocked"
 # expect: 0 in normal operation (every blocked line names method, URL and client; Traefik's provider never triggers one)
 ```
@@ -328,11 +339,16 @@ ssh micro "P=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_sock
 
 ```bash
 ssh micro "docker service update --force traefik_socket-proxy"
-# expect: rc 0; new task Running; then the health check above; Traefik needs no restart
+# expect: rc 0; new task Running (healthy) BEFORE the old one stops (update order start-first); then the health check above; Traefik needs no restart
 ```
 
-The image declares no healthcheck. Liveness is `-watchdoginterval=30 -stoponwatchdog`: the proxy exits if the socket
-disappears and swarm restarts it (`restart_condition: any`). **Repin trigger:** the first `1.x.y` release built with
+The image itself declares no healthcheck; since the review fixes (34-REVIEW IN-01, 2026-10-09) the **service** has one:
+`["CMD", "/healthcheck"]` (exec form — the image is `FROM scratch`, so `docker service update --health-cmd`, which is
+always `CMD-SHELL`, cannot set it; it was applied through the Engine API, see the hardening runbook § P34 review fixes
+record), interval 30 s, timeout 5 s, retries 2, start period 5 s, plus `UpdateConfig.Order=start-first`. So `1/1`
+means the proxy answers. `-allowhealthcheck` serves the `127.0.0.1:55555/health` listener that `/healthcheck` calls.
+Liveness on top: `-watchdoginterval=30 -stoponwatchdog` (the proxy exits if the socket disappears and swarm restarts it,
+`restart_condition: any`). **Repin trigger:** the first `1.x.y` release built with
 go ≥ 1.26.9 (1.13.1 carries go1.26.6 stdlib CVEs, none reachable on this plain-HTTP internal path). Rescan with a
 current DB, then `docker service update --image wollomatic/socket-proxy:<new> --no-resolve-image traefik_socket-proxy`.
 
@@ -351,14 +367,16 @@ removed, so every `:443` router would lose its middleware. Use this form instead
 drops the endpoint flag:
 
 ```bash
-ssh micro "ARGS=\$(docker service inspect traefik_traefik | jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(select(. != \"--providers.swarm.endpoint=tcp://socket-proxy:2375\")) | map(@sh) | join(\" \")'); \
+ssh micro "ARGS=\$(docker service inspect traefik_traefik | jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(select(startswith(\"--providers.swarm.endpoint=\") | not)) | map(@sh) | join(\" \")'); \
   docker service update --detach --network-rm traefik-socket --mount-add type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly --args \"\$ARGS\" traefik_traefik"
 # expect: rc 0; ONE restart; args=23; provider back on the default unix socket; 29/0. Then remove the proxy only if wanted:
 #   docker service rm traefik_socket-proxy && docker network rm traefik-socket
 ```
 
 Take a fresh `docker service inspect traefik_traefik` backup (`umask 077`, `/mnt/data/edge-rollback/`, 600 root) before
-either command. Repo first: revert thinx-swarm `fcafee0` (origin + micro ff) and regenerate the mirror (`MIRROR OK`).
+either command. (The filter drops the endpoint flag whatever its host name — `socket-proxy` before the review fixes,
+`traefik_socket-proxy` since.) Repo first: revert thinx-swarm `fcafee0` and `9204a8e` (origin + micro ff) and regenerate
+the mirror (`MIRROR OK`).
 
 ---
 
