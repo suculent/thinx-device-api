@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@4cc21680cce6ca0a591402e9e590bdda2588e9b6 generated:2026-10-09T17:50:17Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:4a4939f2727fcbe7ca0f725e15f2046d9c7b15e4e3fd1f2af2b3909e41539c13
+# GENERATED — do not edit. source: thinx-swarm@51ff67feffdb87be9e105113ff9d49e58aedffc1 generated:2026-10-09T18:00:01Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:5c8f6bd034d97dddfb39a37c05f8b188275d801853ba842adcd6b80099e04260
 version: '3.7'
 
 services:
@@ -226,6 +226,10 @@ services:
           memory: 8M
       restart_policy:
         condition: any
+      # 34-REVIEW IN-01: start the new proxy task, wait for its healthcheck, THEN stop the old one — a proxy update
+      # leaves no gap in which Traefik's provider poll fails (two read-only replicas side by side are harmless)
+      update_config:
+        order: start-first
 
 volumes:
   # Create a volume to store the certificates, there is a constraint to make sure
