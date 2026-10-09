@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@fcafee0bd0b0ee92a2f8a242f4804bd7689052e8 generated:2026-10-09T15:15:58Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:10f4c8bc8fac31664a4c9f0a4e8c5925e590ed73f5e07baba62cf91dfa04162f
+# GENERATED — do not edit. source: thinx-swarm@8a7a6932ec3a634fd7c6a65112424744cd013813 generated:2026-10-09T15:30:37Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:354c177576cb40113de4ec8321d11f6644343ca84982029c6c9e522ea5a5f32e
 version: '3.7'
 
 services:
@@ -105,10 +105,12 @@ services:
       - --entrypoints.https.address=:443
       # Phase 33 (EDGE-TLS-02, D-17..D-19): default middleware for EVERY router on :443, present and future, external
       # stacks included — HSTS max-age=31536000 (one year) + includeSubDomains + preload directive (header only;
-      # thinx.cloud is NOT submitted to the preload list), nosniff, frame-deny. Informational 1xx responses (the
+      # thinx.cloud is NOT submitted to the preload list), nosniff, frame-deny. Phase 34 (D-15, 33-REVIEW WR-03): the
+      # middleware now comes from the file provider (traefik/tls.toml, docker config tls-config-3), so no label update
+      # on this service can strip it from the edge. Informational 1xx responses (the
       # WebSocket 101) bypass the headers middleware by construction (Traefik ResponseModifier), so thinx-api-ws is
       # unaffected. The http entrypoint gets no headers middleware (HSTS is a :443 response header, D-20).
-      - --entrypoints.https.http.middlewares=security-headers@swarm
+      - --entrypoints.https.http.middlewares=security-headers@file
       # D-03 (Phase 30, EDGE-MIG-04): the vpn/mqtt/mqtts/thxp entrypoints below are VESTIGIAL —
       # defined here but NOT host-published by Traefik (Traefik publishes only :80/:443).
       # Device/MQTT traffic is published DIRECTLY, outside Traefik: :7442 (thxp) by thinx_api,
@@ -236,5 +238,5 @@ configs:
     # (/mnt/gluster/deployment/swarm/traefik/tls.toml after the ff-merge, so deployed bytes == committed bytes),
     # then `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`
     # (+ one task restart). Never `docker stack deploy` for this.
-    name: tls-config-${CONFIG:-2}
+    name: tls-config-${CONFIG:-3}
     file: ./traefik/tls.toml # or /mnt/data/ingress/traefik/tls.toml
