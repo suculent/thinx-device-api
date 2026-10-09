@@ -927,3 +927,135 @@ scan capture `## Reported, not gating (after)`):
     carries a token, apr1/bcrypt or key marker.
     **Closed 2026-10-09:** the operator deleted it; micro's deploy checkout now holds 0 `traefik.yml.bak*` files and
     0 files with a `--pilot.token=` line.
+
+## Phase 34 records
+
+Phase 34 (EDGE-OPS-01/02/03, D-01..D-20; `.planning/phases/34-ops-surface-reduction-sla-close-out/34-CONTEXT.md`) uses the
+Phase 33 mechanism unchanged: repo first in thinx-swarm → origin → micro `--ff-only` → mirror regenerated here
+(`MIRROR OK`) → 600-root pre-flight backup in `/mnt/data/edge-rollback/traefik-p34-pre<Stage>-<UTC>.json` → dry-print +
+sorted-set compare → ONE live update → gate (loopback `29/0` + names == `routers_post_A2:`, overview, HTTPS matrix ==
+pre-row, WS 101/401, bare-IP 301/200, `7442/1883/8883 OPEN`, log scan) → record. Never `docker stack deploy` /
+`restart.sh`, never `--api.insecure`, never an `ipAllowList` / `rateLimit` / `sniStrict` change; `:7442` and plain MQTT
+untouched (AGENTS.md).
+
+| Stage | Command shape | Task restart | Gate (beyond the standard set) | One-command rollback |
+|---|---|---|---|---|
+| **P34-A — log WARN + JSON access log** (`--args` 19 → 23; Plan 01 Task 1) | `ARGS=$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args \| map(if . == "--log.level=ERROR" then "--log.level=WARN" else . end) + ["--accesslog.format=json","--accesslog.fields.names.RequestPath=drop","--accesslog.fields.names.RequestLine=drop","--accesslog.fields.names.ClientUsername=drop"] \| map(@sh) \| join(" ")' <pre-A backup>)`; one `--args` update | **yes** (~15 s) | D-04 canary (query + Authorization + basic-auth username) 0 hits with a positive control per host; 0 JSON lines with RequestPath / RequestLine / ClientUsername; no parse/provider error on the new task | `--args` with the pre-A backup's 19 flags (`map(@sh)`) |
+| **P34-B1 — socket-proxy + `traefik-socket` overlay** (create only; Plan 01 Task 2) | `docker network create --driver overlay --internal --subnet <cidr> traefik-socket`; `docker service create --name traefik_socket-proxy …` (flags == the YAML) | **no** (Traefik untouched) | proxy 1/1 on micro, read-only rootfs, caps dropped, socket mount ro, one network; deny matrix exact; `traefik_traefik` Version.Index unchanged | `docker service rm traefik_socket-proxy && docker network rm traefik-socket` |
+| **P34-B2 — Traefik cutover to the proxy** (`--args` 23 → 24 + `--network-add` + `--mount-rm`, ONE update; Plan 02) | `--args "<24: + --providers.swarm.endpoint=tcp://socket-proxy:2375>" --network-add traefik-socket --mount-rm /var/run/docker.sock` | **yes** | D-10: provider errors / `Cannot connect` / `permission denied` / `403` at WARN+ within 60 s, router count ≠ 29 → auto-revert; live provider label test; deny from inside Traefik | `--args` with the pre-B2 23 flags `--mount-add type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly --network-rm traefik-socket` (one update) |
+| **P34-C — `tls-config-3`** (`--args` 24 → 24 + config swap; Plan 03 Task 1) | `docker config create tls-config-3` from the micro checkout; ONE update `--args "<https default → security-headers@file>" --config-rm tls-config-2 --config-add source=tls-config-3,target=/traefik/tls.toml,mode=0444` | **yes** | HSTS exactly once ×17; PQ hybrid offered again; TLS rows | pre-C 24 flags + `--config-rm tls-config-3 --config-add source=tls-config-2,…` |
+| **P34-D — label-only pass** (Plan 03 Task 2) | `--label-rm` the `security-headers.*` copy on `traefik_traefik`; `thinx-db-http` / `registry-http` → `https-redirect` | **no** | 0 refs to `security-headers@swarm` first; HSTS once; `:80` rows | `--label-add` the removed labels back |
+| **P34-E — retired ACME prune** (`--force`; Plan 04 Task 1) | snapshot → `jq del(…)` of the seven retired names → `chmod 600` → `mv` → `--force` in one remote command | **yes** | store count, served serials unchanged, 0 ACME errors | `cp -p <snapshot>/acme.json` back + `chmod 600` + `--force` |
+| **Credential rotation** (label-only; Plan 04 Tasks 2–3) | `.env` on micro + `--label-add …basicauth.users=…` on `thinx_couchdb` (+ influx), values over ssh stdin only | **no** | old literal 401, new accepted | `--label-add` the previous value from the pre-rotation backup on micro |
+
+Static-flag count: 19 (Phase 33 end state) → **23** (A) → **24** (B2) → 24 (C). The new flags sit mid-file in
+`traefik.yml` but at the end of the live Args — every dry-print compares as a sorted set.
+
+p34_scan_capture: swarm-configs/traefik-edge-scan.2026-10-09.md
+
+### P34 Stage A record (34-01 Task 1, 2026-10-09 13:33–13:52 UTC)
+
+**Outcome: the live `traefik_traefik` runs the 23-flag static command with `--log.level=WARN` and a JSON access log
+whose RequestPath, RequestLine and ClientUsername fields are dropped (one restart, fire 13:47:43.7Z → new task
+`qrxfpvipnuau` Running 13:47:58.6Z, ≈15 s); the D-04 canary — a fresh marker in the `ott`/`code` query values with a
+Bearer header to `https://thinx.cloud/`, in the `ott` query with a Basic header to the bare IP over `:80`, and as the
+basic-auth USERNAME to `https://db.thinx.cloud/` — leaves **0** marker hits and **0** authorization-header markers in
+`docker service logs traefik_traefik`, while JSON access-log lines exist for all three probed hosts and none carries a
+RequestPath / RequestLine / ClientUsername key. Router inventory, overview, HTTPS matrix, WS pair, bare-IP pair and
+the device ports equal the pre-row. No D-10 trigger fired; the staged 19-flag revert was NOT used. EDGE-OPS-01 closes
+here.**
+
+Precondition re-read (13:33Z, read-only): `traefik:v3.7.14 args=19 idx=38379946 upd=completed` (== `Version.Index
+post-Stage-E:`, no leader-election re-save since), task `k47479ipt1mb`, Configs `tls-config-2` (the only config in
+`docker config ls`), loopback `29/0`, overview `[29,0,18,6,["Swarm","File"]]`; Args matching `log.level|accesslog`:
+`--accesslog`, `--log`, the error-only level line; Mounts: the read-only Docker socket bind + the certificates volume;
+`/mnt/data/edge-rollback/` present (`755 root`); thinx-swarm `b04f066` == micro HEAD == origin/master, `MIRROR OK`
+at 19; `7442 OPEN 1883 OPEN 8883 OPEN`; laptop grype 0.86.1, nmap 7.94, sslscan, jq, node v25.1.0, socat, gh, OpenSSL
+3.6.3 (≥ 3.5 for the Plan 03 ML-KEM probe). Two observations, neither blocking this stage: (a) micro's checkout
+carries 6 **untracked** pre-existing `*.yml.bak.20261007222957.pre-v3-labels` files (not ours, not touched;
+tracked-dirty `git status --porcelain -uno` = 0, so the ff-merge is unaffected); (b) the device-flow harness
+`/tmp/p31-device-flow/thinx-device-flow.mjs` is **gone** — the workstation rebooted ~12:38Z and `/tmp` was cleared. No
+step of Plan 34-01 runs it; Plan 34-02 must recreate it (31-03 D5 / 32-RESEARCH recreate path) before its harness rows.
+
+Baseline (Step 1): external scan 13:35:40Z → 13:37:33Z → **`EDGE-SCAN OK`**, rc 0, 0 `FAIL ` lines, identical to the
+Phase 33 `## After` (capture `swarm-configs/traefik-edge-scan.2026-10-09.md`, `## Before (pre-P34-A`). Capture
+`swarm-configs/traefik-edge.F.pre.yml` redacted on micro (e-mail → `${EMAIL}`; 0 e-mail addresses, 0 secret markers):
+19 flags, delta vs E.post.yml none beyond timestamps; its `log_and_access_log:` section records that the CLF access log
+writes the full request line today (a harmless query marker sent at 13:39Z appeared 1×) and `docker_api_access:` the raw
+socket bind. Committed `7ddd0cb5` (`docs(34): F.pre capture + external scan Before`).
+
+Repo first (P32 D-04): thinx-swarm `7ee46ab` (`feat(edge): Phase 34 Stage A — …`: `--log.level=WARN`, the four
+`--accesslog.*` lines right after `--accesslog` with the D-01..D-04 comment block, 23 `- --` lines, 0 non-comment
+error-only level lines) → `git push origin master` → pushed to micro as `p34-stageA`, `git merge --ff-only` (tracked
+dirty 0, 1 file 11+/1−), branch deleted, micro HEAD `7ee46ab` == workstation == origin → mirror regenerated here
+(`MIRROR-GENERATED ok source=thinx-swarm@7ee46ab…`, `MIRROR OK files=1`, **23** flags) and committed
+(`feat(34): Stage A — mirror regenerated at 23 flags`, `5ae47ac6`).
+
+Throwaway log probe on micro (Step 3; no swarm provider, no host ports, no insecure API): `p34-logprobe`
+(`traefik:v3.7.14`, `:8000` entrypoint, the five Stage A flags) — `field not found|failed to decode|flag provided but
+not defined` **0**, container `running` (flags accepted by v3.7.14); a GET with a marker in the `ott` query, plus a
+GET with the marker as URL userinfo + a Basic header + a `code` query → marker hits **0**; **2** JSON lines whose
+key union is `ClientAddr ClientHost ClientPort DownstreamContentSize DownstreamStatus Duration GzipRatio
+OriginContentSize OriginDuration OriginStatus Overhead RequestAddr RequestContentSize RequestCount RequestHost
+RequestMethod RequestPort RequestProtocol RequestScheme RetryAttempts StartLocal StartUTC entryPointName level msg time`
+— **no RequestPath, RequestLine or ClientUsername** (v3.7.14 also adds `level`/`msg`/`time` to each JSON access line);
+the only application lines were the two WRN start-up notices recorded below. Removed; leftovers **0**.
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p34-preA-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  stat -c '%s %a %U %n' \$B; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B"
+# expect: 600 root; 19 — this file is the Stage A revert source, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(if . == \"--log.level=ERROR\" then \"--log.level=WARN\" else . end) + [\"--accesslog.format=json\",\"--accesslog.fields.names.RequestPath=drop\",\"--accesslog.fields.names.RequestLine=drop\",\"--accesslog.fields.names.ClientUsername=drop\"] | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/' | sort"
+# expect: 23 lines == the mirror's 23 `- --` lines sorted (e-mail masked both sides) — sorted-set compare; thxp/mqtt/mqtts/mgmt 4/4
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(if . == \"--log.level=ERROR\" then \"--log.level=WARN\" else . end) + [\"--accesslog.format=json\",\"--accesslog.fields.names.RequestPath=drop\",\"--accesslog.fields.names.RequestLine=drop\",\"--accesslog.fields.names.ClientUsername=drop\"] | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances; args=23
+# rollback (staged, NOT executed):
+ssh micro "B=/mnt/data/edge-rollback/traefik-p34-preA-20261009T134505Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: 19 ; rc 0; one restart; the error-only level and the CLF access log return
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 13:33 | precondition re-read | as above; `args=19 idx=38379946`, `29/0`, heads equal, MIRROR OK at 19; harness absent (not used here) |
+| 13:35:40–13:37:33 | external scan (before) | `EDGE-SCAN OK`, 0 `FAIL `; 17/17 3 AEAD, TLS 1.3 17/17, legacy none 17/17, HSTS 1 ×17; 8080/8443 closed, 7442 open |
+| 13:38–13:41 | F.pre capture | redacted on micro; 19 flags; labels, mounts, networks, configs, ports, image id, task, index, acme `291145 600 root` / 23 == E.post.yml; external stacks' labels identical; query marker logged 1× in CLF |
+| 13:42 | captures committed | `7ddd0cb5` |
+| 13:42–13:43 | repo first | thinx-swarm `7ee46ab` on origin + micro (ff, tracked dirty 0); mirror `5ae47ac6` MIRROR OK at 23 flags |
+| 13:43:42 / 13:43:57 | throwaway log probe | flags accepted, `running`; marker 0; 2 JSON lines without RequestPath/RequestLine/ClientUsername; leftovers 0 |
+| 13:45:05 | pre-flight backup | `/mnt/data/edge-rollback/traefik-p34-preA-20261009T134505Z.json` — `600 root`, 14866 B, Args length **19** |
+| 13:45 | dry-print + sorted-set diff | 23 masked live-set lines vs 23 mirror lines: **diff empty (23/23)**; thxp/mqtt/mqtts/mgmt address flags 4/4 |
+| 13:45:48–13:47:36 | pre-row | laptop: HTTPS matrix rtm/app/console/thinx.cloud/www/swarmpit 200, registry 400, db 401, influx 401, 7 externals 200, micro 200; WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200`; micro: loopback `29/0`, names == `routers_post_A2:`, task `k47479ipt1mb`, `idx=38379946 args=19`, `7442 OPEN 1883 OPEN 8883 OPEN` |
+| **13:47:43.7** | **A fire** | `docker service update --detach --args "<23 flags>" traefik_traefik` → **rc 0** |
+| 13:47:43–13:47:58 | drain + start | old task `k47479ipt1mb` Shutdown; **new task `qrxfpvipnuau`** `traefik:v3.7.14` micro (container `c6fc2ca8bdcc` started 13:47:57.8Z) **Running 13:47:58.6Z** (fire → Running ≈ 15 s); exactly **1** running task; `idx=38380120 upd=updating` → **`idx=38380131 upd=completed`** at 13:48:03.7Z; args=23, image unchanged |
+| 13:48:2x | (1)–(2) loopback | status filter **`29/0`**; overview **`[29,0,18,6,["Swarm","File"]]`** |
+| 13:49:01 | (1) names + (3)–(5) laptop | sorted names **== `routers_post_A2:` (diff empty, 29)**; HTTPS matrix 17/17, WS `101` / `401` + `X-Forwarded-Proto: https`, bare-IP `301` + `200` — the whole laptop row **== pre-row (diff empty)** |
+| 13:49:10 | (6) D-04 canary | see the canary row below |
+| 13:50 | (7) log scan (since the fire) | `port is missing\|error while parsing\|field not found\|failed to decode` → **0**; provider / `Cannot connect` / `permission denied` → **0**; the new task's non-JSON lines are 8 WRN (below), **0 ERR**; 25 transient `middleware "…@swarm" does not exist` ERR lines all on the **stopping** task `k47479ipt1mb` at 13:47:47Z (the A1/B/C/D drain artefact — 25 now vs 13 in Phase 33 because the https entrypoint default reaches every :443 router since Stage D) |
+| 13:50 | (8) ports | `7442 OPEN 1883 OPEN 8883 OPEN` |
+| 13:51:15 | plan verify re-run | a second fresh marker through the plan's own command form → PASS (0 hits; JSON lines thinx.cloud 67, bare-IP 3, db 2) |
+
+canary_hits: 0 (query) / 0 (auth-header markers); positive control: 2 thinx.cloud, 3 bare-IP, 2 db.thinx.cloud; JSON keys RequestPath/RequestLine/ClientUsername: 0
+
+(Counts only, read from `docker service logs --raw --since 2m traefik_traefik` 5 s after the three requests; 26 JSON lines
+in the window; the case-insensitive `authorization|basic |bearer ` count covers the header name and both scheme words;
+the marker value was generated per run with `openssl rand -hex 8`, never written to disk or to this file. The
+db.thinx.cloud lines are the two couch-auth `401`s on `thinx-db-https@swarm` — the basic-auth username sent with them
+is absent. The live JSON key union additionally carries `RouterName ServiceName ServiceURL ServiceAddr TLSCipher
+TLSVersion` — the retained set justified in 34-01-PLAN must_haves.)
+
+WARN baseline (D-01, new task `qrxfpvipnuau`, start-up only, recorded not gated): **7×** `WRN aliasHeadersStrategy is not
+configured: the request headers whose name aliases another header name … are forwarded as is …` (one per entrypoint:
+http, https, mgmt, mqtt, mqtts, thxp, vpn) and **1×** `WRN Traefik can reject some encoded characters in the request
+path …` (v3.6+ migration notice). Both are Traefik advisories about entrypoint options that were silent at the error-only
+level; neither is a provider or parse error. No WRN/ERR line from the swarm provider.
+
+D-10 trigger evaluation: none fired ((1) `29/0` + names == `routers_post_A2:`, (2) overview unchanged, (3) matrix ==
+pre-row, (4) WS 101/401, (5) bare-IP 301/200, (6) canary 0/0 with positive control on all three hosts, (7) parse /
+provider errors 0 on the new task, (8) ports OPEN ×3). The 19-flag revert from
+`traefik-p34-preA-20261009T134505Z.json` was staged and **not executed**.
+
+Version.Index post-P34-A: 38380131
+
+Repo state == live state after this task: thinx-swarm `7ee46ab` (origin + micro), mirror `5ae47ac6` MIRROR OK at 23
+flags, live `traefik_traefik` 23 Args (sorted set == mirror), task `qrxfpvipnuau`, 29 routers enabled ==
+`routers_post_A2:`. Stage B1 starts from here (Traefik untouched until Plan 02).
