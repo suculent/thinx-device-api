@@ -59,6 +59,8 @@ socat TCP-LISTEN:8080,bind=127.0.0.1,reuseaddr,fork EXEC:"ssh root@188.166.23.24
 # then open http://127.0.0.1:8080/dashboard/ in the laptop browser; Ctrl-C the socat to close the bridge
 ```
 
+`/dashboard` without the trailing slash returns 404 from `api@internal`; use `/dashboard/` or open `http://127.0.0.1:8080/` which redirects.
+
 Add `-o ControlMaster=auto -o ControlPath=~/.ssh/cm-%r@%h:%p -o ControlPersist=60` to the inner `ssh` so the
 dashboard's parallel asset requests reuse one connection. The bridge binds the laptop's loopback only and
 disappears with the socat process; the same recipe works via the host netns
@@ -846,6 +848,10 @@ TLS (CBC-SHA1 accepted), HSTS on three hosts, 24-entry store with the failing `c
 EDGE-API-01/02 and EDGE-TLS-01/02/03 then stay open; nothing is re-labelled without the operator's explicit decision.
 Partial reverts are fine: e.g. (b)+(c) alone restores the pre-HSTS header posture while keeping the lockdown and the
 TLS options.
+
+### Human gate result (33-03 Task 3, D-31)
+
+Operator approval relayed 2026-10-09 ≈10:05 UTC: `https://rtm.thinx.cloud/` console OK over the hardened edge; Traefik dashboard via the laptop bridge OK after the trailing-slash correction (`http://127.0.0.1:8080/dashboard` → 404 from `api@internal`, `/dashboard/` → 200, `/` → 302 `/dashboard/`). No revert step executed; EDGE-API-01/02 and EDGE-TLS-01/02/03 close.
 
 ## Recorded for Phase 34
 

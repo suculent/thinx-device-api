@@ -35,6 +35,7 @@ anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal
 - Browser dashboard — laptop bridge, nothing installed on micro:
   `C=$(ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1"); socat TCP-LISTEN:8080,bind=127.0.0.1,reuseaddr,fork EXEC:"ssh root@188.166.23.244 -i $HOME/.ssh/DOKey2 -p2020 docker exec -i $C nc 127.0.0.1 8080"`
   then open `http://127.0.0.1:8080/dashboard/`; Ctrl-C the socat to close the bridge (it binds the laptop loopback only).
+  `/dashboard` without the trailing slash returns 404 from `api@internal`; use `/dashboard/` or open `http://127.0.0.1:8080/` which redirects.
 - Never `--api.insecure`, never publish 8080, never `docker stack deploy` / `restart.sh` for edge changes
   (they drop the live-only secret mounts) — every live edge change is one `docker service update`
   (`--args` / `--label-*` / `--config-*` / `--force`), repo-first in `thinx-swarm`, with a 600-root backup on micro.
