@@ -385,3 +385,90 @@ Repo state == live state after this task: thinx-swarm `efee92c` (origin + micro)
 flags with `exposedbydefault=false`, live `traefik_traefik` 17 Args (sorted set == mirror), `traefik-mgmt` labels,
 29 routers enabled == `routers_post_A2:`. Plan 02 Stage C starts from here (17 → 18 flags, `tls-config-2`).
 
+### Stage C record (33-02 Task 1, 2026-10-09 07:46–08:21 UTC)
+
+**Outcome: the live `traefik_traefik` runs the 18-flag static command with `--providers.file.filename=/traefik/tls.toml`
+and the immutable swarm config `tls-config-2` mounted at `/traefik/tls.toml` (one restart, fire 08:17:18.6Z → new task
+`5agre1dyzrot` Running 08:17:35.5Z, ≈17 s); the loopback API reports providers `["Swarm","File"]` with the inventory
+unchanged (29/0 == `routers_post_A2:`); on the wire rtm/app/console negotiate TLS 1.2 and TLS 1.3 (verify 0), refuse
+TLS 1.1, now REFUSE the CBC suite `ECDHE-RSA-AES128-SHA` (accepted before this stage) and refuse P-384 (curve policy
+applied); nmap sees exactly the three ECDHE_RSA AEAD suites on TLS 1.2, TLSv1.3 present on `ecdh_x25519`, `least
+strength: A`; every behavioural probe equals the pre-row; 7442/1883/8883 OPEN; the device-flow harness PASSES over
+HTTPS (the TLS options are on the device path, D-15) and over :7442 + :1883. No D-30 trigger fired; the staged revert
+(pre-C 17 flags + `--config-rm tls-config-2 --config-add source=tls-config-1,…`) was NOT used.**
+
+Precondition re-read (07:46Z): `traefik:v3.7.14 args=17`, `--entrypoints.mgmt.address=127.0.0.1:8080` and
+`--providers.swarm.exposedbydefault=false` present, Configs `tls-config-1` @ `/traefik/tls.toml` mode 292, `docker config
+ls --filter name=tls-config-2 -q` empty, loopback `29/0`, overview `[29,0,18,6,["Swarm"]]`, thinx-swarm `efee92c` ==
+micro HEAD (dirty=0), harness present. **Version.Index was 38379808, not the recorded `post-Stage-B: 38379801`** — the
+same task `puse77wvt5xk` (container started 23:11:45Z, 0 restarts) was still running. Cause, read-only from `docker
+events` + `journalctl -u docker`: at 06:49:03Z the swarm raft leader moved from `core` to `micro` (election, term
+7937/7938; `core` ran unattended-upgrades at 06:25Z) and the new leader re-saved ALL 21 services at 06:49:27Z with Docker's
+default fields filled in (StopGracePeriod, RestartPolicy, UpdateConfig, DNSConfig) — `Spec` vs `PreviousSpec` on
+`traefik_traefik` differs only by those defaults plus the Stage B flag flip; Args, labels, configs, image and the task
+are the Stage B end state. Treated as met in substance (the content the index protects is unchanged); recorded as a
+deviation in `33-02-SUMMARY.md`. A leader election bumps every service's Version.Index — later `post-Stage-X` index
+gates compare against the index right after that stage's own update, which this record provides.
+
+Repo first (P32 D-04): thinx-swarm `94da01c` (`feat(edge): Phase 33 Stage C — …`: `traefik/tls.toml` rewritten as the
+`default` TLS option — `minVersion = "VersionTLS12"`, `sniStrict = false`, `curvePreferences = ["X25519", "CurveP256"]`,
+six ECDHE AEAD `cipherSuites`, 7-line Phase 33 header with the CONFIG bump rule, 0 CBC / 0 TLS 1.3 names / no ALPN,
+server-preference or max-version keys; `traefik.yml` + `--providers.file.filename=/traefik/tls.toml` after the
+tlschallenge line, `configs:` `name: tls-config-${CONFIG:-2}` with the immutability comment, 18 `- --` lines) → `git push
+origin master` → pushed to micro as `p33-stageC`, `git merge --ff-only` (dirty=0, 2 files 22+/10−), branch deleted, micro
+HEAD `94da01c` == workstation == origin → mirror regenerated here (`MIRROR-GENERATED ok source=thinx-swarm@94da01c…`,
+`MIRROR OK files=1`, 18 flags) and committed (`feat(33): Stage C — mirror regenerated at 18 flags`, `b99210f8`).
+
+Parse pre-validation on micro (throwaway, no host ports, no swarm provider — Boot-and-discover precedent): `timeout 10
+docker run --rm --name p33-tlsprobe -v /mnt/gluster/deployment/swarm/traefik/tls.toml:/traefik/tls.toml:ro
+traefik:v3.7.14 --providers.file.filename=/traefik/tls.toml --entrypoints.https.address=:443 --log.level=DEBUG` →
+`invalid CipherSuite|invalid CurveID|error` lines **0**; `tls.toml` lines **3** (`*file.Provider provider configuration
+{"filename":"/traefik/tls.toml"…}`, `add watcher on: /traefik/tls.toml`, `Configuration received … "tls":{"options":{…`);
+at `--log.level=INFO` the file-provider lines are not emitted (DEBUG only — the plan's `>= 1` expectation needs DEBUG);
+no `p33-tlsprobe` container left behind. Then `docker config create tls-config-2 /mnt/gluster/deployment/swarm/traefik/tls.toml`
+(FROM the fast-forwarded checkout) → decoded sha256 `bb0cba95ea22e973…` == `shasum -a 256` of the committed laptop file.
+Readback note: `docker config inspect --format '{{.Spec.Data}}'` prints the `[]byte` as decimal numbers (`base64 -d` →
+`invalid input`); the working form is `--format '{{json .Spec.Data}}' | tr -d '"' | base64 -d | sha256sum`.
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p33-preC-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Configs[0].ConfigName' \$B"
+# expect: 600 root; 17 ; tls-config-1 — this file is the Stage C Args + config revert source, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--providers.file.filename=/traefik/tls.toml\"] | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/' | sort"
+# expect: 18 lines == the mirror's 18 `- --` lines sorted (e-mail masked both sides) — sorted-set compare
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--providers.file.filename=/traefik/tls.toml\"] | map(@sh) | join(\" \")' \$B); \
+  docker service update --detach --args \"\$ARGS\" --config-rm tls-config-1 --config-add source=tls-config-2,target=/traefik/tls.toml,mode=0444 traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances; args=18; Configs -> tls-config-2; providers ["Swarm","File"]
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 07:50–07:55 | precondition index drift investigated | leader election 06:49:03Z (`core` → `micro`), all 21 services re-saved 06:49:27Z; `traefik_traefik` content == Stage B end state; same task/container; see above |
+| 08:05 | repo first | thinx-swarm `94da01c` on origin + micro (ff, dirty=0); mirror `b99210f8` MIRROR OK at 18 flags |
+| 07:59 / 08:00 | parse pre-validation | INFO run: 0 error lines, 0 `tls.toml` lines; DEBUG run: 0 error lines, 3 `tls.toml` lines incl. `add watcher on: /traefik/tls.toml` and the TLS options in `Configuration received`; leftover containers 0 |
+| 08:00 | `tls-config-2` created | from `/mnt/gluster/deployment/swarm/traefik/tls.toml`; decoded sha256 `bb0cba95ea22e973…` == committed (match) |
+| 08:12:50 | pre-row (laptop) | HTTPS matrix 17/17 == post-A2 baseline (micro 200); WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200`; TLS baseline rtm/app/console: `-tls1_2` ok + verify 0, `-tls1_3` ok, `-tls1_1` `no protocols available`, **CBC `ECDHE-RSA-AES128-SHA` ACCEPTED (handshake failure count 0 ×3) — the "before"** |
+| 08:13:29 | pre-row (micro) | loopback `29/0`; sorted names saved to `/tmp/p33-preC-routers.txt` == `routers_post_A2:` (diff empty); task `puse77wvt5xk`, `idx=38379808 args=17`; `7442 OPEN 1883 OPEN 8883 OPEN`; publishers `thinx_api 7442->7442`, `traefik_traefik 80->80 443->443` |
+| 08:16:58 | pre-flight backup | `/mnt/data/edge-rollback/traefik-p33-preC-20261009T081658Z.json` — `600 root`, 14548 B, Args length **17**, `Configs[0].ConfigName` `tls-config-1` |
+| 08:17 | dry-print + sorted-set diff | 18 masked live-set lines vs 18 mirror lines: **diff empty (18/18)**; thxp/mqtt/mqtts/mgmt address flags 4/4 |
+| **08:17:18.6** | **C fire** | the ONE update above (`--args` 18 flags + `--config-rm tls-config-1 --config-add source=tls-config-2,target=/traefik/tls.toml,mode=0444`) → **rc 0** |
+| 08:17:18–08:17:35 | drain + start | old task `puse77wvt5xk` stopped; **new task `5agre1dyzrot`** `traefik:v3.7.14` micro **Running 08:17:35.5Z** (fire → Running ≈ 17 s); exactly **1** running task; `args=18`, Configs `{"n":"tls-config-2","t":"/traefik/tls.toml","m":292}`; `idx=38379918 upd=completed` once settled |
+| 08:18:3x | (1)–(3) loopback | status filter **`29/0`**; sorted names **== pre-row == `routers_post_A2:` (diff empty)**; overview **`[29,0,18,6,["Swarm","File"]]`**; in-task `sha256sum /traefik/tls.toml` = `bb0cba95ea22e973…` == committed |
+| 08:18:3x | (4) TLS options via the API | **not observable**: `/api/rawdata` keys are `["middlewares","routers","services"]` (0 `VersionTLS12` hits), `/api/tls` and `/api/tls/options` → 404 — Traefik v3.7.14 does not expose TLS options over the API; the plan's rawdata `jq -e` cannot pass on any build. Proof substitutes: the config sha in the task, the DEBUG probe's `Configuration received` with the `tls.options` block, providers `["Swarm","File"]`, and the wire rows below |
+| 08:18:40 | (5) TLS triple + CBC (laptop) | rtm/app/console each: `-tls1_2` → `Protocol : TLSv1.2` + `Verify return code: 0`; `-tls1_3` → `TLSv1.3` + verify 0; `-tls1_1` → `no protocols available` (never a completed handshake); **`-tls1_2 -cipher ECDHE-RSA-AES128-SHA` → `handshake failure` (count 1 ×3) — CBC REFUSED (before: accepted)**; `-curves P-384` → `handshake failure` ×3 (curvePreferences applied); negotiated rtm 1.2 `ECDHE-RSA-AES128-GCM-SHA256`, 1.3 `TLS_AES_128_GCM_SHA256` |
+| 08:19 | (6) nmap `ssl-enum-ciphers` rtm | TLSv1.2 set **exactly** `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`, `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`, `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256` (all `secp256r1`, grade A); `TLSv1.3:` section present (three `TLS_AKE_*` on **`ecdh_x25519`**); no `SSLv3:`/`TLSv1.0:`/`TLSv1.1:` sections; `least strength: A`. **Curve note: `X25519MLKEM768` is no longer offered** — the explicit `curvePreferences = ["X25519", "CurveP256"]` traded the Go-default post-quantum hybrid for an explicit, scannable policy (D-14 hint; T-33-12 accepted). Phase 34 may omit the key to restore the Go default (X25519MLKEM768 + X25519 + P-256 + P-384 + P-521). The ECDSA suites in the list are unobservable (RSA-4096 certificates, RESEARCH Pitfall 6) |
+| 08:18:40 | (7)–(9) laptop | HTTPS matrix 17/17 **== pre-row** (diff empty); WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200` |
+| 08:18:3x | (10)–(11) micro | log scan `invalid CipherSuite\|invalid CurveID\|does not exist\|port is missing\|error while parsing` since the fire: **0 on the new task** (13 transient `does not exist` lines on the stopping task `puse77wvt5xk` — the A1/B/32 Stage 2 drain artefact); 0 other ERR lines on the new task except the pre-existing start-time `Error renewing ACME certificate: checkout.qooldata.com` (Stage E); `7442 OPEN 1883 OPEN 8883 OPEN` |
+| 08:19–08:20 | (12) harness | `p33c-https https://app.thinx.cloud` → **`RESULT: PASS`** (register → status → OTT → firmware → MQTT over the new TLS options); `p33c-7442 http://rtm.thinx.cloud 7442 thinx.cloud 1883` → **`RESULT: PASS`** (keep-7442) |
+
+**D-30 trigger evaluation: none fired** ((1) `29/0`, (5) TLS 1.2 + 1.3 handshakes succeed on rtm/app/console, (7) matrix ==
+pre-row, (8) WS 101/401, (9) bare-IP 301/200, harness PASS ×2). The revert (`--args` with the 17 flags of
+`traefik-p33-preC-20261009T081658Z.json` + `--config-rm tls-config-2 --config-add source=tls-config-1,target=/traefik/tls.toml,mode=0444`)
+was staged and **not executed**. `tls-config-1` stays in the swarm, unreferenced, until Plan 03 removes it.
+
+Version.Index post-Stage-C: 38379918
+
+Repo state == live state after this task: thinx-swarm `94da01c` (origin + micro), mirror `b99210f8` MIRROR OK at 18
+flags, live `traefik_traefik` 18 Args (sorted set == mirror) with `tls-config-2` mounted and loaded, 29 routers enabled
+== `routers_post_A2:`. Stage D starts from here (18 → 19 flags).
+
