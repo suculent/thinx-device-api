@@ -177,7 +177,7 @@ services:
       labels:
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.http.services.thinx-db.loadbalancer.server.port=5985"
+        - "traefik.http.services.thinx-db.loadbalancer.server.port=5984"
         - "traefik.enable=true"
         - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
