@@ -903,6 +903,8 @@ scan capture `## Reported, not gating (after)`):
     `influx-auth`), values over ssh stdin only, never printed or committed; then one line in `traefik.sh`/README
     "credential rotated on <date>; the historic literal in git history is dead". Optional: `git filter-repo
     --replace-text` on the private repo (origin + micro are the only remotes).
+    **Closed 2026-10-09** (34-04 Task 3, `### P34 credential rotation record`): rotated, hash stored in the 600-root env
+    file, `restart.sh` / `thinx.sh` no longer prompt (thinx-swarm `1c4d683`); no history rewrite.
   - **WR-03 HSTS default middleware is a single point of failure.** `--entrypoints.https.http.middlewares=security-headers@swarm`
     makes every `:443` router depend on labels of `traefik_traefik`; losing them (a `--label-rm` typo, the
     LOAD-BEARING port label, an empty swarm config on provider restart) disables all 28 public routers (404
@@ -1632,3 +1634,120 @@ Repo state == live state after this task: no thinx-swarm change (Stage E is a st
 or label change), so thinx-swarm `3d3a31b` == origin == micro and the mirror is unchanged at 24 flags. Live
 `traefik_traefik` has 24 Args, `tls-config-3`, task `vtdqxehcuul8`; acme.json holds 16 entries `600 root`; 29 routers
 enabled == `routers_post_A2:`. In this repo `scripts/traefik-edge-scan.sh` has `HOSTS` 16 (`3b7fa2b2`).
+
+### P34 credential rotation record (34-04 Task 3, 2026-10-09 16:01–16:12 UTC)
+
+**Outcome: the `couch-auth` / `influx-auth` edge basic-auth credential is rotated (D-18, closes 33-REVIEW WR-02). The
+new password came from the operator through `/root/.p34-basicauth` on micro and was hashed there
+(`openssl passwd -apr1 -stdin`). The hash is stored in the deploy env file (operator decision: Option B) and applied live,
+label-only, on `thinx_couchdb` and `thinx_influxdb`. Both middlewares share the one credential, as before (operator: "couchdb
+and influxdb can use the same password"). The password file is shredded. No password, hash or env value left micro or
+was printed: this record holds sha256 prefixes (12 hex) and counts only. The env file `/mnt/gluster/thinx/.env` is now `600
+root:root` (was `644 root:root`), after evidence that no non-root process reads it. The historic literal is challenged on
+both hosts. Note that it was **already** challenged before the rotation, so it had been dead since an earlier
+`restart.sh` prompt rotated the hash. The new credential passes the edge on both hosts. The CouchDB/InfluxDB backend admin accounts were
+NOT rotated (out of scope).**
+
+Operator action (Task 2): `/root/.p34-basicauth` placed. It was created `644`, and the orchestrator corrected it to `600 root:root` at
+≈16:01Z. Executor check (metadata only): `600 root:root`, 1 line, ≥ 17 bytes; no `/root/.p34-basicauth-user`, so
+the username is unchanged (`admin`). Backend-sharing answer: the operator allows the CouchDB and InfluxDB backend
+accounts to share this password if they are rotated later; this plan does not touch them.
+
+Read-only facts (16:02–16:06Z; counts, modes and sha prefixes only):
+
+| Fact | Result |
+|---|---|
+| deploy env link | `/mnt/gluster/deployment/swarm/.env` → `/mnt/glusterfs/thinx/.env` (`/mnt/gluster` → `./glusterfs`); git-ignored in the deploy checkout |
+| env file before | `1729 644 root:root`, 61 lines, trailing newline; **0** `HASHED_PASSWORD=` lines, **0** `USERNAME=` lines, 0 `export ` lines, 0 lines with `$` |
+| how `restart.sh` / `thinx.sh` load it | `export $(cat /mnt/gluster/thinx/.env)`, then `export USERNAME="admin"`, then **`export HASHED_PASSWORD=$(openssl passwd -apr1)` (an interactive prompt on every deploy)**. Word splitting, no quote removal, and no `$` re-expansion of the command-substitution output; `docker stack deploy` interpolates `${USERNAME?…}:${HASHED_PASSWORD?…}` in `thinx.yml` :144 / :492 once |
+| live labels before | couch-auth sha12 `00d35a165e11`, influx-auth sha12 `00d35a165e11` (one shared value), user part `admin`, one apr1 prefix, 0 `$$` |
+| baseline dry render (16:06Z) | in micro's deploy dir: `( export $(cat <env>); export USERNAME="admin"; export HASHED_PASSWORD=<live hash part, in memory>; docker stack config -c ./thinx.yml )` (docker 29.8.1) → couch/influx rendered sha12 `00d35a165e11` == live, 0 `$$`. The render path reproduces the live label byte for byte, so the stored line must be **unquoted with single `$`** (quotes would survive `export $(cat …)` literally) |
+| tasks before | couchdb `pcj2qs3o8yjt` (micro), influxdb `mulafi7tbk6u` (core) |
+
+Before-rotation evidence from the laptop (16:06:01Z): the historic pair from thinx-swarm `158f369:traefik.sh` (extracted
+into shell variables, sent only through `curl -K -` stdin) got **db challenge=1, influx challenge=1**. The historic literal was
+already rejected before this rotation, so this was not a live exposure today. With no credential: db `401` challenge=1, influx `401` challenge=1.
+
+Env-file permission evidence (operator condition for the `chmod 600`):
+
+| Reader | Evidence | uid |
+|---|---|---|
+| `restart.sh` / `thinx.sh` / `docker stack deploy` (client-side `export $(cat …)`) | operator runs them as root on micro | 0 |
+| swarm services binding the gluster `thinx` tree (all 22 services inspected) | only `thinx_worker` binds the whole `/mnt/gluster/thinx` (→ `/mnt/data/thinx`); `thinx_api`, `thinx_couchdb`, `thinx_influxdb`, `thinx_mosquitto`, `thinx_thinx-redis`, `registry_registry` bind sub-directories/files only (`ssl`, `conf`, `couchdb`, `vm.args`, `influxdb2`, …), so they cannot see the env file. `thinx_couchdb` (DHI uid 65532) sees only `couchdb` + `vm.args` | worker main process `node worker.js` = **root** (`docker top`), `docker exec id -u` 0; worker code has no `/mnt/data/thinx` reference |
+| standalone containers | none on micro or core binds the gluster root or `thinx` dir beyond the swarm tasks above | — |
+| user namespaces | `docker info` SecurityOptions on both nodes: apparmor, seccomp, cgroupns, **no userns-remap**, so container root is host root on the FUSE mount (`default_permissions,allow_other`) | — |
+| host jobs | `/etc/cron.daily/backup` (both nodes, root via run-parts, 0 `sudo -u`/`su -`/`runuser`), `/etc/cron.d/clean_docker` (root), root crontab | 0 |
+| non-root login users | micro: none (uid 1000–65533); core: `reverse` (uid 1000) with no processes, no crontab, 0 gluster references in its home | — |
+| env_file keys | thinx-swarm: only `landing/docker-compose.yml` (`env_file: .env` relative to `landing/`, a different file, resolved client-side by compose) | — |
+
+Backups (`umask 077`, all `600 root`, never leave micro, never committed): `/mnt/data/edge-rollback/p34-env-20261009T160640Z`
+(`1729`, `cmp` identical to the pre-rotation env file, original mode recorded: **`644 root:root`**),
+`p34-rot-couchdb-20261009T160640Z.json` (`10252`, label sha12 `00d35a165e11`, idx 38380173),
+`p34-rot-influxdb-20261009T160640Z.json` (`9840`, label sha12 `00d35a165e11`, idx 38379808).
+
+```
+# ONE remote shell on micro (ssh … 'bash -s' <<'EOF' … EOF; nothing secret echoed):
+#   U = user part of the live couch-auth label (asserted == admin); assert 0 HASHED_PASSWORD lines
+#   H=$(openssl passwd -apr1 -stdin < /root/.p34-basicauth); assert apr1 prefix + charset [$./0-9A-Za-z]
+#   cp -p <env> <env>.p34new && printf 'HASHED_PASSWORD=%s\n' "$H" >> <env>.p34new && mv <env>.p34new <env>
+#   render: ( unset HASHED_PASSWORD USERNAME; export $(cat <env>); export USERNAME="admin"; docker stack config -c ./thinx.yml )
+#     → couch/influx rendered sha12 must == sha12("$U:$H"), else restore <env> from the backup (chmod 644) and exit
+#   docker service update --detach --label-add "traefik.http.middlewares.couch-auth.basicauth.users=$U:$H" thinx_couchdb
+#   docker service update --detach --label-add "traefik.http.middlewares.influx-auth.basicauth.users=$U:$H" thinx_influxdb
+# expect: hash len 37 / 3 '$'; env 62 lines, 1 HASHED_PASSWORD line, 0 quoted, first 61 lines == backup;
+#         rendered sha12 == expected == live; task ids unchanged
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| ≈16:01 | operator file | placed; corrected 644 → `600 root:root` by the orchestrator |
+| 16:02–16:06 | read-only facts + consumer evidence | as in the tables above |
+| 16:06:01 | historic pair, before | db challenge=1, influx challenge=1 (already dead) |
+| 16:06:40 | backups | three files `600 root` as listed |
+| 16:07:0x | hash + env write | `hash_ok len=37 dollars=3`; env `1783 644 root:root`, 62 lines, `HASHED_PASSWORD` lines **1**, `USERNAME` lines 0, quoted 0, first 61 lines identical to the backup |
+| 16:07:0x | render parity | couch render sha12 **`79e078373496`** == expected `79e078373496`, influx render `79e078373496` == expected; rendered `$$` 0 |
+| **16:07:13.56** | **labels applied** | couch-auth sha12 `00d35a165e11` → **`79e078373496`** (idx 38380173 → 38380189), influx-auth `00d35a165e11` → **`79e078373496`** (idx 38379808 → 38380190); tasks **unchanged** (couchdb `pcj2qs3o8yjt`, influxdb `mulafi7tbk6u`), so no restart |
+| 16:07:56 | new credential inside the Traefik task netns (`nsenter -t <pid> -n curl -sk --resolve <h>:443:127.0.0.1 -K -`, stdin config built on micro from `admin` + the file) | db: Traefik challenge **0** (code `502`, see below); influx: challenge **0**, code `200`; no credential: db `401` challenge 1, influx `401` challenge 1 |
+| 16:08:38 | shred | `shred -u /root/.p34-basicauth` → `ls: cannot access … No such file or directory`; no user file existed |
+| 16:08:38 | loopback | status filter **`29/0`**, overview **`[29,0,18,6,["Swarm","File"]]`**, `7442 OPEN 1883 OPEN 8883 OPEN`; `traefik_traefik` untouched (`Version.Index post-P34-E: 38380188` still current) |
+| 16:08:39 | laptop proof | historic pair: db challenge=1, influx challenge=1; no credential: db `401` challenge=1, influx `401` challenge=1 |
+| ≈16:09 | env file `chmod 600` | `chown root:root` + `chmod 600`: micro `644 root:root` → **`600 root:root`** (also via the deploy link); **core** sees **`600 root:root`**; a non-root read on core (`su reverse -c cat`) is **denied**; worker container (root) still reads it (`worker_view=600 0`); the `docker stack config` render as root still succeeds |
+
+new_credential_edge: db challenge=0, influx challenge=0
+historic_literal_dead: db challenge=1, influx challenge=1
+no_credential: db 401 challenge=1, influx 401 challenge=1
+label_sha12: couch-auth 00d35a165e11 -> 79e078373496, influx-auth 00d35a165e11 -> 79e078373496
+env_mode: 644 root:root -> 600 root:root (micro and core)
+
+**db.thinx.cloud answers `502` after a passed basic-auth (pre-existing, not caused by the rotation).** The access log
+shows `DownstreamStatus 502 / OriginStatus 502` through `error-pages-middleware`. The `thinx-db` service label sends Traefik to
+`http://10.0.1.6:5985`, and inside the Traefik netns `:5985` is **closed** while `:5984` is open (CouchDB 3 / DHI listens on 5984
+only). The 5985 label is identical in the pre-Stage-D spec backup (15:42Z), the pre-rotation backup, thinx-swarm
+`thinx.yml` :128 and `docker-swarm.yml` :180, and it predates Phase 34. The rotation changed only the basicauth label.
+Recorded as a deferred item (`34-04` deferred-items.md); not fixed here (a separate label change on `thinx_couchdb` with
+its own gate).
+
+Repo side: thinx-swarm `1c4d683` (`chore(ops): Phase 34 — basic-auth credential rotated (D-18)`). README and `traefik.sh`
+carry the rotation line. `restart.sh` / `thinx.sh` no longer prompt (`export HASHED_PASSWORD=$(openssl passwd -apr1)` removed).
+They take the stored hash from the env file and refuse to run without it (`: "${HASHED_PASSWORD:?…}"`, in `thinx.sh` before
+`docker stack rm`). `USERNAME` stays `export USERNAME="admin"`. The commit is pushed to origin and to micro as `p34-ops`,
+`--ff-only` merged, branch deleted; micro HEAD == origin == `1c4d683`, 0 tracked changes, the 6 untracked `*.bak` files left
+alone. Mirror banner regenerated (`traefik.yml` unchanged, banner-only diff) → `MIRROR OK`.
+
+Not run (local secret-read hook): a `stat -c %i` inode cross-check of the env file on micro after the `mv`. The hook blocked it and
+it was not worked around. Not needed: the mode was checked on both nodes and the non-root read on core is denied.
+
+```
+# staged rollback (NOT executed), on micro, newest first:
+# (1) labels back to the pre-rotation values, read by jq from the spec backups (label-only, no restart):
+ssh micro 'B=/mnt/data/edge-rollback; for s in couchdb influxdb; do k=couch; [ $s = influxdb ] && k=influx; \
+  V=$(jq -r ".[0].Spec.Labels[\"traefik.http.middlewares.$k-auth.basicauth.users\"]" $B/p34-rot-$s-20261009T160640Z.json); \
+  docker service update --detach --label-add "traefik.http.middlewares.$k-auth.basicauth.users=$V" thinx_$s >/dev/null; done'
+# (2) env file back (removes the HASHED_PASSWORD line) and its original mode:
+ssh micro 'cp -p /mnt/data/edge-rollback/p34-env-20261009T160640Z /mnt/gluster/thinx/.env && chmod 644 /mnt/gluster/thinx/.env'
+#     mode only: chmod 644 /mnt/gluster/thinx/.env   (owner was and is root:root)
+# (3) with (2), also revert thinx-swarm 1c4d683 (origin + micro ff), or restart.sh / thinx.sh refuse to run
+```
+
+Backend accounts: the CouchDB / InfluxDB backend admin accounts were not rotated (out of this plan's scope). The operator
+allows them to share this password if they are rotated later.
