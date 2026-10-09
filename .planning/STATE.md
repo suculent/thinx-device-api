@@ -4,18 +4,18 @@ milestone: v1.15
 milestone_name: Traefik Hardening (Edge)
 current_phase: 33
 current_phase_name: Dashboard Lockdown & TLS Hardening
-status: executing
-stopped_at: Completed 33-02-PLAN.md
-last_updated: "2026-10-09T09:12:50.994Z"
+status: verifying
+stopped_at: Completed 33-03-PLAN.md (Phase 33 complete)
+last_updated: "2026-10-09T10:21:17.104Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 33 execution started
-state_head: ccb68f4ce52fb50b49dc0002f6a627f7db9052b7
+state_head: d5898167721ebe92bd23577d6c4d8fe4b945d17b
 progress:
   total_phases: 6
   completed_phases: 17
   total_plans: 14
-  completed_plans: 13
-  percent: 93
+  completed_plans: 14
+  percent: 100
 ---
 
 # STATE — THiNX Device API
@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-08 after Phase 31)
 
 Phase: 33 (Dashboard Lockdown & TLS Hardening) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-09 — Phase 33 execution started
 
 ## Milestones
@@ -325,6 +325,11 @@ Full log in `PROJECT.md` Key Decisions. Recent decisions affecting current work:
 - [Phase 33]: 33-02: D-22 renewal evidence = pre-edit acme.json mtime + served notAfter 2026-12-28 (Traefik logs at ERROR); forced reissue host influx.thinx.cloud — new serial 05806B4C8B028F41EC3ACCC00DF3C6A50B04 within ~11 s of the --force restart
 - [Phase 33]: 33-02: D-24 decided by measurement — qooldata_router_refs 0 (E.pre.yml) / 0 (live); checkout.qooldata.com pruned, not re-requested, Phase 32 deferred item resolved with owner-notification note
 - [Phase 33]: 33-02: a swarm raft leader election (06:49Z core->micro) bumps every service's Version.Index without changing content; post-Stage-X index gates compare against each stage's own recorded index
+- [Phase 33]: 33-03: tls-config-1 removed only after the full D-31 bundle and the external scan were green; recreate path documented (no revert step needs it)
+- [Phase 33]: 33-03: overlay negative-reachability probe runs from the errorpage_errorpage task netns (traefik-public not attachable) — standing recipe
+- [Phase 33]: 33-03: ACME failure gate = per-task-id log scan on the live task since the Stage E fire (0); the one 60-min line was the old task's pre-prune pass
+- [Phase 33]: 33-03: thinx-swarm README committed on master (plan-directed), ff-merged on micro; mirror regenerated after every thinx-swarm commit
+- [Phase 33]: 33-03: D-31 gate approved; dashboard bridge URL documented as /dashboard/ with the trailing slash (api@internal answers 404 to /dashboard)
 
 ### Todos
 
@@ -448,11 +453,11 @@ Decided at plan time, not blocking the roadmap:
 
 ## Session Continuity
 
-**Stopped at:** Completed 33-02-PLAN.md
+**Stopped at:** Completed 33-03-PLAN.md (Phase 33 complete)
 
 **Resume file:** None
 
-**Last session:** 2026-10-09T09:12:50.869Z
+**Last session:** 2026-10-09T10:21:16.667Z
 
 **Stopped at (2026-10-04, latest):** v1.14 milestone audit — `gaps_found` 22/25, only Phase 28 open (`.planning/v1.14-MILESTONE-AUDIT.md`). Post-audit fixes committed on `main` locally (transformer 2.2.1 isolate recovery + API 2.2 contract with reason codes, sanitka.udid no input logging, WR-02 influx write pause, WR-03 owner-bounded audit fallback); push to `thinx-staging` (transformer repo first) is the next step.
 
@@ -528,3 +533,4 @@ Decided at plan time, not blocking the roadmap:
 | Phase 32 P03 | 22 min | 2 tasks | 4 files |
 | Phase 33 P01 | 39 min | 3 tasks | 10 files |
 | Phase 33 P02 | 79min | 3 tasks | 8 files |
+| Phase 33 P03 | 56 min | 3 tasks | 8 files |

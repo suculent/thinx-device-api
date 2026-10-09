@@ -21,14 +21,14 @@ Requirements for this milestone. Each maps to a roadmap phase. See `.planning/re
 
 ### Dashboard & API Lockdown
 
-- [ ] **EDGE-API-01**: The Traefik dashboard/API is not reachable unauthenticated from outside — port 8080 is closed externally (or bound internal-only) and `--api.insecure` is disabled.
-- [ ] **EDGE-API-02**: If the dashboard is kept, it is served via a secured router (`api@internal`) behind auth; otherwise it is disabled in production.
+- [x] **EDGE-API-01**: The Traefik dashboard/API is not reachable unauthenticated from outside — port 8080 is closed externally (or bound internal-only) and `--api.insecure` is disabled.
+- [x] **EDGE-API-02**: If the dashboard is kept, it is served via a secured router (`api@internal`) behind auth; otherwise it is disabled in production.
 
 ### TLS Hardening
 
-- [ ] **EDGE-TLS-01**: The HTTPS entrypoint enforces minimum TLS 1.2 (prefer 1.3) with a modern cipher-suite set.
-- [ ] **EDGE-TLS-02**: HSTS is sent on HTTPS responses at the edge (documented max-age) without affecting the plaintext device paths.
-- [ ] **EDGE-TLS-03**: ACME uses a real operator email (not the `admin@example.com` placeholder) and `acme.json` is stored `600`; certificate issuance/renewal is verified working post-migration.
+- [x] **EDGE-TLS-01**: The HTTPS entrypoint enforces minimum TLS 1.2 (prefer 1.3) with a modern cipher-suite set.
+- [x] **EDGE-TLS-02**: HSTS is sent on HTTPS responses at the edge (documented max-age) without affecting the plaintext device paths.
+- [x] **EDGE-TLS-03**: ACME uses a real operator email (not the `admin@example.com` placeholder) and `acme.json` is stored `600`; certificate issuance/renewal is verified working post-migration.
 
 ### Ops Surface Reduction
 
@@ -64,11 +64,11 @@ Filled during roadmap creation.
 | EDGE-MIG-04 | Phase 30 | Complete |
 | EDGE-MIG-02 | Phase 31 | Complete |
 | EDGE-MIG-03 | Phase 32 | Complete |
-| EDGE-API-01 | Phase 33 | Pending |
-| EDGE-API-02 | Phase 33 | Pending |
-| EDGE-TLS-01 | Phase 33 | Pending |
-| EDGE-TLS-02 | Phase 33 | Pending |
-| EDGE-TLS-03 | Phase 33 | Pending |
+| EDGE-API-01 | Phase 33 | Complete |
+| EDGE-API-02 | Phase 33 | Complete |
+| EDGE-TLS-01 | Phase 33 | Complete |
+| EDGE-TLS-02 | Phase 33 | Complete |
+| EDGE-TLS-03 | Phase 33 | Complete |
 | EDGE-OPS-01 | Phase 34 | Pending |
 | EDGE-OPS-02 | Phase 34 | Pending |
 | EDGE-OPS-03 | Phase 34 | Pending |
