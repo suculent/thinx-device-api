@@ -564,4 +564,7 @@ services:
         - swarmpit.service.deployment.autoredeploy=true
 
         - traefik.http.middlewares.influx-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        # 34-REVIEW WR-03: strip the edge Basic header before InfluxDB too — it would otherwise receive the edge
+        # password on every request (InfluxDB has its own login page and Token auth)
+        - "traefik.http.middlewares.influx-auth.basicauth.removeheader=true"
         - traefik.http.routers.thinx-influx-https.middlewares=influx-auth,error-pages-middleware
