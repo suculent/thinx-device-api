@@ -3,7 +3,8 @@
 # traefik-edge-scan.sh — Phase 33 (EDGE-API-01/02, EDGE-TLS-01/02/03; D-26..D-29) external edge scan.
 #
 # Laptop-only, read-only: local nmap (ssl-enum-ciphers + port sweep incl. 8080/8443), sslscan, curl -I and
-# openssl against the public edge 188.166.23.244 and the 16 routed hostnames (D-27). Run it from OUTSIDE the
+# openssl against the public edge 188.166.23.244 and the 16 routed hostnames (D-27), plus the dashboard/API
+# exposure probes (curl -k) on the retired hostnames in RETIRED_HOSTS (34-REVIEW WR-04). Run it from OUTSIDE the
 # swarm — micro sees every client as 10.0.0.2 and sits inside the edge. No third-party scanner is involved and
 # nothing is logged anywhere but stdout.
 #
@@ -48,6 +49,8 @@ fi
 EDGE_IP=188.166.23.244
 # Phase 34 (D-19): micro.thinx.cloud retired — its ACME entry was pruned, it serves the default certificate and is no longer an edge host.
 HOSTS="rtm.thinx.cloud app.thinx.cloud console.thinx.cloud thinx.cloud www.thinx.cloud swarmpit.thinx.cloud registry.thinx.cloud db.thinx.cloud influx.thinx.cloud www.fotostim.com www.fotostim.cz fotostim.com fotostim.cz igraczech.com www.igraczech.com www.syxra.cz"
+# 34-REVIEW WR-04: retired, still resolving to the edge — scanned below with the exposure probes only (curl -k).
+RETIRED_HOSTS="micro.thinx.cloud"
 
 # D-14 on RSA-4096 certificates: only the three ECDHE_RSA AEAD suites are ever observable (the ECDSA entries
 # of D-14 can never be negotiated); nmap names ChaCha with the _SHA256 suffix (33-RESEARCH Pitfall 6).
@@ -212,6 +215,51 @@ for H in $HOSTS; do
   echo "dashboard $H ${dash_code:-000} sig=${dash_sig:-0}"
   echo "redirect $H ${redirect:-000}"
   echo "serial $H ${serial:-none}"
+done
+
+# 34-REVIEW WR-04: retired hostnames that DNS still points at the edge. They get no TLS/HSTS predicates (they
+# serve the Traefik default certificate on purpose, D-19), but Traefik routes by Host() regardless of the
+# certificate, so a re-added dashboard/API router there would be one `curl -k` away. micro.thinx.cloud is where
+# the public dashboard lived until Phase 33. Gating: no Traefik API JSON on /api/overview or /api/http/routers,
+# no dashboard signature and no 401 on /dashboard/ (expected today: the catch-all answers, 302/404, never 401).
+# -k is used ONLY here, and only for these exposure probes.
+echo "## retired hosts (exposure probes only, curl -k)"
+for H in $RETIRED_HOSTS; do
+  for P in /api/overview /api/http/routers; do
+    r_body=$(curl -sk -m 15 "https://$H$P" 2>/dev/null)
+    r_rc=$?
+    if [ "$r_rc" != "0" ]; then
+      echo "FAIL retired-api-exposed $H$P unchecked: curl rc=$r_rc"
+      fail=$((fail + 1))
+      continue
+    fi
+    printf '%s' "$r_body" | jq -R -s -e '(try fromjson catch null) | if type=="object" then (.http != null) elif type=="array" then (length > 0) else false end' >/dev/null 2>&1
+    r_jq_rc=$?
+    if [ "$r_jq_rc" = "0" ]; then
+      echo "FAIL retired-api-exposed $H$P"
+      fail=$((fail + 1))
+    elif [ "$r_jq_rc" != "1" ]; then
+      echo "FAIL retired-api-exposed $H$P unchecked: jq rc=$r_jq_rc"
+      fail=$((fail + 1))
+    fi
+  done
+  r_dash=$(curl -sk -m 15 "https://$H/dashboard/" 2>/dev/null)
+  r_dash_rc=$?
+  r_sig=$(printf '%s\n' "$r_dash" | grep -c APIUrl)
+  r_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 15 "https://$H/dashboard/" 2>/dev/null)
+  r_code_rc=$?
+  if [ "$r_dash_rc" != "0" ] || [ "$r_code_rc" != "0" ]; then
+    echo "FAIL retired-dashboard $H unchecked: curl rc=$r_dash_rc/$r_code_rc"
+    fail=$((fail + 1))
+  elif [ "${r_sig:-0}" != "0" ]; then
+    echo "FAIL retired-dashboard-open $H"
+    fail=$((fail + 1))
+  elif [ "$r_code" = "401" ]; then
+    echo "FAIL retired-dashboard-401 $H"
+    fail=$((fail + 1))
+  fi
+  r_api_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 15 "https://$H/api/overview" 2>/dev/null)
+  echo "retired $H api=${r_api_code:-000} dashboard=${r_code:-000} sig=${r_sig:-0}"
 done
 
 if [ "$fail" = "0" ]; then
