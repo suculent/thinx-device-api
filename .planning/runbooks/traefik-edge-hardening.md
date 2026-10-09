@@ -472,3 +472,79 @@ Repo state == live state after this task: thinx-swarm `94da01c` (origin + micro)
 flags, live `traefik_traefik` 18 Args (sorted set == mirror) with `tls-config-2` mounted and loaded, 29 routers enabled
 == `routers_post_A2:`. Stage D starts from here (18 → 19 flags).
 
+### Stage D record (33-02 Task 2, 2026-10-09 08:24–08:30 UTC)
+
+**Outcome: the live `traefik_traefik` runs the 19-flag static command with
+`--entrypoints.https.http.middlewares=security-headers@swarm` (one restart, fire 08:26:21.7Z → new task `36ssa5zcgpv0`
+Running 08:26:38.4Z, ≈17 s); `/api/entrypoints` reports the `https` entrypoint default middleware chain
+`["security-headers@swarm"]` and the `http` entrypoint none; every one of the 17 D-27 HTTPS hosts returns exactly ONE
+`Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` header — HSTS matrix **3/17 before → 17/17
+after** (registry's 400, the db/influx basic-auth 401s and micro's catch-all included), together with
+`X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY`; the cookie-less WebSocket upgrade still answers
+`HTTP/1.1 101 Switching Protocols` with **0** STS lines (the 1xx bypass holds — the D-18 per-router fallback is NOT
+needed), the cookie probe `401` + `X-Forwarded-Proto: https`; the HTTPS code matrix equals the pre-row; plain HTTP on the
+bare IP carries 0 STS lines (the http entrypoint sends none, D-20). The two redundant per-router references were then
+removed repo-first and label-only live (task ids unchanged) with HSTS still single on app/rtm. No D-30 trigger fired;
+the staged 18-flag revert was NOT used.**
+
+Precondition re-read (08:24Z): Stage C record present with `Version.Index post-Stage-C: 38379918` == live
+(`args=18 upd=completed`), providers `["Swarm","File"]`, `https` entrypoint `http.middlewares` absent (null), micro HEAD
+`94da01c` == thinx-swarm HEAD; HSTS baseline over the 17 hosts = **3/17** (rtm, app, console — the per-router refs),
+`http://188.166.23.244/` 0 STS lines.
+
+Repo first (P32 D-04): thinx-swarm `1578d2f` (`feat(edge): Phase 33 Stage D — …`: `traefik.yml` +
+`--entrypoints.https.http.middlewares=security-headers@swarm` right after `--entrypoints.https.address=:443` with the
+D-17..D-20 comment, 19 `- --` lines) → origin → micro `p33-stageD` ff-merge (dirty=0, 1 file 6+) → mirror regenerated
+(`MIRROR-GENERATED ok source=thinx-swarm@1578d2f…`, `MIRROR OK files=1`, **19 flags**) and committed here
+(`feat(33): Stage D — mirror regenerated at 19 flags`, `525a63fb`).
+
+```
+ssh micro "umask 077; B=/mnt/data/edge-rollback/traefik-p33-preD-\$(date -u +%Y%m%dT%H%M%SZ).json; docker service inspect traefik_traefik > \$B && chmod 600 \$B; \
+  jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B"
+# expect: 600 root; 18 — this file is the Stage D revert source, never leaves micro, never committed
+ssh micro "jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--entrypoints.https.http.middlewares=security-headers@swarm\"] | .[]' \$B | sed -E 's/acme.email=.*/acme.email=<masked>/' | sort"
+# expect: 19 lines == the mirror's 19 `- --` lines sorted (e-mail masked both sides) — sorted-set compare
+ssh micro "ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args + [\"--entrypoints.https.http.middlewares=security-headers@swarm\"] | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE task restart; image unchanged; Version.Index advances; args=19; /api/entrypoints https.http.middlewares == ["security-headers@swarm"]
+# post-D ref removal (label-only, after the gate is green; repo first in thinx.yml + docker-swarm.yml):
+ssh micro "docker service update --detach --label-add traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm thinx_api"
+ssh micro "docker service update --detach --label-rm traefik.http.routers.thinx-console-https.middlewares thinx_console"
+# expect each: rc 0; task id pre == post; chains thinx-api-https ["security-headers@swarm","sslheaders@swarm"], thinx-console-https ["security-headers@swarm"]; STS count still 1 on app/rtm
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 08:24:47 | pre-D HSTS baseline (laptop) | exact-directive STS count **1** on rtm/app/console, **0** on the other 14 hosts → **3/17**; `http://188.166.23.244/` 0 STS |
+| 08:25 | repo first | thinx-swarm `1578d2f` on origin + micro (ff, dirty=0); mirror `525a63fb` MIRROR OK at 19 flags |
+| 08:25:54 | pre-flight backup + pre-row | `/mnt/data/edge-rollback/traefik-p33-preD-20261009T082554Z.json` — `600 root`, 14621 B, Args length **18**; masked live set vs mirror **diff empty (19/19)**, thxp/mqtt/mqtts/mgmt 4/4; loopback `29/0`, names == post-C == `routers_post_A2:`; task `5agre1dyzrot`, `idx=38379918 args=18`; HTTPS matrix 17/17 == post-C row; WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301` + `200`; `7442 OPEN 1883 OPEN 8883 OPEN` |
+| **08:26:21.7** | **D fire** | `docker service update --detach --args "<19 flags>" traefik_traefik` → **rc 0** |
+| 08:26:21–08:26:38 | drain + start | old task `5agre1dyzrot` stopped; **new task `36ssa5zcgpv0`** `traefik:v3.7.14` micro **Running 08:26:38.4Z** (≈17 s); exactly **1** running task; `args=19 idx=38379931 upd=completed` |
+| 08:27:0x | (1)–(2) loopback | status filter **`29/0`**; sorted names **== pre-row (diff empty)**; overview `[29,0,18,6,["Swarm","File"]]`; `/api/entrypoints` `https` → `http.middlewares` **`["security-headers@swarm"]`**, `http` → `null`; chains before the ref removal: thinx-api-https `["security-headers@swarm","sslheaders@swarm","security-headers@swarm"]`, thinx-console-https `["security-headers@swarm","security-headers@swarm"]`, thinx-api-ws `["security-headers@swarm","sslheaders@swarm"]` (doubled refs → still ONE header on the wire, idempotent as researched) |
+| 08:27:19 | (3)–(4) HSTS matrix (laptop) | exact-directive STS count **1 on all 17 hosts — 17/17**, none 0, none 2 (no duplication); thinx.cloud header set: `strict-transport-security: max-age=31536000; includeSubDomains; preload`, `x-content-type-options: nosniff`, `x-frame-options: DENY`, `x-xss-protection: 1; mode=block`; registry's `400` carries STS + `X-Frame-Options: DENY` (outer modifier) |
+| 08:27:19 | (5)–(7) laptop | HTTPS matrix 17/17 **== pre-row**; WS cookie-less → **`HTTP/1.1 101 Switching Protocols` with 0 `strict-transport-security` lines** (headers present: Connection, Sec-Websocket-Accept, Upgrade — D-18 proof, recorded not gated); cookie probe → `401` (+ STS, as any final response) + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200`; `curl -sI http://188.166.23.244/` → **0 STS lines** (D-20) |
+| 08:27:0x | (8)–(9) micro | log scan `invalid CipherSuite\|invalid CurveID\|does not exist\|port is missing\|error while parsing` since the fire: **0 on the new task**; 0 non-ACME ERR lines on the new task; `7442 OPEN 1883 OPEN 8883 OPEN` |
+| 08:28 | post-D ref removal — repo first | thinx-swarm `c03c529` (`chore(edge): Phase 33 post-D — …`: `thinx.yml` thinx-api-https middlewares → `sslheaders@swarm`, console router middlewares line removed, each with a D-17 comment that does not repeat the removed token) → origin → micro `p33-postD` ff (dirty=0, 1 file 3+/2−); this repo `4fccd9bc` (`docker-swarm.yml` identical edits — comment-stripped traefik-label parity diff **empty**; mirror regenerated, banner `c03c529`, still 19 flags, MIRROR OK) |
+| 08:28:55 | post-D ref removal — live | `thinx_api --label-add …thinx-api-https.middlewares=sslheaders@swarm` → rc 0, task **`8v3ype7pftzh` → `8v3ype7pftzh`** (unchanged), label `sslheaders@swarm,security-headers@swarm` → `sslheaders@swarm`; `thinx_console --label-rm …thinx-console-https.middlewares` → rc 0, task **`irh0tnq5g0t2` → `irh0tnq5g0t2`** (unchanged), key gone; no `thinx-staging` push around it (P32 Pitfall 7) |
+| 08:29:25 | post-removal gate (micro) | status filter **`29/0`**; chains **thinx-api-https `["security-headers@swarm","sslheaders@swarm"]`** (entrypoint default prepended), **thinx-console-https `["security-headers@swarm"]`**; `traefik_traefik` untouched (`idx=38379931 args=19`) |
+| 08:29:45 | post-removal gate (laptop) | app / rtm / console STS count **exactly 1** each, codes 200; WS `101` (0 STS) / `401` + `X-Forwarded-Proto: https`; bare-IP `301` + `200`; HTTPS matrix 17/17 == pre-row |
+
+**D-19:** the directive string is unchanged — `max-age=31536000; includeSubDomains; preload` (documented max-age: one
+year), now sent by every HTTPS host instead of three; `thinx.cloud` is **NOT submitted to the HSTS preload list**
+(header only — list submission is effectively irreversible for the whole domain and is a product decision).
+
+**D-20 (recorded, not fixed — Phase 34):** `thinx-api-http` carries no `https-redirect` middleware (plain
+`http://app.thinx.cloud/` answers the API directly) and the `registry-http` router has no middleware at all; the `http`
+entrypoint has no headers middleware, so HSTS is never sent on `:80` (and `:7442` is not a Traefik entrypoint at all —
+AGENTS.md keep-7442 holds by construction).
+
+**D-30 trigger evaluation: none fired** ((1) `29/0`, (5) matrix == pre-row, (6) WS 101/401, (7) bare-IP 301/200; HSTS
+present 17/17 so the stop-and-report branch did not apply). The revert (`--args` with the 18 flags of
+`traefik-p33-preD-20261009T082554Z.json`) was staged and **not executed**; the ref-removal revert (re-add the two
+`security-headers@swarm` refs) was not needed.
+
+Version.Index post-Stage-D: 38379931
+
+Repo state == live state after this task: thinx-swarm `c03c529` (origin + micro), mirror `4fccd9bc` MIRROR OK at 19
+flags, `docker-swarm.yml` == `thinx.yml` traefik labels, live `traefik_traefik` 19 Args (sorted set == mirror), live
+thinx_api / thinx_console labels == the committed files, 29 routers enabled == `routers_post_A2:`. Stage E starts from here.
+
