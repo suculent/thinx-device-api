@@ -1,83 +1,33 @@
-# Requirements: THiNX Device API — v1.15 Traefik Hardening (Edge)
+# Requirements — v1.16 Console Usability & Deploy Keys
 
-**Defined:** 2026-10-06
-**Core Value:** The IoT device API stays available and trustworthy across release cycles; the push → CI → Swarmpit pipeline stays under a 5-minute SLA.
+Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acceptance and publication are still pending; see v1.16-VERIFICATION.md.
 
-## v1 Requirements
-
-Requirements for this milestone. Each maps to a roadmap phase. See `.planning/research/TRAEFIK-MIGRATION.md` for the migration path.
-
-### Reconciliation
-
-- [ ] **EDGE-RECON-01**: The live swarm-host Traefik config (static flags, dynamic rules, ACME storage) is captured and diffed against repo `docker-compose.traefik.yml` + `services/traefik/*`, establishing a single documented source of truth.
-- [ ] **EDGE-RECON-02**: Live-vs-repo drift is reconciled into the repo so the committed config matches what is deployed — or each intentional divergence is documented with rationale.
-
-### Migration
-
-- [ ] **EDGE-MIG-01**: Traefik static config and Docker labels are migrated from v1 syntax to v2 syntax (entrypoints, `providers.docker`, `certificatesresolvers`, `http.routers`/`http.services` labels) on a current v2.x image, with every existing route serving identically.
-- [x] **EDGE-MIG-02**: Traefik is upgraded from v2.x to current v3.x using the backward-compatibility switch (`core.defaultRuleSyntax: v2`) and the official three-phase rollout; each hop is independently rollback-able.
-- [ ] **EDGE-MIG-03**: Routing rules are converted to native v3 syntax and the BC switch is removed (or explicitly retained with documented rationale).
-- [x] **EDGE-MIG-04**: The plaintext device entrypoint (`:7442`) and plain MQTT keep accepting legacy device check-in, OTT redemption, and firmware download after every migration hop (verified against a legacy `__DISABLE_HTTPS__` client path).
-
-### Dashboard & API Lockdown
-
-- [ ] **EDGE-API-01**: The Traefik dashboard/API is not reachable unauthenticated from outside — port 8080 is closed externally (or bound internal-only) and `--api.insecure` is disabled.
-- [ ] **EDGE-API-02**: If the dashboard is kept, it is served via a secured router (`api@internal`) behind auth; otherwise it is disabled in production.
-
-### TLS Hardening
-
-- [ ] **EDGE-TLS-01**: The HTTPS entrypoint enforces minimum TLS 1.2 (prefer 1.3) with a modern cipher-suite set.
-- [ ] **EDGE-TLS-02**: HSTS is sent on HTTPS responses at the edge (documented max-age) without affecting the plaintext device paths.
-- [ ] **EDGE-TLS-03**: ACME uses a real operator email (not the `admin@example.com` placeholder) and `acme.json` is stored `600`; certificate issuance/renewal is verified working post-migration.
-
-### Ops Surface Reduction
-
-- [ ] **EDGE-OPS-01**: Traefik log level is reduced from `DEBUG` to `INFO`/`WARN` in production (access logs retained if needed, free of secrets).
-- [ ] **EDGE-OPS-02**: Traefik reaches the Docker API via a read-only socket-proxy rather than a raw `/var/run/docker.sock` mount.
-- [ ] **EDGE-OPS-03**: The migrated edge preserves the 5-minute push → CI → Swarmpit deploy SLA, verified end-to-end.
-
-## Future Requirements
-
-Deferred, tracked but not in this roadmap.
-
-- **EDGE-FUT-01**: Broader edge redesign (nginx rewrites, console edge consolidation) beyond Traefik.
-- **EDGE-FUT-02**: mTLS / client-cert auth for device transport.
-
-## Out of Scope
-
-| Feature | Reason |
-|---------|--------|
-| Replacing Traefik with another reverse proxy | Migration/hardening only; no proxy swap |
-| TLS-enforcing or removing the plaintext device port `:7442` | Hard constraint — legacy devices require plaintext (operator decision 2026-10-04) |
-| Mosquitto/MQTT broker hardening beyond keeping plaintext working | Separate concern from the HTTP edge |
-| Console/CSP edge changes | Covered by v1.13; not re-opened here |
+- [x] **UI-01**: Remove template alert, duplicate logout, and Inbox; rename My Account to My Profile.
+- [x] **UI-02**: Show device action buttons with icons at the top, including environment editing, and stack sections in a single column.
+- [x] **UI-03**: Resolve linked repository to its name and Git URL.
+- [x] **UI-04**: Make All notifications exclusive of Important and Informational, including hydration and save.
+- [x] **BUILD-01**: Open the full build log from Recent Builds, History, and Device Build History with loading, empty, and error states.
+- [x] **BUILD-02**: Display explicit and expired running builds as TIMEOUT while preserving completed results.
+- [x] **TRANS-01**: Create and edit transformers in Vue and persist them in profile.info.transformers without losing other profile fields.
+- [x] **TRANS-02**: Select existing transformers and create-and-assign a transformer from Device detail.
+- [x] **KEY-01**: Name deploy keys before generation in Vue and Legacy; preserve names across reload.
+- [x] **KEY-02**: Label Vue keys Deploy Keys, sort by generation time, and show/copy each public key.
+- [x] **KEY-03**: Fix Legacy key-generation response handling, list refresh, and error notification behavior.
 
 ## Traceability
 
-Filled during roadmap creation.
-
 | Requirement | Phase | Status |
-|-------------|-------|--------|
-| EDGE-RECON-01 | Phase 29 | Pending |
-| EDGE-RECON-02 | Phase 29 | Pending |
-| EDGE-MIG-01 | Phase 30 | Pending |
-| EDGE-MIG-04 | Phase 30 | Complete |
-| EDGE-MIG-02 | Phase 31 | Complete |
-| EDGE-MIG-03 | Phase 32 | Pending |
-| EDGE-API-01 | Phase 33 | Pending |
-| EDGE-API-02 | Phase 33 | Pending |
-| EDGE-TLS-01 | Phase 33 | Pending |
-| EDGE-TLS-02 | Phase 33 | Pending |
-| EDGE-TLS-03 | Phase 33 | Pending |
-| EDGE-OPS-01 | Phase 34 | Pending |
-| EDGE-OPS-02 | Phase 34 | Pending |
-| EDGE-OPS-03 | Phase 34 | Pending |
+|---|---|---|
+| UI-01 | 35 | Implemented; locally verified |
+| UI-02 | 35 | Implemented; locally verified |
+| UI-03 | 35 | Implemented; locally verified |
+| UI-04 | 35 | Implemented; locally verified |
+| BUILD-01 | 36 | Implemented; locally verified |
+| BUILD-02 | 36 | Implemented; locally verified |
+| TRANS-01 | 37 | Implemented; locally verified |
+| TRANS-02 | 37 | Implemented; locally verified |
+| KEY-01 | 38 | Implemented; locally verified |
+| KEY-02 | 38 | Implemented; locally verified |
+| KEY-03 | 38 | Implemented; locally verified |
 
-**Coverage:**
-- v1 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0 ✓
-
----
-*Requirements defined: 2026-10-06*
-*Last updated: 2026-10-06 after v1.15 milestone start*
+Out of scope: deployment/infrastructure changes, paused v1.15 edge work, credentials from the source document.

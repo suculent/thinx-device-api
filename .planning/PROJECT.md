@@ -258,3 +258,8 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 *Last updated: 2026-10-08 after Phase 31 (v2→v3 upgrade, BC mode)*
+
+
+## Current Milestone: v1.16 — Console Usability & Deploy Keys
+
+Implement all 11 requirements from Drive THiNX/TODOs.md. Parent phase numbers 35–38; Vue and Legacy console submodule plus deploy-key backend. v1.15 edge milestone paused and preserved, not closed.

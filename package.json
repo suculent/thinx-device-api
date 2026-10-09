@@ -33,7 +33,8 @@
     "postpublish": "git push origin --tags",
     "split-tests": "if [ \"$CIRCLE_NODE_INDEX\" = \"0\" ]; then for f in ./spec/jasmine/ZZ*.js; do [ \"$f\" = ./spec/jasmine/ZZ-LogPagingCouchSpec.js ] || rm -f \"$f\"; done; fi; if [ \"$CIRCLE_NODE_INDEX\" = \"1\" ]; then ls ./spec/jasmine/*.js | grep -v 'ZZ' | xargs rm -f; fi",
     "test:csp": "node --test spec/node/StaticCsp.test.js",
-    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js"
+    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js",
+    "test:deploykeys": "node --test spec/node/DeployKeyNames.test.js"
   },
   "dependencies": {
     "@influxdata/influxdb-client": "1.35.0",
