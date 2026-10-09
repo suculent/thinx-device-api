@@ -198,6 +198,22 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
 3. push → CI → Swarmpit measured ≤5 minutes end-to-end on an edge change; swarm runbook updated.
 
+**Plans:** 5 plans (planned 2026-10-09; revised after plan-check — Stage B2 split out)
+**Wave 1**
+- [ ] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
+
+**Wave 2** *(blocked on Wave 1)*
+- [ ] 34-02-PLAN.md — Tracer Stage B2: ONE update moves Traefik to `tcp://socket-proxy:2375` and drops the raw socket bind (D-10 auto-revert); deny-from-Traefik, live provider test, harness (EDGE-OPS-02)
+
+**Wave 3** *(blocked on Wave 2)*
+- [ ] 34-03-PLAN.md — Tracer Stage C: `tls-config-3` (security-headers in the file provider, Go-default curves incl. X25519MLKEM768) + `security-headers@file` default in one update; Stage D: swarm-label copy retired, db/registry `:80` redirect-only (folded D-15..D-17; EDGE-OPS-03 final edge)
+
+**Wave 4** *(blocked on Wave 3)*
+- [ ] 34-04-PLAN.md — Tracer Stage E: prune the seven retired ACME entries (scan HOSTS 17 → 16); operator checkpoint for the new basic-auth password; couch-auth/influx-auth rotation (historic literal proven dead) + vault.yml re-pin (folded D-18..D-20)
+
+**Wave 5** *(blocked on Wave 4)*
+- [ ] 34-05-PLAN.md — Tracer: the D-12 SLA run (git push → CI → registry → Swarmpit → first response served through Traefik by the new task, three legs, re-run once on a miss; a FAIL stays an open EDGE-OPS-03 gap unless the operator accepts it); F.post + scan After + re-verify matrix, `tls-config-2` removed; swarm.md / AGENTS.md / runbook close-out, one docs push (EDGE-OPS-03)
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |

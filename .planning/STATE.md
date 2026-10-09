@@ -2,15 +2,17 @@
 gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
-current_phase: 38
 status: awaiting_ci_and_acceptance
-last_updated: "2026-10-09"
+last_updated: "2026-10-09T13:13:09.667Z"
+state_head: 84c8fa15ae97afdfc1791e002b0f4b8b39764f2b
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 4
   completed_plans: 4
-  percent: 100
+  percent: 0
+current_phase_name: Ops Surface Reduction & SLA Close-out
+current_phase: 38
 ---
 
 # STATE — THiNX Device API
