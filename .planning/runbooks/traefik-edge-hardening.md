@@ -1791,3 +1791,34 @@ final_edge: args=24 log=WARN accesslog=json drop=RequestPath,RequestLine,ClientU
   15833 — `03-RsakeySpec` "revoke … RSA Keys" 2 failures + global coverage thresholds not met, `TEST failed. Should not
   deploy this commit.`), so no `api-registry` ran for it; the last green `test` → `api-registry` is `75e083eb` (13:10Z).
   This push carries the same application code, so a red `test` → NO-MEASUREMENT is expected and will be recorded as such.
+
+**Run 1 result: NO-MEASUREMENT (red `test`, no `api-registry`, so no new `thinx_api` image).** The evidence commit
+`21045c429ca0` (signed `G`, no skip-ci marker) was pushed at T_PUSH `2026-10-09T16:21:25.373Z` (`git push` rc 0, 3.5 s,
+`322e74c8..21045c42`). Then:
+
+| Event | UTC | From T_PUSH |
+|---|---|---|
+| first job of the SHA queued (`snyk-oss-monitor`) | 16:24:18.064 | 173 s |
+| `test` (build 15839) queued / started | 16:24:21.151 / 16:24:45.322 | 176 s / 200 s |
+| `test` stopped: **failed** | 16:27:22.538 | 357 s |
+| `api-registry` | not run (depends on `test`) | — |
+
+`test` 15839 fails exactly like the base revision: `RSA Key (02) should fail on invalid revocation` and `RSA Key (04)
+should be able to revoke multiple RSA Keys at once` (`spec/jasmine/03-RsakeySpec.js`, `expected false to equal true`) →
+`1757 specs, 2 failures, 1 pending spec` → `TEST failed. Should not deploy this commit.` The coverage-threshold lines
+in the same log do not gate (the job's own self-test: "exits 0 when jasmine passes, even below the coverage threshold").
+`lib/thinx/rsakey.js` was last changed by `58027c18` (v1.16 "named deploy keys"). The last green `test` → `api-registry`
+was `75e083eb` at 13:10Z, so every thinx-staging revision since `322e74c8` is red (5/5: builds 15810, 15826, 15828, 15833,
+15839). This is application-layer, outside Phase 34 scope, and deterministic, so it cannot be cured by rerunning.
+
+Edge unaffected (16:28Z): `thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5`; loopback `29/0`;
+`7442 OPEN 1883 OPEN 8883 OPEN`; rtm `/` 200, app `/` 200, `/api/v2/csrf-token` 200; the 2-s probe loop on
+`https://app.thinx.cloud/` ran 183 probes with 0 non-200. The two console-registry jobs of the SHA rebuilt the
+unchanged console (gitlink == base).
+
+sla_run_1: NO-MEASUREMENT push=2026-10-09T16:21:25.373Z push_end=none running=none served=none reason=test-failed(build 15839, 03-RsakeySpec 02+04) sha=21045c429ca0
+
+Per D-13 / swarmpit-upgrade § Gate procedure, NO-MEASUREMENT allows one more evidence commit. **It was not spent:**
+the failure reproduces 5/5 on unchanged application code, so a run 2 would be a second certain NO-MEASUREMENT. The plan
+stops here for the operator: fix the RSA key specs (or the v1.16 rsakey change) on thinx-staging, or decide otherwise.
+No `sla_verdict:` is recorded, because a NO-MEASUREMENT run is never PASS or FAIL.
