@@ -123,8 +123,9 @@ already `--log.level=ERROR` (Phase 29–33 history). The requirement is satisfie
   `landing`/`www` SANs) via the P33 Stage E procedure (snapshot 600 root under `/mnt/data/edge-rollback/` →
   `jq del` → `chmod 600` → `mv` → `--force`, one remote command). Verify none has a router first (none should
   be re-requested). — **Reversibility:** reversible — snapshot restore.
-- **D-20:** **WR-05 vault.yml: re-pin** `vault:1.5.5` to a maintained `hashicorp/vault` tag (tag pin); keep the
-  file deploy-safe (b04f066). Repo-only — no live vault service exists, nothing deployed.
+- **D-20 (DROPPED — superseded by v1.17 VAULT-01 (workstream vault-transit, Phase 39 owns vault.yml; decided 2026-10-09)):** ~~**WR-05 vault.yml: re-pin** `vault:1.5.5` to a maintained `hashicorp/vault` tag (tag pin); keep the
+  file deploy-safe (b04f066). Repo-only — no live vault service exists, nothing deployed.~~ Phase 39 replaces the
+  dormant stack with an internal `openbao/openbao` service; Phase 34 does not touch vault.yml/vault.conf.
 
 ### Claude's Discretion
 - Exact stage order between the folded items, as long as: Stage A (logs) is first, the proxy stage
@@ -167,7 +168,7 @@ already `--log.level=ERROR` (Phase 29–33 history). The requirement is satisfie
 - `~/Repositories/thinx-swarm/traefik.yml` — static command (`--log.level=ERROR`, `--accesslog`, `--providers.swarm`
   without endpoint, `docker.sock:ro` volume), `configs: tls-config-${CONFIG:-2}`.
 - `~/Repositories/thinx-swarm/traefik/tls.toml` — D-15 target; `~/Repositories/thinx-swarm/README.md` §TLS options.
-- `~/Repositories/thinx-swarm/{thinx.yml,registry.yml,vault.yml,traefik.sh}` — D-17/D-18/D-20 edits.
+- `~/Repositories/thinx-swarm/{thinx.yml,registry.yml,traefik.sh}` — D-17/D-18 edits (D-20 dropped).
 - `/mnt/gluster/deployment/swarm` on micro = git checkout of thinx-swarm; update by ssh push + `--ff-only` (no GitHub access, no CI).
 - `docker-swarm.yml` (this repo) — must stay identical to thinx-swarm `thinx.yml` labels (D-17).
 - `docker-compose.traefik.yml` — generated mirror; `scripts/generate-traefik-mirror.js` / `scripts/check-traefik-mirror.js` → `MIRROR OK`.
