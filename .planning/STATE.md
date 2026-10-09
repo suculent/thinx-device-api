@@ -36,7 +36,7 @@ See: `.planning/PROJECT.md` (updated 2026-10-09 after Phase 33)
 
 Phase: 34 (Ops Surface Reduction & SLA Close-out) — EXECUTING
 Plan: 3 of 5
-Status: Executing 34-02 (Stage B2 socket-proxy cutover); 34-01 complete (Stage A + B1 live)
+Status: Paused before 34-03 — 34-01 + 34-02 complete (socket-proxy cutover live); device harness at PARITY pending operator
 Last activity: 2026-10-09 — Phase 34 execution started
 
 ## Milestones
