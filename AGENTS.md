@@ -24,8 +24,9 @@ clients working.
 
 ## Traefik dashboard/API access — ssh plane only (Phase 33)
 
-There is **no public Traefik dashboard or API route** on any hostname and **no basic-auth credential**
-anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal` is served by the
+There is **no public Traefik dashboard or API route** on any hostname and **no basic-auth credential on any
+dashboard/API route** (Phase 33, EDGE-API-01/02; operator decision 2026-10-08; the only edge basic-auth is
+`couch-auth` / `influx-auth` on db/influx, below). `api@internal` is served by the
 `traefik-mgmt` router only on the loopback `mgmt` entrypoint `127.0.0.1:8080` **inside the Traefik task**
 — not on the overlay, not on the host, not on the internet. The only path is ssh to micro + `docker exec`:
 
@@ -47,10 +48,13 @@ anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal
 - HSTS / security headers come from `security-headers@file`, the `[http.middlewares.security-headers.headers]` block in
   `traefik/tls.toml` (tls-config-3), set as the `https` entrypoint default. There is no swarm-label copy any more (removed
   in Phase 34, WR-03); never point the entrypoint default back at `@swarm` — a missing middleware 404s every `:443` router.
-- Traefik reads the Docker API **only** via `traefik_socket-proxy` (`--providers.swarm.endpoint=tcp://socket-proxy:2375`,
-  `wollomatic/socket-proxy`, GET-only allow-list, internal `traefik-socket` overlay `10.234.34.0/24`). Never re-add a Docker
-  socket mount to `traefik_traefik`, never attach `traefik-socket` to anything else, and check `traefik_socket-proxy` is
-  1/1 before any Traefik restart: a Traefik restart while the proxy is down starts with **no swarm routers**. Health check,
+- Traefik reads the Docker API **only** via `traefik_socket-proxy` (`--providers.swarm.endpoint=tcp://traefik_socket-proxy:2375`
+  — the full, cluster-unique service name, never the bare `socket-proxy`, which any `traefik-public` service could
+  claim as an alias (34-REVIEW WR-02); `wollomatic/socket-proxy`, GET-only allow-list, internal `traefik-socket` overlay
+  `10.234.34.0/24`). Never re-add a Docker socket mount to `traefik_traefik`, never attach `traefik-socket` to anything
+  else, and check `traefik_socket-proxy` is 1/1 **and `(healthy)`** before any Traefik restart (it has an exec-form
+  `/healthcheck` and updates start-first since the review fixes): a Traefik restart while the proxy is down starts with
+  **no swarm routers**. Health check,
   restart and rollback: `.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy.
 - Log level is **WARN** (8 start-up WRN lines per task are normal). The access log is **JSON with `RequestPath`,
   `RequestLine` and `ClientUsername` dropped**: query strings carry OTTs, OAuth codes and reset keys, and the username is
@@ -58,11 +62,16 @@ anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal
   `RouterName`, `DownstreamStatus` and `StartUTC` are kept (the SLA marker uses them).
 - The static command has **24 flags** (Phase 34 end state; the mirror `docker-compose.traefik.yml` has 24 `- --` lines).
   `docker service logs` hangs on micro: read Traefik logs with `timeout 30 docker logs --since … <container>` instead.
-- The `couch-auth` / `influx-auth` edge basic-auth credential was rotated on 2026-10-09 (Phase 34, D-18); `couch-auth`
-  strips the header before CouchDB (`basicauth.removeheader=true`, so Fauxton's own login works behind it). Its apr1 hash
-  is the `HASHED_PASSWORD` line of `/mnt/gluster/thinx/.env` on the nodes; `restart.sh` / `thinx.sh` read it from there
-  (no prompt) and refuse to run without it. That `.env` is **`600 root:root`** since Phase 34 (no non-root reader exists):
-  keep it that way, never print it, never commit it.
+- The `couch-auth` / `influx-auth` edge basic-auth credential was rotated on 2026-10-09 (Phase 34, D-18); both
+  middlewares strip the header before the backend (`basicauth.removeheader=true` — couch-auth since 16:29Z, influx-auth
+  since the review fixes, WR-03), so Fauxton's and InfluxDB's own logins work behind them and neither backend receives
+  the edge password. Its hash is the `HASHED_PASSWORD` line of `/mnt/gluster/thinx/.env` on the nodes; `restart.sh` /
+  `thinx.sh` read that file **literally** (no `export $(cat …)`, no sourcing; an inherited `HASHED_PASSWORD` is dropped),
+  fail closed on a missing/unreadable/empty file, and refuse anything but a bare apr1 or bcrypt `$2y$` hash — before
+  `docker stack rm` (WR-01). That `.env` is **`600 root:root`**, which keeps out **non-root users only: root on the
+  nodes and every root container that binds the `thinx` gluster tree can read it — today `thinx_worker` (runs as root,
+  binds all of `/mnt/gluster/thinx`)** (WR-06). Keep it 600, never print it, never commit it, and treat the hash as
+  readable by a compromised worker.
 - thinx-swarm **has** a CircleCI project (`.circleci/config.yml`): every `master` push builds and pushes `thinx/error-page`
   and `thinx/downtime-page`, which Swarmpit then autoredeploys (`errorpage_errorpage` restarts → a few transient
   `errorpage@swarm does not exist` ERR lines in Traefik). It does not deploy the edge; edge changes stay manual.
