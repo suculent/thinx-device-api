@@ -548,3 +548,100 @@ Repo state == live state after this task: thinx-swarm `c03c529` (origin + micro)
 flags, `docker-swarm.yml` == `thinx.yml` traefik labels, live `traefik_traefik` 19 Args (sorted set == mirror), live
 thinx_api / thinx_console labels == the committed files, 29 routers enabled == `routers_post_A2:`. Stage E starts from here.
 
+
+### Stage E record (33-02 Task 3, 2026-10-09 08:54–09:02 UTC)
+
+**Outcome: ACME proven end to end on the hardened edge. The three store files were snapshotted 600/700 root out of git
+(`/mnt/data/edge-rollback/traefik-p33-acme-20261009T085846Z/`), the two stale April-2023 key files were deleted from the
+live volume (D-23), the dead external entry `checkout.qooldata.com` (+ SANs `checkout.fotostim.com/.cz`) and the
+`influx.thinx.cloud` entry were pruned with `jq` and the task was `--force`-restarted 0.6 s after the atomic `mv`
+(fire 09:00:26.0Z → new task `k47479ipt1mb` Running ≈09:00:31Z, ≈5 s); Traefik re-obtained `influx.thinx.cloud` via
+TLS-ALPN through the swarm ingress within ~11 s of the fire — served serial `05B91929242266AC45C0BD14E89A6C4F8247`
+(notAfter 2026-12-28) → **`05806B4C8B028F41EC3ACCC00DF3C6A50B04`** (issuer Let's Encrypt YR1, notBefore 2026-10-09
+08:02:05Z, notAfter **2027-01-07 08:02:04Z** = +90 d). Store count **24 -> 22 -> 23**; `acme.json` `600 root`;
+`_acme.json` / `__acme.json` gone from the volume. The widened ACME log scan on the new task reads **0** and the
+rtm / app serials are unchanged versus E.pre.yml — the forced restart re-challenged nothing else. No D-30 trigger fired;
+the snapshot restore was NOT used. EDGE-TLS-03 closes here (D-21..D-25).**
+
+Precondition re-read (08:54Z): Stage D record present with `Version.Index post-Stage-D: 38379931` == live
+(`traefik:v3.7.14 args=19 idx=38379931 upd=completed`, task `36ssa5zcgpv0`); `/mnt/data/edge-rollback/` present
+(`755 root`, the per-stage backups inside are 600); the volume held exactly `acme.json` (301121 B), `_acme.json`
+(177391 B, 2023-04-25), `__acme.json` (202409 B, 2023-04-29), all `600 root`; `jq '.le.Certificates | length'` = **24**;
+influx served `05B91929242266AC45C0BD14E89A6C4F8247`; `openssl x509 -checkend 2592000` → "will not expire" for
+rtm / app / console / influx (nothing renews within 30 d, so no renewal save could race the edit — Pitfall 9).
+
+**D-21 / D-25 evidence (values never written):** live Args — `acme.email=` flags **1**, `example.com` matches **0**
+(ACME e-mail: real operator address), `acme.tlschallenge=true` **1** (challenge TLS-ALPN unchanged), `acme.storage=/certificates/acme.json` **1**
+(storage unchanged); `args=19`. Store mode `600 root` before and after (Traefik enforces 0600 itself — RESEARCH §Q6).
+
+D-22 renewal evidence: acme.json pre-edit mtime 2026-10-09 08:26:37.434917336 +0000; served notAfter rtm/app/console = Dec 28 2026 (renewal pass 2026-09-29)
+
+(The pre-edit mtime is the Stage D start-time whole-store rewrite of 08:26:37Z — the store is rewritten whole at every
+task start; the 2026-09-29 pass is cited from the served certificates: notAfter 2026-12-28 05:49–05:51 on rtm / app /
+console = issued 2026-09-29 ~05:50Z, 90-day certificates. Traefik runs at `--log.level=ERROR`, so no renewal INFO line
+exists to quote — the store mtime and the served notAfter are the log-equivalent evidence D-22 names.)
+
+qooldata_router_refs: 0 (E.pre.yml) / 0 (live)
+
+(`awk '/^external_stack_labels:/{f=1} f' traefik-edge.E.pre.yml | grep -c 'checkout\.'` → **0**; micro
+`docker service inspect fotostim_landing-com fotostim_landing-cz --format '{{json .Spec.Labels}}' | grep -o 'checkout\.[a-z.]*' | sort -u | wc -l`
+→ **0**. No fotostim router names the pruned host, so Traefik does not re-request it — the D-24 verdict for the Phase 32
+deferred item is "pruned, will not re-request, owner to be notified".)
+
+```
+# 1. snapshot (umask 077; dir 700, files 600 root; never leaves micro, never committed)
+ssh micro "umask 077; S=/mnt/data/edge-rollback/traefik-p33-acme-\$(date -u +%Y%m%dT%H%M%SZ); mkdir -p \$S; V=/var/lib/docker/volumes/traefik_traefik-public-certificates/_data; \
+  cp -p \$V/acme.json \$V/_acme.json \$V/__acme.json \$S/; chmod 700 \$S; chmod 600 \$S/*; stat -c '%s %a %U %n' \$S/*; echo SNAP=\$S"
+# observed: 700 root; 301121 / 177391 / 202409 — all 600 root, cmp byte-identical to the live files
+# 2. D-23: the two stale 2023 files leave the live volume (Traefik never reads them; services/traefik/update.sh reads acme.json only)
+ssh micro "V=/var/lib/docker/volumes/traefik_traefik-public-certificates/_data; rm -f \$V/_acme.json \$V/__acme.json; ls \$V"
+# observed: acme.json
+# 3. D-24 + D-22 in ONE remote command — prune into a temp copy, validate, chmod 600, atomic mv, --force within the second
+ssh micro "umask 077; V=/var/lib/docker/volumes/traefik_traefik-public-certificates/_data; \
+  jq 'del(.le.Certificates[] | select(.domain.main == \"checkout.qooldata.com\" or .domain.main == \"influx.thinx.cloud\"))' \$V/acme.json > \$V/acme.json.new \
+  && jq -e '.le.Certificates | length == 22' \$V/acme.json.new >/dev/null \
+  && jq -r '.le.Certificates[].domain.main' \$V/acme.json.new | grep -c -E '^(checkout.qooldata.com|influx.thinx.cloud)\$' \
+  && chmod 600 \$V/acme.json.new && mv \$V/acme.json.new \$V/acme.json && stat -c '%s %a %U' \$V/acme.json \
+  && docker service update --detach --force traefik_traefik"
+# observed: pruned_left=0; 278606 600 root (22 entries); rc 0 — Version.Index 38379931 -> 38379935 (updating) -> 38379946 (completed)
+# 4. watch the reissue from the laptop
+for i in $(seq 1 12); do echo | openssl s_client -connect influx.thinx.cloud:443 -servername influx.thinx.cloud 2>/dev/null | openssl x509 -noout -serial -issuer -enddate; sleep 10; done
+# observed (first sample, 09:00:37Z): serial=05806B4C8B028F41EC3ACCC00DF3C6A50B04 issuer Let's Encrypt YR1 notAfter=Jan 7 08:02:04 2027 GMT
+# rollback (staged, NOT executed): cp -p $SNAP/acme.json $V/acme.json && chmod 600 $V/acme.json && docker service update --detach --force traefik_traefik
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 08:54:28 | precondition + D-21/D-25 evidence (micro) | `args=19 idx=38379931 upd=completed`, task `36ssa5zcgpv0`; e-mail flags 1 / `example.com` 0 / tlschallenge 1 / storage 1; volume = 3 files, acme.json `301121 600 root` mtime `08:26:37.43Z`; 24 entries, qooldata 1, influx 1; fotostim label `checkout.` refs **0** |
+| 08:54–08:55 | D-22 / D-24 evidence (laptop) | rtm `0535CC…67B0`, app `051152…2809`, console `05F8CE…F905`, influx `05B919…8247` — all notAfter Dec 28 2026, all pass `-checkend 2592000`; E.pre.yml `external_stack_labels:` `checkout.` refs **0** |
+| 08:58:46 | (1) snapshot | `/mnt/data/edge-rollback/traefik-p33-acme-20261009T085846Z` **700 root**; `acme.json` 301121 / `_acme.json` 177391 / `__acme.json` 202409, all **600 root**, `cmp` identical ×3 |
+| 08:58–08:59 | pre-row (laptop) | HTTPS matrix 17/17 == post-D row (registry 400, db/influx 401, 14 × 200); WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200` |
+| 08:59:49 | (2) D-23 delete + loopback pre-row | volume → `acme.json` only (301121 600 root); status filter **`29/0`**; sorted names **== `routers_post_A2:` (diff empty)**; overview `[29,0,18,6,["Swarm","File"]]`; task `36ssa5zcgpv0`, `idx=38379931 args=19` |
+| **09:00:25.5–09:00:26.1** | **(3) prune + E fire** | `jq del(…)` → `acme.json.new` 22 entries, `pruned_left=0`; `chmod 600` + `mv` → `278606 600 root` at 09:00:26.05Z; `docker service update --detach --force traefik_traefik` → **rc 0** at 09:00:26.1Z (edit→restart gap < 1 s) |
+| 09:00:26–09:00:31 | drain + start | old task `36ssa5zcgpv0` stopped; **new task `k47479ipt1mb`** `traefik:v3.7.14` micro **Running ≈09:00:31Z** (≈5 s); `idx=38379935 upd=updating` → **`idx=38379946 upd=completed`** by 09:00:37; exactly **1** running task; `args=19`, image unchanged |
+| 09:00:35.99 | store rewritten by the new task | `acme.json` mtime `09:00:35.99Z`, **291145 600 root**, **23 entries** (22 + the re-obtained influx) |
+| **09:00:37** | **(4) influx reissue (laptop)** | serial **`05806B4C8B028F41EC3ACCC00DF3C6A50B04`** (≠ `05B91929242266AC45C0BD14E89A6C4F8247`), issuer `C=US, O=Let's Encrypt, CN=YR1`, notBefore `Oct 9 08:02:05 2026`, notAfter **`Jan 7 08:02:04 2027`** (+90 d); the default certificate was never observed — the TLS-ALPN obtain completed inside the ~11 s between fire and first sample |
+| 09:01:11 | (5) verify (micro) | volume `acme.json` only; `600 root`; **23** entries, influx **1**, qooldata **0**; `args=19 idx=38379946 upd=completed`, 1 running task; status filter **`29/0`**; names **== pre-row (diff empty)**; overview `[29,0,18,6,["Swarm","File"]]`; `https` entrypoint default `["security-headers@swarm"]`; `7442 OPEN 1883 OPEN 8883 OPEN`; widened ACME scan `Error renewing ACME\|Unable to obtain ACME certificate\|Unable to generate a certificate` since 10m → **0**; provider error scan → **0**; 0 ERR/WRN lines on the new task |
+| 09:01:2x | (5) gate (laptop) | HTTPS matrix 17/17 **== pre-row (diff empty)** — influx `401` served with the NEW certificate; WS `101` / `401` + `X-Forwarded-Proto: https`; bare-IP `301` + `200`; rtm serial `0535CC0C71E39D9378E72893F3A2141267B0` **== E.pre.yml**, app serial `051152D5A20BE36DEFA1B6FA83379CE42809` **== E.pre.yml**, console `05F8CEE45A7D64783AA80214569810CBF905` unchanged vs 08:54; influx `-checkend 6912000` → will not expire (fresh 90-day issuance), TLS 1.3 handshake OK, exactly 1 HSTS header |
+
+**D-24 (recorded):** `qooldata_router_refs` 0/0 → the pruned `checkout.qooldata.com` entry is NOT re-requested (0
+obtain-failure lines on the new task) and the start-time renewal pass no longer logs the `checkout.qooldata.com`
+renewal error for the first time since the v3 cutover. The fotostim stack owner is to be notified that the
+certificate for `checkout.qooldata.com` (+ `checkout.fotostim.com` / `checkout.fotostim.cz`) is no longer managed by
+this edge (Phase 32 `deferred-items.md` updated). Retired thinx names (chronograf, replica, ssl, vvv, test, ctf24,
+micro) stay in the store per D-24.
+
+**Cost accepted (reversibility "costly"):** one of Let's Encrypt's 5-per-week duplicate issuances for
+`influx.thinx.cloud` was spent; the 2023 key files survive only in the 700-root snapshot directory (no consumer is
+known — `services/traefik/update.sh` reads `acme.json` only).
+
+**D-30 trigger evaluation: none fired** ((1) `29/0`, (5) matrix == pre-row, (6) WS 101/401, (7) bare-IP 301/200, reissue
+arrived, rtm/app serials unchanged). The snapshot restore (`cp -p $SNAP/acme.json` + `--force`) was staged and **not
+executed**; `_acme.json` / `__acme.json` are not restored (no consumer).
+
+Version.Index post-Stage-E: 38379946
+
+Repo state == live state after this task: thinx-swarm `c03c529` (origin + micro, unchanged by Stage E — no static or
+label change), mirror `4fccd9bc` MIRROR OK at 19 flags, live `traefik_traefik` 19 Args (sorted set == mirror), acme.json
+23 entries `600 root`, 29 routers enabled == `routers_post_A2:`. Plan 03 captures `traefik-edge.E.post.yml`
+(`acme_json:` 24 → 23, influx serial NEW, `re_challenges_in_phase: 1`), re-runs the scan and removes `tls-config-1`.
