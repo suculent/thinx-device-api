@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@8a7a6932ec3a634fd7c6a65112424744cd013813 generated:2026-10-09T15:30:37Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:354c177576cb40113de4ec8321d11f6644343ca84982029c6c9e522ea5a5f32e
+# GENERATED — do not edit. source: thinx-swarm@3d3a31bf3d8d4c79997b37c8b996ab37bc2fbb9b generated:2026-10-09T15:42:30Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:bb80e77ba555b2e96c5d09436bed10369540efd2d6c58da6f5ca81c871b937d5
 version: '3.7'
 
 services:
@@ -46,18 +46,7 @@ services:
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
-        # security-headers middleware (referenced by thinx-console / thinx-api as
-        # security-headers@swarm — @docker before the Phase 31 v3 hop; thinx-vue carries no ref live).
-        # Reconciled from live on 2026-10-06 (Phase 29, EDGE-RECON-02,
-        # production wins) — this block was running on the traefik service but missing from this
-        # committed file, so a redeploy from here would have dropped security-headers@docker.
-        - traefik.http.middlewares.security-headers.headers.browserxssfilter=true
-        - traefik.http.middlewares.security-headers.headers.contenttypenosniff=true
-        - traefik.http.middlewares.security-headers.headers.forcestsheader=true
-        - traefik.http.middlewares.security-headers.headers.framedeny=true
-        - traefik.http.middlewares.security-headers.headers.stsincludesubdomains=true
-        - traefik.http.middlewares.security-headers.headers.stspreload=true
-        - traefik.http.middlewares.security-headers.headers.stsseconds=31536000
+        # Phase 34 (D-16, 33-REVIEW WR-03): the security-headers middleware lives in traefik/tls.toml (file provider, tls-config-3) and is the https entrypoint default — the swarm-label copy was retired once no router referenced it, so no label update on this service can strip HSTS from the edge.
 
         # LOAD-BEARING (Phase 33 research): the v3 swarm provider skips any traefik-enabled service
         # without an explicit service port ("port is missing") and would drop the shared middlewares

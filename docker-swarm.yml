@@ -184,7 +184,8 @@ services:
 
         - "traefik.http.routers.thinx-db-http.rule=Host(`db.thinx.cloud`)"
         - "traefik.http.routers.thinx-db-http.entrypoints=http"
-        - "traefik.http.routers.thinx-db-http.middlewares=couch-auth,https-redirect"
+        # Phase 34 (D-17, 33-REVIEW WR-04): redirect only — no Basic challenge over plaintext :80; couch-auth stays on thinx-db-https
+        - "traefik.http.routers.thinx-db-http.middlewares=https-redirect"
 
         - "traefik.http.routers.thinx-db-https.rule=Host(`db.thinx.cloud`)"
         - "traefik.http.routers.thinx-db-https.entrypoints=https"
