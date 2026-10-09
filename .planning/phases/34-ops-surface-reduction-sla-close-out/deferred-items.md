@@ -14,3 +14,14 @@
   by the loopback `29/0` inventory and an authenticated request in the Traefik netns that returns non-502. Before
   fixing, confirm with the operator that db.thinx.cloud is meant to be reachable at all. Evidence:
   `.planning/runbooks/traefik-edge-hardening.md` `### P34 credential rotation record`.
+
+## From 34-05 (SLA close-out and end-state evidence, 2026-10-09)
+
+- **EDGE-OPS-03 open gap (operator decision b, 2026-10-09).** `sla_verdict: OPEN-GAP`: run 1 NO-MEASUREMENT (CircleCI
+  `test` red on v1.16 `03-RsakeySpec`; CircleCI degraded); no run 2. Re-measure on the next green edge-change deploy with
+  `.planning/runbooks/swarm.md` § SLA verification; record as `### P34 SLA run 2` in the edge runbook. WINDOWS #19.
+- **External scan re-run.** No single full `scripts/traefik-edge-scan.sh` run was clean on 2026-10-09 (laptop uplink
+  dropped at the tail of each run); all 16 hosts pass as a composite. Re-run once from a stable uplink and append it to
+  `swarm-configs/traefik-edge-scan.2026-10-09.md`. WINDOWS #20.
+- **socket-proxy repin trigger** (first `wollomatic/socket-proxy` 1.x.y built with go ≥ 1.26.9) and the **frozen laptop
+  grype DB** (operator upgrades it) — carried from 34-01; listed in the edge runbook `## Recorded for later (after Phase 34)`.

@@ -40,25 +40,79 @@ ssh micro \
 # expect: startup banner + "Swarmpit running on port 8080" + "Docker SOCK: /var/run/docker.sock"
 ```
 
-**SLA verification** (controlled push-and-observe): follow § Gate procedure in
-`.planning/runbooks/swarmpit-upgrade.md`. In short:
+**SLA verification — end to end (Phase 34 / EDGE-OPS-03, D-12).** The budget is **300 s from `git push` to the
+first response served through Traefik by the new `thinx_api` task**. It replaces the older push_end → task Running
+stop condition, which is kept below as one leg. Gate mechanics (readiness, diff hygiene, NO-MEASUREMENT rule) follow
+§ Gate procedure in `.planning/runbooks/swarmpit-upgrade.md`.
+
+**Phase 34 result: `sla_verdict: OPEN-GAP`** (2026-10-09). Run 1 was NO-MEASUREMENT: CircleCI `test` was red on
+v1.16 `03-RsakeySpec`, so no `api-registry` ran, and CircleCI itself was degraded. No total and no leg was measured, so
+EDGE-OPS-03 (ROADMAP Phase 34 criterion 3) is **open**. Re-measure on the next green edge-change deploy with the
+recipe below and record it as `### P34 SLA run 2` in `.planning/runbooks/traefik-edge-hardening.md`.
+
+**When to re-measure (preconditions, all read-only):**
 
 ```bash
-# 1. Push a signed, non-empty evidence commit to thinx-staging (no [skip ci]);
-#    any thinx-staging push builds and pushes registry.thinx.cloud:5000/thinx/api:swarm.
-git push origin thinx-staging
-
-# 2. SLA start: the end_time of the CircleCI api-registry step "Push to private registry"
-#    (push_end); its log carries the pushed digest.
-# 3. SLA stop: the Status.Timestamp of the thinx_api task that runs that digest:
-ssh micro \
-  "docker service ps thinx_api --no-trunc --filter desired-state=running --format '{{.ID}} {{.CurrentState}} {{.Image}}' | head -3"
-# expect: new task ID, Running, the pushed digest, within 300 s of push_end
+# 1. thinx-staging tip is green: the last `test` job of the branch tip succeeded (not merely "fixed" locally).
+curl -s 'https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/tree/thinx-staging?limit=30&shallow=true' \
+  | jq -r '.[] | select(.workflows.job_name=="test" or .workflows.job_name=="api-registry") | "\(.workflows.job_name) \(.status) \(.vcs_revision[0:12])"' | head -4
+# expect: the newest `test` (and `api-registry`) `success` on the current origin/thinx-staging SHA; 0 jobs running/queued
+# 2. https://status.circleci.com shows no degradation for "Pipelines & Workflows" / "Docker jobs".
+# 3. Swarmpit ready: >= 60 s since its last start, autoredeploy polling.
+ssh micro "curl -s https://swarmpit.thinx.cloud/version; C=\$(docker ps -q -f label=com.docker.swarm.service.name=swarmpit_app | head -1); timeout 20 docker logs --since 30m \$C 2>&1 | grep -c autoredeploy"
+# expect: the version JSON; a non-zero count
+# 4. Pre-state: current thinx_api task, digest, and the traefik-public address the edge uses.
+ssh micro "docker service ps thinx_api --no-trunc --filter desired-state=running --format '{{.ID}} {{.Image}}'; \
+  C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); \
+  docker exec \$C wget -qO- http://127.0.0.1:8080/api/http/services/thinx-api@swarm | jq -c '[.loadBalancer.servers[].url]'"
 ```
 
-Phase 3 observed SLA: **delta = 63 seconds** (then measured against Docker Hub). Phase 28 measured
-32 s on Swarmpit 1.9, 31 s after the stats stack was removed and 50 s on Swarmpit 1.10 (private
-registry, push_end → task Running).
+**Which commit to push:** a signed, non-empty evidence commit on `thinx-staging` that contains no skip-ci marker and
+carries the run's readiness block (the `### P34 SLA run 2` heading in the edge runbook is enough). If the fix that turns
+`test` green is itself unpushed on `thinx-staging`, the push that carries it is the sample. Every commit in
+`origin/thinx-staging..HEAD` gets the same diff-hygiene scan as any SLA push. Push `thinx-staging` only, never `main`.
+
+```bash
+T_PUSH=$(node -e 'console.log(new Date().toISOString())'); git push origin thinx-staging; SHA=$(git rev-parse HEAD)
+# the clock starts at T_PUSH (immediately before the push) and is never moved
+
+# L1 — CI: poll (<= 40 x 30 s) for the SHA's api-registry job, then read its "Push to private registry" step.
+curl -s 'https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/tree/thinx-staging?limit=100&shallow=true' \
+  | jq -r --arg s "$SHA" '.[] | select(.vcs_revision==$s and .workflows.job_name=="api-registry") | "\(.build_num) \(.status)"'
+curl -s "https://circleci.com/api/v1.1/project/github/suculent/thinx-device-api/<build_num>" \
+  | jq -r '.steps[].actions[] | select(.name|startswith("Push to private registry")) | "\(.end_time) \(.output_url)"'
+# PUSH_END = end_time; DIGEST = `curl -s <output_url> | jq -r '.[].message' | grep -o 'digest: sha256:[0-9a-f]\{64\}' | tail -1` (keep 12 hex)
+# a red test / api-registry = NO-MEASUREMENT (record it; one more evidence commit allowed)
+
+# L2 — deploy: the new thinx_api task carrying DIGEST, its RFC3339 Running timestamp and its traefik-public address.
+ssh micro "T=\$(docker service ps thinx_api --no-trunc --filter desired-state=running --format '{{.ID}} {{.Image}}' | grep <DIGEST12> | cut -d' ' -f1); \
+  docker inspect \$T --format '{{json .Status.Timestamp}} {{.Status.State}}'; \
+  docker inspect \$T | jq -r '.[0].NetworksAttachments[] | select(.Network.Spec.Name==\"traefik-public\") | .Addresses[0]'"
+# expect: T_RUNNING (always {{json …}}, Docker's default date form gave Phase 27 a false delta); NEWIP/24
+
+# L3 — edge: the first 2xx/3xx Traefik JSON access-log line served by the new task (the "served via the edge" marker).
+# Read it with `docker logs` of the Traefik CONTAINER on micro — `docker service logs` hangs on micro; always bound it with timeout.
+ssh micro "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); \
+  timeout 30 docker logs --since <T_RUNNING minus 10 s> \$C 2>&1 | grep '^{' \
+  | jq -r 'select((.RouterName // \"\")|startswith(\"thinx-api\")) | select(.ServiceAddr==\"<NEWIP>:7442\") | select(.DownstreamStatus>=200 and .DownstreamStatus<400) | .StartUTC' | sort | head -1"
+# expect: T_SERVED. ServiceAddr, RouterName, DownstreamStatus and StartUTC are retained JSON fields (RequestPath/RequestLine are dropped).
+# Keep traffic flowing during the run (a 2-s curl loop on https://app.thinx.cloud/ from the laptop) so the marker appears promptly.
+# corroborate: thinx-api@swarm servers == ["http://<NEWIP>:7442"]; rtm / and /api/v2/csrf-token 200; WS 101 on rtm; loopback 29/0; 7442 OPEN
+```
+
+Compute in integer seconds: L1 = PUSH_END − T_PUSH, L2 = T_RUNNING − PUSH_END, L3 = T_SERVED − T_RUNNING,
+total = T_SERVED − T_PUSH. **PASS iff total ≤ 300 s.** On a miss run once more (D-13), then record the verdict with the
+slowest leg named. Record `sla_run_N: push=… push_end=… running=… served=… L1=…s L2=…s L3=…s total=…s verdict=… sha=… digest=…`,
+`served_marker: router=… ServiceAddr=<NEWIP>:7442 status=… StartUTC=…`, and replace the OPEN-GAP lines
+(`sla_verdict:`, `edge_ops_03_status:`) with the measured result. A FAIL stays an open gap unless the operator explicitly
+accepts the measured total.
+
+Expectation from the 2026-10-08 CircleCI history: git push → api-registry push_end alone was ~285–301 s in three samples
+(test ~2m15–2m25, api-registry queue ~50 s, build ~60–70 s), so L1 alone is likely to use the whole budget.
+
+History (push_end → task Running only, the L2 leg — not the end-to-end verdict): Phase 3 **63 s** (then against Docker
+Hub); Phase 28 32 s on Swarmpit 1.9, 31 s after the stats stack was removed and 50 s on Swarmpit 1.10 (private
+registry). Phase 34: not measured (OPEN-GAP above).
 
 **Rollback** (if Rung 1 makes things worse):
 ```bash
@@ -233,6 +287,78 @@ every stage of the cycle (AGENTS.md keep-7442 hard constraint).
 `micro` at mode 600 (dir 700, root) and are **never** committed or scp'd into a repo — they hold the
 resolved pilot UUID, the `admin-auth` hash, the ACME email and raw `acme.json` key material.
 Committed artifacts name them by path only and redact every secret to `<redacted>`/`${VAR}`.
+
+---
+
+## Traefik Docker API socket-proxy (Phase 34 / EDGE-OPS-02)
+
+**What it is.** Traefik reads the Docker API **only** through `traefik_socket-proxy` (service alias `socket-proxy`,
+image `wollomatic/socket-proxy:1.13.1` by tag), via `--providers.swarm.endpoint=tcp://socket-proxy:2375`. The proxy
+mounts `/var/run/docker.sock` read-only, runs as `65534:998` with a read-only root filesystem and every capability
+dropped, publishes no port, and answers only a GET allow-list: `_ping`, `version`, `services`, `networks`, `tasks`,
+`nodes/<id>`, plus HEAD `_ping`. Everything else gets 403 (path) or 405 (method). It lives on the **internal** overlay
+`traefik-socket` (`10.234.34.0/24`, not attachable). The only members are the proxy, Traefik and the network's LB
+endpoint, and `-allowfrom=10.234.34.0/24` admits only that subnet. `traefik_traefik` has **no** Docker socket mount.
+
+**Where it is defined.** thinx-swarm `traefik.yml` (the `socket-proxy` service and `traefik-socket: external: true`)
+and `traefik.sh` (creates the `traefik-socket` network with `--internal --subnet=10.234.34.0/24`). Live, it was
+created by `docker network create` / `docker service create` with flags equal to the YAML (34-01 Stage B1), never by
+`docker stack deploy`. The stack-namespace labels let a future bootstrap deploy adopt it.
+
+**Failure mode.** While Traefik runs, a proxy outage leaves Traefik on its **last configuration**: existing routers
+keep serving, but new or changed services (a redeployed task's new address, a label change) are **not seen** until
+the proxy returns, and the provider retries. A **Traefik restart while the proxy is down starts with no swarm routers**
+(404 on every swarm-routed host). Always check the proxy before any Traefik restart (`--force`, `--args`,
+`--config-*` updates); every Phase 34 restart command asserted `1/1` in the same remote command.
+
+**Health check:**
+
+```bash
+ssh micro "docker service ps traefik_socket-proxy --filter desired-state=running --format '{{.ID}} {{.Node}} {{.CurrentState}}'"
+# expect: one task on micro, Running
+ssh micro "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); \
+  docker exec \$C wget -qO- http://socket-proxy:2375/_ping; echo; \
+  docker exec \$C wget -S -O /dev/null http://socket-proxy:2375/v1.56/secrets 2>&1 | grep -m1 'HTTP/'"
+# expect: OK ; HTTP/1.1 403 Forbidden   (API version: `docker version --format '{{.Server.APIVersion}}'`, 1.56 today)
+ssh micro "P=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_socket-proxy | head -1); timeout 20 docker logs --since 1h \$P 2>&1 | grep -c blocked"
+# expect: 0 in normal operation (every blocked line names method, URL and client; Traefik's provider never triggers one)
+```
+
+**Restart** (Traefik keeps serving its last configuration meanwhile; the proxy is back within seconds):
+
+```bash
+ssh micro "docker service update --force traefik_socket-proxy"
+# expect: rc 0; new task Running; then the health check above; Traefik needs no restart
+```
+
+The image declares no healthcheck. Liveness is `-watchdoginterval=30 -stoponwatchdog`: the proxy exits if the socket
+disappears and swarm restarts it (`restart_condition: any`). **Repin trigger:** the first `1.x.y` release built with
+go ≥ 1.26.9 (1.13.1 carries go1.26.6 stdlib CVEs, none reachable on this plain-HTTP internal path). Rescan with a
+current DB, then `docker service update --image wollomatic/socket-proxy:<new> --no-resolve-image traefik_socket-proxy`.
+
+**One-command rollback to the raw socket.** The Stage B2 staged rollback rebuilds the Args from the pre-B2 backup
+(600 root on micro, values never typed), so it restores the 23 flags as they were **before Stage B2**:
+
+```bash
+ssh micro "B=/mnt/data/edge-rollback/traefik-p34-preB2-20261009T151619Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; \
+  ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); \
+  docker service update --detach --network-rm traefik-socket --mount-add type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly --args \"\$ARGS\" traefik_traefik"
+# expect: 23 ; rc 0; ONE restart; Mounts = socket bind (ro) + certificates; networks = traefik-public only; 29/0
+```
+
+At the Phase 34 end state that backup is stale: its https default is `security-headers@swarm`, whose labels Stage D
+removed, so every `:443` router would lose its middleware. Use this form instead. It keeps the current Args and only
+drops the endpoint flag:
+
+```bash
+ssh micro "ARGS=\$(docker service inspect traefik_traefik | jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(select(. != \"--providers.swarm.endpoint=tcp://socket-proxy:2375\")) | map(@sh) | join(\" \")'); \
+  docker service update --detach --network-rm traefik-socket --mount-add type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly --args \"\$ARGS\" traefik_traefik"
+# expect: rc 0; ONE restart; args=23; provider back on the default unix socket; 29/0. Then remove the proxy only if wanted:
+#   docker service rm traefik_socket-proxy && docker network rm traefik-socket
+```
+
+Take a fresh `docker service inspect traefik_traefik` backup (`umask 077`, `/mnt/data/edge-rollback/`, 600 root) before
+either command. Repo first: revert thinx-swarm `fcafee0` (origin + micro ff) and regenerate the mirror (`MIRROR OK`).
 
 ---
 

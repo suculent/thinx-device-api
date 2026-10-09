@@ -78,7 +78,9 @@ already `--log.level=ERROR` (Phase 29–33 history). The requirement is satisfie
 ### SLA close-out (EDGE-OPS-03)
 - **D-11:** "Edge change" = a **normal `thinx_api` push routed through the edge**: a signed, non-empty
   evidence commit to `thinx-staging` (no `[skip ci]`) through the real CircleCI → private registry →
-  Swarmpit autoredeploy pipeline. A thinx-swarm edge change has no CI and is not timed as an SLA.
+  Swarmpit autoredeploy pipeline. A thinx-swarm edge change is not timed as an SLA. *(Correction 2026-10-09: thinx-swarm
+  does have a CircleCI project — `.circleci/config.yml` builds `thinx/error-page` and `thinx/downtime-page` on every
+  `master` push — but it does not deploy the edge, so the decision stands.)*
 - **D-12:** Clock = **`git push` → new build served via the edge**. Stop condition: `https://rtm.thinx.cloud`
   answers 200 through Traefik from the new task (version/digest marker — researcher finds the observable
   one), WS probe OK, router inventory all enabled. Record the three-leg split: CI build (push → registry
@@ -169,7 +171,8 @@ already `--log.level=ERROR` (Phase 29–33 history). The requirement is satisfie
   without endpoint, `docker.sock:ro` volume), `configs: tls-config-${CONFIG:-2}`.
 - `~/Repositories/thinx-swarm/traefik/tls.toml` — D-15 target; `~/Repositories/thinx-swarm/README.md` §TLS options.
 - `~/Repositories/thinx-swarm/{thinx.yml,registry.yml,traefik.sh}` — D-17/D-18 edits (D-20 dropped).
-- `/mnt/gluster/deployment/swarm` on micro = git checkout of thinx-swarm; update by ssh push + `--ff-only` (no GitHub access, no CI).
+- `/mnt/gluster/deployment/swarm` on micro = git checkout of thinx-swarm; update by ssh push + `--ff-only` (micro has no GitHub access). thinx-swarm's own CircleCI builds only the error/downtime
+  page images on `master` pushes (correction 2026-10-09).
 - `docker-swarm.yml` (this repo) — must stay identical to thinx-swarm `thinx.yml` labels (D-17).
 - `docker-compose.traefik.yml` — generated mirror; `scripts/generate-traefik-mirror.js` / `scripts/check-traefik-mirror.js` → `MIRROR OK`.
 - `scripts/traefik-edge-scan.sh` — external scan; rerun after D-15/D-16 for HSTS-once + curves evidence.

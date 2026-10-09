@@ -40,9 +40,32 @@ anywhere (Phase 33, EDGE-API-01/02; operator decision 2026-10-08). `api@internal
   (they drop the live-only secret mounts) — every live edge change is one `docker service update`
   (`--args` / `--label-*` / `--config-*` / `--force`), repo-first in `thinx-swarm`, with a 600-root backup on micro.
 - TLS options live in `thinx-swarm/traefik/tls.toml`, mounted as the immutable docker config `tls-config-<N>`
-  (`tls-config-2` today; AEAD-only TLS 1.2+, HSTS edge-wide via the `https` entrypoint default middleware): to change
-  them bump `CONFIG`, `docker config create tls-config-<N>` FROM micro's fast-forwarded checkout, then
+  (`tls-config-3` today since Phase 34; AEAD-only TLS 1.2+, no curve list = Go default incl. X25519MLKEM768; `tls-config-2`
+  was removed, recreate path in the runbook): to change them bump `CONFIG`, `docker config create tls-config-<N>` FROM
+  micro's fast-forwarded checkout, then
   `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`.
+- HSTS / security headers come from `security-headers@file`, the `[http.middlewares.security-headers.headers]` block in
+  `traefik/tls.toml` (tls-config-3), set as the `https` entrypoint default. There is no swarm-label copy any more (removed
+  in Phase 34, WR-03); never point the entrypoint default back at `@swarm` — a missing middleware 404s every `:443` router.
+- Traefik reads the Docker API **only** via `traefik_socket-proxy` (`--providers.swarm.endpoint=tcp://socket-proxy:2375`,
+  `wollomatic/socket-proxy`, GET-only allow-list, internal `traefik-socket` overlay `10.234.34.0/24`). Never re-add a Docker
+  socket mount to `traefik_traefik`, never attach `traefik-socket` to anything else, and check `traefik_socket-proxy` is
+  1/1 before any Traefik restart: a Traefik restart while the proxy is down starts with **no swarm routers**. Health check,
+  restart and rollback: `.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy.
+- Log level is **WARN** (8 start-up WRN lines per task are normal). The access log is **JSON with `RequestPath`,
+  `RequestLine` and `ClientUsername` dropped**: query strings carry OTTs, OAuth codes and reset keys, and the username is
+  half of a basic-auth pair. Never re-enable those fields or switch back to the common log format. `ServiceAddr`,
+  `RouterName`, `DownstreamStatus` and `StartUTC` are kept (the SLA marker uses them).
+- The static command has **24 flags** (Phase 34 end state; the mirror `docker-compose.traefik.yml` has 24 `- --` lines).
+  `docker service logs` hangs on micro: read Traefik logs with `timeout 30 docker logs --since … <container>` instead.
+- The `couch-auth` / `influx-auth` edge basic-auth credential was rotated on 2026-10-09 (Phase 34, D-18); `couch-auth`
+  strips the header before CouchDB (`basicauth.removeheader=true`, so Fauxton's own login works behind it). Its apr1 hash
+  is the `HASHED_PASSWORD` line of `/mnt/gluster/thinx/.env` on the nodes; `restart.sh` / `thinx.sh` read it from there
+  (no prompt) and refuse to run without it. That `.env` is **`600 root:root`** since Phase 34 (no non-root reader exists):
+  keep it that way, never print it, never commit it.
+- thinx-swarm **has** a CircleCI project (`.circleci/config.yml`): every `master` push builds and pushes `thinx/error-page`
+  and `thinx/downtime-page`, which Swarmpit then autoredeploys (`errorpage_errorpage` restarts → a few transient
+  `errorpage@swarm does not exist` ERR lines in Traefik). It does not deploy the edge; edge changes stay manual.
 - See `.planning/runbooks/traefik-edge-hardening.md` (gate recipes, mechanism table, stage records, the ordered revert set).
 
 ## Local Verification
