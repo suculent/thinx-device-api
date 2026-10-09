@@ -1751,3 +1751,16 @@ ssh micro 'cp -p /mnt/data/edge-rollback/p34-env-20261009T160640Z /mnt/gluster/t
 
 Backend accounts: the CouchDB / InfluxDB backend admin accounts were not rotated (out of this plan's scope). The operator
 allows them to share this password if they are rotated later.
+
+### P34 db.thinx.cloud port fix record (orchestrator, operator request, 2026-10-09 16:18 UTC)
+
+The deferred `db.thinx.cloud` 502 after a passed basic-auth (credential rotation record above) is fixed. The `thinx-db`
+service label now sends Traefik to CouchDB's real port: `traefik.http.services.thinx-db.loadbalancer.server.port`
+5985 → **5984**. Repo first in thinx-swarm `2a479a0` (`thinx.yml`, origin + micro ff), then this repo `2af2b3ed`
+(`docker-swarm.yml` + mirror banner, MIRROR OK). Live: one label-only `--label-add …thinx-db.loadbalancer.server.port=5984`
+on `thinx_couchdb` at 16:18Z; task `pcj2qs3o8yjt` unchanged, Version.Index 38380173/38380189 → **38380191**. Spec backup
+`/mnt/data/edge-rollback/p34-dbport-thinx_couchdb-20261009T161807Z.json` (600 root). Verified: `thinx-db@swarm` server
+`http://10.0.1.6:5984` UP; overview 29/0, 18 services, 6 middlewares; `https://db.thinx.cloud/` 401 with the Basic challenge;
+`http://db.thinx.cloud/` 301 to https. Revert: the same `--label-add` with `5985` (+ git revert of `2a479a0` / `2af2b3ed`).
+
+db_port_fix: thinx-db 5985 -> 5984 (thinx-swarm 2a479a0, thinx-device-api 2af2b3ed, thinx_couchdb idx 38380191, task unchanged)
