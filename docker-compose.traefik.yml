@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@7ee46abb134813b3e588630760e99b5f8b863383 generated:2026-10-09T13:43:32Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:c5e7580554484131dcac35bb2733ebf3b8be855e830952b21a7a888b6041eca3
+# GENERATED — do not edit. source: thinx-swarm@ff305855e91be7ec10482cb300f0b66bb8a6e1bd generated:2026-10-09T13:58:25Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:a70a83bebc8e4de53796034c492e255fffd05f9645eba4ff3a357464f99fa307
 version: '3.7'
 
 services:
@@ -170,6 +170,45 @@ services:
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
 
+  socket-proxy:
+    # Phase 34 (EDGE-OPS-02, D-05..D-08): read-only Docker API for the swarm provider — GET-only allow-list of exactly
+    # the calls Traefik makes (version, _ping, services, networks, tasks, nodes/<id>; HEAD _ping); every other path and
+    # every write method is refused. DHI has no socket-proxy image, so wollomatic/socket-proxy, exact 1.x.y tag, never a
+    # digest. Attached ONLY to traefik-socket; -allowfrom is that network's pinned subnet.
+    image: wollomatic/socket-proxy:1.13.1
+    command:
+      - -listenip=0.0.0.0
+      - -proxyport=2375
+      - -allowfrom=10.234.34.0/24
+      - '-allowGET=(/v1\.[0-9]+)?/(_ping|version|services|networks|tasks|nodes/[a-z0-9]+)'
+      - '-allowHEAD=(/v1\.[0-9]+)?/_ping'
+      - -allowhealthcheck
+      - -watchdoginterval=30
+      - -stoponwatchdog
+      - -shutdowngracetime=5
+      - -loglevel=INFO
+    # nobody + the host's docker.sock group (998 on micro), so the proxy can read the socket and nothing else
+    user: "65534:998"
+    read_only: true
+    cap_drop:
+      - ALL
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-socket
+    deploy:
+      placement:
+        constraints:
+          - node.labels.Traefik == true
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 32M
+        reservations:
+          memory: 8M
+      restart_policy:
+        condition: any
+
 volumes:
   # Create a volume to store the certificates, there is a constraint to make sure
   # Traefik is always deployed to the same Docker node with the same volume containing
@@ -180,6 +219,10 @@ networks:
   # Use the previously created public network "traefik-public", shared with other
   # services that need to be publicly available via this Traefik
   traefik-public:
+    external: true
+  # Phase 34 (D-06): created by traefik.sh — overlay, internal (no egress), NOT attachable, pinned subnet 10.234.34.0/24;
+  # attached only to traefik + socket-proxy, never to traefik-public stacks
+  traefik-socket:
     external: true
   net:
     driver: overlay
