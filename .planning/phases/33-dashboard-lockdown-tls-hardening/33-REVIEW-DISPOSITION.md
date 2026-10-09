@@ -1,55 +1,55 @@
 ---
 phase: 33
 review: 33-REVIEW.md
-updated: 2026-10-09T10:36:08Z
+updated: 2026-10-09T10:36:24Z
 findings:
-  - id: CR-01:
+  - id: CR-01
     severity: critical
-    title: "`scripts/traefik-edge-scan.sh:46-53`, `scripts/traefik-edge-scan.sh:107-110`"
+    title: "Scan prints `EDGE-SCAN OK` with gating predicates silently skipped when `jq` or `nmap` is absent"
     disposition: open
-  - id: WR-01:
+  - id: WR-01
     severity: warning
-    title: "`/Users/sychram/Repositories/thinx-swarm/README.md:92-93`; tracked files"
+    title: "Four tracked `traefik.yml.bak.*` files still carry the cleartext `--pilot.token` UUID; README now claims none is committed"
     disposition: open
-  - id: WR-02:
+  - id: WR-02
     severity: warning
-    title: "`/Users/sychram/Repositories/thinx-swarm/traefik.sh:12-17` (and `git show 158f369:traefik.sh:18`)"
+    title: "The former dashboard `PASSWORD` literal remains recoverable from thinx-swarm history; no rotation is recorded"
     disposition: open
-  - id: WR-03:
+  - id: WR-03
     severity: warning
-    title: "`/Users/sychram/Repositories/thinx-swarm/traefik.yml:111` (mirror `docker-compose.traefik.yml:113`)"
+    title: "Edge-wide HSTS depends on a dynamic-provider middleware — a single point of failure for every `https` router"
     disposition: open
-  - id: WR-04:
+  - id: WR-04
     severity: warning
-    title: "`/Users/sychram/Repositories/thinx-swarm/thinx.yml:135`, `docker-swarm.yml:187`"
+    title: "`couch-auth` challenges clients on plaintext `:80` before redirecting to HTTPS (pre-existing, untouched by the TLS hardening)"
     disposition: open
-  - id: WR-05:
+  - id: WR-05
     severity: warning
-    title: "`/Users/sychram/Repositories/thinx-swarm/vault.yml:15-16`, `:37-38`, `:14`"
+    title: "`vault.yml` is dormant but, as committed, publishes Vault in cleartext on `:8200` and routes a hostname the scan does not cover"
     disposition: open
-  - id: IN-01:
+  - id: IN-01
     severity: info
-    title: "`scripts/traefik-edge-scan.sh:49`"
+    title: "`port-open` predicate matches the word `open` anywhere on the nmap line"
     disposition: open
-  - id: IN-02:
+  - id: IN-02
     severity: info
-    title: "`scripts/traefik-edge-scan.sh:24-25`, `:65`"
+    title: "Hosts are not asserted to resolve to `EDGE_IP`"
     disposition: open
-  - id: IN-03:
+  - id: IN-03
     severity: info
-    title: "`/Users/sychram/Repositories/thinx-swarm/traefik/tls.toml:13`"
+    title: "Explicit `curvePreferences` disables the X25519MLKEM768 post-quantum hybrid that was live before"
     disposition: open
-  - id: IN-04:
+  - id: IN-04
     severity: info
-    title: "`/Users/sychram/Repositories/thinx-swarm/traefik.sh:5-10`"
+    title: "`traefik.sh` has no error handling and is not idempotent"
     disposition: open
-  - id: IN-05:
+  - id: IN-05
     severity: info
-    title: "`/Users/sychram/Repositories/thinx-swarm/traefik.yml:172-174` (mirror `docker-compose.traefik.yml:174-176`)"
+    title: "Unused `net` overlay network declared in `traefik.yml`"
     disposition: open
-  - id: IN-06:
+  - id: IN-06
     severity: info
-    title: "`AGENTS.md:33`, `AGENTS.md:36`; `/Users/sychram/Repositories/thinx-swarm/README.md:51-52`, `:58`"
+    title: "Dashboard/API one-liners assume the Traefik task is on `micro`"
     disposition: open
 ---
 
