@@ -1821,4 +1821,17 @@ sla_run_1: NO-MEASUREMENT push=2026-10-09T16:21:25.373Z push_end=none running=no
 Per D-13 / swarmpit-upgrade § Gate procedure, NO-MEASUREMENT allows one more evidence commit. **It was not spent:**
 the failure reproduces 5/5 on unchanged application code, so a run 2 would be a second certain NO-MEASUREMENT. The plan
 stops here for the operator: fix the RSA key specs (or the v1.16 rsakey change) on thinx-staging, or decide otherwise.
-No `sla_verdict:` is recorded, because a NO-MEASUREMENT run is never PASS or FAIL.
+No PASS/FAIL verdict is recorded, because a NO-MEASUREMENT run is never PASS or FAIL.
+
+**Operator decision (2026-10-09 ≈16:30Z, option b): record the SLA as an open gap; no run 2.** CircleCI's own status
+page shows the service degraded today, `test` stays red on thinx-staging (`03-RsakeySpec`, a v1.16 regression that a
+separate debugger is fixing; `spec/` and `lib/` are out of this plan's scope), and the thinx-swarm error/downtime image
+builds fail at checkout (the operator handles that; not this plan). Nothing was timed, so there is no total, no leg and no
+PASS/FAIL. The re-measure recipe is in `.planning/runbooks/swarm.md` § SLA verification.
+
+sla_verdict: OPEN-GAP (not measurable 2026-10-09: CircleCI test red on v1.16 03-RsakeySpec + CircleCI degraded; run 1 NO-MEASUREMENT; re-measure on the next green edge-change deploy)
+
+edge_ops_03_status: open gap — not measured (run 1 NO-MEASUREMENT 2026-10-09; no total, no slowest leg; ROADMAP Phase 34 success criterion 3 is OPEN; re-measure on the next green edge-change deploy)
+
+EDGE-OPS-03 stays unchecked in `.planning/REQUIREMENTS.md`. The executor did not accept anything on the operator's behalf; the
+operator chose to record the gap, not to accept a measured result.
