@@ -10,6 +10,8 @@ describe("RSA Key", function() {
 
 
   var expect = require('chai').expect;
+  var fs = require("fs");
+  var path = require("path");
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
 
@@ -20,6 +22,15 @@ describe("RSA Key", function() {
     "a9:fd:f3:8e:97:7d:f4:c1:e1:39:3f:fd:2b:3b:5f:9_"
   ];
 
+  // Keys are revoked by the `filename` that list() returns (<owner>-<timestamp>,
+  // no directory, no .pub). Both consoles send exactly that. create() reports
+  // the .pub path instead, so these specs strip it back to the list() form.
+  function listFilename(created) {
+    return path.basename(created.filename, ".pub");
+  }
+
+  var first_key = null; // created in (300); must survive every revocation below
+
   var revoked_filenames = [
 
   ];
@@ -28,7 +39,8 @@ describe("RSA Key", function() {
     rsakey.create(owner,
     function(success, response) {
       expect(success).to.equal(true);
-      expect(response).to.be.a('object'); 
+      expect(response).to.be.a('object');
+      first_key = listFilename(response);
       done();
     });
   }, 10000);
@@ -37,37 +49,59 @@ describe("RSA Key", function() {
     rsakey.list(owner, function(success, list) {
       expect(success).to.equal(true);
       expect(list.length).to.be.greaterThanOrEqual(1);
+      expect(list.map(key => key.filename)).to.include(first_key);
       done();
     });
   }, 10000);
 
+  // Nothing here names a key in list() form, so nothing may be deleted and the
+  // call must report failure. Revocation used to work by position: it deleted
+  // the owner's first N keys for any N identifiers, valid or not.
   it("(02) should fail on invalid revocation", function(done) {
-    rsakey.revoke(owner, invalid_fingerprints,
+    const before = rsakey.getKeyPathsForOwner(owner);
+    const not_list_filenames = invalid_fingerprints.concat([
+      first_key + ".pub",                          // the public half, not the key
+      rsakey.ssh_keys + "/" + first_key + ".pub"   // what create() reports
+    ]);
+    rsakey.revoke(owner, not_list_filenames,
       function(res, success, message) {
-        expect(success).to.equal(true); // succeds for more fingerprints if one is valid? maybe...
-        expect(message).to.be.an('array');
+        expect(success).to.equal(false);
+        expect(message).to.be.an('array').that.is.empty;
+        expect(rsakey.getKeyPathsForOwner(owner)).to.deep.equal(before);
         done();
       }, {});
   }, 10000);
 
+  // Sequential on purpose: keys are named <owner>-<Date.now()>, so two
+  // create() calls in the same millisecond write to the same file.
   it("(03) should be able to add RSA Key 2/3", function(done) {
     rsakey.create(owner, (success, response) => {
-      revoked_filenames.push(response.filename);
       expect(success).to.equal(true);
-    });
-    rsakey.create(owner, (success, response) => {
-        revoked_filenames.push(response.filename);
-        expect(success).to.equal(true);
+      revoked_filenames.push(listFilename(response));
+      rsakey.create(owner, (success2, response2) => {
+        expect(success2).to.equal(true);
+        revoked_filenames.push(listFilename(response2));
+        expect(revoked_filenames[0]).to.not.equal(revoked_filenames[1]);
         done();
+      });
     });
-  }, 10000);
+  }, 30000);
 
   it("(04) should be able to revoke multiple RSA Keys at once", function(done) {
-    rsakey.revoke(owner, revoked_filenames, function(res, succ, mess) {
+    rsakey.list(owner, function(_success, list) {
+      expect(list.map(key => key.filename)).to.include.members(revoked_filenames);
+      rsakey.revoke(owner, revoked_filenames, function(res, succ, mess) {
         expect(succ).to.equal(true);
-        expect(mess).to.be.an('array'); // should be array of length of 2
+        expect(mess).to.have.members(revoked_filenames);
+        const remaining = rsakey.getKeyPathsForOwner(owner);
+        for (const filename of revoked_filenames) {
+          expect(remaining).to.not.include(filename);
+          expect(fs.existsSync(rsakey.ssh_keys + "/" + filename + ".pub")).to.equal(false);
+        }
+        expect(remaining).to.include(first_key); // not selected, not deleted
         done();
       }, {});
+    });
   }, 10000);
 
 
