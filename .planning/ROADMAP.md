@@ -198,9 +198,9 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
 3. push → CI → Swarmpit measured ≤5 minutes end-to-end on an edge change; swarm runbook updated.
 
-**Plans:** 5 plans (planned 2026-10-09; revised after plan-check — Stage B2 split out)
+**Plans:** 1/5 plans executed (planned 2026-10-09; revised after plan-check — Stage B2 split out)
 **Wave 1**
-- [ ] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
+- [x] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
 
 **Wave 2** *(blocked on Wave 1)*
 - [ ] 34-02-PLAN.md — Tracer Stage B2: ONE update moves Traefik to `tcp://socket-proxy:2375` and drops the raw socket bind (D-10 auto-revert); deny-from-Traefik, live provider test, harness (EDGE-OPS-02)
@@ -236,11 +236,10 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete    | 2026-10-09 |
-| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 0/? | Pending | — |
+| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 1/5 | Pending | — |
 
 ---
 *v1.15 Traefik Hardening (Edge) started 2026-10-06: 14 requirements across 6 phases (29–34). Next: `/gsd-discuss-phase 29`.*
-
 
 ## v1.16 — Console Usability & Deploy Keys
 
@@ -269,6 +268,5 @@ Requirements: TRANS-01, TRANS-02
 Requirements: KEY-01, KEY-02, KEY-03
 
 - [x] 38-01-PLAN.md — implement and verify all mapped requirements.
-
 
 All v1.16 plans implemented and locally verified. Console PR #32 merged; API PR #572 approved for staging. Release CI and browser/live acceptance pending.
