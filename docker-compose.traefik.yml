@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@b04f066dee01661e10a52153f16a7cc111855551 generated:2026-10-09T10:48:09Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:982423e30e551f171767623e190f49fe3caff071217206c00ffc17b428a6a629
+# GENERATED — do not edit. source: thinx-swarm@7ee46abb134813b3e588630760e99b5f8b863383 generated:2026-10-09T13:43:32Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:c5e7580554484131dcac35bb2733ebf3b8be855e830952b21a7a888b6041eca3
 version: '3.7'
 
 services:
@@ -144,9 +144,19 @@ services:
       - --providers.file.filename=/traefik/tls.toml
       # Enable the access log, with HTTP requests
       - --accesslog
+      # Phase 34 (EDGE-OPS-01, D-01..D-04): WARN surfaces provider/label warnings (missing port, router conflicts)
+      # without INFO reload noise. Access log kept as JSON; RequestPath (the request URI) and RequestLine
+      # (method + URI + protocol) are dropped because query strings carry secrets — OTT tokens on the firmware URL,
+      # OAuth codes, reset/activation keys — and Traefik cannot redact only the query. ClientUsername is dropped too
+      # (the db/influx basic-auth user — half of a credential pair). Header fields stay at the default drop.
+      # Path-level debugging uses the API's own redacted logs.
+      - --accesslog.format=json
+      - --accesslog.fields.names.RequestPath=drop
+      - --accesslog.fields.names.RequestLine=drop
+      - --accesslog.fields.names.ClientUsername=drop
       # Enable the Traefik log, for configurations and errors
       - --log
-      - --log.level=ERROR
+      - --log.level=WARN
       # Enable the Dashboard and API — Phase 33 (EDGE-API-01/02, D-02/D-03): served ONLY on the loopback `mgmt`
       # entrypoint above through the traefik-mgmt router label; there is no public route and no basic-auth any
       # more. Never --api.insecure (that would open an unauthenticated :8080 on every interface).
