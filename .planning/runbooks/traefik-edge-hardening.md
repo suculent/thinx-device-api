@@ -1835,3 +1835,51 @@ edge_ops_03_status: open gap — not measured (run 1 NO-MEASUREMENT 2026-10-09; 
 
 EDGE-OPS-03 stays unchecked in `.planning/REQUIREMENTS.md`. The executor did not accept anything on the operator's behalf; the
 operator chose to record the gap, not to accept a measured result.
+
+### Re-verify matrix (Phase 34, 2026-10-09 16:36–17:06 UTC) vs traefik-edge.F.pre.yml
+
+34-05 Task 2. Every signal was re-read at the Phase 34 end state (micro read-only except the `tls-config-2` removal;
+laptop probes) and compared with the pre-Stage-A baseline `swarm-configs/traefik-edge.F.pre.yml` (13:38–13:41Z). The
+end-state capture is `swarm-configs/traefik-edge.F.post.yml`; the scan is `## After (post-P34` in
+`swarm-configs/traefik-edge-scan.2026-10-09.md`.
+
+| Signal | Baseline (F.pre, 13:38Z) | End state (16:36–17:06Z) | Verdict |
+|---|---|---|---|
+| static args (count) | `traefik:v3.7.14 args=19 idx=38379946`, task `k47479ipt1mb` | **`args=24 idx=38380188 upd=completed`**, task `vtdqxehcuul8` (since 15:51:47Z); sorted set == mirror (24/24) | +5 flags, designed end state |
+| the P34 flag changes | `--log.level=ERROR`; no `accesslog.*`; no endpoint; https default `security-headers@swarm` | **`--log.level=WARN`; `--accesslog.format=json` + `RequestPath` / `RequestLine` / `ClientUsername` `=drop`; `--providers.swarm.endpoint=tcp://socket-proxy:2375`; https default `security-headers@file`** | A / B2 / C landed |
+| log level | error-only, 0 WRN lines ever | WARN: current task 8 start-up WRN (7 `aliasHeadersStrategy` + 1 encoded-characters) + 6 transient `errorpage@swarm does not exist` ERR from three errorpage autoredeploys (16:31/16:41/16:43Z, not an edge change) | WARN baseline as recorded in Stage A |
+| access log | CLF; full request line incl. query logged (marker 1×); basic-auth user in field 3 | **JSON**; fresh canary 16:53:39Z: marker hits **0**, auth-header markers **0**, positive control thinx.cloud 1 / bare IP 1 / db 1, JSON lines with RequestPath / RequestLine / ClientUsername **0** | EDGE-OPS-01 holds |
+| Docker API path | raw `/var/run/docker.sock` bind (ro), no endpoint | **certificates volume only**; in-task `ls /var/run/docker.sock` → No such file; endpoint `tcp://socket-proxy:2375`; 0 provider / `Cannot connect` / `permission denied` lines on the current task | EDGE-OPS-02 holds |
+| proxy deny matrix | n/a (no proxy) | **`ping=200 headping=200 version=200 services=200 tasks=200 networks=200 node=200 nodes=403 secrets=403 configs=403 containers=403 info=403 events=403 post=405 delete=405 loopback=403`** (16:37:15Z) == `deny_matrix_b1`; proxy `wollomatic/socket-proxy:1.13.1` 1/1, task `iqrs4f7agcyl`, user `65534:998`, read-only, caps `[ALL]` dropped, Version.Index 38380136 (unchanged since B1) | identical to B1 |
+| networks | traefik: `traefik-public` only | traefik: **`traefik-public` + `traefik-socket`**; proxy: `traefik-socket` only; `traefik-socket` internal / not attachable / `10.234.34.0/24`, members = proxy `.3` + traefik `.8` + LB endpoint `.4` | designed |
+| mounted config | `tls-config-2` (sha `bb0cba95…`), the only config | **`tls-config-3`** (mode 0444), in-task sha `45d010483d0e1d50…` == committed; `tls-config-2` **removed** 17:06:07Z (0 refs before; idx and task unchanged after) | C end state; recreate path below |
+| https default middleware | `["security-headers@swarm"]` | **`["security-headers@file"]`**; `http` none | WR-03 closed |
+| overview + middlewares | `[29,0,18,6,["Swarm","File"]]`; six incl. `security-headers@swarm` | **`[29,0,18,6,["Swarm","File"]]`**; `couch-auth@swarm error-pages-middleware@swarm https-redirect@swarm influx-auth@swarm security-headers@file sslheaders@swarm`; couch-auth `removeHeader true` | swarm copy gone, file copy in its place |
+| router inventory | `29/0`, names == `routers_post_A2:` | **`29/0`**, sorted-name md5 `218439c6…` == the F.pre list | identical |
+| HSTS (exact directive) | 17/17 exactly 1 | **16/16 exactly 1** (scan composite; micro out of `HOSTS`) | identical on every scanned host |
+| TLS rows (rtm/app/console) | TLS 1.2 verify 0, 1.3 ok, 1.1 refused, CBC refused, **X25519MLKEM768 refused, P-384 refused** | TLS 1.2 verify 0 ×3, 1.3 ok ×3, 1.1 refused ×3, CBC `handshake failure` ×3, **X25519MLKEM768 negotiated ×3, P-384 accepted ×3**; nmap TLS 1.2 set == 3 AEAD suites on all 16 | curve change intended (Stage C) |
+| HTTPS matrix | rtm/app/console/thinx.cloud/www/swarmpit 200, registry 400, db 401, influx 401, 7 externals 200, micro 200 | identical on the 16 scanned hosts; `micro.thinx.cloud` presents `CN=TRAEFIK DEFAULT CERT` (Stage E, D-19) | == baseline; one intended change |
+| WS pair | `101` / `401` + `X-Forwarded-Proto: https` | **`HTTP/1.1 101 Switching Protocols` (0 STS) / `HTTP/1.1 401` + `X-Forwarded-Proto: https`** | identical |
+| bare-IP pair | `301 https://188.166.23.244/` / `200` | **`301 https://188.166.23.244/` (0 STS) / `200`** | identical |
+| `:80` rows | db `401` + challenge, registry `400`, app `200` | **db `301` (0 `WWW-Authenticate`), registry `301`, app `200` (plaintext on purpose)** | Stage D (WR-04, D-17) |
+| ACME | 23 entries `291145 600 root` | **16 entries `203654 600 root`**, retired mains 0, ACME error lines on the current task 0; rtm/app/console/influx serials == F.pre | Stage E |
+| credential rotation | couch/influx label sha12 `00d35a165e11` | label values `<redacted>` (rotation record: `79e078373496`); historic literal challenged on both hosts (rotation record, 16:08:39Z) | D-18 / WR-02 |
+| ports + publishers | `7442/1883/8883 OPEN`; `thinx_api 7442`, `traefik 80 443`, `mosquitto 1883 1884 8883` | **identical**; external sweep `port 7442 rtm.thinx.cloud open` | keep-7442 holds |
+| device-flow harness | not run at F.pre (harness lost with the reboot) | **`p34end-7442` PASS** (16:53:51Z, `:7442` + `:1883`), **`p34end-https` PASS** (16:53:59Z) | both device paths hold |
+| external stacks (D-09) | `external_stack_labels:` | key sets and rule / entrypoints / middlewares values **identical** | untouched |
+| repo == deployed | thinx-swarm `b04f066` == micro == origin, MIRROR OK at 19 | **thinx-swarm `4e4f315` == micro HEAD (tracked-dirty 0) == origin/master == mirror banner; `MIRROR OK files=1`, 24 `- --` lines; `docker-swarm.yml` vs `thinx.yml` traefik-label parity diff empty** | holds |
+| external scan | `EDGE-SCAN OK` (17 hosts) | **all 16 hosts pass every predicate (composite of run 1 forward + run 6 reversed); 0 predicate failures in six runs; no single full run clean** — the laptop uplink dropped out at the tail of each run (1.1.1.1:443 lost in the same seconds); Traefik task / index unchanged, no swarm event in the gaps | **deviation:** plan verify (one clean full run) not met from this laptop; edge evidence complete per host |
+| SLA (EDGE-OPS-03) | Phase 28: push_end → Running 31–50 s | **`sla_verdict: OPEN-GAP`** — run 1 NO-MEASUREMENT (CI `test` red on v1.16 `03-RsakeySpec`, CircleCI degraded); `thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` | **open** — ROADMAP criterion 3 not met |
+
+```
+# the one live mutation of Plan 34-05 Task 2 (after the read-only items; 17:06:07.6Z):
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'REF=0; for s in $(docker service ls -q); do docker service inspect $s --format "{{range .Spec.TaskTemplate.ContainerSpec.Configs}}{{.ConfigName}} {{end}}" | grep -qw tls-config-2 && REF=$((REF+1)); done; [ $REF = 0 ] || exit 3; docker config rm tls-config-2'
+# observed: refs=0; rc 0; `docker config ls --filter name=tls-config-2 -q` empty; traefik_traefik mounts tls-config-3, idx 38380188 and task vtdqxehcuul8 unchanged; in-task sha 45d010483d0e1d50…; 29/0
+# recreate path (needed only for the Stage C rollback, which swaps the mount back to tls-config-2 — recreate FIRST):
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "git -C /mnt/gluster/deployment/swarm show 94da01c:traefik/tls.toml | docker config create tls-config-2 -"
+# expect: decoded sha256 bb0cba95ea22e973… (the Phase 33 file)
+```
+
+Verdict: every edge signal is at its designed Phase 34 end-state value or identical to F.pre. Two items are not
+closed: the external scan has no single clean full run from this laptop today (laptop uplink, evidence above; re-run from
+a stable uplink), and EDGE-OPS-03 is an open gap (`sla_verdict: OPEN-GAP`). Nothing to revert.
