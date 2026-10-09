@@ -1059,3 +1059,118 @@ Version.Index post-P34-A: 38380131
 Repo state == live state after this task: thinx-swarm `7ee46ab` (origin + micro), mirror `5ae47ac6` MIRROR OK at 23
 flags, live `traefik_traefik` 23 Args (sorted set == mirror), task `qrxfpvipnuau`, 29 routers enabled ==
 `routers_post_A2:`. Stage B1 starts from here (Traefik untouched until Plan 02).
+
+### P34 Stage B1 record (34-01 Task 2, 2026-10-09 13:52–14:01 UTC)
+
+**Outcome: the read-only, GET-only Docker API proxy runs live — service `traefik_socket-proxy`
+(`wollomatic/socket-proxy:1.13.1`, alias `socket-proxy`, task `iqrs4f7agcyl` on micro, Running 13:58:46Z) on the new
+overlay `traefik-socket` (internal, not attachable, `10.234.34.0/24`), created repo-first with flags equal to
+thinx-swarm `traefik.yml`; a throwaway Traefik probe pointed at a throwaway copy of the same allow-list read the full
+29-router inventory with **0 blocked** requests, and the live deny matrix matches exactly. `traefik_traefik` was NOT
+touched (args=23, Version.Index 38380131 == post-P34-A). The cutover (Stage B2) is Plan 02.**
+
+Precondition re-read (13:52Z): Stage A record present; live `args=23 idx=38380131`; `docker network ls --filter
+name=traefik-socket -q` and `docker service ls --filter name=traefik_socket-proxy -q` → empty.
+
+**D-05 image decision.** DHI catalog (`gh api repos/docker-hardened-images/catalog/contents/image --paginate`): **644**
+images, **0** named `socket-proxy` / `docker-socket-proxy` (nearest: `haproxy`, which would mean hand-rolling the
+allow-list) → `wollomatic/socket-proxy`. Docker Hub newest `1.x.y` tag: **`1.13.1`** (2026-08-15; `1.13.0` 2026-08-08;
+the floating `1` tag is not used); pinned by tag, never by digest (the registry's manifest digest for the scan was
+`sha256:14b0afd0…`, recorded here only, the spec carries none — `--no-resolve-image`).
+
+socket_proxy_grype: wollomatic/socket-proxy:1.13.1 critical=0 high=0 medium=0 low=0 other=0 (grype 0.86.1 — DB schema 5 built 2026-03-09, a frozen feed that predates the image; see the trivy line)
+socket_proxy_trivy: wollomatic/socket-proxy:1.13.1 critical=0 high=4 medium=4 low=0 unknown=18 (trivy 0.52.1, DB updated 2026-10-09T13:10Z)
+
+The trivy counts are **13 unique CVEs × 2 Go binaries** in the image (`socket-proxy` and its `healthcheck`), all Go
+**stdlib go1.26.6**, fixed in go 1.26.9 / 1.27.2: HIGH `CVE-2026-78667` (net/http Range-header DoS) and
+`CVE-2026-97031` (crypto/tls ECH DoS), MEDIUM `CVE-2026-94439` (HTTP/1 CONNECT smuggling) and `CVE-2026-97032` (HPACK
+DoS), 9 unscored (net/http, html/template, Windows-only os). **No Critical → the plan continues.** Exposure is small: the
+proxy speaks plain HTTP/1 (no TLS, no ECH, no client HTTP/2), on an internal overlay where only Traefik is attached and
+`-allowfrom` admits only that subnet. **Repin trigger:** the first `1.x.y` release built with go ≥ 1.26.9 — rescan
+with a current DB, record, `docker service update --image wollomatic/socket-proxy:<new> --no-resolve-image`.
+Recorded as a deviation in 34-01-SUMMARY (the laptop grype is too old to see this image's findings).
+
+**Micro facts (13:55Z, read-only):** Docker socket `660 root:998` → proxy user `65534:998`; Engine 29.8.1, API **1.56**;
+micro node id `02keahicu8drkpx5pb1gtml26` (core `u8v1l5d4zkoc0ceexkyr33dxu`); swarm default address pool `10.0.0.0/8` /24;
+HEALTHCHECK observation: `docker image inspect` → `Config.Healthcheck` **null** (no image-defined healthcheck — the image
+ships a `healthcheck` binary but declares none), `ExposedPorts 2375/tcp`, `User 65534:65534`; so liveness is
+`-watchdoginterval=30 -stoponwatchdog` (exits if the socket disappears, swarm restarts it) plus the D-10 gates — no
+`--health-cmd` (shell-form only, the image is distroless). Subnets in use: bridge `172.17/16`, docker_gwbridge `172.18/16`,
+ingress `10.0.0/24`, traefik-public `10.0.1/24`, thinx_internal `10.0.2/24`, swarmpit_net `10.0.5/24`; host routes
+`10.18/16`, `10.133/16`, `188.166.0/18` — **0** containing `10.234.34.`
+
+traefik_socket_subnet: 10.234.34.0/24
+
+**Throwaway allow-list validation (Step 2, 13:56:0x–13:57Z, plain containers on bridge `p34-probe-net` = `172.19.0.0/16`,
+no host ports, no insecure API):** `p34-sockprobe` (the allow-list below, `-allowfrom=172.19.0.0/16`, `-loglevel=DEBUG`,
+user `65534:998`, read-only, caps dropped) + `p34-traefikprobe` (`traefik:v3.7.14`, `--providers.swarm.endpoint=tcp://p34-sockprobe:2375`,
+the live constraints flag verbatim, `exposedbydefault=false`, the http/https/vpn/mqtt/mqtts/thxp + loopback mgmt
+entrypoints, `--api`, `--log.level=DEBUG`, the P32 resolver with the e-mail read into a variable on micro and never
+printed, storage `/tmp/acme-p34.json`, Let's Encrypt STAGING). After 45 s (three refresh cycles):
+
+- proxy: 153 log lines, **blocked 0**; calls seen — `HEAD /_ping` 1, `GET /v1.56/version` 4, `/v1.56/services` 3,
+  `/v1.56/networks` 3, `/v1.56/tasks` 63, `/v1.56/nodes/<micro>` 33, `/v1.56/nodes/<core>` 33 — exactly the researched
+  provider set (no Info, no events), no regex change needed;
+- probe Traefik: overview `[29,0,18,6,["Swarm"]]`, sorted router names **== `routers_post_A2:` (diff empty, 29)**; swarm
+  provider ERR **0** / WRN **0**; the 80 ERR lines are all `providerName=le.acme` (staging TLS-ALPN cannot complete on a
+  probe with no inbound path — the P32 Boot-and-discover precedent); the 7 `Cannot connect|permission denied|403` hits
+  are digits inside staging authz URLs / lego durations, not proxy refusals; WRN = the same 7 + 1 start-up notices as
+  the live Stage A baseline;
+- from the probe: `GET /v1.56/secrets` → **403**, `POST /v1.56/services/create` → **405**, `/_ping` → `OK`;
+- `docker rm -f p34-traefikprobe p34-sockprobe; docker network rm p34-probe-net` → leftovers **0 / 0**; Traefik
+  `idx=38380131 args=23` unchanged.
+
+Repo first (P32 D-04): thinx-swarm `ff30585` (`feat(edge): Phase 34 Stage B1 — …`: `traefik.yml` gains the `socket-proxy`
+service — image `wollomatic/socket-proxy:1.13.1`, the ten single-dash flags, `user: "65534:998"`, `read_only: true`,
+`cap_drop: [ALL]`, the socket bind `:ro`, network `traefik-socket` only, placement `node.labels.Traefik == true`, limits
+0.10 CPU / 32M, reservation 8M, `restart_policy: any`, no traefik label — and top-level `traefik-socket: external: true`;
+`traefik.sh` creates `traefik-socket` with `--internal --subnet=10.234.34.0/24`; the traefik service is unchanged, still
+23 `- --` lines; `docker stack config` parses it) → origin → micro `p34-stageB1` ff (tracked dirty 0, 2 files 46+) →
+mirror regenerated (`MIRROR-GENERATED ok source=thinx-swarm@ff30585…`, `MIRROR OK files=1`, still 23 flags) and
+committed here (`feat(34): Stage B1 — mirror regenerated (socket-proxy service)`, `289fddbe`).
+
+```
+ssh micro "docker network create --driver overlay --internal --subnet 10.234.34.0/24 traefik-socket"
+# expect: rc 0; driver overlay, Internal true, Attachable false, subnet 10.234.34.0/24
+ssh micro 'docker service create --name traefik_socket-proxy --detach --no-resolve-image --replicas 1 \
+  --constraint "node.labels.Traefik == true" --network name=traefik-socket,alias=socket-proxy \
+  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly \
+  --user 65534:998 --read-only --cap-drop ALL --limit-cpu 0.10 --limit-memory 32M --reserve-memory 8M --restart-condition any \
+  --label com.docker.stack.namespace=traefik --label com.docker.stack.image=wollomatic/socket-proxy:1.13.1 \
+  --container-label com.docker.stack.namespace=traefik \
+  wollomatic/socket-proxy:1.13.1 -listenip=0.0.0.0 -proxyport=2375 -allowfrom=10.234.34.0/24 \
+  "-allowGET=(/v1\.[0-9]+)?/(_ping|version|services|networks|tasks|nodes/[a-z0-9]+)" "-allowHEAD=(/v1\.[0-9]+)?/_ping" \
+  -allowhealthcheck -watchdoginterval=30 -stoponwatchdog -shutdowngracetime=5 -loglevel=INFO'
+# expect: rc 0; 1/1 Running on micro within seconds; spec image without a digest suffix; Args == the YAML command (sorted set)
+# (the stack-namespace labels let a future bootstrap `docker stack deploy` adopt the service instead of duplicating it; --cap-drop accepted by Engine 29.8.1)
+# rollback (staged, NOT executed; nothing uses the proxy yet):
+ssh micro "docker service rm traefik_socket-proxy && docker network rm traefik-socket"
+# + git revert ff30585 (thinx-swarm, origin + micro ff) and 289fddbe (mirror back), MIRROR OK
+```
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 13:52 | precondition + DHI | args=23 idx=38380131; no traefik-socket / no proxy; DHI 644 images, 0 socket-proxy |
+| 13:53–13:55 | tag + scans | `1.13.1` newest; grype critical 0 (stale DB); trivy critical 0 / high 4 / medium 4 / unknown 18 (current DB) |
+| 13:55 | micro facts | gid 998, API 1.56, node id, Healthcheck null, `10.234.34.0/24` free |
+| 13:56–13:57 | throwaway pair | blocked 0; probe 29 routers == `routers_post_A2:`; swarm provider ERR/WRN 0; secrets 403, POST 405; leftovers 0 |
+| 13:57–13:58 | repo first | thinx-swarm `ff30585` on origin + micro (ff); mirror `289fddbe` MIRROR OK at 23 flags |
+| 13:58:43 | network + service create | `traefik-socket` `tnwugjbjx2dz`; `traefik_socket-proxy` `nzkphcpt6qk0` → rc 0 ×2 |
+| 13:58:46 | proxy Running | task `iqrs4f7agcyl` micro Running (≈3 s); proxy log: allow-list printed anchored (`^…$`), `allowfrom=10.234.34.0/24`, `watchdog enabled interval=30 stoponwatchdog=true`, `running and listening` |
+| 13:59 | readback | image `wollomatic/socket-proxy:1.13.1` (no digest); User `65534:998`; ReadOnly **true**; CapabilityDrop **[ALL]**; mounts exactly `/var/run/docker.sock` ro; networks exactly 1 (`traefik-socket`, alias `socket-proxy`); placement `node.labels.Traefik == true`; limits 0.10 CPU / 32 MiB, reservation 8 MiB; restart any; no published ports; labels only the two stack-bookkeeping keys; Args **== the YAML command (10/10, `LC_ALL=C` sorted set)**; network: driver overlay, **Internal true, Attachable false**, Ingress false, scope swarm, subnet `10.234.34.0/24`, endpoints `traefik_socket-proxy.1.iqrs4f7agcyl…` + `traefik-socket-endpoint` (Engine 29's name for the network's load-balancer endpoint, the plan's `lb-traefik-socket`) — no other service attached |
+| 13:59:16 | deny matrix (live) | the line below; the proxy logged each refusal as `level=WARN msg="blocked request"` with reason `path not allowed` ×7 (403), `method not allowed` ×2 (405), `forbidden IP` ×1 (403, the loopback-sourced ping) |
+| 14:00 | Traefik untouched | `traefik_traefik` `idx=38380131 args=23`, task `qrxfpvipnuau` unchanged |
+
+deny_matrix_b1: ping=200 headping=200 version=200 services=200 tasks=200 networks=200 node=200 nodes=403 secrets=403 configs=403 containers=403 info=403 events=403 post=405 delete=405 loopback=403
+
+(Requests from the proxy's own netns with the host's curl — source = the proxy's overlay IP `10.234.34.3`, inside
+`-allowfrom`; `node` = `GET /v1.56/nodes/<micro id>`, `nodes` = the list endpoint; `loopback` = `GET /_ping` from
+`127.0.0.1`, outside `-allowfrom`.)
+
+traefik_traefik untouched (args=23, Version.Index == post-P34-A: 38380131).
+
+Repo state == live state after this task: thinx-swarm `ff30585` (origin + micro), mirror `289fddbe` MIRROR OK at 23 flags,
+live `traefik_traefik` 23 Args (sorted set == mirror, Stage A end state), `traefik_socket-proxy` 1/1 with Args == the
+YAML, `traefik-socket` internal / not attachable / `10.234.34.0/24` with only the proxy attached. **Plan 02 (Stage B2)
+starts from here:** args=23, proxy 1/1, deny matrix recorded; it must first recreate the device-flow harness
+(`/tmp/p31-device-flow/thinx-device-flow.mjs` was lost with the 12:38Z workstation reboot).
