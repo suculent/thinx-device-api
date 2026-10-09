@@ -3,7 +3,7 @@
 # traefik-edge-scan.sh — Phase 33 (EDGE-API-01/02, EDGE-TLS-01/02/03; D-26..D-29) external edge scan.
 #
 # Laptop-only, read-only: local nmap (ssl-enum-ciphers + port sweep incl. 8080/8443), sslscan, curl -I and
-# openssl against the public edge 188.166.23.244 and the 17 routed hostnames (D-27). Run it from OUTSIDE the
+# openssl against the public edge 188.166.23.244 and the 16 routed hostnames (D-27). Run it from OUTSIDE the
 # swarm — micro sees every client as 10.0.0.2 and sits inside the edge. No third-party scanner is involved and
 # nothing is logged anywhere but stdout.
 #
@@ -46,7 +46,8 @@ if [ -n "$missing" ]; then
 fi
 
 EDGE_IP=188.166.23.244
-HOSTS="rtm.thinx.cloud app.thinx.cloud console.thinx.cloud thinx.cloud www.thinx.cloud swarmpit.thinx.cloud registry.thinx.cloud db.thinx.cloud influx.thinx.cloud www.fotostim.com www.fotostim.cz fotostim.com fotostim.cz igraczech.com www.igraczech.com www.syxra.cz micro.thinx.cloud"
+# Phase 34 (D-19): micro.thinx.cloud retired — its ACME entry was pruned, it serves the default certificate and is no longer an edge host.
+HOSTS="rtm.thinx.cloud app.thinx.cloud console.thinx.cloud thinx.cloud www.thinx.cloud swarmpit.thinx.cloud registry.thinx.cloud db.thinx.cloud influx.thinx.cloud www.fotostim.com www.fotostim.cz fotostim.com fotostim.cz igraczech.com www.igraczech.com www.syxra.cz"
 
 # D-14 on RSA-4096 certificates: only the three ECDHE_RSA AEAD suites are ever observable (the ECDSA entries
 # of D-14 can never be negotiated); nmap names ChaCha with the _SHA256 suffix (33-RESEARCH Pitfall 6).
@@ -56,7 +57,7 @@ WANT12="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA
 # couch-auth / influx-auth basic-auth middlewares and answer 401 on every path before and after Phase 33 —
 # that 401 is the backend's auth, not a Traefik dashboard route (a Traefik basic-auth 401 carries the default
 # realm on both, so the realm cannot discriminate a dashboard router from a protected backend). Exactly these
-# two hosts, nothing else. api-exposed and dashboard-open still run on all 17 hosts, so an unauthenticated
+# two hosts, nothing else. api-exposed and dashboard-open still run on all 16 hosts, so an unauthenticated
 # dashboard or API on db/influx would still fail the scan.
 BASICAUTH_HOSTS="db.thinx.cloud influx.thinx.cloud"
 
