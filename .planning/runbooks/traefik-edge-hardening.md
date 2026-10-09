@@ -1554,3 +1554,81 @@ Repo state == live state after this task: thinx-swarm `3d3a31b` == origin/master
 `thinx-db-http.middlewares=https-redirect` and `registry_registry` `registry-http.middlewares=https-redirect` == the
 committed files; 29 routers enabled == `routers_post_A2:`; `7442 OPEN 1883 OPEN 8883 OPEN`. This is the final edge that
 Plan 05 measures the SLA on (D-13); Plan 04 (ACME prune, credential rotation) starts from here.
+
+### P34 Stage E record (34-04 Task 1, 2026-10-09 15:49–15:54 UTC)
+
+**Outcome: the seven retired ACME entries are gone from the store. Pruned: chronograf, replica, ssl, vvv, test and
+micro `.thinx.cloud`, plus `ctf24.teacloud.net`, with no SANs and no `landing.`/`www.` variants. The procedure was the
+Phase 33 Stage E one in a single remote command: proxy 1/1 asserted, `jq del` into a temp file, count check, `chmod 600`,
+atomic `mv`, then `--force` 0.08 s after the `mv`. The store went from 23 to 16 entries (`600 root`). The new task
+`vtdqxehcuul8` was Running about 5 s after the fire and logged only the 8 start-up WRN lines, with 0 ACME renew/obtain
+lines and 0 provider lines. It did not rewrite the store and re-requested nothing. The rtm/app/console/influx serials
+equal F.pre.yml, so nothing was re-challenged. `micro.thinx.cloud` now presents `CN=TRAEFIK DEFAULT CERT`, the intended
+D-19 effect (assumption A6). The router inventory, overview, 16-host matrix, WS pair, bare-IP pair and device ports are
+unchanged. No D-10 trigger fired, and the snapshot restore was NOT executed.**
+
+Precondition (15:49Z): Stage D record present, `Version.Index post-P34-D: 38380175` == live; `traefik:v3.7.14 args=24`,
+Configs `tls-config-3`, task `l7z1nflaqdim`; `traefik_socket-proxy` 1/1 Running; the volume holds `acme.json` only,
+`291145 600 root`, mtime `2026-10-09 09:00:35.99Z` (unchanged since P33 Stage E — the P34 A/B2/C restarts did not
+rewrite it).
+
+Pre-checks (read-only, counts and names only — no certificate or key body was written out):
+
+| Check | Result |
+|---|---|
+| (a) store size / mode / count | `291145 600 root`; **PRE = 23** entries |
+| (b) candidates (main, SAN count) | `chronograf.thinx.cloud 0`, `replica.thinx.cloud 0`, `ssl.thinx.cloud 0`, `vvv.thinx.cloud 0`, `test.thinx.cloud 0`, `ctf24.teacloud.net 0`, `micro.thinx.cloud 0`; `landing.`/`www.` variant entries (main or SAN) **0** |
+| (c) router refs per candidate | `Host()` names in every live service label (22 services, 17 distinct Host rules) and in `/api/http/routers` rules: **0 / 0** for each of the seven — nothing is removed from the prune set |
+| (d) entries expiring within 30 days (`openssl x509 -checkend 2592000`, in memory on micro) | **0 of 23** (nearest retired notAfter: `vvv.thinx.cloud` Nov 22 2026; the others Dec 2–28 2026) — no renewal save can race the edit |
+| (e) laptop pre-row (15:50:41Z) | rtm `0535CC…67B0`, app `051152…2809`, console `05F8CE…F905`, influx `05806B…0B04` — all == F.pre.yml; `micro.thinx.cloud` subject `CN=micro.thinx.cloud` (Let's Encrypt YR2), `curl -sk` **200**; 16-host matrix rtm/app/console/thinx.cloud/www/swarmpit 200, registry 400, db 401, influx 401, 7 externals 200, HSTS 1 on each; WS `101` / cookie probe `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200` |
+| (e) micro pre-row | status filter **`29/0`**, sorted names md5 == `routers_post_A2:` md5; overview `[29,0,18,6,["Swarm","File"]]`; `7442 OPEN 1883 OPEN 8883 OPEN`; task `l7z1nflaqdim`, idx `38380175` |
+
+Snapshot: `/mnt/data/edge-rollback/traefik-p34-acme-20261009T155129Z/` **700 root**, `acme.json` `291145 600 root`, `cmp`
+identical to the live file, 23 entries (never leaves micro, never committed).
+
+```
+# 1. snapshot (umask 077; dir 700, file 600 root)
+ssh micro "umask 077; S=/mnt/data/edge-rollback/traefik-p34-acme-\$(date -u +%Y%m%dT%H%M%SZ); V=/var/lib/docker/volumes/traefik_traefik-public-certificates/_data; \
+  mkdir -p \$S; cp -p \$V/acme.json \$S/; chmod 700 \$S; chmod 600 \$S/acme.json; cmp \$V/acme.json \$S/acme.json && echo CMP_IDENTICAL"
+# expect: 700 root dir, 291145 600 root file, CMP_IDENTICAL, 23 entries
+# 2. ONE remote command: proxy 1/1 -> prune into a temp copy -> count -> retired 0 -> chmod 600 -> atomic mv -> --force
+ssh micro 'umask 077; V=/var/lib/docker/volumes/traefik_traefik-public-certificates/_data
+  [ "$(docker service ps traefik_socket-proxy --filter desired-state=running -q | wc -l)" = 1 ] || exit 3
+  jq "del(.le.Certificates[] | select(.domain.main as \$m | [\"chronograf.thinx.cloud\",\"replica.thinx.cloud\",\"ssl.thinx.cloud\",\"vvv.thinx.cloud\",\"test.thinx.cloud\",\"ctf24.teacloud.net\",\"micro.thinx.cloud\"] | index(\$m)))" $V/acme.json > $V/acme.json.new \
+   && jq -e ".le.Certificates | length == 16" $V/acme.json.new >/dev/null \
+   && R=$(jq -r ".le.Certificates[].domain.main" $V/acme.json.new | grep -cE "^((chronograf|replica|ssl|vvv|test|micro)\.thinx\.cloud|ctf24\.teacloud\.net)$")
+  [ "$R" = 0 ] && chmod 600 $V/acme.json.new && mv $V/acme.json.new $V/acme.json && stat -c "%s %a %U" $V/acme.json \
+   && docker service update --detach --force traefik_traefik || { rm -f $V/acme.json.new; exit 4; }'
+# expect: proxy_running_tasks=1; pruned_left=0; 203654 600 root (16 entries); rc 0
+# rollback (staged, NOT executed): cp -p /mnt/data/edge-rollback/traefik-p34-acme-20261009T155129Z/acme.json $V/acme.json \
+#   && chmod 600 $V/acme.json && docker service update --detach --force traefik_traefik   (proxy 1/1 asserted first)
+```
+
+acme_prune: 23 -> 16 (removed 7: chronograf.thinx.cloud, replica.thinx.cloud, ssl.thinx.cloud, vvv.thinx.cloud, test.thinx.cloud, ctf24.teacloud.net, micro.thinx.cloud)
+
+| Time (UTC) | Step | Observed |
+|---|---|---|
+| 15:49:52 | precondition (micro) | as above |
+| 15:50:13 | pre-checks (a)–(d) (micro) | as in the table above |
+| 15:50:41–15:51:0x | pre-row (e) | laptop + micro rows as above |
+| 15:51:29 | snapshot | `traefik-p34-acme-20261009T155129Z` 700 root / `acme.json` 600 root, `cmp` identical |
+| **15:51:42.11–15:51:42.19** | **prune + E fire** | `proxy_running_tasks=1`; `pruned_left=0`; `mv` at 15:51:42.11Z → `203654 600 root`; `docker service update --detach --force traefik_traefik` **rc 0** at 15:51:42.19Z (edit → restart gap 0.08 s) |
+| 15:51:42–15:51:47 | drain + start | old task `l7z1nflaqdim` Shutdown; **new task `vtdqxehcuul8`** micro **Running ≈15:51:47Z** (≈5 s); idx 38380175 → 38380177 (updating) → **38380188 (completed)**; exactly **1** running task; `traefik:v3.7.14 args=24`, image unchanged |
+| 15:52:22 | (1)(2)(5)(7) micro gate | volume `acme.json` only, **`600 root`, 16 entries, retired mains 0**, mtime still `15:51:42.07Z` (the `mv`; the new task did not rewrite the store); `docker logs --since 15:51:40Z` on the new container (`docker service logs` hangs on micro — 34-03): **8** lines, all start-up WRN (1 encoded-characters + 7 `aliasHeadersStrategy`), ACME renew/obtain/generate lines **0**, provider / `Cannot connect` / `permission denied` / parse / `does not exist` / `port is missing` lines **0**; status filter **`29/0`**, sorted names md5 **== pre-row == `routers_post_A2:`**; overview **`[29,0,18,6,["Swarm","File"]]`**; `7442 OPEN 1883 OPEN 8883 OPEN`; proxy 1/1 |
+| 15:52:38 | (3)(4)(6) laptop gate | serials rtm `0535CC0C71E39D9378E72893F3A2141267B0`, app `051152D5A20BE36DEFA1B6FA83379CE42809`, console `05F8CEE45A7D64783AA80214569810CBF905`, influx `05806B4C8B028F41EC3ACCC00DF3C6A50B04` — **all == F.pre.yml** (no collateral re-challenge); **`micro.thinx.cloud` → `subject=CN=TRAEFIK DEFAULT CERT`** (default certificate, expected per D-19 / A6), `curl -sk` **200** == pre-row (the catch-all still answers); 16-host matrix + HSTS **== pre-row (diff empty)**, HSTS exactly 1 on 16/16; WS `101` / cookie probe `401` + `X-Forwarded-Proto: https`; bare-IP `301 https://188.166.23.244/` + `200` |
+| 15:53:41 | re-read | idx `38380188 completed`, task `vtdqxehcuul8`, store 16 entries `600 root` unchanged |
+
+micro.thinx.cloud: default certificate (expected, D-19). The retired manager hostname has had no router since Phase 33
+Stage A2, so no user path depends on it. `scripts/traefik-edge-scan.sh` drops it from `HOSTS` (17 → 16), so the external scan
+keeps gating only the live hosts.
+
+D-10 trigger evaluation: none fired ((1) store 16 / 600 root / retired 0, (2) 0 ACME and provider lines on the new task,
+(3) serials == F.pre.yml, (5) `29/0` + names == baseline + overview unchanged, (6) matrix == pre-row, WS 101/401, bare-IP
+301/200, (7) ports OPEN ×3). The snapshot restore was staged and **not executed**.
+
+Version.Index post-P34-E: 38380188
+
+Repo state == live state after this task: no thinx-swarm change (Stage E is a store edit plus a restart, with no static
+or label change), so thinx-swarm `3d3a31b` == origin == micro and the mirror is unchanged at 24 flags. Live
+`traefik_traefik` has 24 Args, `tls-config-3`, task `vtdqxehcuul8`; acme.json holds 16 entries `600 root`; 29 routers
+enabled == `routers_post_A2:`. In this repo `scripts/traefik-edge-scan.sh` has `HOSTS` 16 (`3b7fa2b2`).
