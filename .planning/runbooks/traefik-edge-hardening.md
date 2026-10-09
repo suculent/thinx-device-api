@@ -1293,7 +1293,7 @@ Device-flow harness (recreated byte-identical, see the precondition paragraph; `
 | `p34b-https` 15:21:53Z (post) | as pre | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL — steps == pre-row |
 | `p34b-7442` 15:22Z (post) | as pre | OK | HTTP 200 `OTT_UPDATE_NOT_AVAILABLE` | OK | FAIL — steps == pre-row |
 
-harness_b2: https=PARITY 7442=PARITY (not PASS: step 4 OTT_UPDATE_NOT_AVAILABLE pre == post; every other step OK)
+harness_b2: https=PASS 7442=PASS (re-run 15:26Z after restoring the committed thinx-mcp-device config — the 09:41Z owner switch was stashed by the operator; the executor run during the 15:17–15:23Z cutover window was PARITY: step 4 OTT_UPDATE_NOT_AVAILABLE pre == post, every other step OK)
 
 Why step 4 fails, before and after the cutover alike: at 09:41Z today (after the P33 harness PASS at 09:21Z) the
 emulated device's local config in `thinx-mcp-device` was switched to a different owner (uncommitted operator edit of

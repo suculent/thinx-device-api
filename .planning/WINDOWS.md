@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 17
+open_count: 16
 waived_count: 0
-fixed_count: 1
+fixed_count: 2
 total_count: 18
-last_updated: 2026-10-09T15:23:34.207Z
+last_updated: 2026-10-09T15:27:12.115Z
 ---
 
 # Broken Windows Ledger
@@ -32,7 +32,7 @@ last_updated: 2026-10-09T15:23:34.207Z
 | 15 | 33 | deviation | .planning/runbooks/traefik-edge-hardening.md |  | 33-01: overlay negative probe runs via --network container:<traefik-public peer> because traefik-public is not attachable (plan recipe refused) | open |  | 2026-10-08T23:17:41.841Z |  |
 | 16 | 33 | deviation | .planning/runbooks/traefik-edge-hardening.md |  | 33-02 Task 1: Version.Index precondition drift (38379808 vs post-Stage-B 38379801) caused by a swarm leader election re-saving all services; content unchanged, treated as met in substance | open |  | 2026-10-09T09:12:46.010Z |  |
 | 17 | 33 | unrun-verify | .planning/phases/33-dashboard-lockdown-tls-hardening/33-02-PLAN.md |  | 33-02 Task 1: rawdata TLS-options jq literal cannot pass on Traefik v3.7.14 (API does not expose TLS options); proven on the wire + in-task config sha instead (deferred-items.md) | open |  | 2026-10-09T09:12:46.280Z |  |
-| 18 | 34 | unrun-verify | .planning/runbooks/traefik-edge-hardening.md |  | 34-02 Task 2 harness_b2 is PARITY, not PASS: step 4 OTT redeem answers OTT_UPDATE_NOT_AVAILABLE before and after the B2 cutover, because the thinx-mcp-device config was switched to a new owner at 09:41Z (new UDID, no deployed build); operator: attach a build to the new device or restore the committed config, then rerun both harness paths | open |  | 2026-10-09T15:23:34.207Z |  |
+| 18 | 34 | unrun-verify | .planning/runbooks/traefik-edge-hardening.md |  | 34-02 Task 2 harness_b2 is PARITY, not PASS: step 4 OTT redeem answers OTT_UPDATE_NOT_AVAILABLE before and after the B2 cutover, because the thinx-mcp-device config was switched to a new owner at 09:41Z (new UDID, no deployed build); operator: attach a build to the new device or restore the committed config, then rerun both harness paths | fixed |  | 2026-10-09T15:23:34.207Z | 2026-10-09T15:27:12.115Z |
 
 ````json
 [
@@ -264,10 +264,10 @@ last_updated: 2026-10-09T15:23:34.207Z
     "file": ".planning/runbooks/traefik-edge-hardening.md",
     "line": null,
     "description": "34-02 Task 2 harness_b2 is PARITY, not PASS: step 4 OTT redeem answers OTT_UPDATE_NOT_AVAILABLE before and after the B2 cutover, because the thinx-mcp-device config was switched to a new owner at 09:41Z (new UDID, no deployed build); operator: attach a build to the new device or restore the committed config, then rerun both harness paths",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-09T15:23:34.207Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-09T15:27:12.115Z",
     "milestone": "v1.15"
   }
 ]
