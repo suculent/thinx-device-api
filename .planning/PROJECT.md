@@ -10,7 +10,7 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
 
-## Current Milestone: v1.15 Traefik Hardening (Edge)
+## Preserved Milestone: v1.15 Traefik Hardening (Edge)
 
 **Goal:** Reconcile the Traefik edge against what is actually deployed, then modernize and harden it — migrating off the outdated `v2.6.1` image driven by v1-syntax flags/labels — without breaking plaintext device check-in (`:7442`) or the 5-minute deploy SLA.
 
@@ -262,3 +262,8 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 *Last updated: 2026-10-09 after Phase 33 (dashboard lockdown & TLS hardening)*
+
+
+## Current Milestone: v1.16 — Console Usability & Deploy Keys
+
+Implement all 11 requirements from Drive THiNX/TODOs.md. Parent phase numbers 35–38; Vue and Legacy console submodule plus deploy-key backend. v1.15 phases 29–33 are complete; Phase 34 remains open. Its latest state and requirements are preserved in milestones/v1.15-*-IN-PROGRESS.md, not closed.
