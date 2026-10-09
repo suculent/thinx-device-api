@@ -1,19 +1,25 @@
 describe("RSA Key", function() {
 
-  beforeAll(() => {
-    console.log(`🚸 [chai] >>> running RSA spec`);
-  });
-
-  afterAll(() => {
-    console.log(`🚸 [chai] <<< completed RSA spec`);
-  });
-
-
   var expect = require('chai').expect;
   var fs = require("fs");
+  var os = require("os");
   var path = require("path");
   var RSAKey = require("../../lib/thinx/rsakey");
   var rsakey = new RSAKey();
+
+  // 34-REVIEW WR-05: every key this spec creates goes into a per-run temp
+  // directory, never into Globals.app_config().ssh_keys (in development that
+  // is the developer's real ~/.ssh, on CI /mnt/data/ssh_keys). The directory
+  // and all key material in it are removed after the spec.
+  beforeAll(() => {
+    console.log(`🚸 [chai] >>> running RSA spec`);
+    rsakey.ssh_keys = fs.mkdtempSync(path.join(os.tmpdir(), "rsakey-spec-"));
+  });
+
+  afterAll(() => {
+    fs.rmSync(rsakey.ssh_keys, { recursive: true, force: true });
+    console.log(`🚸 [chai] <<< completed RSA spec`);
+  });
 
   var envi = require("../_envi.json");
   var owner = envi.oid;
@@ -72,8 +78,8 @@ describe("RSA Key", function() {
       }, {});
   }, 10000);
 
-  // Sequential on purpose: keys are named <owner>-<Date.now()>, so two
-  // create() calls in the same millisecond write to the same file.
+  // Sequential, so done() cannot race the pushes. Concurrent creates are
+  // covered separately in (03b).
   it("(03) should be able to add RSA Key 2/3", function(done) {
     rsakey.create(owner, (success, response) => {
       expect(success).to.equal(true);
@@ -104,6 +110,33 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
+
+  // 34-REVIEW IN-08: keys are named <owner>-<timestamp>; two concurrent
+  // create() calls (a double-clicked console button) usually land in the same
+  // millisecond and used to share one name, the second key silently replacing
+  // the first. Each must get its own name and keep its own key material.
+  it("(03b) concurrent creates for one owner never share a key file", function(done) {
+    var results = [];
+    var finish = function(success, response) {
+      expect(success).to.equal(true);
+      results.push(response);
+      if (results.length < 2) return;
+      var names = results.map(listFilename);
+      expect(names[0]).to.not.equal(names[1]);
+      for (var i = 0; i < 2; i++) {
+        expect(fs.readFileSync(rsakey.ssh_keys + "/" + names[i] + ".pub", "utf8")).to.equal(results[i].pubkey);
+        expect(fs.existsSync(rsakey.ssh_keys + "/" + names[i])).to.equal(true);
+      }
+      rsakey.revoke(owner, names, function(_res, succ, mess) {
+        expect(succ).to.equal(true);
+        expect(mess).to.have.members(names);
+        expect(rsakey.getKeyPathsForOwner(owner)).to.include(first_key);
+        done();
+      }, {});
+    };
+    rsakey.create(owner, finish);
+    rsakey.create(owner, finish);
+  }, 30000);
 
   //validateOwner: function(invalid-owner)
   it("(05) should be able to reject invalid owner (feature envy)", function () {
