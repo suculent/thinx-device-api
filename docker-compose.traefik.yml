@@ -1,5 +1,5 @@
-# GENERATED — do not edit. source: thinx-swarm@efee92c568e0fea9a17b42d34849cfc046ccf093 generated:2026-10-08T23:10:07Z by scripts/generate-traefik-mirror.js
-# mirror-sha256:b1e8f9f9cd7f8e7ac0f1fa0707885ae52bd5775b8f55d543086dc804ba4eb048
+# GENERATED — do not edit. source: thinx-swarm@94da01cd1b5a649d367894a7030be1e021ac0fea generated:2026-10-09T07:59:23Z by scripts/generate-traefik-mirror.js
+# mirror-sha256:fd25846a0a99ea5f5eb431a4777f5c80ce8bc355d1704e07a98017f1919c9033
 version: '3.7'
 
 services:
@@ -132,6 +132,10 @@ services:
       - --certificatesresolvers.le.acme.storage=/certificates/acme.json
       # Use the TLS Challenge for Let's Encrypt
       - --certificatesresolvers.le.acme.tlschallenge=true
+      # Phase 33 (EDGE-TLS-01, D-13..D-16): load the mounted TLS options file — default option = TLS 1.2+,
+      # six ECDHE AEAD suites, X25519/P-256, sniStrict false; TLS options cannot be set via swarm labels.
+      # The file is the docker config `tls-config-${CONFIG}` (see `configs:` below) — never edit it in place.
+      - --providers.file.filename=/traefik/tls.toml
       # Enable the access log, with HTTP requests
       - --accesslog
       # Enable the Traefik log, for configurations and errors
@@ -168,5 +172,10 @@ networks:
 # https://medium.com/@jakub.hajek/container-orchestration-with-traefik-2-x-and-docker-swarm-with-canary-deployment-27e7ea62af6f
 configs:
   tls-config:
-    name: tls-config-${CONFIG:-1}
+    # Phase 33 (EDGE-TLS-01, D-13): swarm configs are immutable — to change tls.toml bump CONFIG,
+    # `docker config create tls-config-<N>` the new name FROM the micro checkout
+    # (/mnt/gluster/deployment/swarm/traefik/tls.toml after the ff-merge, so deployed bytes == committed bytes),
+    # then `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`
+    # (+ one task restart). Never `docker stack deploy` for this.
+    name: tls-config-${CONFIG:-2}
     file: ./traefik/tls.toml # or /mnt/data/ingress/traefik/tls.toml
