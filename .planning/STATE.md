@@ -5,17 +5,17 @@ milestone_name: Traefik Hardening (Edge)
 current_phase: 34
 current_phase_name: Ops Surface Reduction & SLA Close-out
 status: executing
-stopped_at: Phase 34 plans 34-01..34-03 complete; 34-04 next (operator checkpoint: basic-auth password file)
-last_updated: "2026-10-09T15:48:55.579Z"
+stopped_at: Phase 34 plans 34-01..34-04 complete; 34-05 (SLA deploy + close-out) next
+last_updated: "2026-10-09T16:15:45.667Z"
 last_activity: 2026-10-09
 last_activity_desc: Phase 34 execution started
-state_head: 8e29c2e24bf436484b5129e936245f959551fb4f
+state_head: 168ee472fc2dd7b2cbc45d4d630d11bd54402662
 progress:
   total_phases: 6
   completed_phases: 18
   total_plans: 19
-  completed_plans: 17
-  percent: 89
+  completed_plans: 18
+  percent: 95
 ---
 
 # STATE — THiNX Device API
@@ -35,8 +35,8 @@ See: `.planning/PROJECT.md` (updated 2026-10-09 after Phase 33)
 ## Current Position
 
 Phase: 34 (Ops Surface Reduction & SLA Close-out) — EXECUTING
-Plan: 4 of 5
-Status: Executing 34-04 (Stage E ACME prune, couch/influx credential rotation — has an operator checkpoint)
+Plan: 5 of 5
+Status: Executing 34-05 (SLA push->CI->Swarmpit run, F.post, scan After, docs)
 Last activity: 2026-10-09 — Phase 34 execution started
 
 ## Milestones
