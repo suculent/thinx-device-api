@@ -70,3 +70,40 @@ test('deletion follows the selected filename, not its position or another owner'
     assert.equal(fs.existsSync(path.join(dir,other)),true);
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
+test('two creates in the same millisecond get distinct names and neither key is overwritten (34-REVIEW IN-08)', async () => {
+  const {dir,key}=fixture();
+  const saved=process.env.GIT_KEY_PASSPHRASE;
+  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
+  require('../../lib/thinx/secrets')._resetCacheForTests();
+  try {
+    key.newUniqueIdentifier=()=>12345; // force the clash the wall clock only produces sometimes
+    const create=()=>new Promise(resolve=>key.create(OWNER,(success,response)=>resolve({success,response})));
+    const [a,b]=await Promise.all([create(),create()]);
+    assert.equal(a.success,true); assert.equal(b.success,true);
+    const names=[a,b].map(r=>path.basename(r.response.filename,'.pub'));
+    assert.notEqual(names[0],names[1]);
+    for (const name of names) assert.match(name,/^a{64}-\d+$/);
+    assert.deepEqual(key.getKeyPathsForOwner(OWNER).sort(),names.slice().sort());
+    for (const r of [a,b]) {
+      const base=path.basename(r.response.filename,'.pub');
+      assert.equal(fs.readFileSync(path.join(dir,base+'.pub'),'utf8'),r.response.pubkey);
+      assert.match(fs.readFileSync(path.join(dir,base),'utf8'),/BEGIN ENCRYPTED PRIVATE KEY/);
+      assert.equal(new Date(r.response.date).getTime(),Number(base.split('-')[1]));
+    }
+    assert.notEqual(a.response.pubkey,b.response.pubkey);
+  } finally {
+    if (typeof saved==='undefined') delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=saved;
+    require('../../lib/thinx/secrets')._resetCacheForTests();
+    fs.rmSync(dir,{recursive:true,force:true});
+  }
+});
+test('a failed generation releases the claimed name and leaves no file behind', async () => {
+  const {dir,key}=fixture();
+  try {
+    key.newUniqueIdentifier=()=>777;
+    key.generate=(owner,date,cb)=>cb(new Error('synthetic failure'));
+    const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success)));
+    assert.equal(ok,false);
+    assert.deepEqual(fs.readdirSync(dir),[]);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
