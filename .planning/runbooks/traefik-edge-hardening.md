@@ -1867,6 +1867,35 @@ edge_ops_03_status: open gap — not measured (run 1 NO-MEASUREMENT 2026-10-09; 
 EDGE-OPS-03 stays unchecked in `.planning/REQUIREMENTS.md`. The executor did not accept anything on the operator's behalf; the
 operator chose to record the gap, not to accept a measured result.
 
+### P34 SLA run 2 (34-VERIFICATION gap closure, 2026-10-11 17:3xZ)
+
+Same D-12 recipe as run 1 (`.planning/runbooks/swarm.md` § SLA verification): the push of this signed evidence
+commit is the sample, timed from T_PUSH (taken immediately before `git push`) to the first 2xx/3xx Traefik JSON
+access-log line whose `ServiceAddr` is the new `thinx_api` task's `:7442`. Budget 300 s total. No re-run to pick a
+better number. One re-run is allowed only if the run is invalid on its face (a CI infra failure unrelated to the code).
+
+Readiness (17:33Z, read-only):
+
+final_edge: args=24 log=WARN accesslog=json drop=RequestPath,RequestLine,ClientUsername docker_api=tcp://traefik_socket-proxy:2375 tls=tls-config-3 hsts=security-headers@file routers=29/0
+
+- **CircleCI:** `status.json` indicator `none`, "All Systems Operational" (17:33:24Z). `summary.json`: 0 non-operational
+  components ("Pipelines & Workflows", "Docker Jobs" operational), 0 incidents, 0 maintenances in progress. The
+  13:30–17:30Z maintenance that covered the fea9712e push has ended.
+- **Tip green:** `origin/thinx-staging` = `fea9712e823b`; `test` 15859 **success**, `api-registry` 15860 **success**
+  on that SHA; 0 thinx-staging jobs running or queued.
+- **Swarmpit:** `/version` `1.10-SNAPSHOT`, statistics false, API 1.44, engine 29.8.1; `swarmpit_app` container
+  started 2026-10-11T06:47:45Z (≫ 60 s); `autoredeploy` lines in the last 30 min: 65 (polling).
+- **Edge:** `traefik_traefik` idx 38380400, 24 Args, Configs `tls-config-3`, endpoint
+  `tcp://traefik_socket-proxy:2375`; `traefik_socket-proxy` 1/1 `(healthy)`; overview routers `[29,0]`.
+- **Pre:** `thinx_api` task `qntushc2e953` (micro, Running since 2026-10-11T17:15:11.422Z, the fea9712e rollout),
+  digest `096c3cf47d1f`; `thinx-api@swarm` servers `["http://10.0.1.30:7442"]`. Traefik container `31e4644c3188` on micro.
+- **Git:** base `origin/thinx-staging` = `fea9712e823b`. The pushed range carries the verification report, the
+  mirror banner (thinx-swarm `88d0e5a`, README only), the doc-drift fixes, the WINDOWS #20 attempt record and
+  this commit. Diff hygiene over `fea9712e..HEAD` plus this edit (256 added lines): apr1 / bcrypt / PEM / AWS / GitHub /
+  Slack / `sk-` / JWT shapes 0, e-mail addresses 0, `HASHED_PASSWORD=` 0, credential-assignment shapes 0; skip-ci
+  markers in messages 0; every commit `G`. Non-planning diff: `docker-compose.traefik.yml` (banner only);
+  `services/console` diff empty.
+
 ### Re-verify matrix (Phase 34, 2026-10-09 16:36–17:06 UTC) vs traefik-edge.F.pre.yml
 
 34-05 Task 2. Every signal was re-read at the Phase 34 end state (micro read-only except the `tls-config-2` removal;
