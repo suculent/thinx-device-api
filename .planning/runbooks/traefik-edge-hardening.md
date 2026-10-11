@@ -2476,10 +2476,10 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
 - **WR-05 `vault.yml`** — image re-pin / delete decision moved to v1.17 VAULT-01 (Phase 39 owns `vault.yml`).
 - ~~**mosquitto `:8883` (TLS MQTT) listener down**~~ — **resolved 2026-10-09** (`### P34 MQTTS 8883 record`): 8883
   serves the thinx.cloud cert with go-auth, 1884 websockets removed, daily cert-sync cron on micro.
-- **Edge basic-auth hash → bcrypt `$2y$`** (34-REVIEW WR-06): needs the plaintext again (shredded 16:08:38Z); operator
-  re-places it at `/root/.p34-basicauth`; hash on micro with python3 `bcrypt` (prefix rewritten to `$2y$`), store in the
-  env file, label-only update of `couch-auth` / `influx-auth`, shred. Optional: move the deploy secret out of the tree
-  `thinx_worker` mounts (`/root/…`, read by `restart.sh` / `thinx.sh`) or narrow the worker's mount.
+- ~~**Edge basic-auth hash → bcrypt `$2y$`** (34-REVIEW WR-06)~~ — **done 2026-10-11** (`### P34 WR-06 bcrypt + move
+  record`): `couch-auth` / `influx-auth` carry a bcrypt `$2y$` cost-12 hash, label-only update; the hash moved out of
+  the tree `thinx_worker` mounts to `/mnt/gluster/deployment/secrets/edge-basicauth` (`600 root:root`), read literally
+  by `restart.sh` / `thinx.sh`; the staged plaintext was shredded.
 - **CouchDB / InfluxDB backend admin accounts** were not rotated (only the edge basic-auth was); the operator allows
   them to share the edge password when they are.
 - **errorpage autoredeploy blips** — each thinx-swarm `master` push rebuilds `thinx/error-page`, Swarmpit replaces the

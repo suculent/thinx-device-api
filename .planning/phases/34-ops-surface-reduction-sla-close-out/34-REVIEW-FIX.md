@@ -44,6 +44,10 @@ The live changes, with backups, Version.Index values, gates and revert lines, ar
 
 ## Pre-existing finding surfaced while gating (not a review finding, not changed)
 
+> **Superseded 2026-10-09 20:25Z:** `:8883` is now up. It serves MQTTS with the `thinx.cloud` cert and the same go-auth
+> as `:1883`, the websockets listener `:1884` is removed, and a daily cert-sync cron runs on micro. See the hardening
+> runbook, `### P34 MQTTS 8883 record`. The paragraph below describes the state before that fix.
+
 `thinx_mosquitto` does not listen on **`:8883`** (TLS MQTT). From the Traefik task over the overlay, `tasks.mosquitto`
 answers 1883 and 1884 but not 8883. `188.166.23.244:8883` is CLOSED from micro and from the laptop. Host
 ufw/NAT/docker-proxy are fine. The task has been Running on core since about 06:50Z, which is before Phase 34. The

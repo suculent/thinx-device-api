@@ -209,7 +209,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 - [x] 34-03-PLAN.md — Tracer Stage C: `tls-config-3` (security-headers in the file provider, Go-default curves incl. X25519MLKEM768) + `security-headers@file` default in one update; Stage D: swarm-label copy retired, db/registry `:80` redirect-only (folded D-15..D-17; EDGE-OPS-03 final edge)
 
 **Wave 4** *(blocked on Wave 3)*
-- [x] 34-04-PLAN.md — Tracer Stage E: prune the seven retired ACME entries (scan HOSTS 17 → 16); operator checkpoint for the new basic-auth password; couch-auth/influx-auth rotation (historic literal proven dead) + vault.yml re-pin (folded D-18..D-20)
+- [x] 34-04-PLAN.md — Tracer Stage E: prune the seven retired ACME entries (scan HOSTS 17 → 16); operator checkpoint for the new basic-auth password; couch-auth/influx-auth rotation (historic literal proven dead) (folded D-18, D-19); D-20 vault.yml re-pin dropped, moved to v1.17
 
 **Wave 5** *(blocked on Wave 4)*
 - [x] 34-05-PLAN.md — Tracer: the D-12 SLA run (git push → CI → registry → Swarmpit → first response served through Traefik by the new task, three legs, re-run once on a miss; a FAIL stays an open EDGE-OPS-03 gap unless the operator accepts it); F.post + scan After + re-verify matrix, `tls-config-2` removed; swarm.md / AGENTS.md / runbook close-out, one docs push (EDGE-OPS-03)
