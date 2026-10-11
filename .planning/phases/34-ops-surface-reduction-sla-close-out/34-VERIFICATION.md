@@ -1,6 +1,6 @@
 ---
 phase: 34-ops-surface-reduction-sla-close-out
-verified: 2026-10-11T18:02:00Z
+verified: 2026-10-11T18:05:00Z
 status: passed
 score: 12/12 must-haves verified
 re_verification:
@@ -11,6 +11,11 @@ re_verification:
     - "34-05 must-have: one clean external scan run (WINDOWS #20). The recorded vps run (17:51:24Z–17:53:50Z, d9ebca9d) is a complete single run ending in EDGE-SCAN OK. The verifier ran it again from vps at 17:58:31Z–18:00:20Z (rc=0) and the output matched the recorded run line for line (154/154)."
   gaps_remaining: []
   regressions: []
+  stale_refresh:
+    at: 2026-10-11T18:05:00Z
+    previous_verified: 2026-10-11T18:02:00Z
+    cause: "7a111f11 edited two covered runbook files after the 18:02Z report: traefik-edge-hardening.md (re-verify matrix row 'external scan' gained a superseded-2026-10-11 note; the Recorded-for-later item 'External scan re-run from a stable uplink' is struck through and marked done) and traefik-edge-scan.2026-10-09.md (the ## After verdict now says it is superseded by the clean vps run at the end of the file)."
+    finding: "Doc-only. All 6 changed lines are annotations; no evidence line, run output, count or verdict that this report relies on changed. Every new statement matches the file (vps 37.60.254.174, 17:51Z, rc=0, EDGE-SCAN OK at line 883, WINDOWS #20 fixed). Status stays passed, score stays 12/12; digest recomputed."
 covered_files:
   - ".planning/PROJECT.md"
   - ".planning/ROADMAP.md"
@@ -37,7 +42,7 @@ covered_files:
   - "scripts/traefik-edge-scan.sh"
   - "spec/jasmine/03-RsakeySpec.js"
   - "spec/node/DeployKeyNames.test.js"
-covered_digest: "v3:sha256:803b9efed4845b7bf8f3fb46e5527efa0df71f246096f00823778538599de0a0"
+covered_digest: "v3:sha256:a7690e2650bbb7e00c5f7da234de12ec3fdeb8050df4f731c1635975f209d6c7"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -45,7 +50,7 @@ overrides_applied: 0
 # Phase 34: Ops Surface Reduction & SLA Close-out Verification Report
 
 **Phase goal:** Reduce the operational attack surface and confirm the deploy SLA end-to-end.
-**Verified:** 2026-10-11T18:02Z (re-verification #2; initial 17:20Z, re-verification #1 17:50Z)
+**Verified:** 2026-10-11T18:02Z (re-verification #2; initial 17:20Z, re-verification #1 17:50Z); fingerprint refreshed 18:05Z after doc-only commit 7a111f11 (see "Re-verification note: 7a111f11")
 **Status:** passed
 **Re-verification:** Yes. The one remaining gap, WINDOWS #20 (a single clean external scan run), is closed. This verifier reproduced the result independently.
 
@@ -87,7 +92,7 @@ None.
 | `docker-swarm.yml` | label parity | ✓ VERIFIED | carried |
 | `scripts/traefik-edge-scan.sh` | HOSTS 16 + RETIRED_HOSTS probes | ✓ VERIFIED | full run executed by the verifier: rc=0 |
 | `.planning/runbooks/swarm.md` | SLA recipe + socket-proxy ops | ✓ VERIFIED | carried |
-| `.planning/runbooks/traefik-edge-hardening.md` | P34 records incl. SLA run 2 | ✓ VERIFIED | two stale scan lines (Info, below) |
+| `.planning/runbooks/traefik-edge-hardening.md` | P34 records incl. SLA run 2 | ✓ VERIFIED | the two stale scan lines were fixed in 7a111f11 |
 | `.planning/runbooks/swarm-configs/traefik-edge.F.post.yml` | end-state capture | ✓ VERIFIED | exists |
 | `.planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md` | a single EDGE-SCAN OK run | ✓ VERIFIED | `## Clean single run — 2026-10-11` section; the 34-05 automated check's capture half (`awk '/^## After \(post-P34/{f=1} f' … \| grep -q 'EDGE-SCAN OK'`) now passes, and its fresh-run half passed in the verifier's own vps run |
 | `.planning/WINDOWS.md` | #20 fixed | ✓ VERIFIED | table + JSON + counts consistent |
@@ -136,15 +141,15 @@ All three are `[x]` / Complete in `v1.15-REQUIREMENTS-IN-PROGRESS.md` (lines 35�
 
 ### Anti-Patterns Found
 
-No TBD/FIXME/XXX markers. Four doc drifts remain after d9ebca9d. None is a blocker.
+No TBD/FIXME/XXX markers. The 18:02Z report listed five Info items. 7a111f11 resolved the three runbook drifts (struck through below); two remain. None is a blocker.
 
 | File | Line | Pattern | Severity | Impact |
 |---|---|---|---|---|
-| `.planning/runbooks/traefik-edge-hardening.md` | 2534–2536 | `## Recorded for later` still lists "External scan re-run from a stable uplink" as pending (not struck through like the SLA item above it) | ℹ️ Info | Strike it through and point at the `## Clean single run — 2026-10-11` section |
-| `.planning/runbooks/traefik-edge-hardening.md` | 1975 | the re-verify matrix row "external scan" still says "no single full run clean … deviation" | ℹ️ Info | Add the 2026-10-11 vps run |
-| `.planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md` | ~239 | the `## After` verdict paragraph still says "No single full run printed the OK verdict line"; the clean run is appended at the end without a forward reference | ℹ️ Info | One-line forward pointer |
+| ~~`.planning/runbooks/traefik-edge-hardening.md`~~ (resolved 7a111f11) | 2534–2536 | `## Recorded for later` still lists "External scan re-run from a stable uplink" as pending (not struck through like the SLA item above it) | ℹ️ Info | Strike it through and point at the `## Clean single run — 2026-10-11` section |
+| ~~`.planning/runbooks/traefik-edge-hardening.md`~~ (resolved 7a111f11) | 1975 | the re-verify matrix row "external scan" still says "no single full run clean … deviation" | ℹ️ Info | Add the 2026-10-11 vps run |
+| ~~`.planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md`~~ (resolved 7a111f11) | ~241 | the `## After` verdict paragraph still says "No single full run printed the OK verdict line"; the clean run is appended at the end without a forward reference | ℹ️ Info | One-line forward pointer |
 | `.planning/STATE.md` | 39 | "verification pending (EDGE-OPS-03 open gap, WINDOWS #19; full clean scan owed, WINDOWS #20)" | ℹ️ Info | The orchestrator updates this when the phase closes |
-| git | — | `d9ebca9d` is local only: `origin/thinx-staging` is still at `1359dd34` | ℹ️ Info | Push when convenient (docs only, no CI effect on the edge) |
+| git | — | `d9ebca9d` and `7a111f11` are local only: `origin/thinx-staging` is still at `1359dd34` (local ref, 18:04Z) | ℹ️ Info | Push when convenient (docs only, no CI effect on the edge) |
 
 ### Human Verification Required
 
@@ -159,7 +164,17 @@ None. The device-flow harness was not re-run because it mutates device state; it
 
 Phase 34 achieves its goal. Only the Info-level doc drift above remains.
 
+### Re-verification note: 7a111f11 (2026-10-11 18:05Z)
+
+The 18:02Z report went stale because commit 7a111f11 edited two covered files. `git show 7a111f11 -- .planning/runbooks` changes 2 lines in each file:
+
+- `traefik-edge-hardening.md` line 1975 (re-verify matrix, row "external scan"): adds "(superseded 2026-10-11: a clean single run from `vps`, `EDGE-SCAN OK`, rc=0, is the last section of `traefik-edge-scan.2026-10-09.md`; WINDOWS #20 fixed)". The composite-run evidence and the historical "deviation … from this laptop" verdict are unchanged, and both are still true of the 10-09 laptop runs.
+- `traefik-edge-hardening.md` line 2534 (`## Recorded for later`): "External scan re-run from a stable uplink" is struck through and marked done 2026-10-11 (17:51Z, `vps` 37.60.254.174, appended to the scan file). The original note is kept.
+- `traefik-edge-scan.2026-10-09.md` line 241 (`## After` verdict): prefixed "(superseded 2026-10-11 by the clean single run from `vps` at the end of this file — `EDGE-SCAN OK`)". The run 1 to run 6 evidence below it is unchanged.
+
+Each new statement was checked against the files. The scan file's last section is `## Clean single run — 2026-10-11 17:51:24Z–17:53:50Z (from vps 37.60.254.174 …)`, which records rc=0 and ends in `EDGE-SCAN OK` (line 883). WINDOWS #20 is `fixed` (resolved 17:54:12Z). The commit touches no run output, count, host section, SLA record, script or implementation file, and no truth's evidence depends on the annotated lines. These are the three Info items above, now resolved. Every other covered file is clean at HEAD 7a111f11, and the recomputed fingerprint covers the same 25 files. Status stays **passed**, score **12/12**. No production calls were made for this refresh.
+
 ---
 
-_Verified: 2026-10-11T17:20Z; re-verified 17:50Z and 18:02Z_
+_Verified: 2026-10-11T17:20Z; re-verified 17:50Z and 18:02Z; fingerprint refreshed 18:05Z (7a111f11, doc-only)_
 _Verifier: Claude (gsd-verifier)_
