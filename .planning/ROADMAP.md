@@ -198,7 +198,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
 3. push → CI → Swarmpit measured ≤600 s end-to-end on an edge change (budget raised from 5 minutes by the operator on 2026-10-11); swarm runbook updated.
 
-**Plans:** 5/5 plans executed (planned 2026-10-09; revised after plan-check — Stage B2 split out)
+**Plans:** 5/5 plans complete — verified passed 12/12 on 2026-10-11 (planned 2026-10-09; revised after plan-check — Stage B2 split out)
 **Wave 1**
 - [x] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
 
@@ -236,7 +236,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete    | 2026-10-09 |
-| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Pending | — |
+| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Complete    | 2026-10-11 |
 
 ---
 *v1.15 Traefik Hardening (Edge) started 2026-10-06: 14 requirements across 6 phases (29–34). Next: `/gsd-discuss-phase 29`.*
