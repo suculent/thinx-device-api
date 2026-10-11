@@ -1966,8 +1966,9 @@ mirror banner), mirror `MIRROR OK` at 24 flags, `docker-swarm.yml` == `thinx.yml
 **Ordered revert set, newest first.** Revert only as far as the failure requires. Each step is one command (or a
 short group of label updates) followed by the gate: loopback `29/0` + names, HTTPS matrix, WS 101/401, bare-IP 301/200,
 `7442/1883/8883 OPEN`. **Before any step that restarts Traefik ((b), (d), (e), (g)), assert `traefik_socket-proxy`
-1/1** (and, since the review fixes, `(healthy)`) unless (e) has already put Traefik back on the raw socket. Steps
-(r1)–(r3) undo the Phase 34 review fixes (`### P34 review fixes record`) and come first. The (d) pre-C Args still name
+1/1** (and, since the review fixes, `(healthy)`) unless (e) has already put Traefik back on the raw socket. Step (r0)
+undoes the WR-06 bcrypt + move (`### P34 WR-06 bcrypt + move record`) and comes first; steps
+(r1)–(r3) undo the Phase 34 review fixes (`### P34 review fixes record`) and come next. The (d) pre-C Args still name
 the old endpoint `tcp://socket-proxy:2375`, which resolves through the proxy's `socket-proxy` alias on `traefik-socket`
 — keep that alias while any pre-review backup may be replayed. Backups are `600 root` on micro
 (`/mnt/data/edge-rollback/`), never leave the host, and are read by `jq` there; Args are rebuilt with `map(@sh)`, never
@@ -1975,6 +1976,11 @@ typed. Order constraints: (c) before (d) (the pre-C Args name `security-headers@
 `tls-config-2` recreated before (d); (e) before (f); everything live before (h).
 
 ```
+# (r0) review fix WR-06 (2026-10-11) — bcrypt labels back to apr1, env line back, loader reverted. Full commands and
+#      expectations: `### P34 WR-06 bcrypt + move record` § Revert. Order: (r0a) labels, (r0b) env file, (r0c) git revert 5005ca0 (+ micro ff), (r0d) optional secrets file removal
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'B=/mnt/data/edge-rollback/p34-wr06-20261011T170115Z; for s in couchdb influxdb; do k=couch; [ $s = influxdb ] && k=influx; V=$(jq -r ".[0].Spec.Labels[\"traefik.http.middlewares.$k-auth.basicauth.users\"]" $B/thinx_$s.spec.json); docker service update --detach --label-add "traefik.http.middlewares.$k-auth.basicauth.users=$V" thinx_$s >/dev/null; done'
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'cp -p /mnt/data/edge-rollback/p34-wr06-20261011T170115Z/thinx-env.pre-wr06 /mnt/gluster/thinx/.env'
+# expect: rc 0; tasks unchanged; label sha12 79e078373496 ×2; env 62 lines / 600 root; then (r0c). (a3) below goes back one rotation further and needs (r0) first
 # (r1) review fix WR-02 — endpoint back to the bare alias (ONE --args update, one restart; proxy 1/1 asserted first)
 ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "[ \"\$(docker service ls --filter name=traefik_socket-proxy --format '{{.Replicas}}')\" = '1/1' ] || exit 3; B=/mnt/data/edge-rollback/p34rf-wr02-traefik_traefik-20261009T175450Z.json; jq '.[0].Spec.TaskTemplate.ContainerSpec.Args | length' \$B; ARGS=\$(jq -r '.[0].Spec.TaskTemplate.ContainerSpec.Args | map(@sh) | join(\" \")' \$B); docker service update --detach --args \"\$ARGS\" traefik_traefik"
 # expect: 24 ; rc 0; one restart; endpoint tcp://socket-proxy:2375; 29/0, names == routers_post_A2:
@@ -2134,7 +2140,8 @@ rules apply to any fix: `:8883` must come back as plain TLS MQTT, never redirect
   operator** (the plaintext was shredded at 16:08:38Z): micro has **no `htpasswd`**; it has **python3 `bcrypt` 3.2.2**
   (emits `$2b$`; same algorithm as `$2y$`, so the prefix is rewritten to `$2y$`, the form the WR-01 check accepts).
   Proven with synthetic values in a `--network none` throwaway `traefik:v3.7.14` (file-provider basicAuth): both `$2y$` and
-  `$2b$` hashes → right password 200, wrong 401, none 401, 0 error lines.
+  `$2b$` hashes → right password 200, wrong 401, none 401, 0 error lines. **Done 2026-10-11** (bcrypt live, hash moved
+  out of the worker-bound tree): `### P34 WR-06 bcrypt + move record`.
 - **IN-02** — `traefik.sh` refuses to deploy unless `stat -c %g /var/run/docker.sock` == the gid in `traefik.yml`
   (scratch test: 998 → proceeds, 999 → rc 1, docker not called). Live micro: `docker.sock gid=998 group=docker` (matches).
 - **IN-03 / IN-04 / IN-05** — `traefik.yml` comments + README + swarm.md (`:ro` cosmetic, allow-list is the boundary;
@@ -2272,6 +2279,171 @@ SIGHUP reload, which runs as uid 1883 — `0640 root:1883` would work); `/mnt/gl
 `0644` key files for every exported domain, and `mosquitto/ssl/traefik_key.pem` is `0754`; `/etc/cron.d/clean_docker`
 line 2 starts with `docker service restart` (not a command), so its monthly `update_all.sh` chain never runs (the root
 crontab `renew_registry_cert.sh` does that job).
+
+### P34 WR-06 bcrypt + move record (34-REVIEW WR-06; 2026-10-11 16:47–17:04 UTC)
+
+**Outcome: WR-06 is closed (operator: "placed + move"). The `couch-auth` / `influx-auth` edge basic-auth hash is now
+bcrypt (`$2y$`, cost 12; it was apr1) and is applied live, label-only, on `thinx_couchdb` and `thinx_influxdb`. Neither
+task restarted. The stored copy moved out of the `thinx` gluster tree that the root `thinx_worker` binds. It is now
+`/mnt/gluster/deployment/secrets/edge-basicauth` (dir `700`, file `600 root:root`), which no container binds and which
+is outside the `swarm` git checkout. `/mnt/gluster/thinx/.env` lost its `HASHED_PASSWORD` line. The plaintext file
+is shredded. This record holds sha256 prefixes (12 hex), counts and modes only. No password, hash, label value or env
+value left micro or was printed.**
+
+**Same password, new hash.** Before the change, the plaintext in `/root/.p34-basicauth` already passed the edge on the
+live apr1 labels (db `200` + CouchDB welcome, influx `200`, challenge 0). The operator re-placed the 2026-10-09 (D-18)
+password; it was not rotated. That password's apr1 hash sat in the worker-readable `.env` from 2026-10-09 16:07Z to
+2026-10-11 17:02:57Z. If that window matters, rotate the password with the recipe below. The gate's "old credential
+is dead" check is therefore "the labels and the Traefik middleware carry 0 `$apr1$`" (both 0), not a login test.
+
+Inputs (metadata only): `/root/.p34-basicauth` `600 root:root`, 18 B, 2 lines, line 1 = 16 characters (used alone:
+`head -n1 | tr -d '\r\n'`); user unchanged `admin`; micro python3 `bcrypt` 3.2.2, no `htpasswd`.
+
+**Location choice (read-only, 16:47Z).** All 22 services through the Engine API (`/services`, `ContainerSpec.Mounts`):
+
+| Fact | Result |
+|---|---|
+| binds under `/mnt/gluster/deployment` | only three single files in `swarm/`: `console/default.conf` (`thinx_console`, `thinx_vue`, ro), `swarmpit/couchdb-logging.ini` (`swarmpit_db`) |
+| binds of `/mnt/gluster/thinx` | `thinx_worker` the **whole** tree (→ `/mnt/data/thinx`, rw, uid 0); `thinx_api`, `thinx_couchdb`, `thinx_influxdb`, `thinx_mosquitto`, `thinx_thinx-redis`, `registry_registry` subdirs/files |
+| standalone containers | none on micro, none on core |
+| `/mnt/gluster/deployment` | not a git repo (only `swarm/` is the thinx-swarm checkout), `755 root`, gluster on both nodes |
+| `/mnt/gluster/deployment/secrets` | did not exist; created `700 root:root`; core sees `700` / `600 root:root`; `su reverse -c ls` on core → **Permission denied** |
+| host backup job | `/etc/cron.daily/backup` tars all of `/mnt/glusterfs` to `/backups` (micro: archives `644 root`, dir `755`; core: empty). micro has no non-root users and no container mounts `/backups` (pre-existing, see "Seen, not fixed") |
+| Docker socket | `thinx_worker` and `thinx_api` bind `/var/run/docker.sock` **rw** (host-root-equivalent), `swarmpit_app` / `swarmpit_agent` / `traefik_socket-proxy` ro |
+
+**Repo first: thinx-swarm `5005ca0`** (`fix(ops): edge basic-auth hash is bcrypt and lives outside the worker's bind
+mount (34-REVIEW WR-06)`, signed). `restart.sh` / `thinx.sh` use one literal reader (`load_kv_file`: line reader, first
+`=`, `export "$k=$v"`, CRLF stripped, invalid names skipped). They take every key except `HASHED_PASSWORD` from
+`/mnt/gluster/thinx/.env` (a `HASHED_PASSWORD` line there is ignored, with one stderr line) and **only**
+`HASHED_PASSWORD` from the secrets file. They fail closed on a missing/unreadable/empty file of either kind and on a
+secrets file readable by group or others (`find -perm -040 -o -perm -004`), and they accept **only bcrypt**
+`^\$2y\$(1[0-9]|2[0-9]|3[01])\$[./0-9A-Za-z]{53}$`. **apr1 is refused** (no revert-path exception: the revert set below
+restores the old loader together with the old env line). Everything still runs before `docker stack rm`. The README
+carries the new location, who can still read the hash, and the rotation recipe. Pushed to origin `master` and to micro
+as `p34-wr06`, `--ff-only`, branch deleted: micro HEAD == origin == `5005ca0`, tracked-dirty 0. That ff also carried
+the two error-page / downtime commits another session pushed minutes earlier (`77fb6db`, `c96f5b2`), and the push
+triggers the thinx-swarm CircleCI image builds (harmless). This repo: mirror banner regenerated at `5005ca0`
+(`09f98bf1`, banner-only, `MIRROR OK files=1`, 24 flags).
+
+`env -i HOME=<scratch> PATH=<stub>:/usr/bin:/bin` matrix on scratch copies (paths rewritten to a temp dir;
+`docker`/`sleep` stubbed, and the stub logs only sha12 of `admin:$HASHED_PASSWORD`; synthetic `$2y$12$`+53 random
+characters), **76/76 PASS** = 19 cases × 2 scripts × bash 3.2 (`/bin/bash`) and 5.2:
+
+| Case | Expect | Observed |
+|---|---|---|
+| hash file missing / empty / unreadable (000) | rc 1, 0 stdout, docker not called | as expected ×4 |
+| hash file mode 644 / 640 (valid content) | rc 1 (group/other readable) | as expected ×4 |
+| `$apr1$…` / `$2b$…` / `$2y$04$` (cost 4) / single-quoted / `$$`-escaped | rc 1 | as expected ×4 |
+| stale inherited `HASHED_PASSWORD` + no line in the hash file | rc 1 | as expected ×4 |
+| valid `$2y$12$` (+ `FOO=bar baz` keeps the space, `X=$HOME/$(id)` literal) | rc 0, sha == file | `972407d17118` ×4 |
+| stale inherited + valid file | the file wins | `972407d17118` ×4 |
+| CRLF + extra `OTHER=x` in the hash file / no trailing newline | rc 0, `OTHER` not exported | as expected ×4 |
+| `HASHED_PASSWORD` in the env file + valid hash file / env-file line only, no hash file | hash file wins / rc 1 | as expected ×4 |
+| env file missing / empty | rc 1 | as expected ×4 |
+
+No run printed a `KEY=value` line (no environment dump).
+
+**Hash + file (16:52:43Z, ONE remote shell, nothing secret echoed).**
+`H=$(head -n1 /root/.p34-basicauth | tr -d '\r\n' | python3 -c '…bcrypt.hashpw(p, bcrypt.gensalt(12))….replace("$2b$","$2y$",1)')`
+→ `hash_ok len=60 dollars=3`; `bcrypt.checkpw` (password on stdin, hash via the python process env only) **right=True
+wrong=False**. Written through a `600` `mktemp` in the `700` dir + `mv`: 3 lines (2 comment lines, 1
+`HASHED_PASSWORD=` line), read-back equal; **expected label sha12 `4b8f8bbd91b2`**.
+
+**Render check (`docker stack config`, scratch copies cut after the hash check with `docker stack config -c ./thinx.yml`
+appended, asserted to contain no `stack rm`/`stack deploy` command; run in the deploy dir, output parsed in memory by
+pyyaml, sha12 only; nothing deployed):**
+
+| Run | old loader (`31ac7ea`) + env file | new `restart.sh` | new `thinx.sh` | masked render (users values → X) |
+|---|---|---|---|---|
+| pre-push (scratch copies of `5005ca0`) | 485 lines, `79e078373496` ×2 == **live** (method proven) | `4b8f8bbd91b2` ×2 == expected | `4b8f8bbd91b2` ×2 | `3c6b08e395fc` all three; old vs new diff = 4 lines, all `basicauth.users` |
+| post-ff (copies of the micro checkout, sha12 == scratch) | identical | identical | identical | identical |
+| post-removal of the env line | **rc 1, refuses** (no hash in `.env` any more, as designed) | `4b8f8bbd91b2` ×2, no "ignoring" message | `4b8f8bbd91b2` ×2 | `3c6b08e395fc` |
+
+0 rendered `$$`, 0 `$apr1$` in the new renders, 0 unexpected stderr lines.
+
+**Live change (17:01:16.48Z), backups first** — `/mnt/data/edge-rollback/p34-wr06-20261011T170115Z/` (`700 root`):
+`thinx_couchdb.spec.json` (`10327`, label sha12 `79e078373496`), `thinx_influxdb.spec.json` (`9867`, `79e078373496`),
+later `thinx-env.pre-wr06` (`1783`, `cmp` identical to the env file before the removal), all `600 root:root`.
+
+```
+# on micro, H read from the secrets file into a variable, never echoed; user part of the live label asserted == admin
+docker service update --detach --label-add "traefik.http.middlewares.couch-auth.basicauth.users=admin:$H"  thinx_couchdb
+docker service update --detach --label-add "traefik.http.middlewares.influx-auth.basicauth.users=admin:$H" thinx_influxdb
+# expect: rc 0 ×2; inspected label sha12 == 4b8f8bbd91b2, $apr1$ 0, $$ 0; task ids unchanged (else auto-restore from the backups)
+```
+
+rc 0 / 0. **Version.Index `thinx_couchdb` 38380400 → 38380569, `thinx_influxdb` 38380400 → 38380570** (both were at
+38380400 from a joint update at 2026-10-11 06:47:33Z, before this work); tasks **unchanged** (`88doe8anls5t` micro,
+`mulafi7tbk6u` core).
+
+| Gate | Before (17:00Z) | After (17:01–17:02Z) |
+|---|---|---|
+| `couch-auth@swarm` / `influx-auth@swarm` | enabled, users 1, removeHeader true, sha12 `79e078373496`, apr1 1 | **enabled, users 1, removeHeader true, sha12 `4b8f8bbd91b2`, apr1 0, `:$2y$12$` 1** (both) |
+| overview / not-enabled routers | `[29,0,18,6,["Swarm","File"]]` / 0 | `[29,0,18,6,["Swarm","File"]]` / 0 |
+| password from the file, Traefik netns (`nsenter -t <pid> -n curl -sk --resolve <h>:443:127.0.0.1 -K -`, stdin config) | db 200 welcome 1, influx 200; challenge 0 | **db 200 + CouchDB welcome, influx 200; challenge 0** |
+| same + one extra character (wrong password) | — | db 401 challenge 1, influx 401 challenge 1 |
+| no credential (netns) | 401, `Basic realm="traefik"` ×2 | 401, `Basic realm="traefik"` ×2 |
+| laptop `https://db…` / `https://influx…` | 401 + challenge ×2 | 401 + challenge ×2 |
+| laptop `http://db…` / `http://influx…` | 301 → https ×2 | 301 → https ×2 |
+| `7442 / 1883 / 8883` from the laptop to `188.166.23.244` | OPEN ×3 | OPEN ×3 |
+| Traefik log since 17:01:00Z (`timeout 30 docker logs`) | — | 0 ERR, 0 basicauth/middleware lines |
+| device-flow harness | `p34wr06-pre-7442` PASS, `p34wr06-pre-https` PASS | **`p34wr06-post-7442` PASS, `p34wr06-post-https` PASS** |
+
+(Harness: `/tmp/p31-device-flow/thinx-device-flow.mjs` had been cleared from `/tmp` again and was re-extracted, at
+3010 B, from the 31-03 executor's Write call in the local transcript. It ran from `~/Repositories/thinx-mcp-device`;
+its stash was not touched.)
+
+**Env line removed (17:02:52Z).** Backup first (above). `awk '!/^HASHED_PASSWORD=/'` into a `600` `mktemp` in the same
+dir, `chown root:root`, `mv`: `1783 B / 62 lines / 1 HASHED_PASSWORD` → **`1729 B / 61 lines / 0`**, `600 root:root`
+(also through the deploy link), diff vs backup = exactly 1 removed line (the `HASHED_PASSWORD=` one), 0 added, 0
+leftover temp files.
+
+**Worker visibility (inside `thinx_worker`, container `bc86ecfeeed4` on micro, uid 0, counts only):**
+`grep -c HASHED_PASSWORD /mnt/data/thinx/.env` → **0**; across `/mnt/data/thinx/.env*` (incl. the two old `.env.bak.*`)
+→ **0**; files containing it in `conf mosquitto ssl qool redact-work snapshots test-reports` + top-level files → **0**;
+`/mnt/gluster/deployment/secrets/edge-basicauth` visible → **no**; mountinfo lines naming `deployment` → **0**. Host side:
+files under `/mnt/gluster/thinx` (excluding the couchdb/influxdb2/redis/repos/deploy/statistics/ssh_keys data dirs)
+containing the new hash value → **0**.
+
+**Residual (recorded, not fixable by a file move):** the hash is a **service label**, so anything with Docker API
+access reads it: from inside `thinx_worker`, `curl --unix-socket /var/run/docker.sock …/services/thinx_couchdb` returns
+the `couch-auth.basicauth.users` key **2** times (Spec + PreviousSpec), with its value. The worker and `thinx_api` mount
+the socket rw (host-root-equivalent), and Traefik reads `/services` through the socket-proxy (IN-04). The move closes
+the passive file read through the bind mount; bcrypt (cost 12) is what makes a leaked hash expensive. Removing the
+socket from the worker is a separate design change.
+
+**Shred (17:03:15Z):** `shred -u /root/.p34-basicauth` → `ls: cannot access … No such file or directory` on micro, and
+absent on core; scratch dir `/root/wr06-scratch` removed.
+
+```
+wr06: couch-auth 79e078373496 -> 4b8f8bbd91b2 (thinx_couchdb 38380400 -> 38380569, task 88doe8anls5t same) ; influx-auth 79e078373496 -> 4b8f8bbd91b2 (thinx_influxdb 38380400 -> 38380570, task mulafi7tbk6u same)
+hash_location: /mnt/gluster/deployment/secrets/edge-basicauth (700/600 root) ; /mnt/gluster/thinx/.env 62 -> 61 lines, HASHED_PASSWORD 0 ; worker count 0
+Version.Index post-P34-WR-06: thinx_couchdb 38380569, thinx_influxdb 38380570
+```
+
+**Rotation recipe (next time, new password):** operator places `/root/.p34-basicauth` (`600 root`); on micro, in ONE
+remote shell, hash it as above, write the new `HASHED_PASSWORD=` line to a `600` temp in
+`/mnt/gluster/deployment/secrets/` + `mv`, render with `docker stack config` from scratch copies (sha12 == `admin:$H`),
+back up both service specs, then the two `--label-add` lines, then the gate above, then `shred -u`.
+
+**Revert** (newest first; it is also step (r0) of the ordered revert set):
+
+```
+# (r0a) labels back to the apr1 value (label-only, no restart; the same password keeps working)
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'B=/mnt/data/edge-rollback/p34-wr06-20261011T170115Z; for s in couchdb influxdb; do k=couch; [ $s = influxdb ] && k=influx; V=$(jq -r ".[0].Spec.Labels[\"traefik.http.middlewares.$k-auth.basicauth.users\"]" $B/thinx_$s.spec.json); docker service update --detach --label-add "traefik.http.middlewares.$k-auth.basicauth.users=$V" thinx_$s >/dev/null; done'
+# expect: rc 0; tasks unchanged; label sha12 79e078373496 on both; middlewares apr1 1
+# (r0b) env file back (restores the apr1 HASHED_PASSWORD line, 62 lines, 600 root) — BEFORE (r0c): the old loader refuses without it
+ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 'cp -p /mnt/data/edge-rollback/p34-wr06-20261011T170115Z/thinx-env.pre-wr06 /mnt/gluster/thinx/.env'
+# (r0c) thinx-swarm: git revert 5005ca0 → origin push → micro ff (as in (h)); this repo: git revert the WR-06 docs commit, mirror regenerated
+# (r0d) optional, only after (r0c): ssh … 'shred -u /mnt/gluster/deployment/secrets/edge-basicauth && rmdir /mnt/gluster/deployment/secrets'
+```
+
+**Seen, not fixed (out of scope):** micro's `/backups` tar archives (whole gluster tree, so they include every
+`.env` version, including the apr1 line since 2026-10-09) are `644 root` in a `755` dir. micro has no non-root
+users, and no container mounts `/backups`. `/mnt/gluster/thinx/.env.bak.20260619154540.cors` and
+`.env.bak.20260929142800` are `644 root` inside the worker-bound tree (0 `HASHED_PASSWORD` lines, but other env
+values). The pre-WR-06 backups in `/mnt/data/edge-rollback/p34-wr06-20261011T170115Z/` hold the apr1 hash of the
+current password (`600 root`, host-local, unmounted).
 
 ## Recorded for later (after Phase 34)
 

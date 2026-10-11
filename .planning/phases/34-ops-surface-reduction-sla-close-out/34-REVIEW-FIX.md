@@ -1,28 +1,29 @@
 ---
 phase: 34-ops-surface-reduction-sla-close-out
 review: 34-REVIEW.md
-fixed_at: 2026-10-09T18:05:00Z
-status: partial
+fixed_at: 2026-10-11T17:04:00Z
+status: all_fixed
 findings_total: 14
-fixed: 13
-partial: 1
-needs_operator: 1
-thinx_swarm_head: 51ff67f
-live_changes: 3
+fixed: 14
+partial: 0
+needs_operator: 0
+thinx_swarm_head: 5005ca0
+live_changes: 4
 ---
 
 # Phase 34: Code Review Fix Report
 
-13 of 14 findings are fixed. WR-06 is **partial**: the documentation is fixed, but the move to bcrypt needs the operator
-to supply the plaintext password again. It was shredded on micro at 16:08:38Z. The checkpoint is in the executor's
-return.
+All 14 findings are fixed. WR-06 was partial on 2026-10-09 (docs only; the bcrypt move needed the plaintext again).
+It was closed on 2026-10-11, 16:47–17:04Z, after the operator re-placed the password ("placed + move"). The hash is
+bcrypt live, and the stored copy moved out of the worker-bound `thinx` tree.
 
-Repo state: thinx-swarm `51ff67f` == origin/master == the micro checkout (tracked-dirty 0). `MIRROR OK files=1`, 24
-flags. Nothing was pushed to thinx-staging. `.planning/STATE.md` and `.planning/ROADMAP.md` were not touched.
+Repo state: thinx-swarm `5005ca0` == origin/master == the micro checkout (tracked-dirty 0). `MIRROR OK files=1`, 24
+flags (`09f98bf1`). Nothing was pushed to thinx-staging. `.planning/STATE.md` and `.planning/ROADMAP.md` were not
+touched.
 
 The live changes, with backups, Version.Index values, gates and revert lines, are in
-`.planning/runbooks/traefik-edge-hardening.md` § `### P34 review fixes record`. They are also steps (r1)–(r3) of the
-Phase 34 ordered revert set.
+`.planning/runbooks/traefik-edge-hardening.md` § `### P34 review fixes record` (WR-02, WR-03, IN-01) and
+`### P34 WR-06 bcrypt + move record` (WR-06). They are also steps (r0)–(r3) of the Phase 34 ordered revert set.
 
 | ID | Outcome | Commit(s) | Evidence |
 |---|---|---|---|
@@ -31,7 +32,7 @@ Phase 34 ordered revert set.
 | WR-03 | fixed (live) | thinx-swarm `a365644`; this repo `052f8b48` | `influx-auth.basicauth.removeheader=true` in `thinx.yml` and `docker-swarm.yml`. Backup `p34rf-influxrh-thinx_influxdb-20261009T175153Z.json`. Label-only change: idx 38380190 → **38380302**, task `mulafi7tbk6u` unchanged. The API reports `removeHeader: true`. `https://influx.thinx.cloud/` returns 401 with the Basic challenge, and `http://` returns 301 |
 | WR-04 | fixed | this repo `43a60bea` | `RETIRED_HOSTS="micro.thinx.cloud"` gets exposure probes only, with `curl -k`. Each probe fails on Traefik API JSON at `/api/overview` or `/api/http/routers`, the `APIUrl` signature, or a 401 on `/dashboard/`, and fails closed on curl or jq errors. `HOSTS` stays at 16. A live run of the block printed `api=302 dashboard=302 sig=0` (nginx catch-all) and `EDGE-SCAN OK`. The jq predicate gives rc 0 for `{"http":…}` and for a non-empty array, and rc 1 for `[]`, HTML or an empty body |
 | WR-05 | fixed | this repo `a70837ee` | `03-RsakeySpec` points `rsakey.ssh_keys` at `mkdtemp(os.tmpdir()/rsakey-spec-)` and removes it in `afterAll`. Run with `HOME=<scratch>`, `ENVIRONMENT=development` and a scratch jasmine config: 15 specs, 1 failure, which is (13) `purgeOrphanedKeys` (no CouchDB locally; pre-existing, same as in the debug notes). The **new spec leaves 0 files** in the scratch `HOME/.ssh` and 0 temp dirs; the **old spec leaves 6** (3 key pairs). The real `~/.ssh` file-name list is identical before and after (128 names, compared by `cmp`; names only, no contents read) |
-| WR-06 | **partial** — docs fixed; bcrypt **needs-operator** | thinx-swarm `4cc2168`; this repo `0a5c061c`, `ac188048` | AGENTS.md, the thinx-swarm README and the runbook now say that `600 root:root` keeps out non-root users only, and that root on the nodes and root containers that bind the `thinx` tree (today `thinx_worker`) can read the hash. bcrypt: micro has **no `htpasswd`**; it has **python3 `bcrypt` 3.2.2**, which emits `$2b$` (rewrite the prefix to `$2y$`, the form the WR-01 check accepts). This was proven with synthetic values in a `--network none` `traefik:v3.7.14` throwaway: `$2y$` and `$2b$` both returned 200 for the right password and 401 for a wrong one or none. The plaintext is needed again, so this ends in a checkpoint |
+| WR-06 | **fixed (live, 2026-10-11)** — bcrypt + hash moved out of the worker's bind mount | thinx-swarm `4cc2168` (docs), `5005ca0` (loader); this repo `0a5c061c`, `ac188048` (docs), `09f98bf1` (mirror), the WR-06 records commit | **bcrypt:** the hash was made on micro from line 1 of the operator file (stdin only) with python3 `bcrypt` 3.2.2, cost 12, `$2b$`→`$2y$`; `checkpw` right=True, wrong=False. **Same password as the 2026-10-09 rotation** (it passed the apr1 labels before the change), so it was re-hashed, not rotated. Labels applied label-only at 17:01:16Z after `600` spec backups (`/mnt/data/edge-rollback/p34-wr06-20261011T170115Z/`): sha12 `79e078373496` → **`4b8f8bbd91b2`** on both, `thinx_couchdb` idx 38380400 → **38380569**, `thinx_influxdb` 38380400 → **38380570**, tasks unchanged. Gate: both middlewares enabled, users 1, removeHeader true, `$apr1$` 0; overview `[29,0,18,6,["Swarm","File"]]`, 0 non-enabled routers; in the Traefik netns the password passes (db 200 + CouchDB welcome, influx 200, challenge 0); a wrong password and no credential get 401 + `Basic realm="traefik"`; laptop https 401 + challenge, http 301; 7442/1883/8883 OPEN from the laptop to the public IP; 0 Traefik ERR; harness **PASS** ×2 (`p34wr06-post-7442`, `p34wr06-post-https`). **Move:** the new store is `/mnt/gluster/deployment/secrets/edge-basicauth` (dir 700, file 600 root). Of all 22 services and both nodes' standalone containers, none binds that path; only three single files under `deployment/swarm/` are bound. It is outside the git checkout, core sees the same modes, and a non-root `ls` is denied. `restart.sh` / `thinx.sh` (`5005ca0`): one literal reader for both files, `HASHED_PASSWORD` comes only from the secrets file (an env-file line is ignored), they fail closed on missing/unreadable/empty or a group/other-readable secrets file, accept **only** `$2y$` with cost 10–31 (apr1 refused), all before `docker stack rm`. `env -i` matrix **76/76 PASS** (19 cases × 2 scripts × bash 3.2/5.2). Render check: the old loader + env file reproduces live `79e078373496` (method proven); the new loader renders `4b8f8bbd91b2` == expected in both scripts; the masked render `3c6b08e395fc` is identical, so only the 4 `basicauth.users` lines changed; this was repeated after the micro ff and after the env-line removal. Env file: the `HASHED_PASSWORD` line was removed with awk after a backup (62 → 61 lines, 1783 → 1729 B, 600 root, diff = that one line). Inside `thinx_worker`: `grep -c HASHED_PASSWORD` = **0** (also across `.env*` and the small dirs), secrets path not visible, 0 mountinfo lines. Plaintext shredded at 17:03:15Z (absent on micro and core). **Residual:** the hash is a service label, so the worker can still read it through its rw `docker.sock` (key seen 2× in `/services/thinx_couchdb`); bcrypt is the mitigation there. The password's apr1 hash was worker-readable 2026-10-09 16:07Z → 2026-10-11 17:02Z, so rotate the password if that window matters. Record and revert: runbook `### P34 WR-06 bcrypt + move record`, revert-set step (r0) |
 | IN-01 | fixed (live) | thinx-swarm `9204a8e`, `51ff67f`; this repo `06eb7e9e`, `61befe53`, `ac188048` | Added a real healthcheck, `["CMD","/healthcheck"]` (`docker exec … /healthcheck` → rc 0 first), plus `update_config.order: start-first`. The image is `FROM scratch`, and `--health-cmd` always writes `CMD-SHELL`, so the change was applied through the Engine API: dry-run diff (exactly those 2 changes), then the apply with that file. Backup `p34rf-in01-traefik_socket-proxy-20261009T175322Z.json`. idx 38380136 → **38380315**; the new task `2p48l57isdvn` was `(healthy)` before the old one stopped. Gate: proxy 1/1; `_ping` OK; `/secrets` 403; 0 Traefik log lines in the window; overview and routers unchanged |
 | IN-02 | fixed | thinx-swarm `9204a8e` | `traefik.sh` refuses to run unless the docker.sock gid equals the gid in `traefik.yml`. Scratch test with a stubbed `stat`: 998 proceeds; 999 gives rc 1 and no docker call. The live socket gid on micro is 998 (`docker`). The change procedure is documented in `traefik.yml`, the README and swarm.md |
 | IN-03 | fixed | thinx-swarm `9204a8e`; this repo `ac188048` | `traefik.yml`, the README and swarm.md now say that `:ro` is cosmetic and the anchored allow-list is the security boundary |
@@ -55,3 +56,4 @@ recorded under "Recorded for later" in the hardening runbook. Plaintext `:7442` 
 - `HOME=<scratch> ENVIRONMENT=development GIT_KEY_PASSPHRASE=<synthetic> npx jasmine --config=<scratch: only 03-RsakeySpec>` → 15 specs, only (13) fails (CouchDB)
 - `node scripts/check-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm` → `MIRROR OK files=1`
 - `bash -n` on `restart.sh`, `thinx.sh`, `traefik.sh`, `scripts/traefik-edge-scan.sh` → OK
+- WR-06 (2026-10-11): `env -i` loader matrix → `TOTAL pass=76 fail=0`; `bash -n` + `/bin/bash -n` on `restart.sh` / `thinx.sh` (`5005ca0`) → OK; `node scripts/check-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm` → `MIRROR OK files=1`

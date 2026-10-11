@@ -71,13 +71,18 @@ dashboard/API route** (Phase 33, EDGE-API-01/02; operator decision 2026-10-08; t
 - The `couch-auth` / `influx-auth` edge basic-auth credential was rotated on 2026-10-09 (Phase 34, D-18); both
   middlewares strip the header before the backend (`basicauth.removeheader=true` — couch-auth since 16:29Z, influx-auth
   since the review fixes, WR-03), so Fauxton's and InfluxDB's own logins work behind them and neither backend receives
-  the edge password. Its hash is the `HASHED_PASSWORD` line of `/mnt/gluster/thinx/.env` on the nodes; `restart.sh` /
-  `thinx.sh` read that file **literally** (no `export $(cat …)`, no sourcing; an inherited `HASHED_PASSWORD` is dropped),
-  fail closed on a missing/unreadable/empty file, and refuse anything but a bare apr1 or bcrypt `$2y$` hash — before
-  `docker stack rm` (WR-01). That `.env` is **`600 root:root`**, which keeps out **non-root users only: root on the
-  nodes and every root container that binds the `thinx` gluster tree can read it — today `thinx_worker` (runs as root,
-  binds all of `/mnt/gluster/thinx`)** (WR-06). Keep it 600, never print it, never commit it, and treat the hash as
-  readable by a compromised worker.
+  the edge password. Since 2026-10-11 (WR-06) its hash is **bcrypt `$2y$` (cost 12)** and is the `HASHED_PASSWORD` line
+  of **`/mnt/gluster/deployment/secrets/edge-basicauth`** (dir `700`, file `600 root:root`). No container binds that path,
+  and it is outside the `swarm` git checkout. `/mnt/gluster/thinx/.env` no longer carries it: `thinx_worker` (root) binds
+  that whole tree, and a `HASHED_PASSWORD` line there is ignored. `restart.sh` / `thinx.sh` read both files
+  **literally** (no `export $(cat …)`, no sourcing; an inherited `HASHED_PASSWORD` is dropped). They fail closed on a
+  missing/unreadable/empty file or a group/other-readable hash file, and refuse anything but a bare `$2y$` hash with
+  cost 10–31 (apr1 is refused), all before `docker stack rm` (WR-01/WR-06). Keep it 600, never print it, never commit
+  it. **Still readable by** root on the nodes, and by anything with Docker API access, because the hash is a service
+  label: `thinx_worker` and `thinx_api` mount `docker.sock` read-write (host-root-equivalent), and Traefik reads
+  `/services` through the socket-proxy. bcrypt is what makes a leaked hash expensive. The password itself was not
+  changed by WR-06 (same plaintext as the 2026-10-09 rotation, re-hashed); its apr1 hash was readable by the worker
+  2026-10-09…11. Rotate the password if that window matters. Rotation recipe: runbook `### P34 WR-06 bcrypt + move record`.
 - thinx-swarm **has** a CircleCI project (`.circleci/config.yml`): every `master` push builds and pushes `thinx/error-page`
   and `thinx/downtime-page`, which Swarmpit then autoredeploys (`errorpage_errorpage` restarts → a few transient
   `errorpage@swarm does not exist` ERR lines in Traefik). It does not deploy the edge; edge changes stay manual.

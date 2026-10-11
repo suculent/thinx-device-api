@@ -305,7 +305,8 @@ dropped, publishes no port, and answers only a GET allow-list: `_ping`, `version
 `traefik-socket` (`10.234.34.0/24`, not attachable). The only members are the proxy, Traefik and the network's LB
 endpoint, and `-allowfrom=10.234.34.0/24` admits only that subnet. `traefik_traefik` has **no** Docker socket mount.
 **Residual exposure (IN-04):** `GET /services` and `/tasks` are the provider's minimum and return full specs, including
-`ContainerSpec.Env` (interpolated secrets such as `WORKER_SECRET`) and the `basicauth.users` hash labels; a compromised
+`ContainerSpec.Env` (interpolated secrets such as `WORKER_SECRET`) and the `basicauth.users` hash labels (bcrypt `$2y$`
+since 2026-10-11, 34-REVIEW WR-06; the stored copy is `/mnt/gluster/deployment/secrets/edge-basicauth`); a compromised
 Traefik can read them (it could before, with the raw socket). Never add a second consumer of the proxy.
 
 **Where it is defined.** thinx-swarm `traefik.yml` (the `socket-proxy` service and `traefik-socket: external: true`)
