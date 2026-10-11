@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 17
+open_count: 16
 waived_count: 0
-fixed_count: 3
+fixed_count: 4
 total_count: 20
-last_updated: 2026-10-11T17:43:43.915Z
+last_updated: 2026-10-11T17:54:12.994Z
 ---
 
 # Broken Windows Ledger
@@ -34,7 +34,7 @@ last_updated: 2026-10-11T17:43:43.915Z
 | 17 | 33 | unrun-verify | .planning/phases/33-dashboard-lockdown-tls-hardening/33-02-PLAN.md |  | 33-02 Task 1: rawdata TLS-options jq literal cannot pass on Traefik v3.7.14 (API does not expose TLS options); proven on the wire + in-task config sha instead (deferred-items.md) | open |  | 2026-10-09T09:12:46.280Z |  |
 | 18 | 34 | unrun-verify | .planning/runbooks/traefik-edge-hardening.md |  | 34-02 Task 2 harness_b2 is PARITY, not PASS: step 4 OTT redeem answers OTT_UPDATE_NOT_AVAILABLE before and after the B2 cutover, because the thinx-mcp-device config was switched to a new owner at 09:41Z (new UDID, no deployed build); operator: attach a build to the new device or restore the committed config, then rerun both harness paths | fixed |  | 2026-10-09T15:23:34.207Z | 2026-10-09T15:27:12.115Z |
 | 19 | 34 | unrun-verify | .planning/runbooks/traefik-edge-hardening.md |  | 34-05 EDGE-OPS-03 SLA (D-12 git push -> served via the edge by the new thinx_api task, <=300 s) not measured: run 1 NO-MEASUREMENT (CircleCI test red on v1.16 03-RsakeySpec, CircleCI degraded); sla_verdict OPEN-GAP; re-measure on the next green edge-change deploy per swarm.md SLA verification; 8bc8ecf6 (carried the RSA spec fix 9020f3ca): CircleCI never ran `test`; fea9712e: pushed 2026-10-11T17:08:23Z inside CircleCI maintenance (13:30-17:30Z), test 15859 green, registry push done ~322 s after push, new thinx_api task Running ~408 s after push; untimed (no readiness block, no T_PUSH), not a valid sample; run 2 (2026-10-11, 553c069d, T_PUSH 17:34:48.394Z): measured L1 331 s + L2 40 s + L3 9 s = 380 s, PASS at the 600 s budget the operator set after the run (FAIL against the original 300 s); record ### P34 SLA run 2 | fixed |  | 2026-10-09T17:16:39.633Z | 2026-10-11T17:43:43.915Z |
-| 20 | 34 | unrun-verify | .planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md |  | 34-05 Task 2 verify: no single full scripts/traefik-edge-scan.sh run printed the OK verdict (laptop uplink dropped at the tail of each run, 1.1.1.1 lost in the same seconds); all 16 hosts pass every predicate as a composite of runs 1+6; re-run once from a stable uplink | open |  | 2026-10-09T17:16:40.018Z |  |
+| 20 | 34 | unrun-verify | .planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md |  | 34-05 Task 2 verify: no single full scripts/traefik-edge-scan.sh run printed the OK verdict (laptop uplink dropped at the tail of each run, 1.1.1.1 lost in the same seconds); all 16 hosts pass every predicate as a composite of runs 1+6; re-run once from a stable uplink | fixed |  | 2026-10-09T17:16:40.018Z | 2026-10-11T17:54:12.994Z |
 
 ````json
 [
@@ -292,10 +292,10 @@ last_updated: 2026-10-11T17:43:43.915Z
     "file": ".planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-09.md",
     "line": null,
     "description": "34-05 Task 2 verify: no single full scripts/traefik-edge-scan.sh run printed the OK verdict (laptop uplink dropped at the tail of each run, 1.1.1.1 lost in the same seconds); all 16 hosts pass every predicate as a composite of runs 1+6; re-run once from a stable uplink",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-10-09T17:16:40.018Z",
-    "resolved_at": null,
+    "resolved_at": "2026-10-11T17:54:12.994Z",
     "milestone": "v1.15"
   }
 ]

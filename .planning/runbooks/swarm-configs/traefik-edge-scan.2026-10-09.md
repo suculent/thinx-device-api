@@ -721,3 +721,164 @@ during each run. The 34-VERIFICATION retry rule allows 2 retries after an uplink
 - **To close #20:** run once from a different uplink (a tethered phone, a cloud VM, or any network without this
   limiter), or add a per-host pause to the scan as a reviewed script change. Hosts 1–12 are clean on the
   current uplink; only the tail is affected.
+
+## Clean single run — 2026-10-11 17:51:24Z–17:53:50Z (from `vps` 37.60.254.174, Contabo, Debian 12; WINDOWS #20)
+
+Run from outside the laptop network to avoid the uplink drop that broke every laptop run. Throwaway `debian:12-slim` container (nmap, sslscan 2.0.7, jq, curl, netcat-openbsd, openssl), `scripts/traefik-edge-scan.sh` as committed at 1359dd34, rc=0, nothing installed on the host.
+
+```
+## Port sweep 188.166.23.244
+80/tcp   open     http
+443/tcp  open     https
+8080/tcp filtered http-proxy
+8443/tcp filtered https-alt
+port 7442 rtm.thinx.cloud open
+nosni-subject CN = TRAEFIK DEFAULT CERT
+## rtm.thinx.cloud
+https rtm.thinx.cloud 200
+hsts rtm.thinx.cloud 1
+tls12 rtm.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 rtm.thinx.cloud yes
+legacy rtm.thinx.cloud none
+dashboard rtm.thinx.cloud 404 sig=0
+redirect rtm.thinx.cloud 301 https://rtm.thinx.cloud/
+serial rtm.thinx.cloud 0535CC0C71E39D9378E72893F3A2141267B0
+## app.thinx.cloud
+https app.thinx.cloud 200
+hsts app.thinx.cloud 1
+tls12 app.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 app.thinx.cloud yes
+legacy app.thinx.cloud none
+dashboard app.thinx.cloud 404 sig=0
+redirect app.thinx.cloud 200 
+serial app.thinx.cloud 051152D5A20BE36DEFA1B6FA83379CE42809
+## console.thinx.cloud
+https console.thinx.cloud 200
+hsts console.thinx.cloud 1
+tls12 console.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 console.thinx.cloud yes
+legacy console.thinx.cloud none
+dashboard console.thinx.cloud 404 sig=0
+redirect console.thinx.cloud 301 https://console.thinx.cloud/
+serial console.thinx.cloud 05F8CEE45A7D64783AA80214569810CBF905
+## thinx.cloud
+https thinx.cloud 200
+hsts thinx.cloud 1
+tls12 thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 thinx.cloud yes
+legacy thinx.cloud none
+dashboard thinx.cloud 404 sig=0
+redirect thinx.cloud 301 https://thinx.cloud/
+serial thinx.cloud 05985238756DDB1D8FE88F15C2780670FB6D
+## www.thinx.cloud
+https www.thinx.cloud 200
+hsts www.thinx.cloud 1
+tls12 www.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.thinx.cloud yes
+legacy www.thinx.cloud none
+dashboard www.thinx.cloud 404 sig=0
+redirect www.thinx.cloud 301 https://www.thinx.cloud/
+serial www.thinx.cloud 05985238756DDB1D8FE88F15C2780670FB6D
+## swarmpit.thinx.cloud
+https swarmpit.thinx.cloud 200
+hsts swarmpit.thinx.cloud 1
+tls12 swarmpit.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 swarmpit.thinx.cloud yes
+legacy swarmpit.thinx.cloud none
+dashboard swarmpit.thinx.cloud 404 sig=0
+redirect swarmpit.thinx.cloud 301 https://swarmpit.thinx.cloud/
+serial swarmpit.thinx.cloud 05F241E17BADFEFAB79078069E218FB5D282
+## registry.thinx.cloud
+https registry.thinx.cloud 400
+hsts registry.thinx.cloud 1
+tls12 registry.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 registry.thinx.cloud yes
+legacy registry.thinx.cloud none
+dashboard registry.thinx.cloud 400 sig=0
+redirect registry.thinx.cloud 301 https://registry.thinx.cloud/
+serial registry.thinx.cloud 05BDB7A8495E98A507BD392073F1D2306425
+## db.thinx.cloud
+https db.thinx.cloud 401
+hsts db.thinx.cloud 1
+tls12 db.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 db.thinx.cloud yes
+legacy db.thinx.cloud none
+dashboard db.thinx.cloud 401 sig=0
+redirect db.thinx.cloud 301 https://db.thinx.cloud/
+serial db.thinx.cloud 05ABDB813970665925BBF3986D858437F8C2
+## influx.thinx.cloud
+https influx.thinx.cloud 401
+hsts influx.thinx.cloud 1
+tls12 influx.thinx.cloud TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 influx.thinx.cloud yes
+legacy influx.thinx.cloud none
+dashboard influx.thinx.cloud 401 sig=0
+redirect influx.thinx.cloud 301 https://influx.thinx.cloud/
+serial influx.thinx.cloud 05806B4C8B028F41EC3ACCC00DF3C6A50B04
+## www.fotostim.com
+https www.fotostim.com 200
+hsts www.fotostim.com 1
+tls12 www.fotostim.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.fotostim.com yes
+legacy www.fotostim.com none
+dashboard www.fotostim.com 404 sig=0
+redirect www.fotostim.com 301 https://www.fotostim.com/
+serial www.fotostim.com 05CA722C72F15D90F21C62D2042992CAB37A
+## www.fotostim.cz
+https www.fotostim.cz 200
+hsts www.fotostim.cz 1
+tls12 www.fotostim.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.fotostim.cz yes
+legacy www.fotostim.cz none
+dashboard www.fotostim.cz 404 sig=0
+redirect www.fotostim.cz 301 https://www.fotostim.cz/
+serial www.fotostim.cz 059B763F7AAA69FEBA932265DAB2215F3A92
+## fotostim.com
+https fotostim.com 200
+hsts fotostim.com 1
+tls12 fotostim.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 fotostim.com yes
+legacy fotostim.com none
+dashboard fotostim.com 404 sig=0
+redirect fotostim.com 301 https://fotostim.com/
+serial fotostim.com 068859B1E2768CC50E6AA79CBBC559958C13
+## fotostim.cz
+https fotostim.cz 200
+hsts fotostim.cz 1
+tls12 fotostim.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 fotostim.cz yes
+legacy fotostim.cz none
+dashboard fotostim.cz 404 sig=0
+redirect fotostim.cz 301 https://fotostim.cz/
+serial fotostim.cz 058A2108047618D8AE8BAEE94DFD9656C275
+## igraczech.com
+https igraczech.com 200
+hsts igraczech.com 1
+tls12 igraczech.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 igraczech.com yes
+legacy igraczech.com none
+dashboard igraczech.com 404 sig=0
+redirect igraczech.com 301 https://igraczech.com/
+serial igraczech.com 069BB404CE5F1F729812C79096FEB2F867A7
+## www.igraczech.com
+https www.igraczech.com 200
+hsts www.igraczech.com 1
+tls12 www.igraczech.com TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.igraczech.com yes
+legacy www.igraczech.com none
+dashboard www.igraczech.com 404 sig=0
+redirect www.igraczech.com 301 https://www.igraczech.com/
+serial www.igraczech.com 069BB404CE5F1F729812C79096FEB2F867A7
+## www.syxra.cz
+https www.syxra.cz 200
+hsts www.syxra.cz 1
+tls12 www.syxra.cz TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+tls13 www.syxra.cz yes
+legacy www.syxra.cz none
+dashboard www.syxra.cz 404 sig=0
+redirect www.syxra.cz 301 https://www.syxra.cz/
+serial www.syxra.cz 0584ABE5714F7F196979A72B1C74C87CB60F
+## retired hosts (exposure probes only, curl -k)
+retired micro.thinx.cloud api=404 dashboard=404 sig=0
+EDGE-SCAN OK
+```
