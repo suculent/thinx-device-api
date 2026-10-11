@@ -691,3 +691,33 @@ EDGE-SCAN FAIL 41
 - **8080 / 8443:** `filtered` from the laptop in this window (Before: `closed`). Both mean "not open". micro logs a
   UFW BLOCK for the laptop's `:8443` SYN, and the UFW rule files are unchanged since 2026-03-05. The path behaved
   differently today (the laptop uplink was also unstable), not the host.
+
+## Re-run attempt for WINDOWS #20 (2026-10-11 17:22–17:32Z) — not clean, #20 stays open
+
+Committed script `scripts/traefik-edge-scan.sh` (last change `43a60bea`, sha256 `b67d3c1e0459…`), unchanged, run from
+the laptop (`en0`, gateway `192.168.32.1`) three times. A parallel `nc -z -G 3 1.1.1.1 443` probe ran every 2 s
+during each run. The 34-VERIFICATION retry rule allows 2 retries after an uplink drop.
+
+| Run | Window (UTC) | Verdict | First failing section | 1.1.1.1:443 lost |
+|---|---|---|---|---|
+| 1 | 17:22:53–17:25:42 | `EDGE-SCAN FAIL 27` | `fotostim.cz` (host 13 of 16) | 17:25:38, 17:25:41 |
+| 2 | 17:27:29–17:30:24 | `EDGE-SCAN FAIL 28` | `fotostim.cz` (host 13 of 16) | 17:30:21, 17:30:23 |
+| 3 | 17:30:58–17:31:16 | `EDGE-SCAN FAIL 112` | `rtm.thinx.cloud` (host 1) | every probe 17:31:02–17:31:15 |
+
+- **Runs 1 and 2:** the port sweep and hosts 1–12 (`rtm` … `fotostim.com`) have **0** `FAIL ` lines. They pass
+  every predicate: https 200/301, HSTS ×1, TLS 1.2 AEAD-only set, TLS 1.3 yes, no legacy protocols, dashboard
+  404 sig=0, `:80` redirect, `port 7442 rtm.thinx.cloud open`. Every `FAIL` from `fotostim.cz` onward is
+  `curl rc=7` (connect failed) or an empty sslscan table, and 1.1.1.1 drops in the same seconds. This is the
+  2026-10-09 signature.
+- **Run 3** began 34 s after run 2 ended, while the uplink was still down, so it is invalid on its face.
+- **Not the edge:** an nmap `-Pn -sT -p 80,443` at 17:32:19Z (the operator's suggestion) reports `fotostim.cz`,
+  `igraczech.com`, `www.igraczech.com`, `www.syxra.cz`, `micro.thinx.cloud`, `rtm.thinx.cloud` and `1.1.1.1` all
+  up with 80/443 open in 0.36 s. 1.1.1.1, the edge and 8.8.8.8:53 answered every 3 s from 17:31:30Z.
+- **Not laptop port exhaustion:** TIME_WAIT stayed at 6–17 sockets and ESTABLISHED at ~105 while 1.1.1.1 failed.
+  The ephemeral range is 49152–65535.
+- **Pattern:** in runs 1 and 2 the drop starts about 2 min 45 s into the scan, after the sslscan/openssl volume
+  of 12 hosts, and clears within about a minute. This looks like flood or connection-rate protection on the
+  local router or the ISP, triggered by the scan's own traffic. It does not depend on the edge.
+- **To close #20:** run once from a different uplink (a tethered phone, a cloud VM, or any network without this
+  limiter), or add a per-host pause to the scan as a reviewed script change. Hosts 1–12 are clean on the
+  current uplink; only the tail is affected.
