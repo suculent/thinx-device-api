@@ -899,7 +899,7 @@ scan capture `## Reported, not gating (after)`):
 - **Unchanged Phase 34 scope** (fix-forward rows #6/#7 + SLA): `--log.level=ERROR` → INFO/WARN (EDGE-OPS-01; note no
   renewal INFO line exists today, which is why D-22 cites store mtime + served notAfter), the raw
   `/var/run/docker.sock:ro` bind → read-only socket-proxy (EDGE-OPS-02), SLA close-out.
-  **Phase 34 disposition:** done for rows #6 (`### P34 Stage A record`, WARN + JSON access log) and #7 (`### P34 Stage B1 record` + `### P34 Stage B2 record`, socket-proxy, raw bind removed); the SLA is an **open gap** — `### P34 SLA run 1` (`sla_verdict: OPEN-GAP`), carried in `## Recorded for later (after Phase 34)`.
+  **Phase 34 disposition:** done for rows #6 (`### P34 Stage A record`, WARN + JSON access log) and #7 (`### P34 Stage B1 record` + `### P34 Stage B2 record`, socket-proxy, raw bind removed); the SLA was an open gap after `### P34 SLA run 1` and was measured on 2026-10-11 in `### P34 SLA run 2`: total 380 s, `sla_verdict: PASS` against the 600 s budget the operator set after the run (FAIL against the original 300 s).
 - **Not scheduled (product decisions):** HSTS preload-list submission for `thinx.cloud` (header carries `preload`, the
   list is NOT submitted — D-19); a management VPN on the swarm (`:1194` stays vestigial).
   **Phase 34 disposition:** deferred (product decisions, 34-CONTEXT `<deferred>`); carried in `## Recorded for later (after Phase 34)`.
@@ -1860,9 +1860,9 @@ separate debugger is fixing; `spec/` and `lib/` are out of this plan's scope), a
 builds fail at checkout (the operator handles that; not this plan). Nothing was timed, so there is no total, no leg and no
 PASS/FAIL. The re-measure recipe is in `.planning/runbooks/swarm.md` § SLA verification.
 
-sla_verdict: OPEN-GAP (not measurable 2026-10-09: CircleCI test red on v1.16 03-RsakeySpec + CircleCI degraded; run 1 NO-MEASUREMENT; re-measure on the next green edge-change deploy)
+sla_verdict_2026-10-09 (superseded by `### P34 SLA run 2`): OPEN-GAP (not measurable 2026-10-09: CircleCI test red on v1.16 03-RsakeySpec + CircleCI degraded; run 1 NO-MEASUREMENT; re-measure on the next green edge-change deploy)
 
-edge_ops_03_status: open gap — not measured (run 1 NO-MEASUREMENT 2026-10-09; no total, no slowest leg; ROADMAP Phase 34 success criterion 3 is OPEN; re-measure on the next green edge-change deploy)
+edge_ops_03_status_2026-10-09 (superseded by `### P34 SLA run 2`): open gap — not measured (run 1 NO-MEASUREMENT 2026-10-09; no total, no slowest leg; ROADMAP Phase 34 success criterion 3 is OPEN; re-measure on the next green edge-change deploy)
 
 EDGE-OPS-03 stays unchecked in `.planning/REQUIREMENTS.md`. The executor did not accept anything on the operator's behalf; the
 operator chose to record the gap, not to accept a measured result.
@@ -1895,6 +1895,50 @@ final_edge: args=24 log=WARN accesslog=json drop=RequestPath,RequestLine,ClientU
   Slack / `sk-` / JWT shapes 0, e-mail addresses 0, `HASHED_PASSWORD=` 0, credential-assignment shapes 0; skip-ci
   markers in messages 0; every commit `G`. Non-planning diff: `docker-compose.traefik.yml` (banner only);
   `services/console` diff empty.
+
+**Run 2 result: measured, total 380 s.** The evidence commit `553c069d441f` (signed `G`) was pushed at T_PUSH
+`2026-10-11T17:34:48.394Z` (`git push` rc 0, 2.6 s, `fea9712e..553c069d`). CircleCI stayed `none` for the whole
+run. A 2-s `https://app.thinx.cloud/` probe loop (17:34:46–17:42:07Z) ran throughout.
+
+| Event | UTC | From T_PUSH |
+|---|---|---|
+| `test` 15863 queued / started | 17:34:53.223 / 17:35:14.984 | 4.8 s / 26.6 s |
+| `test` 15863 stopped: **success** | 17:38:07.671 | 199.3 s |
+| `api-registry` 15868 queued / started | 17:38:08.811 / 17:39:16.739 | 200.4 s / 268.3 s (queue 67.9 s) |
+| `Push to private registry (thinx/api:swarm)` end_time = **push_end** | 17:40:19.814 | **331.4 s** |
+| Swarmpit `autoredeploy fired` for `thinx_api` | 17:40:33 | 345 s |
+| new task `5cit42qdrisg` (micro) **Running**, `{{json .Status.Timestamp}}` | 17:40:59.706 | 371.3 s |
+| first access-log line to the new task: `502` (app not yet listening) | 17:41:06.625 | 378.2 s |
+| first **2xx** through Traefik from the new task = **T_SERVED** | 17:41:08.804 | **380.4 s** |
+
+sla_run_2: push=2026-10-11T17:34:48.394Z push_end=2026-10-11T17:40:19.814Z running=2026-10-11T17:40:59.706Z served=2026-10-11T17:41:08.804Z L1=331s L2=40s L3=9s total=380s verdict=PASS(budget 600 s; FAIL against the original 300 s) sha=553c069d441f digest=0d1be3c3a39f
+
+served_marker: router=thinx-api-https@swarm ServiceAddr=10.0.1.34:7442 status=200 StartUTC=2026-10-11T17:41:08.803752079Z
+
+- **Slowest leg: L1 (CI), 331.420 s.** That breaks down as `test` 172.7 s, the `api-registry` queue 67.9 s, and the
+  build/push 63.1 s. L1 alone is over 300 s, as the 2026-10-08 history (~285–301 s) predicted. L2 39.891 s matches
+  the Phase 28 history (31–50 s). L3 9.098 s.
+- **Rollover blip:** the old task `qntushc2e953` was shut down and the new one became Running at 17:40:59.7Z. Traefik
+  then routed to it before the app was listening, so one request got `502` at 17:41:06.6Z. This was the laptop probe
+  at 17:41:06 (1 of 200 probes non-200). The next request, 2.2 s later, got 200. `thinx_api` updates are
+  stop-first with no container healthcheck gating the route (read 17:4xZ: `UpdateConfig.Order` `stop-first`,
+  Parallelism 1, 1 replica, service and image healthcheck `null`). A `start-first` order plus a healthcheck would remove
+  the blip; that is not changed here.
+- **Corroboration (17:41:36Z):** `thinx-api@swarm` servers `["http://10.0.1.34:7442"]` (the old `10.0.1.30` is
+  gone); rtm `/` 200, `/api/v2/csrf-token` 200, app `/` 200, WebSocket upgrade on rtm 101; loopback overview `[29,0]`,
+  0 non-enabled routers; laptop → `188.166.23.244` 7442 / 1883 / 8883 OPEN; Swarmpit logged 1 `autoredeploy fired`
+  for `thinx_api` since push_end.
+- **Validity:** green `test` and `api-registry`, CircleCI operational, T_PUSH taken immediately before the push, one
+  push, no re-run. The run is valid.
+
+**Budget change (operator decision, 2026-10-11 ≈17:41Z, after this run's total was known):** the end-to-end SLA
+budget is **600 s** (was 300 s). Run 2 measured 380 s: **PASS** against 600 s; it would have been a **FAIL** against
+the original 300 s. The measurement is unchanged; only the threshold moved. The recipe in `.planning/runbooks/swarm.md`
+§ SLA verification now states 600 s.
+
+sla_verdict: PASS (run 2, 2026-10-11: total 380 s ≤ 600 s budget; operator raised the budget from 300 s to 600 s after the run; against 300 s this run is FAIL by 80 s, slowest leg L1/CI 331 s)
+
+edge_ops_03_status: met at the 600 s budget (run 2, 2026-10-11, total 380 s); ROADMAP Phase 34 success criterion 3 text still reads "≤5 minutes" and needs the operator's edit to match
 
 ### Re-verify matrix (Phase 34, 2026-10-09 16:36–17:06 UTC) vs traefik-edge.F.pre.yml
 
@@ -2478,7 +2522,7 @@ current password (`600 root`, host-local, unmounted).
 
 Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT `<deferred>`, the Phase 34 records):
 
-- **EDGE-OPS-03 open gap — the end-to-end deploy SLA was never measured.** `sla_verdict: OPEN-GAP` (2026-10-09): run 1
+- ~~**EDGE-OPS-03 open gap**~~ — **closed 2026-10-11** by `### P34 SLA run 2`: total 380 s (L1 CI 331 s, L2 40 s, L3 9 s), PASS against the 600 s budget the operator set after the run, FAIL against the original 300 s. If the budget goes back to 300 s, L1 (CI) is the leg to cut. The original 2026-10-09 entry follows. `sla_verdict: OPEN-GAP` (2026-10-09): run 1
   was NO-MEASUREMENT (CircleCI `test` red on thinx-staging, `03-RsakeySpec` "revoke … RSA Keys" 2 failures from the v1.16
   rsakey change, 5/5 revisions since `322e74c8`; CircleCI degraded), so there is **no measured total and no slowest leg**.
   ROADMAP Phase 34 success criterion 3 stays open and EDGE-OPS-03 unchecked. Re-measure on the next green edge-change

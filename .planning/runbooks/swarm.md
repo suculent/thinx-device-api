@@ -40,15 +40,15 @@ ssh micro \
 # expect: startup banner + "Swarmpit running on port 8080" + "Docker SOCK: /var/run/docker.sock"
 ```
 
-**SLA verification — end to end (Phase 34 / EDGE-OPS-03, D-12).** The budget is **300 s from `git push` to the
-first response served through Traefik by the new `thinx_api` task**. It replaces the older push_end → task Running
+**SLA verification — end to end (Phase 34 / EDGE-OPS-03, D-12).** The budget is **600 s from `git push` to the
+first response served through Traefik by the new `thinx_api` task** (300 s until 2026-10-11, when the operator raised it). It replaces the older push_end → task Running
 stop condition, which is kept below as one leg. Gate mechanics (readiness, diff hygiene, NO-MEASUREMENT rule) follow
 § Gate procedure in `.planning/runbooks/swarmpit-upgrade.md`.
 
-**Phase 34 result: `sla_verdict: OPEN-GAP`** (2026-10-09). Run 1 was NO-MEASUREMENT: CircleCI `test` was red on
-v1.16 `03-RsakeySpec`, so no `api-registry` ran, and CircleCI itself was degraded. No total and no leg was measured, so
-EDGE-OPS-03 (ROADMAP Phase 34 criterion 3) is **open**. Re-measure on the next green edge-change deploy with the
-recipe below and record it as `### P34 SLA run 2` in `.planning/runbooks/traefik-edge-hardening.md`.
+**Phase 34 result: `sla_verdict: PASS`** (run 2, 2026-10-11, at the 600 s budget). Total **380 s**: L1 (CI) 331 s,
+L2 (deploy) 40 s, L3 (edge) 9 s. The operator raised the budget from 300 s to 600 s after this run's total was
+known; against 300 s, run 2 is a FAIL by 80 s, and L1 alone exceeds 300 s. Record: `### P34 SLA run 2` in
+`.planning/runbooks/traefik-edge-hardening.md`. Run 1 (2026-10-09) was NO-MEASUREMENT (red `test`, CircleCI degraded).
 
 **When to re-measure (preconditions, all read-only):**
 
@@ -101,18 +101,19 @@ ssh micro "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_trae
 ```
 
 Compute in integer seconds: L1 = PUSH_END − T_PUSH, L2 = T_RUNNING − PUSH_END, L3 = T_SERVED − T_RUNNING,
-total = T_SERVED − T_PUSH. **PASS iff total ≤ 300 s.** On a miss run once more (D-13), then record the verdict with the
+total = T_SERVED − T_PUSH. **PASS iff total ≤ 600 s.** On a miss run once more (D-13), then record the verdict with the
 slowest leg named. Record `sla_run_N: push=… push_end=… running=… served=… L1=…s L2=…s L3=…s total=…s verdict=… sha=… digest=…`,
 `served_marker: router=… ServiceAddr=<NEWIP>:7442 status=… StartUTC=…`, and replace the OPEN-GAP lines
 (`sla_verdict:`, `edge_ops_03_status:`) with the measured result. A FAIL stays an open gap unless the operator explicitly
 accepts the measured total.
 
 Expectation from the 2026-10-08 CircleCI history: git push → api-registry push_end alone was ~285–301 s in three samples
-(test ~2m15–2m25, api-registry queue ~50 s, build ~60–70 s), so L1 alone is likely to use the whole budget.
+(test ~2m15–2m25, api-registry queue ~50 s, build ~60–70 s), so L1 alone was likely to use the whole 300 s budget. Run 2 (2026-10-11) confirmed it: L1 = 331 s (`test`
+173 s, api-registry queue 68 s, build + push 63 s).
 
 History (push_end → task Running only, the L2 leg — not the end-to-end verdict): Phase 3 **63 s** (then against Docker
 Hub); Phase 28 32 s on Swarmpit 1.9, 31 s after the stats stack was removed and 50 s on Swarmpit 1.10 (private
-registry). Phase 34: not measured (OPEN-GAP above).
+registry). Phase 34 run 2: **40 s** (push_end → Running, Swarmpit 1.10, private registry).
 
 **Rollback** (if Rung 1 makes things worse):
 ```bash
