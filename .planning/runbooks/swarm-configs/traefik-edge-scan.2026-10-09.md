@@ -238,7 +238,7 @@ mount), task `vtdqxehcuul8`, `Version.Index 38380188`, Configs `tls-config-3` (s
 https default `security-headers@file`, acme store 16 entries. Same script, **16 hosts** (`micro.thinx.cloud` left
 `HOSTS` in Plan 34-04 because its certificate was pruned on purpose: D-19 / A6).
 
-**Verdict: every one of the 16 hosts passes every predicate (composite of run 1 and run 6 below). No single full run
+**Verdict (superseded 2026-10-11 by the clean single run from `vps` at the end of this file — `EDGE-SCAN OK`): every one of the 16 hosts passes every predicate (composite of run 1 and run 6 below). No single full run
 printed the OK verdict line, because the laptop's own uplink dropped out near the end of each run.** Across six runs
 there are **0** predicate failures on any host that answered. Every `FAIL ` line is a no-connection line (`curl rc=7`,
 `tls12-set … got: none`, `no sslscan protocol table`, or `no-tls13` from the same lost connection). Evidence that the

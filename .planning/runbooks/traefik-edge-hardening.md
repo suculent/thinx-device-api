@@ -1972,7 +1972,7 @@ end-state capture is `swarm-configs/traefik-edge.F.post.yml`; the scan is `## Af
 | device-flow harness | not run at F.pre (harness lost with the reboot) | **`p34end-7442` PASS** (16:53:51Z, `:7442` + `:1883`), **`p34end-https` PASS** (16:53:59Z) | both device paths hold |
 | external stacks (D-09) | `external_stack_labels:` | key sets and rule / entrypoints / middlewares values **identical** | untouched |
 | repo == deployed | thinx-swarm `b04f066` == micro == origin, MIRROR OK at 19 | **thinx-swarm `4e4f315` == micro HEAD (tracked-dirty 0) == origin/master == mirror banner; `MIRROR OK files=1`, 24 `- --` lines; `docker-swarm.yml` vs `thinx.yml` traefik-label parity diff empty** | holds |
-| external scan | `EDGE-SCAN OK` (17 hosts) | **all 16 hosts pass every predicate (composite of run 1 forward + run 6 reversed); 0 predicate failures in six runs; no single full run clean** — the laptop uplink dropped out at the tail of each run (1.1.1.1:443 lost in the same seconds); Traefik task / index unchanged, no swarm event in the gaps | **deviation:** plan verify (one clean full run) not met from this laptop; edge evidence complete per host |
+| external scan | `EDGE-SCAN OK` (17 hosts) | **all 16 hosts pass every predicate (composite of run 1 forward + run 6 reversed); 0 predicate failures in six runs; no single full run clean** (superseded 2026-10-11: a clean single run from `vps` — `EDGE-SCAN OK`, rc=0 — is the last section of `traefik-edge-scan.2026-10-09.md`; WINDOWS #20 fixed) — the laptop uplink dropped out at the tail of each run (1.1.1.1:443 lost in the same seconds); Traefik task / index unchanged, no swarm event in the gaps | **deviation:** plan verify (one clean full run) not met from this laptop; edge evidence complete per host |
 | SLA (EDGE-OPS-03) | Phase 28: push_end → Running 31–50 s | **`sla_verdict: OPEN-GAP`** — run 1 NO-MEASUREMENT (CI `test` red on v1.16 `03-RsakeySpec`, CircleCI degraded); `thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` | **open** — ROADMAP criterion 3 not met |
 
 ```
@@ -2531,7 +2531,7 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
   ~50 s, build ~60–70 s), and in run 1 the first job of the SHA was queued only 173 s after the push. CI speed-up
   candidates: run the image build in parallel with `test` and gate only the registry push on it; cut CircleCI queueing
   (pipeline start latency, the api-registry queue).
-- **External scan re-run from a stable uplink.** The Phase 34 `## After` has every host passing every predicate, but
+- ~~**External scan re-run from a stable uplink.**~~ — **done 2026-10-11** (17:51Z, from `vps` 37.60.254.174: `EDGE-SCAN OK`, appended to `traefik-edge-scan.2026-10-09.md`; WINDOWS #20 fixed). Original note: the Phase 34 `## After` had every host passing every predicate, but
   only as a composite of two runs, because the laptop's uplink dropped out at the tail of each run (1.1.1.1 lost in
   the same seconds). One clean `scripts/traefik-edge-scan.sh` run should be appended to `traefik-edge-scan.2026-10-09.md`.
 - **Real client IPs at the edge** (D-05): host-mode publishing of `:80` / `:443` on micro or PROXY protocol; then an
