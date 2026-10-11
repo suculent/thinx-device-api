@@ -8,11 +8,11 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 ## Core Value
 
-The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
+The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 600 s SLA (push → first response served by the new task; raised from 5 minutes on 2026-10-11).
 
 ## Preserved Milestone: v1.15 Traefik Hardening (Edge)
 
-**Goal:** Reconcile the Traefik edge against what is actually deployed, then modernize and harden it — migrating off the outdated `v2.6.1` image driven by v1-syntax flags/labels — without breaking plaintext device check-in (`:7442`) or the 5-minute deploy SLA.
+**Goal:** Reconcile the Traefik edge against what is actually deployed, then modernize and harden it — migrating off the outdated `v2.6.1` image driven by v1-syntax flags/labels — without breaking plaintext device check-in (`:7442`) or the deploy SLA (600 s since 2026-10-11, was 5 minutes).
 
 **Target features:**
 - Reconcile repo `docker-compose.traefik.yml` + `services/traefik/*` against the live swarm-host config (gluster bind-mount suspected) to establish source of truth before any change.

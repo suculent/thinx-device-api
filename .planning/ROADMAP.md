@@ -86,7 +86,7 @@ See `.planning/milestones/v1.14-ROADMAP.md`. 24/24 v1.14 requirements (OPS-SWARM
 
 ### 🚧 v1.15 — Traefik Hardening (Edge) (Phases 29–34) — IN PROGRESS
 
-Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard constraint across every phase: the plaintext device entrypoint `:7442` and plain MQTT keep working (legacy `__DISABLE_HTTPS__` devices), and each phase is independently rollback-able within the 5-minute deploy SLA.
+Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard constraint across every phase: the plaintext device entrypoint `:7442` and plain MQTT keep working (legacy `__DISABLE_HTTPS__` devices), and each phase is independently rollback-able within the deploy SLA (600 s push → first response; 5 minutes until 2026-10-11).
 
 ### Phase 29: Edge Reconciliation & Source of Truth
 
@@ -196,7 +196,7 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 
 1. Log level is `INFO`/`WARN` in production (access logs, if kept, free of secrets).
 2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
-3. push → CI → Swarmpit measured ≤5 minutes end-to-end on an edge change; swarm runbook updated.
+3. push → CI → Swarmpit measured ≤600 s end-to-end on an edge change (budget raised from 5 minutes by the operator on 2026-10-11); swarm runbook updated.
 
 **Plans:** 5/5 plans executed (planned 2026-10-09; revised after plan-check — Stage B2 split out)
 **Wave 1**
