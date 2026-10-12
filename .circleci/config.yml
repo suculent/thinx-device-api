@@ -976,9 +976,11 @@ workflows:
       # Snyk: code review (SAST), component analysis (SCA) and container images,
       # all reported into the thinx-cloud Snyk org.
       #
-      # Each container monitor mirrors the filters of the job that builds its
-      # image. A single job requiring all four builds would never run, because
-      # build-base is `base`-only while the others are staging/main.
+      # v1.18 CI-04: every Snyk monitor runs on main only and scans what main
+      # publishes (the Hub images built by the *-hub jobs); thinx-staging and
+      # thinx-console run none. snyk-monitor-base stays on base, after
+      # build-base. snyk-monitor-console-classic lives in the gated
+      # legacy-console workflow, next to console-classic-hub.
       #
 
       - snyk-code-monitor:
@@ -987,7 +989,6 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-staging
                 - main
 
       - snyk-oss-monitor:
@@ -996,7 +997,6 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-staging
                 - main
 
       - snyk-container-monitor:
@@ -1030,24 +1030,19 @@ workflows:
 
       - snyk-container-monitor:
           name: snyk-monitor-console-vue
-          image: thinx/console
+          image: thinxcloud/console
           tag: vue
-          registry: registry.thinx.cloud:5000
           dockerfile: services/console/vue/Dockerfile
           submodules: true
           context:
             - dockerhub
-            - thinx-docker-repo
-            - console
-          # Scans the private-registry copy, which thinx-staging (and the
-          # thinx-console dev branch) publishes.
+          # Scans the Hub copy (thinxcloud/console:vue), which only main publishes.
           requires:
-            - vue-console-registry
+            - vue-console-hub
           filters:
             branches:
               only:
-                - thinx-console
-                - thinx-staging
+                - main
 
   #
   # v1.18 CI-05: legacy console image builds, gated on the pipeline parameter
@@ -1087,26 +1082,18 @@ workflows:
 
       - snyk-container-monitor:
           name: snyk-monitor-console-classic
-          image: thinx/console
-          tag: swarm
-          registry: registry.thinx.cloud:5000
+          image: thinxcloud/console
+          tag: latest
           dockerfile: services/console/src/Dockerfile
           submodules: true
           context:
-            # dockerhub carries SNYK_TOKEN. Without it this job installed the
-            # Snyk CLI and then failed its own preflight with "SNYK_TOKEN is
-            # empty", so the console-classic image was never monitored.
-            # Order matters: dockerhub first, then thinx-docker-repo, so the
-            # private-registry DOCKER_LOGIN/DOCKER_PASSWORD win the name
-            # collision and the registry.thinx.cloud:5000 pull still works.
-            # This mirrors snyk-monitor-console-vue, which already passes.
+            # dockerhub carries SNYK_TOKEN and the docker.io login.
             - dockerhub
-            - thinx-docker-repo
-            - console
-          # Scans the private-registry copy, which only thinx-staging publishes.
+          # Scans the Hub copy (thinxcloud/console:latest); runs on main
+          # whenever the gate is open.
           requires:
-            - console-classic-registry
+            - console-classic-hub
           filters:
             branches:
               only:
-                - thinx-staging
+                - main
