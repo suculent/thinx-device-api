@@ -234,10 +234,10 @@ Where each firmware platform stands, from our last round of testing:
 
 | Platform | Builder | Over-the-air update |
 |----------|---------|---------------------|
-| Arduino ESP8266/ESP32 | works | works |
-| PlatformIO | works | ready to test |
-| MicroPython | works, needs tighter integration with sources | deployment not verified yet |
-| NodeMCU | works, needs tighter integration with sources (`$workdir`) | file-based update pre-tested; deployment not verified. Likely to be deprecated: its toolchain has seen no updates for years. |
+| Arduino ESP8266/ESP32 | ✅ | ✅ |
+| PlatformIO | ✅ | ✅ |
+| MicroPython | ✅, needs tighter integration with sources | deployment not verified yet |
+| NodeMCU | ✅, needs tighter integration with sources (`$workdir`) | file-based update pre-tested; deployment not verified. Likely to be deprecated: its toolchain has seen no updates for years. |
 | Pine64 | builder and platform support ready | waiting for firmware |
 
 ## License
