@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
-last_updated: "2026-10-12T09:30:00.000Z"
-state_head: 84c8fa15ae97afdfc1791e002b0f4b8b39764f2b
+last_updated: "2026-10-12T09:39:20.029Z"
+state_head: 88d18fd01c09aae762f9486ee711fb378a8c025c
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 4
   completed_plans: 4
   percent: 0
-current_phase_name: Deploy Key Management
 current_phase: 38
+current_phase_name: Deploy Key Management
 ---
 
 # STATE — THiNX Device API
@@ -40,6 +40,12 @@ Local unit/regression checks, builds, source security checks, and lint pass. Git
 ## Next Action
 
 API PR #572 is merged into thinx-staging (concurrent v1.15 Phase 34 context preserved). Monitor staging test and registry image jobs, then verify live rollout before closing v1.16.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261012-fqh | Fix v1.15 edge documentation drift (fix-forward SLA/socket-proxy/P33 rows, swarm.md post-rollback note, review ledgers re-dispositioned) | 2026-10-12 | 88d18fd0 | [261012-fqh-fix-v1-15-edge-documentation-drift](./quick/261012-fqh-fix-v1-15-edge-documentation-drift/) |
 
 ## Deferred Items
 
