@@ -18,7 +18,10 @@
  * - unverified upgrades are never counted and still close 1008; a Cookie header without
  *   x-thx-core still gets 401;
  * - D-06: delivery stays Messenger.sendToOwner over the per-owner Set;
- * - thinx-core.js delegates its upgrade handler to SocketUpgrade.handle and keeps no path map.
+ * - thinx-core.js delegates its upgrade handler to SocketUpgrade.handle and keeps no path map;
+ * - scripts/check-ws-multitab.js (the credential-free live probe) prints `WS-MULTITAB OK 2/2 opened`
+ *   when two same-path sockets open and `WS-MULTITAB FAIL 1/2 opened` against a server that drops
+ *   the second upgrade on a path (the pre-Phase-43 behaviour).
  *
  * Run it locally without the bootstrap helper (which boots thinx-core and needs Redis):
  *   printf '%s' '{"spec_dir":"spec/jasmine","helpers":[],"random":false}' > "${TMPDIR:-/tmp}/p43-jasmine.json"
@@ -34,6 +37,7 @@ const fs = require("fs");
 const path = require("path");
 const http = require("http");
 const net = require("net");
+const childProcess = require("child_process");
 const WebSocket = require("ws");
 
 const Messenger = require("../../lib/thinx/messenger");
@@ -41,6 +45,7 @@ const SocketSession = require("../../lib/thinx/socket_session");
 
 const SOCKET_UPGRADE_PATH = path.join(__dirname, "../../lib/thinx/socket_upgrade.js");
 const CORE_PATH = path.join(__dirname, "../../thinx-core.js");
+const PROBE_PATH = path.join(__dirname, "../../scripts/check-ws-multitab.js");
 
 let SocketUpgrade = null;
 try { SocketUpgrade = require(SOCKET_UPGRADE_PATH); } catch (_e) { SocketUpgrade = null; }
@@ -426,6 +431,49 @@ describe("SocketUpgradeSpec (Phase 43, NOTIF-02)", function () {
       expect(hd.upgrade.liveSocketCount(), "live sockets").to.equal(baseLive);
       expect(r.data.indexOf("HTTP/1.1 101"), "no handshake").to.equal(-1);
     }, 15000);
+  });
+
+  describe("WS probe: scripts/check-ws-multitab.js", function () {
+
+    function runProbe(url) {
+      return new Promise((resolve) => {
+        childProcess.execFile(process.execPath, [PROBE_PATH, url], { timeout: 20000 }, (err, stdout) => {
+          const code = (err && typeof err.code === "number") ? err.code : (err ? -1 : 0);
+          const out = String(stdout || "").trim().split("\n");
+          resolve({ code: code, last: out[out.length - 1] });
+        });
+      });
+    }
+
+    it("U7 two cookie-less sockets on one path both open against the SocketUpgrade harness: OK 2/2, exit 0", async function () {
+      expect(SocketUpgrade, "lib/thinx/socket_upgrade.js").to.not.equal(null);
+      const res = await runProbe("ws://127.0.0.1:" + h.port);
+      expect(res.code, "exit code").to.equal(0);
+      expect(res.last, "final line").to.equal("WS-MULTITAB OK 2/2 opened");
+      expect(h.upgrade.liveSocketCount(), "cookie-less probe sockets tracked").to.equal(0);
+    }, 30000);
+
+    it("U8 a server that drops the second upgrade on a path makes the probe fail: FAIL 1/2, exit 1", async function () {
+      const stub = http.createServer();
+      const stubWss = new WebSocket.Server({ noServer: true });
+      const seen = new Map();
+      stub.on("upgrade", (request, socket, head) => {
+        const key = String(request.url);
+        const n = (seen.get(key) || 0) + 1;
+        seen.set(key, n);
+        if (n > 1) { socket.destroy(); return; }
+        stubWss.handleUpgrade(request, socket, head, (ws) => { ws.on("error", () => { /* ignore */ }); });
+      });
+      await new Promise((resolve) => stub.listen(0, "127.0.0.1", resolve));
+      try {
+        const res = await runProbe("ws://127.0.0.1:" + stub.address().port);
+        expect(res.code, "exit code").to.equal(1);
+        expect(res.last, "final line").to.equal("WS-MULTITAB FAIL 1/2 opened");
+      } finally {
+        for (const c of stubWss.clients) { try { c.terminate(); } catch (_e) { /* ignore */ } }
+        await new Promise((resolve) => stubWss.close(() => stub.close(() => resolve())));
+      }
+    }, 30000);
   });
 
   describe("WS static: thinx-core wiring", function () {
