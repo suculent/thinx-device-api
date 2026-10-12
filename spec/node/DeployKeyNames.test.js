@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 process.env.ENVIRONMENT = 'development';
 const RSAKey = require('../../lib/thinx/rsakey');
+const Util = require('../../lib/thinx/util');
 const OWNER = 'a'.repeat(64);
 const OTHER = 'b'.repeat(64);
 function fixture() {
@@ -52,10 +53,38 @@ test('legacy create(owner, callback) remains valid; invalid names never generate
     let generated=0;
     key.generate=(owner,date,cb,name)=>{generated++;assert.equal(name,undefined);cb(null,'ssh-rsa fixture thinx-'+date);};
     key.create(OWNER,success=>assert.equal(success,true));
-    for (const name of ['', '  ', 'key\nother', 'key\u0000', 'x'.repeat(121), {}, []]) {
+    for (const name of ['', '  ', 'key\nother', 'key\u0000', 'x'.repeat(121), {}, [], 'a\tb', 'a\rb', 'a\u001fb', 'a\u007fb']) {
       key.create(OWNER,(success,response)=>{assert.equal(success,false);assert.equal(response,'invalid_key_name');},name);
     }
     assert.equal(generated,1);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('hasControlChars matches the old key-name character class on every UTF-16 code unit (Codacy no-control-regex)', () => {
+  // The pre-change character class from lib/thinx/rsakey.js create(), kept here as the oracle.
+  const oracle = /[\r\n\x00-\x1f\x7f]/;
+  for (let c = 0; c <= 0xFFFF; c++) {
+    const s = String.fromCharCode(c);
+    assert.equal(Util.hasControlChars(s), oracle.test(s), 'code unit 0x' + c.toString(16).padStart(4, '0'));
+  }
+  for (const s of ['\t', '\r', '\n', '\u0000', '\u001f', '\u007f']) assert.equal(Util.hasControlChars(s), true);
+  for (const s of [' ', '~', '\u0080', '\u00a0', '\u00ed', '\ud83d', '\udd11']) assert.equal(Util.hasControlChars(s), false);
+  assert.equal(Util.hasControlChars('Firmware Repository'), false);
+  assert.equal(Util.hasControlChars('a\tb'), true);
+  assert.equal(Util.hasControlChars('end\x7f'), true);
+  assert.equal(Util.hasControlChars('Klíč ✓ 🔑'), false);
+  assert.equal(Util.hasControlChars(''), false);
+  for (const v of [{}, [], undefined, 42]) assert.equal(Util.hasControlChars(v), false);
+});
+test('names at the 120-char limit and non-ASCII names are accepted', async () => {
+  const {dir,key}=fixture();
+  try {
+    key.newUniqueIdentifier=()=>12345;
+    key.generate=(owner,date,cb,name)=>cb(null,'ssh-rsa fixture '+name);
+    for (const name of ['x'.repeat(120), 'Klíč ✓ 🔑']) {
+      const result=await new Promise(resolve=>key.create(OWNER,(success,response)=>resolve({success,response}),name));
+      assert.equal(result.success,true,'accepted: '+name.slice(0,16));
+      assert.equal(result.response.name,name);
+    }
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
 test('deletion follows the selected filename, not its position or another owner', () => {
