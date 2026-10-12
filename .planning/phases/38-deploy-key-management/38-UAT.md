@@ -3,7 +3,7 @@ status: complete
 phase: 38-deploy-key-management
 source: [38-01-SUMMARY.md]
 started: 2026-10-12T12:55:00Z
-updated: 2026-10-12T14:28:31.815Z
+updated: 2026-10-12T14:29:19.391Z
 ---
 
 ## Current Test
@@ -26,8 +26,8 @@ result: pass
 
 ### 4. Failed deploy-key load shows an error
 expected: If the deploy-key list cannot be loaded, the page shows an error message rather than "No deploy keys yet." (If you can't provoke a failure, answer "skip".)
-result: skipped
-reason: "Operator answered skip: a load failure could not be provoked live. Behaviour is covered by the unit suite (35 WR-05, console 295c83a)."
+result: pass
+note: "Re-tested live with DevTools request blocking on the deploy-key list request: the page showed the load error instead of the empty state."
 
 ### 5. Legacy console: named key generation
 expected: In the legacy console's deploy-key page, you can enter a name and generate a key. The key appears in the list right away (no manual refresh) under that name, and the same key and name show in the Vue Deploy Keys page.
@@ -41,10 +41,10 @@ note: "Operator decision: pass (legacy console is being deprecated). The form bl
 ## Summary
 
 total: 6
-passed: 5
+passed: 6
 issues: 0
 pending: 0
-skipped: 1
+skipped: 0
 blocked: 0
 
 ## Gaps
