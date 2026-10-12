@@ -69,10 +69,16 @@ upgrades.
 
 ### Notifications
 
-- [ ] **NOTIF-01**: The actionable console toast HTML-escapes the device-supplied `notification.body`, so no markup injection is possible.
+- [ ] **NOTIF-01**: The actionable console toast HTML-escapes the device-supplied `notification.body`, so no markup injection is possible; the fix is deployed to production via a one-off legacy console build while CI-05 is in effect, not deferred to CI-06.
 - [ ] **NOTIF-02**: A second Legacy console tab on the same `/<owner>` socket path is accepted and both tabs receive frames.
 - [ ] **NOTIF-03**: Build status frames reach the owner's console sockets.
 - [ ] **NOTIF-04**: Reloading a Vue deep link such as `/#/app/history` stays on that page instead of redirecting to the dashboard.
+
+### CI / Delivery
+
+- [ ] **CI-04**: Snyk monitor jobs (snyk-code-monitor, snyk-oss-monitor, snyk-container-monitor incl. snyk-monitor-console-classic / snyk-monitor-console-vue in the parent .circleci/config.yml `main` workflow) run only on branch `main`, never on `thinx-staging`.
+- [ ] **CI-05**: For the duration of v1.18 the legacy console image build (build-console-classic: console-classic-registry / console-classic-hub, plus jobs that require it) is temporarily disabled in CI, so thinx-staging pipelines skip it; production keeps serving the existing thinx/console:swarm image. The change is a single, clearly marked, revertible edit.
+- [ ] **CI-06**: Before the milestone closes, the legacy console build is re-enabled, and the Legacy console changes made during v1.18 that are not yet live (e.g. FIX-04 / Phase 35 legacy deploy-key items; NOTIF-01 already ships earlier through its one-off build) are built and deployed.
 
 ## Future Requirements
 
@@ -91,12 +97,44 @@ upgrades.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| CI-04 | Phase 42 | Pending |
+| CI-05 | Phase 42 | Pending |
+| UI-05 | Phase 42 | Pending |
+| LOGIN-01 | Phase 42 | Pending |
+| LOGIN-02 | Phase 42 | Pending |
+| LOGIN-03 | Phase 42 | Pending |
+| NOTIF-01 | Phase 43 | Pending |
+| NOTIF-02 | Phase 43 | Pending |
+| NOTIF-03 | Phase 43 | Pending |
+| DEV-01 | Phase 44 | Pending |
+| DEV-02 | Phase 44 | Pending |
+| DEV-03 | Phase 44 | Pending |
+| DEV-04 | Phase 44 | Pending |
+| DEV-05 | Phase 44 | Pending |
+| REPO-01 | Phase 44 | Pending |
+| KEY-04 | Phase 45 | Pending |
+| KEY-05 | Phase 45 | Pending |
+| KEY-06 | Phase 45 | Pending |
+| POL-04 | Phase 45 | Pending |
+| FIX-04 | Phase 45 | Pending |
+| TRANS-03 | Phase 46 | Pending |
+| TRANS-04 | Phase 46 | Pending |
+| ENV-01 | Phase 46 | Pending |
+| POL-03 | Phase 46 | Pending |
+| FIX-03 | Phase 46 | Pending |
+| BUILD-03 | Phase 47 | Pending |
+| POL-02 | Phase 47 | Pending |
+| FIX-02 | Phase 47 | Pending |
+| NOTIF-04 | Phase 48 | Pending |
+| POL-01 | Phase 48 | Pending |
+| FIX-01 | Phase 48 | Pending |
+| CI-06 | Phase 48 | Pending |
 
 **Coverage:**
-- v1.18 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29 ⚠️
+- v1.18 requirements: 32 total
+- Mapped to phases: 32
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-10-12*
-*Last updated: 2026-10-12 after initial definition*
+*Last updated: 2026-10-12 after roadmap creation (CI-04..06 added, NOTIF-01 one-off deploy; 32 requirements mapped to Phases 42–48)*
