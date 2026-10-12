@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 35-console-usability
 source: [35-01-SUMMARY.md]
 started: 2026-10-12T10:03:40Z
@@ -51,5 +51,12 @@ blocked: 0
   reason: "User reported: pass but the URL should be clickable and open in a detached tab/window (target blank, noopener, noreferer set correctly to prevent XSS)."
   severity: minor
   test: 4
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+  root_cause: "DeviceDetail.vue renders linkedRepository.url as plain text in a <p> (line 69); no anchor, no scheme check. Repository URLs are user-entered (Repositories.vue form.url) and may be https://, git@host:path (SSH) or arbitrary text, so a naive :href binding would allow javascript: URLs."
+  artifacts:
+    - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
+      issue: "Linked Repository card shows URL as text only (line 69)"
+  missing:
+    - "Computed/helper that returns the URL only when new URL(url).protocol is http: or https:, else null"
+    - "Render <a :href target=_blank rel=noopener noreferrer> when safe; keep plain text for SSH/other URLs"
+    - "Unit test in tests/unit/milestone-v116.cjs covering https link, javascript: rejected, git@ shown as text"
+  debug_session: ""
