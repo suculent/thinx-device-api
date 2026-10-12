@@ -1,7 +1,7 @@
 ---
 phase: 42-ci-trim-login-page-build-footer
 verified: 2026-10-12T17:10:00Z
-status: human_needed
+status: passed
 score: 16/18 must-haves verified
 covered_files:
   - ".circleci/config.yml"
@@ -24,7 +24,7 @@ covered_files:
   - "services/console/vue/tests/unit/login-page.cjs"
   - "services/console/vue/vue.config.js"
   - "spec/node/CiPipelineGates.test.js"
-covered_digest: "v3:sha256:4f6b1450e00e20ab5a107815a5999ccd3da862a7e648a2271cf4b87ee0032eba"
+covered_digest: "v3:sha256:0309cce3f56fb8d2c5666a326eda2907468afcd4034168f0a2281c73c04f1b92"
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
@@ -55,7 +55,7 @@ human_verification:
 
 **Phase Goal:** `thinx-staging` pipelines run only what the milestone needs, and a user opening the Vue console sees a THiNX-branded welcome login with the social logins right under a green Login button, with every page footer telling them which build they are running.
 **Verified:** 2026-10-12T17:10:00Z
-**Status:** human_needed
+**Status:** passed (human verification accepted by operator 2026-10-12)
 **Re-verification:** No (initial verification)
 
 All automated evidence below was collected by the verifier in its own process: the raw CircleCI v2 API (unauthenticated), the CircleCI compiler (`compile-config-with-defaults`, called directly and not through the phase script), the public endpoints https://console.thinx.cloud/ and https://rtm.thinx.cloud/, the console unit suite and the parent spec. Nothing was taken from the SUMMARY files without a re-check, except the pre-deploy Legacy baseline hashes, which only 42-03 could record.
@@ -215,3 +215,12 @@ None of the three review warnings undermines a must-have. WR-01 (the gate spec i
 
 _Verified: 2026-10-12T17:10:00Z_
 _Verifier: Claude (gsd-verifier)_
+
+## Post-verification delta (2026-10-12, orchestrator)
+
+After this report was written, review finding WR-01 was fixed in commit `4e16212c`: `.circleci/config.yml` gained one
+`test`-job step (`node --test spec/node/CiPipelineGates.test.js`) and `package.json` `test:node` now includes the spec.
+No Snyk filter, workflow, parameter or job selection changed. Re-checked after the edit: `node scripts/check-ci-gates.js compile`
+prints `CI-GATES COMPILE OK` (job selection identical for both parameter values), the spec passes 22/22, and `npm run test:node`
+passes 65/65. The digest above was recomputed over the same covered files. Human verification items H1–H6 and the
+prohibitions review were accepted by the operator ("All good — continue"); status set to passed.
