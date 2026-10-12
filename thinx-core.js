@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 
 const JWTLogin = require("./lib/thinx/jwtlogin");
 const InfluxConnector = require('./lib/thinx/influx');
-const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
 const RedisHealth = require('./lib/thinx/redis-health');
