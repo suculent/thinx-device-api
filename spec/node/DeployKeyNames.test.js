@@ -107,3 +107,32 @@ test('a failed generation releases the claimed name and leaves no file behind', 
     assert.deepEqual(fs.readdirSync(dir),[]);
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
+test('keys created within the same second still list newest first (38 WR-01)', () => {
+  const {dir,key}=fixture();
+  try {
+    writePair(dir,OWNER,1700000000000,'older');
+    writePair(dir,OWNER,1700000000001,'newer');
+    writePair(dir,OWNER,1700000000900,'newest');
+    const listed=key.exportKeysForList(key.getKeyPathsForOwner(OWNER),OWNER);
+    assert.deepEqual(listed.map(k=>k.name),['newest','newer','older']);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('a filesystem error after key generation fails the create instead of crashing, and leaves no key (38 WR-02)', async () => {
+  const {dir,key}=fixture();
+  const prevPass=process.env.GIT_KEY_PASSPHRASE;
+  const fsx=require('fs-extra'); // rsakey.js writes through fs-extra
+  const realChmod=fsx.chmodSync;
+  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
+  try {
+    key.newUniqueIdentifier=()=>4242;
+    const privatePath=path.join(dir,OWNER+'-4242');
+    fsx.chmodSync=(p,mode)=>{ if (p===privatePath) { const e=new Error('synthetic EIO'); e.code='EIO'; throw e; } return realChmod(p,mode); };
+    const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success),'Broken disk'));
+    assert.equal(ok,false,'create reports failure through the callback');
+    assert.deepEqual(fs.readdirSync(dir),[],'no private key and no claimed .pub are left behind');
+  } finally {
+    fsx.chmodSync=realChmod;
+    if (prevPass===undefined) delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=prevPass;
+    fs.rmSync(dir,{recursive:true,force:true});
+  }
+});
