@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 35-console-usability
 source: [35-01-SUMMARY.md]
 started: 2026-10-12T10:03:40Z
-updated: 2026-10-12T10:08:42.571Z
+updated: 2026-10-12T10:58:16.775Z
 ---
 
 ## Current Test
@@ -24,11 +24,10 @@ result: pass
 expected: The device detail sections are stacked in a single column (no side-by-side cards) on a desktop-width window, and nothing overlaps or is cut off.
 result: pass
 
-### 4. Linked repository shows name and Git URL
-expected: For a device linked to a source repository, the device detail shows the repository's name and its Git URL, not a raw source ID or hash.
-result: issue
-reported: "pass but the URL should be clickable and open in a detached tab/window (target blank, noopener, noreferer set correctly to prevent XSS)."
-severity: minor
+### 4. Linked repository URL is a safe new-tab link (re-test after G-35-4)
+expected: For a device linked to a source repository, the device detail shows the repository's name and its Git URL. An http(s) Git URL is a clickable link that opens in a new tab (target="_blank", rel="noopener noreferrer") while the console tab stays put. A git@/SSH URL is shown as plain text, not a link.
+result: pass
+previous_result: issue — "pass but the URL should be clickable and open in a detached tab/window (target blank, noopener, noreferer set correctly to prevent XSS)." (fixed by 35-02-PLAN.md)
 
 ### 5. Exclusive notification selection
 expected: In the notification settings, selecting "All" clears "Important" and "Informational", and selecting either of those clears "All". After you save and reload the page, the same selection is shown.
@@ -37,8 +36,8 @@ result: pass
 ## Summary
 
 total: 5
-passed: 4
-issues: 1
+passed: 5
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -47,10 +46,12 @@ blocked: 0
 
 - gap_id: G-35-4
   truth: "Linked repository Git URL is shown as a clickable link that opens in a new tab with target=\"_blank\" and rel=\"noopener noreferrer\", and only http(s) URLs are rendered as links"
-  status: failed
+  status: resolved
   reason: "User reported: pass but the URL should be clickable and open in a detached tab/window (target blank, noopener, noreferer set correctly to prevent XSS)."
   severity: minor
   test: 4
+  resolved_by: 35-02-PLAN.md
+  resolved_at: 2026-10-12
   root_cause: "DeviceDetail.vue renders linkedRepository.url as plain text in a <p> (line 69); no anchor, no scheme check. Repository URLs are user-entered (Repositories.vue form.url) and may be https://, git@host:path (SSH) or arbitrary text, so a naive :href binding would allow javascript: URLs."
   artifacts:
     - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
