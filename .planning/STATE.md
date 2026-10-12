@@ -3,14 +3,14 @@ gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
-stopped_at: Completed 36-02-PLAN.md
-last_updated: "2026-10-12T12:20:00Z"
-state_head: 92eca3b7880e442300ff929cd2c1efc2f789f86f
+stopped_at: Completed 37-02-PLAN.md
+last_updated: "2026-10-12T12:29:13.616Z"
+state_head: 04455f8c348ceda73ec0c2d1d452398687ce5bb0
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 100
 current_phase: 38
 current_phase_name: Deploy Key Management
@@ -35,6 +35,7 @@ v1.15 Traefik Hardening (Edge) shipped 2026-10-12 (Phases 29–34, 14/14 require
 Use thinx-staging baseline, paired console branch and parent submodule pointer. Preserve API signatures, legacy plaintext transport, existing dependency locks. No source credentials in git.
 - [Phase 35]: G-35-4: linkedRepositoryHref binds only http:/https: (WHATWG URL parse) and returns the parsed href; other schemes and parse failures stay plain text
 - [Phase 36]: G-36-3: device Build History rows are inert summary rows (date/build id/status); the full build log loads only from the per-row Open build log button into BuildLogDialog, no row-click shortcut (operator direction 2026-10-12)
+- [Phase 37]: G-37-5: device Transformer Assignment is one stacked checkbox per transformer on editForm.transformers (no multi-select), with an empty-state line; Manage Transformers is a filled orange variant=warning button (operator 2026-10-12)
 
 ## Verification
 

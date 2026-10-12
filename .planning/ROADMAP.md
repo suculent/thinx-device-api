@@ -155,10 +155,10 @@ Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-36-3 (device B
 
 Requirements: TRANS-01, TRANS-02
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 
 - [x] 37-01-PLAN.md — implement and verify all mapped requirements.
-- [ ] 37-02-PLAN.md — gap closure G-37-5: device transformer assignment as one checkbox per transformer (empty-state line), Manage Transformers as a filled orange button.
+- [x] 37-02-PLAN.md — gap closure G-37-5: device transformer assignment as one checkbox per transformer (empty-state line), Manage Transformers as a filled orange button.
 
 ### Phase 38: Deploy Key Management
 
