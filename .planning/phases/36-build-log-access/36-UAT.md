@@ -27,7 +27,7 @@ result: pass
 ### 3. Full build log from Device Build History
 expected: On a device's detail page, a row in Build History opens the same full-log dialog for that build, by click or by Enter on the focused row.
 result: issue
-reported: "the history should not list full build logs (only on \"Open build log\" -> \"View\""
+reported: "the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
 severity: major
 
 ### 4. Empty and error states in the log dialog
@@ -50,9 +50,9 @@ blocked: 0
 ## Gaps
 
 - gap_id: G-36-3
-  truth: "Device Build History lists builds without showing full build logs inline; the full log appears only in the dialog opened via \"Open build log\" -> \"View\""
+  truth: "Device Build History lists builds without loading or showing full build logs inline, so it loads quickly; the full log appears only in the dialog opened via \"Open build log\" -> \"View\""
   status: failed
-  reason: "User reported: the history should not list full build logs (only on \"Open build log\" -> \"View\""
+  reason: "User reported: the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
   severity: major
   test: 3
   artifacts: []  # Filled by diagnosis
