@@ -254,3 +254,39 @@ test("evaluateJobs requires the main monitors", () => {
     const problems = evaluateJobs(["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api"], { branch: "main", legacy: false });
     assert.ok(problems.some((p) => p.includes("snyk-monitor-console-vue") && p.includes("CI-04")), problems.join("\n"));
 });
+
+// ---------------------------------------------------------------------------
+// Task 3: live pipeline checker arguments and the legacy-on rules (offline)
+// ---------------------------------------------------------------------------
+
+const { parseArgs, UsageError } = gates;
+
+test("evaluateJobs with the gate open accepts a thinx-staging legacy build and requires it", () => {
+    assert.deepEqual(evaluateJobs(["test", "api-registry", "vue-console-registry", "console-classic-registry"], { branch: "thinx-staging", legacy: true }), []);
+    const problems = evaluateJobs(["test", "api-registry", "vue-console-registry"], { branch: "thinx-staging", legacy: true });
+    assert.ok(problems.some((p) => p.includes("console-classic-registry")), problems.join("\n"));
+});
+
+test("parseArgs: pipeline needs exactly one of --revision or --pipeline-id", () => {
+    assert.throws(() => parseArgs(["pipeline", "--revision", "abc1234", "--pipeline-id", "x"]), UsageError);
+    assert.throws(() => parseArgs(["pipeline"]), UsageError);
+    assert.throws(() => parseArgs(["pipeline", "--revision", "abc12"]), UsageError, "short revision");
+    assert.throws(() => parseArgs(["pipeline", "--pipeline-id", "not-a-uuid"]), UsageError);
+    assert.throws(() => parseArgs(["pipeline", "--revision", "abc1234", "--expect", "maybe"]), UsageError);
+    assert.throws(() => parseArgs(["pipeline", "--revision", "abc1234", "--bogus"]), UsageError);
+    assert.throws(() => parseArgs(["nope"]), UsageError);
+    assert.throws(() => parseArgs(["compile", "--wait"]), UsageError);
+});
+
+test("parseArgs: pipeline defaults and flag forms", () => {
+    assert.deepEqual(parseArgs(["pipeline", "--revision", "ABC1234"]), {
+        command: "pipeline", revision: "abc1234", branch: "thinx-staging", pipelineId: undefined, expect: "legacy-off", wait: false, timeoutMin: 30
+    });
+    const byId = parseArgs(["pipeline", "--pipeline-id=27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--expect", "legacy-on", "--wait", "--timeout-min", "5"]);
+    assert.equal(byId.pipelineId, "27d73a7d-4afd-4fbb-932f-e853ebef5eb4");
+    assert.equal(byId.branch, undefined);
+    assert.equal(byId.expect, "legacy-on");
+    assert.equal(byId.wait, true);
+    assert.equal(byId.timeoutMin, 5);
+    assert.throws(() => parseArgs(["pipeline", "--pipeline-id", "27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--branch", "main"]), UsageError);
+});

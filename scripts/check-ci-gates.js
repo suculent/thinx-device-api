@@ -21,14 +21,31 @@
  *       Each compile must be valid; the workflows must be exactly `main` (false) or `main` plus
  *       `legacy-console` (true). For thinx-staging and main the compiled job selection is checked
  *       with evaluateJobs().
+ *   node scripts/check-ci-gates.js pipeline --revision <sha> [--branch thinx-staging]
+ *                                           [--expect legacy-off|legacy-on] [--wait] [--timeout-min 30]
+ *   node scripts/check-ci-gates.js pipeline --pipeline-id <uuid> [--expect ...] [--wait] [--timeout-min 30]
+ *       Reads a real pipeline's job list through the public CircleCI API v2 (unauthenticated GETs,
+ *       project gh/suculent/thinx-device-api) and checks it with evaluateJobs(); --expect legacy-on
+ *       means the CI-05 gate was open for that pipeline (default legacy-off).
+ *       --revision finds the newest push (trigger webhook) pipeline on --branch whose revision
+ *       starts with <sha> (at least 7 hex characters), polling every 15 s until it appears.
+ *       --pipeline-id addresses one pipeline directly (e.g. the API-triggered Phase 43 bypass);
+ *       the branch is the pipeline's own.
+ *       --wait keeps polling until every required job has finished and fails each required job
+ *       that did not end in `success`. --timeout-min bounds every wait (default 30).
  *   const { selectJobs, evaluateJobs, parseArgs } = require('./scripts/check-ci-gates');
  *
  * Output:
  *   compile   `<false|true>/<branch>: job,job,...` lines, then `CI-GATES COMPILE OK` or
  *             `CI-GATES COMPILE FAIL <n> problems` followed by one line per problem.
+ *   pipeline  `pipeline <number> <id> branch=<branch> revision=<sha7>`, one `workflow: job (status)`
+ *             line per job, then `CI-GATES PIPELINE OK <number>` or
+ *             `CI-GATES PIPELINE FAIL <number> <n> problems` followed by one line per problem.
  *
- * Exit codes: 0 = OK, 1 = gate problems, 2 = usage error, network failure (`CI-GATES NETWORK ...`)
- * or timeout.
+ * Exit codes: 0 = OK, 1 = gate problems, 2 = usage error, network failure (`CI-GATES NETWORK ...`),
+ * timeout (`CI-GATES TIMEOUT ...`), or an API answer of 401/403/404 (`CI-GATES ACCESS ...`: the
+ * project is no longer publicly readable; the CircleCI MCP chain list_runs -> list_run_workflows ->
+ * list_workflow_jobs gives the same job list).
  *
  * Only node built-ins and the declared dependency `yaml` are used. No token is read or sent.
  */
@@ -52,11 +69,21 @@ const SNYK_BRANCHES = ["main", "base"];
 const MAIN_REQUIRED = ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
 const MAIN_LEGACY_REQUIRED = ["console-classic-hub", "snyk-monitor-console-classic"];
 
+// Verified 2026-10-12: GET /api/v2/project/gh/suculent/thinx-device-api returns this slug.
+const API_BASE = "https://circleci.com/api/v2";
+const PROJECT_SLUG = "gh/suculent/thinx-device-api";
+const MAX_PIPELINE_PAGES = 5;
+const POLL_MS = 15000;
+const NON_TERMINAL = new Set(["running", "queued", "not_running", "blocked", "on_hold"]);
+
 const RETRIES = 3;
 const BACKOFF_MS = 5000;
 
 class UsageError extends Error {}
 class NetworkError extends Error {}
+class AccessError extends Error {}
+class HttpError extends Error {}
+class GateTimeoutError extends Error {}
 
 // ---------------------------------------------------------------------------
 // Job selection
@@ -138,24 +165,31 @@ function selectJobs(config, branch, params) {
 // Rules
 // ---------------------------------------------------------------------------
 
+// The jobs a pipeline on `branch` must run, each with the requirement that demands it.
+function requiredJobs(branch, legacy) {
+    const required = [];
+    // CI-05: trimming CI must never stop production deploys.
+    if (branch === "thinx-staging") {
+        for (const job of STAGING_REQUIRED) required.push({ job, req: "CI-05" });
+        if (legacy) required.push({ job: "console-classic-registry", req: "CI-05" });
+    }
+    if (branch === "main") {
+        for (const job of MAIN_REQUIRED) required.push({ job, req: "CI-04" });
+        if (legacy) for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
+    }
+    return required;
+}
+
 function evaluateJobs(names, options) {
     const { branch, legacy } = options || {};
     const ran = new Set(names);
     const problems = [];
-    const need = (job, why) => {
-        if (!ran.has(job)) problems.push(why + ": required job " + job + " did not run on " + branch);
-    };
 
     // CI-05: no legacy console image build while the gate is closed.
     if (!legacy) {
         for (const job of LEGACY_JOBS) {
             if (ran.has(job)) problems.push("CI-05: " + job + " ran on " + branch + " with build_legacy_console closed");
         }
-    }
-    // CI-05: trimming CI must never stop production deploys.
-    if (branch === "thinx-staging") {
-        for (const job of STAGING_REQUIRED) need(job, "CI-05");
-        if (legacy) need("console-classic-registry", "CI-05");
     }
     // CI-04: Snyk monitors run on main only (snyk-monitor-base stays on base); thinx-staging and
     // the thinx-console dev branch run none.
@@ -164,9 +198,8 @@ function evaluateJobs(names, options) {
             if (String(job).startsWith("snyk-")) problems.push("CI-04: " + job + " ran on " + branch + " (Snyk monitors run on main only)");
         }
     }
-    if (branch === "main") {
-        for (const job of MAIN_REQUIRED) need(job, "CI-04");
-        if (legacy) for (const job of MAIN_LEGACY_REQUIRED) need(job, "CI-04");
+    for (const { job, req } of requiredJobs(branch, legacy)) {
+        if (!ran.has(job)) problems.push(req + ": required job " + job + " did not run on " + branch);
     }
     return problems;
 }
@@ -175,7 +208,71 @@ function evaluateJobs(names, options) {
 // CLI
 // ---------------------------------------------------------------------------
 
-const USAGE = "usage: node scripts/check-ci-gates.js compile";
+const USAGE = [
+    "usage: node scripts/check-ci-gates.js compile",
+    "       node scripts/check-ci-gates.js pipeline (--revision <sha> [--branch <name>] | --pipeline-id <uuid>)",
+    "                                      [--expect legacy-off|legacy-on] [--wait] [--timeout-min <n>]"
+].join("\n");
+
+const PIPELINE_VALUE_FLAGS = new Set(["--revision", "--branch", "--pipeline-id", "--expect", "--timeout-min"]);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function parsePipelineArgs(args) {
+    const seen = {};
+    let wait = false;
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        let flag = arg;
+        let value;
+        const eq = arg.indexOf("=");
+        if (arg.startsWith("--") && eq !== -1) {
+            flag = arg.slice(0, eq);
+            value = arg.slice(eq + 1);
+        }
+        if (flag === "--wait" && value === undefined) {
+            wait = true;
+            continue;
+        }
+        if (!PIPELINE_VALUE_FLAGS.has(flag)) throw new UsageError("unknown argument: " + arg);
+        if (value === undefined) {
+            value = args[++i];
+            if (value === undefined || value.startsWith("--")) throw new UsageError(flag + " requires a value");
+        }
+        if (!value) throw new UsageError(flag + " requires a value");
+        if (Object.prototype.hasOwnProperty.call(seen, flag)) throw new UsageError(flag + " given twice");
+        seen[flag] = value;
+    }
+
+    const revision = seen["--revision"];
+    const pipelineId = seen["--pipeline-id"];
+    if ((revision === undefined) === (pipelineId === undefined)) {
+        throw new UsageError("pipeline needs exactly one of --revision or --pipeline-id");
+    }
+    if (revision !== undefined && !/^[0-9a-f]{7,40}$/i.test(revision)) {
+        throw new UsageError("--revision must be 7 to 40 hex characters");
+    }
+    if (pipelineId !== undefined && !UUID.test(pipelineId)) throw new UsageError("--pipeline-id must be a UUID");
+    if (pipelineId !== undefined && seen["--branch"] !== undefined) {
+        throw new UsageError("--branch goes with --revision; --pipeline-id uses the pipeline's own branch");
+    }
+    const branch = seen["--branch"] === undefined ? "thinx-staging" : seen["--branch"];
+    if (!/^[A-Za-z0-9._/-]+$/.test(branch)) throw new UsageError("--branch has unexpected characters");
+    const expect = seen["--expect"] === undefined ? "legacy-off" : seen["--expect"];
+    if (expect !== "legacy-off" && expect !== "legacy-on") throw new UsageError("--expect must be legacy-off or legacy-on");
+    const timeoutText = seen["--timeout-min"] === undefined ? "30" : seen["--timeout-min"];
+    const timeoutMin = Number(timeoutText);
+    if (!/^\d+(\.\d+)?$/.test(timeoutText) || !(timeoutMin > 0)) throw new UsageError("--timeout-min must be a positive number");
+
+    return {
+        command: "pipeline",
+        revision: revision === undefined ? undefined : revision.toLowerCase(),
+        branch: pipelineId === undefined ? branch : undefined,
+        pipelineId: pipelineId === undefined ? undefined : pipelineId.toLowerCase(),
+        expect,
+        wait,
+        timeoutMin
+    };
+}
 
 function parseArgs(argv) {
     const args = Array.from(argv || []);
@@ -184,6 +281,7 @@ function parseArgs(argv) {
         if (args.length) throw new UsageError("compile takes no arguments, got " + args[0]);
         return { command };
     }
+    if (command === "pipeline") return parsePipelineArgs(args);
     if (command === undefined) throw new UsageError("missing subcommand");
     throw new UsageError("unknown subcommand: " + command);
 }
@@ -206,6 +304,12 @@ async function requestJson(url, init) {
         if (response.status >= 500 || response.status === 429) {
             lastError = "HTTP " + response.status + " from " + url;
             continue;
+        }
+        if (response.status === 401 || response.status === 403 || response.status === 404) {
+            throw new AccessError("HTTP " + response.status + " from " + url);
+        }
+        if (response.status < 200 || response.status > 299) {
+            throw new HttpError("HTTP " + response.status + " from " + url);
         }
         const text = await response.text();
         let body;
@@ -276,6 +380,116 @@ async function runCompile() {
     return 1;
 }
 
+// ---------------------------------------------------------------------------
+// pipeline: a real pipeline's job list (public API, no token)
+// ---------------------------------------------------------------------------
+
+function apiGet(pathAndQuery) {
+    return requestJson(API_BASE + pathAndQuery, { headers: { Accept: "application/json" } }).then((r) => r.body);
+}
+
+async function untilDeadline(deadline, what, attempt) {
+    for (;;) {
+        const result = await attempt();
+        if (result !== undefined) return result;
+        if (Date.now() + POLL_MS > deadline) throw new GateTimeoutError(what);
+        await sleep(POLL_MS);
+    }
+}
+
+async function listAll(pathPrefix) {
+    const items = [];
+    let token;
+    do {
+        const body = await apiGet(pathPrefix + (token ? "?page-token=" + encodeURIComponent(token) : ""));
+        items.push(...asList(body.items));
+        token = body.next_page_token;
+    } while (token);
+    return items;
+}
+
+async function findPushPipeline(branch, revision) {
+    let token;
+    for (let page = 0; page < MAX_PIPELINE_PAGES; page++) {
+        const query = "?branch=" + encodeURIComponent(branch) + (token ? "&page-token=" + encodeURIComponent(token) : "");
+        const body = await apiGet("/project/" + PROJECT_SLUG + "/pipeline" + query);
+        for (const item of asList(body.items)) {
+            const itemRevision = String((item.vcs && item.vcs.revision) || "").toLowerCase();
+            if (itemRevision.startsWith(revision) && item.trigger && item.trigger.type === "webhook") return item;
+        }
+        token = body.next_page_token;
+        if (!token) break;
+    }
+    return undefined;
+}
+
+async function listJobs(workflows) {
+    const jobs = [];
+    for (const workflow of workflows) {
+        for (const job of await listAll("/workflow/" + workflow.id + "/job")) {
+            jobs.push({ workflow: workflow.name, name: job.name, status: job.status });
+        }
+    }
+    return jobs;
+}
+
+async function runPipeline(args) {
+    const deadline = Date.now() + args.timeoutMin * 60000;
+    const legacy = args.expect === "legacy-on";
+
+    let pipeline;
+    if (args.pipelineId) {
+        pipeline = await apiGet("/pipeline/" + args.pipelineId);
+    } else {
+        pipeline = await untilDeadline(deadline, "no push pipeline on " + args.branch + " for revision " + args.revision + " within " + args.timeoutMin + " min",
+            () => findPushPipeline(args.branch, args.revision));
+    }
+    const branch = (pipeline.vcs && pipeline.vcs.branch) || args.branch;
+    const revision = String((pipeline.vcs && pipeline.vcs.revision) || "").slice(0, 7);
+    console.log("pipeline " + pipeline.number + " " + pipeline.id + " branch=" + branch + " revision=" + revision);
+
+    const problems = [];
+    if (pipeline.state === "errored") {
+        problems.push("pipeline errored (CircleCI could not run the config)");
+        for (const error of asList(pipeline.errors)) problems.push("pipeline error: " + ((error && error.message) || JSON.stringify(error)));
+    } else {
+        const workflows = await untilDeadline(deadline, "pipeline " + pipeline.number + " has no workflow after " + args.timeoutMin + " min", async () => {
+            const items = await listAll("/pipeline/" + pipeline.id + "/workflow");
+            return items.length ? items : undefined;
+        });
+
+        const required = requiredJobs(branch, legacy);
+        let jobs = await listJobs(workflows);
+        if (args.wait) {
+            const pending = (list) => required.filter(({ job }) => list.some((j) => j.name === job && NON_TERMINAL.has(j.status)));
+            while (pending(jobs).length) {
+                if (Date.now() + POLL_MS > deadline) {
+                    throw new GateTimeoutError("pipeline " + pipeline.number + ": " + pending(jobs).map((r) => r.job).join(",") + " still unfinished after " + args.timeoutMin + " min");
+                }
+                await sleep(POLL_MS);
+                jobs = await listJobs(workflows);
+            }
+        }
+
+        for (const job of jobs) console.log(job.workflow + ": " + job.name + " (" + job.status + ")");
+        problems.push(...evaluateJobs(jobs.map((job) => job.name), { branch, legacy }));
+        if (args.wait) {
+            for (const { job, req } of required) {
+                const found = jobs.find((j) => j.name === job);
+                if (found && found.status !== "success") problems.push(req + ": required job " + job + " ended " + found.status);
+            }
+        }
+    }
+
+    if (!problems.length) {
+        console.log("CI-GATES PIPELINE OK " + pipeline.number);
+        return 0;
+    }
+    console.log("CI-GATES PIPELINE FAIL " + pipeline.number + " " + problems.length + " problems");
+    for (const problem of problems) console.log(problem);
+    return 1;
+}
+
 async function main(argv) {
     let args;
     try {
@@ -287,9 +501,23 @@ async function main(argv) {
     }
     try {
         if (args.command === "compile") return await runCompile();
+        if (args.command === "pipeline") return await runPipeline(args);
     } catch (error) {
         if (error instanceof NetworkError) {
             console.log("CI-GATES NETWORK " + error.message);
+            return 2;
+        }
+        if (error instanceof GateTimeoutError) {
+            console.log("CI-GATES TIMEOUT " + error.message);
+            return 2;
+        }
+        if (error instanceof AccessError) {
+            console.log("CI-GATES ACCESS " + error.message + ": the project " + PROJECT_SLUG + " (or this pipeline) is no longer publicly readable."
+                + " The CircleCI MCP chain list_runs -> list_run_workflows -> list_workflow_jobs gives the same job list.");
+            return 2;
+        }
+        if (error instanceof HttpError) {
+            console.log("CI-GATES HTTP " + error.message);
             return 2;
         }
         throw error;
@@ -300,6 +528,7 @@ async function main(argv) {
 module.exports = {
     selectJobs,
     evaluateJobs,
+    requiredJobs,
     evaluateCompiled,
     parseArgs,
     runsOnBranch,
