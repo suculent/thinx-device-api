@@ -3,6 +3,7 @@ created: 2026-10-03T22:30:00.000Z
 title: "Console notifications: remaining delivery gaps after per-owner routing"
 area: api
 severity: medium
+resolves_phase: 43
 files:
   - lib/thinx/messenger.js forwardNonNotification
   - thinx-core.js upgrade handler duplicate-path guard (socketMap keyed by path)

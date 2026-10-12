@@ -12,6 +12,7 @@
 - User-provided server access:
   - `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020`
   - Swarm path: `/mnt/gluster/deployment/swarm`
+- Edge (Traefik) changes: docker service update only (args / labels / configs) — never restart.sh or docker stack deploy; see "Traefik dashboard/API access" below.
 
 ## Legacy plaintext device port — keep 7442
 
@@ -20,6 +21,72 @@ The plaintext HTTP device port **7442** (next to HTTPS 7443) and plain (non-TLS)
 in, redeem OTT tokens and download firmware over them. Operator decision 2026-10-04. Do not close,
 redirect or TLS-enforce them as a "hardening" fix; any hardening on these paths must keep plaintext
 clients working.
+
+MQTT over TLS is `thinx_mosquitto` **:8883** (cert `thinx.cloud`, TLS 1.2+ AEAD-only, same go-auth as :1883); the
+websockets listener :1884 is gone (2026-10-09). The cert is synced from Traefik's acme.json by
+`/etc/cron.d/mosquitto-cert-renew` on micro (thinx-swarm `scripts/mosquitto-cert-renew.sh`, restarts mosquitto only
+on change). Probe ports against the public IP `188.166.23.244` from the laptop — micro's loopback reports :8883 open
+even with no listener. See `.planning/runbooks/swarm.md` § MQTT / MQTTS.
+
+## Traefik dashboard/API access — ssh plane only (Phase 33)
+
+There is **no public Traefik dashboard or API route** on any hostname and **no basic-auth credential on any
+dashboard/API route** (Phase 33, EDGE-API-01/02; operator decision 2026-10-08; the only edge basic-auth is
+`couch-auth` / `influx-auth` on db/influx, below). `api@internal` is served by the
+`traefik-mgmt` router only on the loopback `mgmt` entrypoint `127.0.0.1:8080` **inside the Traefik task**
+— not on the overlay, not on the host, not on the internet. The only path is ssh to micro + `docker exec`:
+
+- JSON API gate (used by every edge verification):
+  `ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "C=\$(docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1); docker exec \$C wget -qO- http://127.0.0.1:8080/api/overview"`
+  (the image has `wget` and `nc`, no `curl`; `/api/http/routers | jq -r '.[] | select(.status!="enabled") | .name'` must print nothing).
+- Browser dashboard — laptop bridge, nothing installed on micro:
+  `C=$(ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker ps -q -f label=com.docker.swarm.service.name=traefik_traefik | head -1"); socat TCP-LISTEN:8080,bind=127.0.0.1,reuseaddr,fork EXEC:"ssh root@188.166.23.244 -i $HOME/.ssh/DOKey2 -p2020 docker exec -i $C nc 127.0.0.1 8080"`
+  then open `http://127.0.0.1:8080/dashboard/`; Ctrl-C the socat to close the bridge (it binds the laptop loopback only).
+  `/dashboard` without the trailing slash returns 404 from `api@internal`; use `/dashboard/` or open `http://127.0.0.1:8080/` which redirects.
+- Never `--api.insecure`, never publish 8080, never `docker stack deploy` / `restart.sh` for edge changes
+  (they drop the live-only secret mounts) — every live edge change is one `docker service update`
+  (`--args` / `--label-*` / `--config-*` / `--force`), repo-first in `thinx-swarm`, with a 600-root backup on micro.
+- TLS options live in `thinx-swarm/traefik/tls.toml`, mounted as the immutable docker config `tls-config-<N>`
+  (`tls-config-3` today since Phase 34; AEAD-only TLS 1.2+, no curve list = Go default incl. X25519MLKEM768; `tls-config-2`
+  was removed, recreate path in the runbook): to change them bump `CONFIG`, `docker config create tls-config-<N>` FROM
+  micro's fast-forwarded checkout, then
+  `docker service update --config-rm tls-config-<N-1> --config-add source=tls-config-<N>,target=/traefik/tls.toml,mode=0444`.
+- HSTS / security headers come from `security-headers@file`, the `[http.middlewares.security-headers.headers]` block in
+  `traefik/tls.toml` (tls-config-3), set as the `https` entrypoint default. There is no swarm-label copy any more (removed
+  in Phase 34, WR-03); never point the entrypoint default back at `@swarm` — a missing middleware 404s every `:443` router.
+- Traefik reads the Docker API **only** via `traefik_socket-proxy` (`--providers.swarm.endpoint=tcp://traefik_socket-proxy:2375`
+  — the full, cluster-unique service name, never the bare `socket-proxy`, which any `traefik-public` service could
+  claim as an alias (34-REVIEW WR-02); `wollomatic/socket-proxy`, GET-only allow-list, internal `traefik-socket` overlay
+  `10.234.34.0/24`). Never re-add a Docker socket mount to `traefik_traefik`, never attach `traefik-socket` to anything
+  else, and check `traefik_socket-proxy` is 1/1 **and `(healthy)`** before any Traefik restart (it has an exec-form
+  `/healthcheck` and updates start-first since the review fixes): a Traefik restart while the proxy is down starts with
+  **no swarm routers**. Health check,
+  restart and rollback: `.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy.
+- Log level is **WARN** (8 start-up WRN lines per task are normal). The access log is **JSON with `RequestPath`,
+  `RequestLine` and `ClientUsername` dropped**: query strings carry OTTs, OAuth codes and reset keys, and the username is
+  half of a basic-auth pair. Never re-enable those fields or switch back to the common log format. `ServiceAddr`,
+  `RouterName`, `DownstreamStatus` and `StartUTC` are kept (the SLA marker uses them).
+- The static command has **24 flags** (Phase 34 end state; the mirror `docker-compose.traefik.yml` has 24 `- --` lines).
+  `docker service logs` hangs on micro: read Traefik logs with `timeout 30 docker logs --since … <container>` instead.
+- The `couch-auth` / `influx-auth` edge basic-auth credential was rotated on 2026-10-09 (Phase 34, D-18); both
+  middlewares strip the header before the backend (`basicauth.removeheader=true` — couch-auth since 16:29Z, influx-auth
+  since the review fixes, WR-03), so Fauxton's and InfluxDB's own logins work behind them and neither backend receives
+  the edge password. Since 2026-10-11 (WR-06) its hash is **bcrypt `$2y$` (cost 12)** and is the `HASHED_PASSWORD` line
+  of **`/mnt/gluster/deployment/secrets/edge-basicauth`** (dir `700`, file `600 root:root`). No container binds that path,
+  and it is outside the `swarm` git checkout. `/mnt/gluster/thinx/.env` no longer carries it: `thinx_worker` (root) binds
+  that whole tree, and a `HASHED_PASSWORD` line there is ignored. `restart.sh` / `thinx.sh` read both files
+  **literally** (no `export $(cat …)`, no sourcing; an inherited `HASHED_PASSWORD` is dropped). They fail closed on a
+  missing/unreadable/empty file or a group/other-readable hash file, and refuse anything but a bare `$2y$` hash with
+  cost 10–31 (apr1 is refused), all before `docker stack rm` (WR-01/WR-06). Keep it 600, never print it, never commit
+  it. **Still readable by** root on the nodes, and by anything with Docker API access, because the hash is a service
+  label: `thinx_worker` and `thinx_api` mount `docker.sock` read-write (host-root-equivalent), and Traefik reads
+  `/services` through the socket-proxy. bcrypt is what makes a leaked hash expensive. The password itself was not
+  changed by WR-06 (same plaintext as the 2026-10-09 rotation, re-hashed); its apr1 hash was readable by the worker
+  2026-10-09…11. Rotate the password if that window matters. Rotation recipe: runbook `### P34 WR-06 bcrypt + move record`.
+- thinx-swarm **has** a CircleCI project (`.circleci/config.yml`): every `master` push builds and pushes `thinx/error-page`
+  and `thinx/downtime-page`, which Swarmpit then autoredeploys (`errorpage_errorpage` restarts → a few transient
+  `errorpage@swarm does not exist` ERR lines in Traefik). It does not deploy the edge; edge changes stay manual.
+- See `.planning/runbooks/traefik-edge-hardening.md` (gate recipes, mechanism table, stage records, the ordered revert set).
 
 ## Local Verification
 - Build command:
@@ -55,7 +122,7 @@ Current state (check the `FROM` line before trusting this list):
 |---|---|
 | `builders/nodemcu-docker-build` | `ubuntu:22.04` — verified building 2026-09-20 |
 | `builders/micropython-docker-build` | `ubuntu:22.04` |
-| `builders/mongoose-docker-build` | `dhi.io/debian-base:trixie-dev` (Debian 13.7) — moved off Ubuntu 2026-09-22 |
+| `builders/mongoose-docker-build` | `mgos/esp32-build:4.4.1-r7` (Ubuntu 22.04) + esp8266 toolchain from `mgos/esp8266-build:3.0.6_1391d154-r1` — local builds since 2026-10-08 |
 
 A bump to `ubuntu:26.04` was attempted and rolled back on 2026-06-28 — all three break, each for a
 different, non-trivial reason (verified by local `docker build` of each on `ubuntu:26.04`):
@@ -67,24 +134,30 @@ different, non-trivial reason (verified by local `docker build` of each on `ubun
   toolchain and `mpy-cross` at image build time, and adds python3/esptool for current MicroPython;
   before that the published image never had a built toolchain and could not produce firmware. The
   22.04 ceiling still applies (the SDK's crosstool-NG still needs python2-era host tooling).
-- **mongoose** — no longer applies: the image left the Ubuntu line entirely on 2026-09-22. The
-  `ppa:mongoose-os/mos` dependency (which publishes focal only, hence the 26.04 `404 … resolute
-  Release`) is gone — `mos` is now compiled from source in a `golang:1.27.1` stage and dropped
-  into a Debian 13 DHI base. See *mongoose builder — mos is built from source* below.
+- **mongoose** — no longer applies: the `ppa:mongoose-os/mos` dependency (which publishes focal
+  only, hence the 26.04 `404 … resolute Release`) is gone — `mos` is compiled from source. The
+  base is now the upstream SDK image, whose tag is dictated by `cesanta/mongoose-os`, so there is
+  no `FROM` line of ours to bump at all. See *mongoose builder — mos is built from source* and
+  *mongoose builder — builds locally* below.
 - **nodemcu** — esp-open-sdk's bundled crosstool-NG toolchain fails to build against the 26.04
   host GCC/glibc: `configure: error: could not find a working compiler`. It builds clean on 22.04.
 
 **Trigger to reconsider:** only when the upstream esp-open-sdk toolchain gains a
 modern-Ubuntu-compatible release. Bumping past 22.04 requires replacing those toolchains, not just
-the `FROM` line. (This ceiling is about the two esp-open-sdk builders; arduino and mongoose are
-both on Debian 13 DHI.)
+the `FROM` line. (This ceiling is about the two esp-open-sdk builders; arduino is on Debian 13
+DHI and mongoose is on the upstream `mgos/*-build` SDK images.)
 
 ### mongoose builder — `mos` is built from source, not installed from the PPA
 
 `builders/mongoose-docker-build` compiles **`github.com/suculent/mos`** — our fork — at pinned
-commit `f612a4c` (branch `thinx/deps-2026-09`) in a `golang:1.27.1` stage and copies the binary
-into a `dhi.io/debian-base:trixie-dev` runtime. Do not "simplify" this back to
-`apt-get install mos-latest`, and do not point it at upstream `mongoose-os/mos`.
+commit `f612a4c` (branch `thinx/deps-2026-09`) and copies the binary into the runtime stage.
+Do not "simplify" this back to `apt-get install mos-latest`, and do not point it at upstream
+`mongoose-os/mos`.
+
+**The build stage is the SDK image plus a Go tarball, not `golang:1.27.1`** (since 2026-10-08).
+`mos` is cgo-linked, so it must be linked against the runtime's glibc: a binary built in
+`golang:1.27.1` (Debian 13) dies on Ubuntu 22.04 with `version GLIBC_2.3x not found`. Keep
+`GO_VERSION`/`GO_SHA256` in the Dockerfile on the same line as the other builders' `golang:` tag.
 
 The fork exists because upstream's tree still carries its 2021 dependency set (x/crypto, go-git
 v5.4.2, grpc v1.40, x/net), which grype scores at **77 findings, 11 critical**, and upstream has
@@ -106,8 +179,9 @@ are **all** `not-fixed` or `wont-fix` upstream — zero are actionable, so do no
 
 **Pin the Go stage to a supported line.** It was `golang:1.25.13` for a day; Go backports security
 fixes to the two most recent majors only, so with 1.27 released the 1.25 line is already done
-receiving them. Both builders track `golang:1.27.1`. Bump it when Go 1.29 ships, not before —
-and rerun the build-chain tests, since the toolchain is what links these binaries.
+receiving them. arduino tracks `golang:1.27.1`; mongoose pins the same version as a tarball
+(`GO_VERSION`/`GO_SHA256` args). Bump both when Go 1.29 ships, not before — and rerun the
+build-chain tests, since the toolchain is what links these binaries.
 
 Build-stage requirements: `python3` (the Makefile generates `version/version.go` via
 `tools/fw_meta.py`), plus `pkg-config libusb-1.0-0-dev libftdi1-dev libudev-dev` — `mos` links
@@ -115,7 +189,46 @@ libusb/libftdi through cgo (`gousb`, `cesanta/hid`, `cesanta/go-serial`). The ru
 therefore needs `libusb-1.0-0` and `libftdi1-2`, which the PPA package used to pull in as `Depends`.
 
 Verified 2026-09-22: the image builds and `mos build --arch=esp8266` produces `fw.zip` through
-`build.mongoose-os.com`.
+`build.mongoose-os.com`. Since 2026-10-08 the entrypoint builds locally instead — see the next
+section.
+
+### mongoose builder — builds locally, no `build.mongoose-os.com`, no Docker-in-Docker
+
+`cmd.sh` runs `mos build --local --platform=<arch>`. `mos --local` has two modes: outside an SDK
+container it runs `docker run docker.io/mgos/<platform>-build:<tag>` and `make` inside it, which
+cannot work here — THiNX build containers deliberately get no `docker.sock`
+(`services/worker/builder-lib.sh`, keep it that way) and the image has no `docker` binary.
+Inside an SDK container, signalled by **`MGOS_SDK_REVISION` being set in the environment**, `mos`
+calls `make` directly against `/opt/Espressif`. So the runtime stage *is*
+`docker.io/mgos/esp32-build:4.4.1-r7` (Ubuntu 22.04, sets that variable), with the esp8266 side
+copied in from `docker.io/mgos/esp8266-build:3.0.6_1391d154-r1`: `/opt/Espressif/xtensa-lx106-elf`
+**and** `/opt/Espressif/esp-open-sdk` plus the `ESP8266_NONOS_SDK -> esp-open-sdk/sdk` symlink.
+The toolchain alone links fine but fails at the final link with
+`cannot open linker script file ../ld/eagle.rom.addr.v6.ld` — the NONOS SDK lives in esp-open-sdk.
+That direction (esp32 base, esp8266 copied in) is forced: the esp8266 image is Ubuntu 18.04 and
+cannot run a `mos` linked on anything newer, while 22.04 runs 18.04's prebuilt gcc fine.
+
+The SDK tags are what `platforms/<arch>/sdk.version` in `cesanta/mongoose-os` names (fetched
+from `raw.githubusercontent.com/cesanta/mongoose-os/master/platforms/<arch>/sdk.version`; the
+`mongoose-os/mongoose-os` org name 404s). Bump them only together with the mongoose-os
+version the projects build against. Both images are frozen since 2022, so grype will report far
+more against this image than the 2 findings of the Debian 13 era; that base cannot move.
+
+Costs accepted with this: image is ~2.5 GB (was ~450 MB); lib sources and prebuilt `.a` archives
+are still fetched from `github.com/mongoose-os-libs` at build time, so the container needs
+outbound HTTPS — "local" removes the cloud builder, not the network.
+
+Verified 2026-10-08 against `mongoose-os-apps/demo-js` mounted at `/opt/workspace`, through the
+entrypoint: esp8266 (no `platform:` key, the default) and esp32 (`platform: esp32`) both report
+`THiNX BUILD SUCCESSFUL.` and write `build/fw.zip`.
+
+**Fixed alongside (2026-10-08), in `services/worker`:** the mongoose branch of `builder` ran
+`"$DCMD"` *quoted*, so bash looked for one executable literally named
+`docker run --cpus=1.0 …` and no non-swarm mongoose build ever started — and its output was not
+`tee`d into the log that the `THiNX BUILD SUCCESSFUL` grep reads. It also mounted the repository
+at `/opt/mongoose-builder` while `swarmbuild` mounts `/opt/workspace` like every other image, so
+swarm builds ran in an empty directory. The image's `WORKDIR` is now `/opt/workspace`, same as
+all builders; `builder.test.js` has a wiring test for both.
 
 **Fixed alongside the base move (2026-09-22):** `cmd.sh` used to call `/root/.mos/bin/mos update`
 under `set -e`, and `/root/.mos` has never existed in the published image — the entrypoint died

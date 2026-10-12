@@ -96,9 +96,10 @@ services:
   mosquitto:
     image: thinxcloud/mosquitto:latest
     # password is injected through the thinx.pw file in test - files backend must be enabled there; otherwise uses Redis/GoAuth plugin
+    # Phase 34 MQTTS (2026-10-09): 1883 plain MQTT stays for legacy devices (AGENTS.md); 8883 is MQTT over TLS
+    # (cert thinx.cloud, see thinx-swarm scripts/mosquitto-cert-renew.sh); the 1884 websockets listener was removed (no consumers).
     ports:
       - 1883:1883
-      - 1884:1884
       - 8883:8883
     networks:
       - traefik-public
@@ -107,7 +108,10 @@ services:
       - '/mnt/gluster/thinx/mosquitto/config/mosquitto.conf:/etc/mosquitto/mosquitto.conf'
       - '/mnt/gluster/thinx/mosquitto/data:/mqtt/data'
       - '/mnt/gluster/thinx/mosquitto/auth:/mqtt/auth'
-      - '/mnt/gluster/thinx/ssl:/mqtt/ssl'
+      # Only the thinx.cloud pair, read-only, per file (was the whole rw /mnt/gluster/thinx/ssl dir with every domain key).
+      # Key is 0640 root:1883 — mosquitto loads TLS files after dropping to uid 1883.
+      - '/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_cert.pem:/mqtt/ssl/thinx_cloud_cert.pem:ro'
+      - '/mnt/gluster/thinx/mosquitto/ssl/thinx_cloud_key.pem:/mqtt/ssl/thinx_cloud_key.pem:ro'
 
     deploy:
       resources:
@@ -118,10 +122,8 @@ services:
           cpus: '0.1'
           memory: 64M
       labels:
-        - "traefik.tcp.services.mosquitto.loadbalancer.server.port=8883"
-        - "traefik.tcp.routers.mosquitto-secure.entrypoints=mqtts"
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        # Phase 33 (EDGE-API-01, D-08): the rule-less MQTTS TCP router and its opt-in labels were removed — MQTT is
+        # direct-published by this service (:1883 plain, :8883 TLS), never routed by Traefik (AGENTS.md keep plain MQTT).
         - "swarmpit.service.deployment.autoredeploy=true"
 
   couchdb:
@@ -179,14 +181,15 @@ services:
       labels:
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.http.services.thinx-db.loadbalancer.server.port=5985"
+        - "traefik.http.services.thinx-db.loadbalancer.server.port=5984"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-db-http.rule=Host(`db.thinx.cloud`)"
         - "traefik.http.routers.thinx-db-http.entrypoints=http"
-        - "traefik.http.routers.thinx-db-http.middlewares=couch-auth,https-redirect"
+        # Phase 34 (D-17, 33-REVIEW WR-04): redirect only — no Basic challenge over plaintext :80; couch-auth stays on thinx-db-https
+        - "traefik.http.routers.thinx-db-http.middlewares=https-redirect"
 
         - "traefik.http.routers.thinx-db-https.rule=Host(`db.thinx.cloud`)"
         - "traefik.http.routers.thinx-db-https.entrypoints=https"
@@ -195,6 +198,8 @@ services:
         - "traefik.http.routers.thinx-db-https.middlewares=couch-auth,error-pages-middleware"
 
         - traefik.http.middlewares.couch-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        # strip the edge Basic header before CouchDB so it does not read it as a CouchDB login (Fauxton has its own)
+        - "traefik.http.middlewares.couch-auth.basicauth.removeheader=true"
 
   thinx-redis:
     networks:
@@ -239,8 +244,8 @@ services:
       - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
-    labels:
-      - traefik.backend.transformer.noexpose
+    # Phase 33 (D-08): the dead Traefik v1 `traefik.backend.*` container label was removed — a v1 (not deploy)
+    # label with no v3 effect; the service is on the internal network only and is never discovered by Traefik.
     deploy:
       resources:
         reservations:
@@ -309,6 +314,8 @@ services:
       - "GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}"
       # Phase 25: CSRF_MODE legacy|observe|signed; roll back with CSRF_MODE=legacy. CSRF_ENFORCE stays true.
       - "CSRF_ENFORCE=true"
+      - "CORS_ENFORCE=true"
+      - "THINX_MQTT_DEVICE_WRITES=1"
       - "CSRF_MODE=signed"
     ports:
       - 7442:7442
@@ -335,7 +342,7 @@ services:
       labels:
         - "traefik.http.services.thinx-api.loadbalancer.server.port=7442"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-api-http.rule=Host(`${THINX_HOSTNAME}`)"
@@ -346,7 +353,8 @@ services:
         - "traefik.http.routers.thinx-api-https.entrypoints=https"
         - "traefik.http.routers.thinx-api-https.tls=true"
         - "traefik.http.routers.thinx-api-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@docker,security-headers@docker"
+        # Phase 33 (EDGE-TLS-02, D-17): security headers now come from the https entrypoint default middleware — the per-router reference was redundant and is dropped; sslheaders stays (X-Forwarded-Proto for the API).
+        - "traefik.http.routers.thinx-api-https.middlewares=sslheaders@swarm"
         - "swarmpit.service.deployment.autoredeploy=true"
 
         # NGINX Entrypoint for WSS
@@ -362,18 +370,24 @@ services:
         # negotiates cookie.secure from req.secure, which is only true when this
         # header arrives AND `trust proxy` accepts the hop it came from (see
         # lib/middleware/cookie-policy.js). Both routers below must keep
-        # referencing sslheaders@docker — declaring the middleware is not enough.
+        # referencing sslheaders@swarm — declaring the middleware is not enough.
+        # Phase 31 (EDGE-MIG-02): the suffix is @swarm because Traefik v3 discovers swarm
+        # services through its separate swarm provider (the v2 docker-provider suffix is a
+        # dangling reference under v3). The v2 docker-network label became traefik.swarm.network
+        # for the same reason — the api sits on two overlay networks, so the label is required.
         - "traefik.http.middlewares.sslheaders.headers.customRequestHeaders.X-Forwarded-Proto=https"
         - "traefik.http.middlewares.sslheaders.headers.customResponseHeaders.X-Forwarded-Proto=https"
         - "traefik.http.middlewares.sslheaders.headers.customRequestHeaders.Connection=upgrade"
         # Direct WSS router: rtm.thinx.cloud WebSocket upgrades go straight to the API (bypasses nginx).
         # priority 200 beats the console router so WS upgrades reach the API; sslheaders (no Upgrade strip) preserves the handshake.
         # Reproduces the live thinx-api-ws router so a `docker stack deploy` does not silently drop it.
-        - "traefik.http.routers.thinx-api-ws.rule=Host(`rtm.thinx.cloud`) && HeadersRegexp(`Upgrade`, `(?i)websocket`)"
+        # Phase 32 (EDGE-MIG-03, D-08): HeaderRegexp is the v3 name of the v2 matcher (rename only; unanchored, (?i) kept for legacy Upgrade: WebSocket clients).
+        # Phase 33 (EDGE-API-01, D-08): Host is ${WEB_HOSTNAME} (= rtm.thinx.cloud), NOT the api hostname variable (= app) — 32-REVIEW IN-05 as corrected by 33-RESEARCH §Q3
+        - "traefik.http.routers.thinx-api-ws.rule=Host(`${WEB_HOSTNAME}`) && HeaderRegexp(`Upgrade`, `(?i)websocket`)"
         - "traefik.http.routers.thinx-api-ws.entrypoints=https"
         - "traefik.http.routers.thinx-api-ws.priority=200"
         - "traefik.http.routers.thinx-api-ws.service=thinx-api"
-        - "traefik.http.routers.thinx-api-ws.middlewares=sslheaders@docker"
+        - "traefik.http.routers.thinx-api-ws.middlewares=sslheaders@swarm"
         - "traefik.http.routers.thinx-api-ws.tls=true"
         - "traefik.http.routers.thinx-api-ws.tls.certresolver=le"
 
@@ -416,7 +430,7 @@ services:
         # should be 7440, but the 80 port of container is exposed anyway in swarm mode
         - "traefik.http.services.thinx-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-console-http.rule=Host(`${WEB_HOSTNAME}`)"
@@ -427,12 +441,11 @@ services:
         - "traefik.http.routers.thinx-console-https.entrypoints=https"
         - "traefik.http.routers.thinx-console-https.tls=true"
         - "traefik.http.routers.thinx-console-https.tls.certresolver=le"
-        - "traefik.http.routers.thinx-console-https.middlewares=security-headers@docker"
+        # Phase 33 (EDGE-TLS-02, D-17): security headers now come from the https entrypoint default middleware — the per-router reference was redundant and is removed.
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.frontend.headers.STSPreload=true"
-        - "traefik.frontend.headers.STSSeconds=31536000"
+        # Phase 33 (D-08): dead Traefik v1 header labels removed — HSTS comes from the entrypoint default middleware (Plan 02 Stage D)
 
   vue:
     depends_on:
@@ -467,7 +480,7 @@ services:
       labels:
         - "traefik.http.services.thinx-vue-console.loadbalancer.server.port=80"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-vue-console-http.rule=Host(`${VUE_HOSTNAME}`)"
@@ -481,8 +494,7 @@ services:
 
         - swarmpit.service.deployment.autoredeploy=true
 
-        - "traefik.frontend.headers.STSPreload=true"
-        - "traefik.frontend.headers.STSSeconds=31536000"
+        # Phase 33 (D-08): dead Traefik v1 header labels removed — HSTS comes from the entrypoint default middleware (Plan 02 Stage D)
 
   worker:
     image: thinxcloud/worker:latest
@@ -499,8 +511,8 @@ services:
       - ROLLBAR_SERVER_TOKEN
     networks:
       - internal
-    labels:
-      - traefik.backend.worker.noexpose
+    # Phase 33 (D-08): the dead Traefik v1 `traefik.backend.*` container label was removed — a v1 (not deploy)
+    # label with no v3 effect; the service is on the internal network only and is never discovered by Traefik.
     volumes:
       - '/mnt/gluster/thinx:/mnt/data/thinx'
       - '/mnt/gluster/thinx/deploy:/mnt/data/deploy'
@@ -541,7 +553,7 @@ services:
       labels:
         - "traefik.http.services.thinx-influx.loadbalancer.server.port=8086"
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.thinx-influx-http.rule=Host(`${INFLUX_HOSTNAME}`)"
@@ -556,4 +568,7 @@ services:
         - swarmpit.service.deployment.autoredeploy=true
 
         - traefik.http.middlewares.influx-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        # 34-REVIEW WR-03: strip the edge Basic header before InfluxDB too — it would otherwise receive the edge
+        # password on every request (InfluxDB has its own login page and Token auth)
+        - "traefik.http.middlewares.influx-auth.basicauth.removeheader=true"
         - traefik.http.routers.thinx-influx-https.middlewares=influx-auth,error-pages-middleware

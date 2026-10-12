@@ -9,6 +9,8 @@
 - ✅ **v1.12 — Inbox Drawdown** — Phases 18–20 (shipped 2026-06-29)
 - ✅ **v1.13 — Web Hardening (Console/Edge)** — Phase 21 (shipped 2026-09-25)
 - ✅ **v1.14 — Backlog & Hardening Sweep** — Phases 22–28 (shipped 2026-10-05)
+- ✅ **v1.15 — Traefik Hardening (Edge)** — Phases 29–34 (shipped 2026-10-12)
+- ✅ **v1.16 — Console Usability & Deploy Keys** — Phases 35–38 (shipped 2026-10-12)
 
 ## Phases
 
@@ -83,6 +85,32 @@ See `.planning/milestones/v1.14-ROADMAP.md`. 24/24 v1.14 requirements (OPS-SWARM
 
 </details>
 
+<details>
+<summary>✅ v1.15 — Traefik Hardening (Edge) (Phases 29–34) — SHIPPED 2026-10-12</summary>
+
+See `.planning/milestones/v1.15-ROADMAP.md`. 14/14 v1.15 requirements; milestone audit `tech_debt`, closed as `override_closeout` (see `.planning/MILESTONES.md`).
+
+- [x] Phase 29: Edge Reconciliation & Source of Truth (3/3 plans) — completed 2026-10-06
+- [x] Phase 30: v1→v2 Syntax Migration (parity) (2/2 plans) — completed 2026-10-07
+- [x] Phase 31: v2→v3 Upgrade (backward-compat mode) (3/3 plans) — completed 2026-10-08
+- [x] Phase 32: v3 Native Syntax & BC Removal (3/3 plans) — completed 2026-10-08
+- [x] Phase 33: Dashboard Lockdown & TLS Hardening (3/3 plans) — completed 2026-10-09
+- [x] Phase 34: Ops Surface Reduction & SLA Close-out (5/5 plans) — completed 2026-10-11
+
+</details>
+
+<details>
+<summary>✅ v1.16 — Console Usability & Deploy Keys (Phases 35–38) — SHIPPED 2026-10-12</summary>
+
+See `.planning/milestones/v1.16-ROADMAP.md`. 11/11 v1.16 requirements, all accepted by live UAT; no milestone audit, closed as `override_closeout` (see `.planning/MILESTONES.md`).
+
+- [x] Phase 35: Console Usability (2/2 plans) — completed 2026-10-12
+- [x] Phase 36: Build Log Access & Timeout Status (2/2 plans) — completed 2026-10-12
+- [x] Phase 37: Transformer Parity (2/2 plans) — completed 2026-10-12
+- [x] Phase 38: Deploy Key Management (1/1 plan) — completed 2026-10-12
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -100,6 +128,16 @@ See `.planning/milestones/v1.14-ROADMAP.md`. 24/24 v1.14 requirements (OPS-SWARM
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete | 2026-10-03 |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete | 2026-10-05 |
+| 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete | 2026-10-06 |
+| 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete | 2026-10-07 |
+| 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete | 2026-10-08 |
+| 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete | 2026-10-08 |
+| 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete | 2026-10-09 |
+| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Complete | 2026-10-11 |
+| 35. Console Usability | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 36. Build Log Access & Timeout Status | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 37. Transformer Parity | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 38. Deploy Key Management | v1.16 | 1/1 | Complete | 2026-10-12 |
 
 ---
-*v1.14 Backlog & Hardening Sweep shipped 2026-10-05: 24 requirements across 7 phases (22–28). Next: `/gsd-new-milestone`.*
+*v1.16 Console Usability & Deploy Keys shipped 2026-10-12. Next: `/gsd-new-milestone` (v1.17 Deploy-Key Vault Transit runs in the `vault-transit` workstream).*

@@ -8,11 +8,15 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 ## Core Value
 
-The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 5-minute SLA.
+The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 600 s SLA (push → first response served by the new task; raised from 5 minutes on 2026-10-11).
 
 ## Current State
 
-**Shipped:** v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
+**Shipped:** v1.16 Console Usability & Deploy Keys (2026-10-12) — 11/11 requirements across Phases 35–38, all accepted by live UAT on `rtm.thinx.cloud`. The Vue console lost the template alert, duplicate logout and Inbox, gained a single-column device page with icon actions at the top, resolves the linked repository to its name and an http(s)-only Git link, and keeps All/Important/Informational notifications mutually exclusive. Full build logs open from Recent Builds, History and the device Build History (summary rows plus an explicit "Open build log" button); stale running builds show TIMEOUT. Transformers are created and edited in Vue and persisted as a `profile.info.transformers` patch, assigned per device with checkboxes. Deploy keys take an optional name (stored in the public-key comment, backward compatible), list newest first with show/copy, and delete by exact filename; the Legacy key-generation flow was fixed. No milestone audit was run; closed as `override_closeout`.
+
+Previously: v1.15 Traefik Hardening (Edge) (2026-10-12) — 14/14 requirements across Phases 29–34. The production edge runs **Traefik v3.7.14** on native v3 rules with a **24-flag** static command whose only source is `thinx-swarm/traefik.yml`; `docker-compose.traefik.yml` is a generated, CI-checked mirror. The dashboard/API answers only on loopback `127.0.0.1:8080` inside the task (ssh + `docker exec`), `exposedbydefault=false`. TLS 1.2+ AEAD-only and HSTS/security headers come from the file provider (`tls-config-3`, `security-headers@file`); ACME uses the real e-mail with `acme.json` 600. Logs are WARN with a JSON access log that drops `RequestPath`/`RequestLine`/`ClientUsername`; Traefik reads Docker only through the GET-only `traefik_socket-proxy`. The couch/influx edge basic-auth is bcrypt, outside the worker-bound tree. Deploy SLA measured at 380 s against the 600 s budget. `:7442` and plain MQTT `:1883` stayed plaintext throughout; MQTTS is `:8883`. Milestone audit `tech_debt`; closed as `override_closeout`.
+
+Previously: v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
 
 Previously: v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
 
@@ -38,7 +42,18 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 ## Next Milestone Goals
 
-Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Deferred Items):
+v1.17 Deploy-Key Vault Transit runs as the `vault-transit` workstream (Phase 39, internal OpenBao on the swarm). For the root track, run `/gsd-new-milestone`.
+
+Carried out of v1.16:
+- Backend full-log payload (AR-36-01): `GET /api/v2/logs/build/:id` reads `build.log` synchronously and returns it as a JSON Buffer byte array (~3.4× size, uncompressed); return a string, add compression or a size cap/tail-first
+- Open review items: 35-REVIEW-DISPOSITION (incl. legacy generic errors IN-03/IN-04), 36-REVIEW WR-01 (inert-row test checks only the `<tr>`), 37-REVIEW IN-02/IN-03, 38-REVIEW IN-01..04/06/07; Vue same-second deploy-key sort relies on API order; UI-review polish across 35–38
+- Legacy AngularJS console is deprecating (KEY-03 live test accepted by operator decision)
+
+Edge candidates carried out of v1.15 (`milestones/v1.15-MILESTONE-AUDIT.md`, runbook `## Recorded for later (after Phase 34)`):
+- Real client IPs at the edge (host-mode publishing or PROXY protocol), then `ipAllowList` / `rateLimit`; `sniStrict=true`; socket-proxy repin
+- Edge doc drift: stale `OPEN-GAP` SLA line and bare socket-proxy name in the fix-forward list, P33 closure rows, post-rollback mirror note; re-disposition review ledgers 29/30/32/33
+
+Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Deferred Items):
 - Worker lifecycle and the build-queue cron that never dispatches waiting builds (todo `2026-09-28-fix-worker-builder-service-polling-completion-detection`)
 - API-key credential/storage hardening (todo `2026-10-03-apikey-hash-credential-and-storage`), Rollbar server/client token split
 - Remove the legacy worker `cmd` path and the last shell-exec sites in `statistics.js`; drop stale env secrets next to the swarm mounts
@@ -46,6 +61,28 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 - Make CI fail on spec failures (`jasmine || true`)
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.16 Console Usability & Deploy Keys (shipped 2026-10-12)</summary>
+
+- ✓ **UI-01..04** — v1.16 (Phase 35) — header cleanup and My Profile; icon actions and single-column device page; repository name + safe http(s) Git link; exclusive notification groups incl. hydration and save.
+- ✓ **BUILD-01/02** — v1.16 (Phase 36) — full build log from Recent Builds, History and device Build History with loading/empty/error states; explicit and expired running builds shown as TIMEOUT.
+- ✓ **TRANS-01/02** — v1.16 (Phase 37) — Vue transformer create/edit persisted as a `profile.info.transformers` patch; per-device checkbox assignment and create-and-assign.
+- ✓ **KEY-01..03** — v1.16 (Phase 38) — named deploy keys (Vue + Legacy, persisted across reload); Deploy Keys label, newest first, show/copy; Legacy response/refresh/error handling fixed.
+
+</details>
+
+<details>
+<summary>v1.15 Traefik Hardening (Edge) (shipped 2026-10-12)</summary>
+
+- ✓ **EDGE-RECON-01/02** — v1.15 (Phase 29) — live edge captured and diffed; thinx-swarm is the source, the device-api file a generated mirror with a CI staleness gate; drift reconciled or documented.
+- ✓ **EDGE-MIG-01/02/03** — v1.15 (Phases 30–32) — v1→v2 syntax on v2.11, v3.7.14 under the BC switch, then native v3 with the switch removed; each hop rollback-able.
+- ✓ **EDGE-MIG-04** — v1.15 (Phases 30–32) — `:7442` and plain MQTT kept legacy check-in, OTT and firmware download working after every hop.
+- ✓ **EDGE-API-01/02** — v1.15 (Phase 33) — no public dashboard/API; `api@internal` on loopback only.
+- ✓ **EDGE-TLS-01/02/03** — v1.15 (Phases 33–34) — AEAD-only TLS 1.2+, edge-wide HSTS not on plaintext paths, real ACME e-mail, `acme.json` 600, renewal proven.
+- ✓ **EDGE-OPS-01/02/03** — v1.15 (Phase 34) — WARN + secret-free access log; GET-only socket-proxy; SLA 380 s ≤ 600 s.
+
+</details>
 
 <details>
 <summary>v1.14 Backlog & Hardening Sweep (shipped 2026-10-05)</summary>
@@ -140,18 +177,18 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 
 ## Out of Scope
 
-- **services/console** frontend work — owned by the console submodule's GSD project (`services/console/.planning/`)
+- **services/console** frontend work — owned by the console submodule's GSD project (`services/console/.planning/`) — except where a parent milestone pairs backend and console changes (v1.16 ran Phases 35–38 here with paired console branches)
 - **G10** (`thinx_worker` silent-loop on `docker pull`) — lives in the worker repo, different codebase
 - **chai-http v5 ESM migration** — dependency lock per `AGENTS.md:82-92`; trigger to reconsider is a Snyk/Dependabot CVE in superagent v3 (tracked as TEST-CHAI-01)
 - **Multi-tenant revamp / v2 API features** — future major milestone, not v1.x
-- **Edge layer redesign** (Traefik labels, nginx rewrites beyond G8 needs) — out of scope except for targeted header hardening (AUTH-API-01 in v1.0, CSP pinning in v1.13)
+- **Edge layer redesign beyond Traefik** (nginx rewrites, console edge consolidation — EDGE-FUT-01) and device mTLS (EDGE-FUT-02). Traefik itself was migrated and hardened in v1.15; replacing it with another proxy stays out of scope
 - **Dashboard data-exposure rework** (AGENTS.md L98) — privacy concern but not a regression vs. legacy; v1.x candidate at most
 - **CONSOLE-LEGACY-JSON-PARSE** — legacy AngularJS console double-parse bug (`JSON.parse` on an already-parsed object at `services/console/src/login.js:173` + `password.js:87`); frontend fault in the sibling submodule, no parent-repo angle. Reclassified out of parent scope at v1.11 start; owned by the `services/console` GSD workspace
 
 ## Context
 
 - **Tech stack:** Node/Express monolith, CommonJS (no ESM migration), chai-http v4 pinned per `AGENTS.md:82-92`
-- **Production deploy:** parent `thinx-staging` push → CircleCI build → private-registry publish → Swarmpit 1.10 autoredeploy (registry push → task Running 31–75 s in v1.14; SLA 5 min). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
+- **Production deploy:** parent `thinx-staging` push → CircleCI build → private-registry publish → Swarmpit 1.10 autoredeploy (registry push → task Running 31–75 s in v1.14; SLA 600 s push → first response since 2026-10-11, measured 380 s in v1.15). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
 - **Branch model (since 2026-09-19):** `master` is deleted and `main` is the default branch. `main` is protected — direct pushes are rejected (`GH006`), so changes reach it through a PR. `thinx-staging` accepts direct pushes. Since `3cfd0666` the two branches publish to different registries: `thinx-staging` → `registry.thinx.cloud:5000`, `main` → Docker Hub, which ended the race where both wrote the same tags. All six submodules publish from `main` only.
 - **Signing:** GPG-sign commits is the project default; the 2026-05-26 single-session authorization for unsigned commits is recorded in memory `unsigned-commits-260526` and does not carry forward.
 - **AGENTS.md** at parent root is the existing onboarding doc (Codex-runtime convention) — kept as the ops/deploy + dependency-lock rationale reference alongside `.planning/`.
@@ -221,6 +258,22 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 | Dormant connector shipped before the cutover (stats off without `INFLUXDB_TOKEN`) | Decouples the code deploy from the irreversible storage upgrade | ✓ Good — the first push caught a ms-timestamp collision bug in CI (#15564) before any data moved |
 | InfluxDB UI credentials: go-B (random admin password as an unmounted secret, UI via SSH tunnel) | Keeps edge basic-auth and InfluxDB credentials independent; no password-sync duty | ✓ Good |
 | 27 review CR-01 (API-key substring match, pre-existing) split out as quick task 261003-s59 | Outside the phase goal but a live auth bypass | — Pending |
+| Phase 31: v2→v3 cutover via ordered surgical `docker service update` (no stack deploy); operator chose to accept the B1→B2 window over an unqualified-ref bridge | Stack deploy drops the live-only `INFLUXDB_TOKEN` mount and resets edge auth hashes; plan must-haves pin `@swarm` refs | ✓ Good with a lesson — v3's swarm provider rejects services carrying both `traefik.docker.*` and `traefik.swarm.*` labels, so the Stage A "bridge" caused a ~2-min web outage until Stage C ran; future label migrations are single-step |
+| Phase 33: Traefik API/dashboard moved to a loopback-only `mgmt` entrypoint reached over ssh + `docker exec`, no public router and no basic-auth | Operator manages the swarm over ssh already; any overlay- or internet-reachable listener exposes the unauthenticated API to 16 overlay services and the internet; ingress NAT rules out IP allowlists | ✓ Good — scan and verifier confirm 8080 closed everywhere; operator `traefik` shell function opens it in Safari (`/dashboard/` needs the trailing slash) |
+| Phase 33: research amendments to locked decisions accepted (keep the `traefik-public` port label, mgmt router in labels, 19 flags, `${WEB_HOSTNAME}` WS rule) | Local swarm falsification showed the swarm provider drops a port-less service's middlewares and synthesises a phantom router otherwise | ✓ Good — recorded visibly in plans and verification; no outage |
+| Phase 33: explicit `curvePreferences = [X25519, P-256]` | Scannable, explicit TLS policy | ✓ Resolved — Phase 34 dropped the curve list (Go default incl. X25519MLKEM768) |
+| Phase 33 code-review fixes limited to repo-only changes; findings needing a live edge change deferred to Phase 34 | thinx-swarm `master` must never disagree with the live spec (P32 D-04) | ✓ Good — CR-01/WR-01/WR-05 fixed, WR-02/03/04 recorded |
+| v1.15: thinx-swarm is the only edge source; every live edge change is one `docker service update`, repo-first, never `stack deploy` | `stack deploy`/`restart.sh` drop live-only secret mounts; one-update changes have a one-command rollback | ✓ Good — 6 phases, no unplanned outage after the 31-03 cutover |
+| Phase 34: HSTS/security headers in the file provider (`security-headers@file`, `tls-config-3`) | A swarm-label middleware is one label update away from vanishing, and a missing default middleware 404s every `:443` router | ✓ Good |
+| Phase 34: Docker API through `traefik_socket-proxy` (GET-only, internal overlay), addressed by full service name | Removes the raw socket from the internet-facing task; a bare `socket-proxy` alias could be claimed by any `traefik-public` service | ✓ Good |
+| Phase 34: SLA budget raised 300 s → 600 s (operator, 2026-10-11) | CI duration dominates (L1 331 s); the edge legs are ~50 s | — Pending — revisit if CI gets faster |
+| Phase 34: real client IPs / `ipAllowList` deferred | Swarm ingress NAT shows every client as `10.0.0.2`; needs host-mode publishing or PROXY protocol first | — Pending |
+| v1.16: console usability work driven from the parent repo (paired console branch + submodule pointer), sourced from Drive THiNX/TODOs.md | Backend and both consoles change together for build logs and deploy keys | ✓ Good — 11/11 accepted live in one day of UAT |
+| G-35-4: repository Git URL bound as a link only for http:/https: (WHATWG URL parse) | Repository URLs are user-controlled; `javascript:`/`data:` must never reach `href` | ✓ Good |
+| G-36-3: device Build History rows are inert summaries; the full log loads only from an explicit "Open build log" button | Full-log fetch is heavyweight (sync GlusterFS read, Buffer JSON); row clicks made the page slow | ✓ Good — backend payload cost deferred as AR-36-01 |
+| G-37-5: per-device transformer assignment as one checkbox per transformer; Manage Transformers as a filled warning button | Multi-select was hard to use; operator direction 2026-10-12 | ✓ Good |
+| Phase 38: deploy-key name optional and stored in the public-key comment; deletion by exact filename | Keeps old keys and API clients working; sorting made index-based selection unsafe | ✓ Good |
+| v1.16 closed without a milestone audit (`override_closeout`); Phases 35/36 verification superseded by live UAT after 37/38 touched shared files | Operator decision 2026-10-12 | — Pending |
 
 ## Evolution
 
@@ -241,4 +294,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-05 after v1.14 milestone*
+*Last updated: 2026-10-12 after v1.16 milestone*

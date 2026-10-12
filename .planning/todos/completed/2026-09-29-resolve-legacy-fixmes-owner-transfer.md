@@ -33,3 +33,20 @@ did not touch the code they describe.
 - (2) is a small log-hygiene fix.
 - (3) needs the async rewrite plus a spec that shows a device already in transfer is refused.
 - (1) can be closed as won't-fix if development mode no longer uses a separate data root.
+
+## Status (updated 2026-10-06)
+
+- [x] **(3) transfer.js `request()`** — **RESOLVED.** Promisified the in-progress gate: it now
+  iterates the real udids, awaits all `exit_on_transfer()` checks via `Promise.all`, and refuses
+  with `transfer_already_in_progress` before any ownership/key lookup. Added a regression test
+  (`TransferApiKeySpec.js`) that seeds `dtr:<udid>` and asserts the refusal (fails on pre-fix code).
+  Commit `5fdb15e4`; shipped in release `v1.14.4031`.
+- [x] **(2) owner.js `create()`** — **RESOLVED.** The `[DEBUG] [create] checking owner by username`
+  log at `owner.js:909` no longer logs the value — the username is the OAuth owner hash (identifying
+  data), so the breadcrumb is kept without it. Decision 2026-10-06.
+- [x] **(1) owner.js `avatar_path()`** — **CLOSED (won't-fix).** `avatar_path` builds from
+  `app_config.data_root` with no development-mode override; harmless outside production file-serving
+  (dev/test use no separate data root). The `FIXME` marker at `owner.js:266` was replaced with a
+  won't-fix `NOTE`. Decision 2026-10-06.
+
+All three items closed → moved to `completed/` on 2026-10-06.

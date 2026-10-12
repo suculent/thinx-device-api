@@ -260,7 +260,7 @@ describe("LOG-04 Buildlog list / listPage / purgeOwner / toBuildListItem", funct
     });
 
     it("a doc without log gives {date: timestamp, udid}", function () {
-      expect(Buildlog.toBuildListItem({ _id: "x", owner: OWNER_A, udid: "u1", timestamp: 1234 })).to.deep.equal({ date: 1234, udid: "u1" });
+      expect(Buildlog.toBuildListItem({ _id: "x", owner: OWNER_A, udid: "u1", timestamp: 1234 })).to.deep.equal({ date: 1234, udid: "u1", build_id: "x", state: undefined, start_time: 1234 });
     });
   });
 
