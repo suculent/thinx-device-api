@@ -144,10 +144,10 @@ Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-35-4 (re-teste
 
 Requirements: BUILD-01, BUILD-02
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans executed
 
 - [x] 36-01-PLAN.md — implement and verify all mapped requirements.
-- [ ] 36-02-PLAN.md — gap closure G-36-3: device Build History summary-only (inline log card removed, per-row "Open build log" button opens the full log).
+- [x] 36-02-PLAN.md — gap closure G-36-3: device Build History summary-only (inline log card removed, per-row "Open build log" button opens the full log).
 
 ### Phase 37: Transformer Parity
 

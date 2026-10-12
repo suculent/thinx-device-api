@@ -3,14 +3,14 @@ gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
-stopped_at: Completed 35-02-PLAN.md
-last_updated: "2026-10-12T11:05:00Z"
-state_head: fadfab0e56c9744a135cee03fa55a7f3c286107f
+stopped_at: Completed 36-02-PLAN.md
+last_updated: "2026-10-12T11:43:25.810Z"
+state_head: 92eca3b7880e442300ff929cd2c1efc2f789f86f
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 6
+  completed_plans: 6
   percent: 100
 current_phase: 38
 current_phase_name: Deploy Key Management
@@ -34,6 +34,7 @@ v1.15 Traefik Hardening (Edge) shipped 2026-10-12 (Phases 29–34, 14/14 require
 
 Use thinx-staging baseline, paired console branch and parent submodule pointer. Preserve API signatures, legacy plaintext transport, existing dependency locks. No source credentials in git.
 - [Phase 35]: G-35-4: linkedRepositoryHref binds only http:/https: (WHATWG URL parse) and returns the parsed href; other schemes and parse failures stay plain text
+- [Phase 36]: G-36-3: device Build History rows are inert summary rows (date/build id/status); the full build log loads only from the per-row Open build log button into BuildLogDialog, no row-click shortcut (operator direction 2026-10-12)
 
 ## Verification
 
@@ -123,6 +124,6 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 
 ## Session
 
-**Last session:** 2026-10-12T10:30:23.481Z
-**Stopped at:** Completed 35-02-PLAN.md
+**Last session:** 2026-10-12T11:43:25.750Z
+**Stopped at:** Completed 36-02-PLAN.md
 **Resume file:** None
