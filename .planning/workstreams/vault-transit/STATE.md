@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
 status: planning
-stopped_at: "Phase 39 context gathered; next: $gsd-plan-phase 39 --ws vault-transit"
-last_updated: "2026-10-12T12:42:43.936Z"
+stopped_at: "Phase 39 research interrupted: research agent reports workspace out of credits; partial findings saved; planning and independent checking not started"
+last_updated: "2026-10-12T14:34:03.879Z"
 last_activity: 2026-10-09
 last_activity_desc: v1.17 roadmap created (3 phases, 17/17 requirements mapped)
-state_head: 38f4a4ecde7d6bdfb56b6456aeefa6df7d6b5c27
+state_head: 727a1de456c20b4d74bd7ba5605353df95c45236
 progress:
   total_phases: 3
   completed_phases: 0
@@ -84,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T12:42:43.903Z
-**Stopped At:** Phase 39 context gathered; next: $gsd-plan-phase 39 --ws vault-transit
-**Resume File:** .planning/workstreams/vault-transit/phases/39-internal-openbao-on-the-swarm/39-CONTEXT.md
+**Last session:** 2026-10-12T14:34:03.850Z
+**Stopped At:** Phase 39 research interrupted: research agent reports workspace out of credits; partial findings saved; planning and independent checking not started
+**Resume File:** .planning/workstreams/vault-transit/phases/39-internal-openbao-on-the-swarm/.continue-here.md
