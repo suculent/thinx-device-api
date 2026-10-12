@@ -81,7 +81,7 @@ Progress: [█░░░░░░░░░] 14%
 ### Blockers/Concerns
 
 - [Phase 43] The NOTIF-01 legacy build uses the CI-05 bypass: API-triggered thinx-staging pipeline with `build_legacy_console=true` (runbook `.planning/runbooks/legacy-console-build-gate.md`). It also reruns the API and Vue deploy jobs, i.e. a production redeploy (42-REVIEW IN-01).
-- [Phase 42 follow-up] Unpushed on thinx-staging (operator: hold until Phase 43 ships): Phase 42 close-out docs, the WR-01 CI change (`4e16212c`) and quick 261012-r9z Codacy fixes (`5836eed0`, `174cf071`). They ride Phase 43's push; then confirm Codacy PR #573 is up to standards.
+- [Phase 42 follow-up] Pushed 2026-10-12 (operator, `2e018d7f..b7ea0959`): Phase 42 close-out, WR-01, quick 261012-r9z Codacy fixes, the `-s ours` main merge `87525c98` and the README rewrite. Confirm the Codacy PR #573 status once re-analysed.
 - [Phase 42 follow-up] H6: confirm the first `main` pipeline after Phase 42 runs all four Snyk monitors green (snyk-monitor-console-vue now uses the dockerhub context only). WR-02 accepted: production images are Snyk-scanned only via main.
 - [Phase 43] The WebSocket upgrade change in `thinx-core.js` must keep `ZZ-WebSocketHandshakeRtmSpec` green and keep per-owner frame routing (quick 261003-vn3); no cross-owner delivery.
 - [Phase 45] v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`; rename touches only the `.pub` comment. Coordinate merge order.
