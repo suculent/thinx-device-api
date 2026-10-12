@@ -690,8 +690,14 @@ jobs:
     - run:
         # v1.18 CI-04/CI-05: the Snyk main-only filters and the legacy-console
         # gate are asserted offline (no CircleCI API, no token).
+        # The job has no node_modules on the host (tests run in the api
+        # container), so the spec's only dependency, the pinned yaml package,
+        # goes into a prefix outside the checkout: a ./node_modules here would
+        # end up in the docker build context of the later steps.
         name: CI pipeline gates (CI-04, CI-05)
-        command: node --test spec/node/CiPipelineGates.test.js
+        command: |
+          npm install --prefix /tmp/ci-gates --no-save --ignore-scripts --no-audit --no-fund yaml@2.8.3
+          NODE_PATH=/tmp/ci-gates/node_modules node --test spec/node/CiPipelineGates.test.js
 
     - run:
         name: Traefik mirror staleness (EDGE-RECON-01)
