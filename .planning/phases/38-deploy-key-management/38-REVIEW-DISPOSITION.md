@@ -13,19 +13,19 @@ findings:
     title: "Throwing fs calls in the async generateKeyPair callback crash the process and leak the claim"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "A failed or partial private-key write leaves a visible, broken key pair"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Stranded claim files are never cleaned up, not even by GDPR `revokeAllForOwner` or `purgeOrphanedKeys`"
   - id: WR-05
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`filenames` is iterated with `for…of` without an array check, so non-array bodies return 500"
   - id: WR-06
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`create()` response shape does not match the list/delete contract"
   - id: IN-01
     severity: info
@@ -45,7 +45,7 @@ findings:
     title: "Duplicate filenames in a revoke request are reported as revoked twice"
   - id: IN-05
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Dead code and debug logging around the touched functions"
   - id: IN-06
     severity: info
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "The newest-first sort changes which key GitHub linking pushes"
-open: 11
+open: 6
 total: 13
 recorded: 2026-10-12T14:33:48.523Z
 ---
@@ -66,15 +66,15 @@ recorded: 2026-10-12T14:33:48.523Z
 |---------|----------|-------------|--------|
 | WR-01 | warning | fixed (f3845d58) | - |
 | WR-02 | warning | fixed (f3845d58) | - |
-| WR-03 | warning | open | - |
-| WR-04 | warning | open | - |
-| WR-05 | warning | open | - |
-| WR-06 | warning | open | - |
+| WR-03 | warning | fixed (7c8fe41a) | - |
+| WR-04 | warning | fixed (7c8fe41a) | - |
+| WR-05 | warning | fixed (7c8fe41a) | - |
+| WR-06 | warning | fixed (7c8fe41a) | - |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
 | IN-04 | info | open | - |
-| IN-05 | info | open | - |
+| IN-05 | info | fixed (7c8fe41a) | - |
 | IN-06 | info | open | - |
 | IN-07 | info | open | - |
 
