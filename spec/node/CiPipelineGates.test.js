@@ -290,3 +290,15 @@ test("parseArgs: pipeline defaults and flag forms", () => {
     assert.equal(byId.timeoutMin, 5);
     assert.throws(() => parseArgs(["pipeline", "--pipeline-id", "27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--branch", "main"]), UsageError);
 });
+
+test("parseArgs: --timeout-min accepts only plain positive decimals (Codacy detect-unsafe-regex)", () => {
+    const withTimeout = (value) => parseArgs(["pipeline", "--revision", "abc1234", "--timeout-min=" + value]);
+    for (const [text, expected] of [["1", 1], ["2.5", 2.5], ["0.5", 0.5], ["007", 7], ["30", 30]]) {
+        assert.equal(withTimeout(text).timeoutMin, expected, JSON.stringify(text));
+    }
+    assert.equal(parseArgs(["pipeline", "--revision", "abc1234"]).timeoutMin, 30, "default");
+    assert.equal(parseArgs(["pipeline", "--revision", "abc1234", "--timeout-min", "5"]).timeoutMin, 5, "separate-argument form");
+    for (const text of ["", "0", "0.0", "00", "-1", "+1", "1e3", "0x10", "1.", ".5", " 5", "5 ", "1.2.3", "Infinity", "NaN", "1,5", "\u0661"]) {
+        assert.throws(() => withTimeout(text), UsageError, JSON.stringify(text));
+    }
+});

@@ -217,6 +217,13 @@ const USAGE = [
 const PIPELINE_VALUE_FLAGS = new Set(["--revision", "--branch", "--pipeline-id", "--expect", "--timeout-min"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// ASCII digits, optionally one dot and more ASCII digits. Each dot-separated part is checked on its
+// own, so no regex here nests a quantifier (Codacy security/detect-unsafe-regex).
+function isPlainDecimal(text) {
+    const parts = text.split(".");
+    return parts.length <= 2 && parts.every((part) => /^\d+$/.test(part));
+}
+
 function parsePipelineArgs(args) {
     const seen = {};
     let wait = false;
@@ -261,7 +268,7 @@ function parsePipelineArgs(args) {
     if (expect !== "legacy-off" && expect !== "legacy-on") throw new UsageError("--expect must be legacy-off or legacy-on");
     const timeoutText = seen["--timeout-min"] === undefined ? "30" : seen["--timeout-min"];
     const timeoutMin = Number(timeoutText);
-    if (!/^\d+(\.\d+)?$/.test(timeoutText) || !(timeoutMin > 0)) throw new UsageError("--timeout-min must be a positive number");
+    if (!isPlainDecimal(timeoutText) || !(timeoutMin > 0)) throw new UsageError("--timeout-min must be a positive number");
 
     return {
         command: "pipeline",
