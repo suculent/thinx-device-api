@@ -166,6 +166,8 @@ Status: complete 2026-10-12. Live UAT 6/6 passed, including gap G-37-5 (checkbox
 
 Requirements: KEY-01, KEY-02, KEY-03
 
+Status: complete 2026-10-12. Live UAT 6/6 passed (test 6 by operator decision, legacy console deprecating). Backend review WR-01..06 + IN-05 fixed (f3845d58, 7c8fe41a). Verification passed; threats_open 0.
+
 - [x] 38-01-PLAN.md — implement and verify all mapped requirements.
 
 All v1.16 plans implemented and locally verified. Console PR #32 merged; API PR #572 approved for staging. Release CI and browser/live acceptance pending.

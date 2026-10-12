@@ -4,7 +4,7 @@ milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
 stopped_at: Completed 37-02-PLAN.md
-last_updated: "2026-10-12T12:48:21Z"
+last_updated: "2026-10-12T14:44:37Z"
 state_head: 04455f8c348ceda73ec0c2d1d452398687ce5bb0
 progress:
   total_phases: 4
@@ -38,6 +38,8 @@ Use thinx-staging baseline, paired console branch and parent submodule pointer. 
 - [Phase 37]: G-37-5: device Transformer Assignment is one stacked checkbox per transformer on editForm.transformers (no multi-select), with an empty-state line; Manage Transformers is a filled orange variant=warning button (operator 2026-10-12)
 
 ## Verification
+
+Phase 38 accepted 2026-10-12: live UAT 6/6; backend review WR-01..WR-06 + IN-05 fixed in f3845d58 and 7c8fe41a (pushed; live UAT ran before them, tests cover them); 38-VERIFICATION.md passed; 38-SECURITY.md threats_open 0. All v1.16 phases (35-38) accepted. Open: 38-REVIEW IN-01..04/06/07, 35-REVIEW IN-03/IN-04 (legacy generic errors), Vue same-second sort relies on the API order, UI-review polish across 35-38.
 
 Phase 37 accepted 2026-10-12: live UAT 6/6 (G-37-5 resolved by 37-02), operator acknowledged the 37-02 prohibitions, review WR-01 + IN-01 fixed in console ff6e809 (pushed with parent 7d56e977); 37-VERIFICATION.md passed; 37-SECURITY.md threats_open 0. Open: 37-REVIEW IN-02/IN-03, 37-UI-REVIEW polish items.
 

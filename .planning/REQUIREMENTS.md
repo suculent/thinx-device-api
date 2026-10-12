@@ -26,8 +26,8 @@ Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acce
 | BUILD-02 | 36 | Verified; live UAT 5/5 passed 2026-10-12 |
 | TRANS-01 | 37 | Verified; live UAT 6/6 passed 2026-10-12 |
 | TRANS-02 | 37 | Verified; live UAT 6/6 passed 2026-10-12 |
-| KEY-01 | 38 | Implemented; locally verified |
-| KEY-02 | 38 | Implemented; locally verified |
-| KEY-03 | 38 | Implemented; locally verified |
+| KEY-01 | 38 | Verified; live UAT 6/6 passed 2026-10-12 |
+| KEY-02 | 38 | Verified; live UAT 6/6 passed 2026-10-12 |
+| KEY-03 | 38 | Verified; live UAT 6/6 passed 2026-10-12 |
 
 Out of scope: deployment/infrastructure changes, paused v1.15 edge work, credentials from the source document.
