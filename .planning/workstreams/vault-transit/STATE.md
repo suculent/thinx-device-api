@@ -2,15 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
+current_phase: 39
+current_phase_name: Internal OpenBao on the Swarm
 status: planning
-last_updated: "2026-10-09T14:00:00.000Z"
+stopped_at: "Phase 39 context gathered; next: $gsd-plan-phase 39 --ws vault-transit"
+last_updated: "2026-10-12T12:42:43.936Z"
 last_activity: 2026-10-09
+last_activity_desc: v1.17 roadmap created (3 phases, 17/17 requirements mapped)
+state_head: 38f4a4ecde7d6bdfb56b6456aeefa6df7d6b5c27
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
@@ -66,7 +70,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [D-05] Phase 34 D-20 (flat-ROADMAP plan 34-03, on disk in `34-04-PLAN.md`) conflicts with a deployed internal OpenBao ("NOT DEPLOYED", redirect-only `vault-http`, "never deploy vault"). Whichever lands second must reconcile vault.yml.
+- [D-05 resolved 2026-10-12] Archived `.planning/milestones/v1.15-ROADMAP.md` records that Phase 34 D-20 was dropped and moved to v1.17. Phase 39 owns the OpenBao replacement; inspect the current vault.yml during planning.
 - [Phase 40] Must not reach `thinx-staging` before Phase 39 is live: KEYENC-03 refuses key generation without OpenBao, and a `thinx-staging` push deploys to production. Use a non-deploying CI branch (e.g. `thinx-unit`) until then.
 - [Phase 39] Node-local Raft + static-seal key bind OpenBao to one node; confirm the manager set and pin by hostname. Decide how the seal key reaches the container (bind mount vs swarm secret).
 - [Phase 41] Pre-migration backup, pre-migration Gluster backups and DO VM snapshots hold `thinx`-passphrase keys — ACCEPTED residual risk (operator, 2026-10-09); no destroy/re-issue requirement.
@@ -80,5 +84,6 @@ None yet.
 
 ## Session Continuity
 
-**Stopped At:** Roadmap created; next is `/gsd-discuss-phase 39`
-**Resume File:** None
+**Last session:** 2026-10-12T12:42:43.903Z
+**Stopped At:** Phase 39 context gathered; next: $gsd-plan-phase 39 --ws vault-transit
+**Resume File:** .planning/workstreams/vault-transit/phases/39-internal-openbao-on-the-swarm/39-CONTEXT.md
