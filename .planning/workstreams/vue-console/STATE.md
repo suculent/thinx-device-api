@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 43
 current_phase_name: Notification Delivery
 status: executing
-stopped_at: Phase 43 UI-SPEC approved
-last_updated: "2026-10-12T20:54:01.007Z"
+stopped_at: Completed 43-01-PLAN.md
+last_updated: "2026-10-12T21:06:13.575Z"
 last_activity: 2026-10-12
-last_activity_desc: Phase 42 complete, transitioned to Phase 43
-state_head: 789954013d9b5644d15afab175d2194922519874
+last_activity_desc: Completed 43-01 (multi-tab WebSocket upgrades, NOTIF-02)
+state_head: 9a9ba69b8cfe553e9f148591c7956ce26c7b807a
 progress:
   total_phases: 7
   completed_phases: 1
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 43 (Notification Delivery) — READY TO EXECUTE
-Plan: Not started
+Phase: 43 (Notification Delivery) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-10-12 - Completed quick task 261012-r9z: Fix Codacy findings on PR 573
+Last activity: 2026-10-12 — Completed 43-01 (multi-tab WebSocket upgrades, NOTIF-02)
 
 Progress: [█░░░░░░░░░] 14%
 
@@ -56,6 +56,7 @@ Progress: [█░░░░░░░░░] 14%
 | Phase 42 P01 | 7 min | 3 tasks | 4 files |
 | Phase 42 P02 | 8 min | 3 tasks | 11 files |
 | Phase 42 P03 | 8 min | 2 tasks | 1 files |
+| Phase 43 P01 | 10min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Progress: [█░░░░░░░░░] 14%
 - [Phase 42]: 42-02: the 460px stacked social-row media block must follow the row rules (same specificity); login-page.cjs asserts the cascade order
 - [Phase 42]: 42-03: shipped via thinx-staging; pipeline 5655 ran only test, api-registry, vue-console-registry (CI-GATES PIPELINE OK); console.thinx.cloud serves id 2e018d7 and the logo; Legacy files byte-identical
 - [Phase 42]: 42-03: close-out docs commits stay local (a docs-only thinx-staging push would redeploy API and Vue); they ride the next push
+- [Phase 43]: NOTIF-02: WebSocket upgrades tracked per connection and per verified owner in lib/thinx/socket_upgrade.js (path-keyed socketMap guard removed); cap 10 live sockets per owner, 11th gets HTTP 429 with one log line
+- [Phase 43]: Credential-free live probe scripts/check-ws-multitab.js (WS-MULTITAB OK/FAIL) is how 43-03 proves multi-tab upgrades on rtm.thinx.cloud
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ Progress: [█░░░░░░░░░] 14%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T20:14:39.421Z
-**Stopped At:** Phase 43 UI-SPEC approved
-**Resume File:** .planning/workstreams/vue-console/phases/43-notification-delivery/43-UI-SPEC.md
+**Last session:** 2026-10-12T21:06:07.403Z
+**Stopped At:** Completed 43-01-PLAN.md
+**Resume File:** None
