@@ -3,14 +3,15 @@ gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
-last_updated: "2026-10-12T09:39:20.029Z"
-state_head: 88d18fd01c09aae762f9486ee711fb378a8c025c
+stopped_at: Completed 35-02-PLAN.md
+last_updated: "2026-10-12T10:30:23.522Z"
+state_head: fadfab0e56c9744a135cee03fa55a7f3c286107f
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
-  percent: 0
+  total_plans: 5
+  completed_plans: 5
+  percent: 100
 current_phase: 38
 current_phase_name: Deploy Key Management
 ---
@@ -32,6 +33,7 @@ v1.15 Traefik Hardening (Edge) shipped 2026-10-12 (Phases 29–34, 14/14 require
 ## Decisions
 
 Use thinx-staging baseline, paired console branch and parent submodule pointer. Preserve API signatures, legacy plaintext transport, existing dependency locks. No source credentials in git.
+- [Phase 35]: G-35-4: linkedRepositoryHref binds only http:/https: (WHATWG URL parse) and returns the parsed href; other schemes and parse failures stay plain text
 
 ## Verification
 
@@ -110,3 +112,15 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 | scheduled_v1.14 | WR-04 `POST /api/v2/user` without CSRF | **→ Phase 25 (SEC-CSRF-04).** Decided 2026-09-25: no machine-client exemption; registrants must prime the token. |
 | scheduled_v1.14 | Console CSP source-of-truth | **→ Phase 25 (SEC-CSP-03/04).** Gluster file is canonical (decision 2026-09-25); images and runbook snapshots mirror it, incl. the Vue `connect-src` `app.thinx.cloud` fix. Retiring the bind mount stays future (SEC-CSP-05). |
 | scheduled_v1.14 | Classic register / forgot / reset-confirm under enforcement | **→ Phase 25 (SEC-CSRF-06).** |
+
+## Performance Metrics
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 35 P02 | 4min | 2 tasks | 3 files |
+
+## Session
+
+**Last session:** 2026-10-12T10:30:23.481Z
+**Stopped at:** Completed 35-02-PLAN.md
+**Resume file:** None

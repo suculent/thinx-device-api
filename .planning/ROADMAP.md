@@ -136,7 +136,7 @@ Active milestone (v1.15 shipped 2026-10-12).
 Requirements: UI-01, UI-02, UI-03, UI-04
 
 - [x] 35-01-PLAN.md — implement and verify all mapped requirements.
-- [ ] 35-02-PLAN.md — gap closure G-35-4: repository Git URL as safe new-tab link (http(s) only).
+- [x] 35-02-PLAN.md — gap closure G-35-4: repository Git URL as safe new-tab link (http(s) only).
 
 ### Phase 36: Build Log Access & Timeout Status
 
