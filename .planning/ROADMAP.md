@@ -135,6 +135,8 @@ Active milestone (v1.15 shipped 2026-10-12).
 
 Requirements: UI-01, UI-02, UI-03, UI-04
 
+Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-35-4 (re-tested after the 35-02 deploy). Verification passed; threats_open 0.
+
 - [x] 35-01-PLAN.md — implement and verify all mapped requirements.
 - [x] 35-02-PLAN.md — gap closure G-35-4: repository Git URL as safe new-tab link (http(s) only).
 

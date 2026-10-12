@@ -4,7 +4,7 @@ milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
 stopped_at: Completed 35-02-PLAN.md
-last_updated: "2026-10-12T10:30:23.522Z"
+last_updated: "2026-10-12T11:05:00Z"
 state_head: fadfab0e56c9744a135cee03fa55a7f3c286107f
 progress:
   total_phases: 4
@@ -36,6 +36,8 @@ Use thinx-staging baseline, paired console branch and parent submodule pointer. 
 - [Phase 35]: G-35-4: linkedRepositoryHref binds only http:/https: (WHATWG URL parse) and returns the parsed href; other schemes and parse failures stay plain text
 
 ## Verification
+
+Phase 35 accepted 2026-10-12: live UAT 5/5 passed (G-35-4 fix pushed to console and parent thinx-staging, re-tested live), 35-VERIFICATION.md status passed, 35-SECURITY.md threats_open 0. Code review 35-REVIEW.md: 16 findings open in 35-REVIEW-DISPOSITION.md, including CR-01 (TransformerEditor blanks a transformer on Save after a failed load; Phase 37 scope).
 
 Local unit/regression checks, builds, source security checks, and lint pass. GitHub connector write access restored; console PR #32 is merged and API PR #572 is approved for thinx-staging. CLI credentials remain unavailable. Browser validation could not run because Chromium downloads were invalid. CI and production acceptance pending. See v1.16-VERIFICATION.md.
 

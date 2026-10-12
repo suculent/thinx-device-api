@@ -18,10 +18,10 @@ Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acce
 
 | Requirement | Phase | Status |
 |---|---|---|
-| UI-01 | 35 | Implemented; locally verified |
-| UI-02 | 35 | Implemented; locally verified |
-| UI-03 | 35 | Implemented; locally verified |
-| UI-04 | 35 | Implemented; locally verified |
+| UI-01 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
+| UI-02 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
+| UI-03 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
+| UI-04 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
 | BUILD-01 | 36 | Implemented; locally verified |
 | BUILD-02 | 36 | Implemented; locally verified |
 | TRANS-01 | 37 | Implemented; locally verified |
