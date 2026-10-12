@@ -315,6 +315,49 @@
 
 ---
 
+## Milestone: v1.16 — Console Usability & Deploy Keys
+
+**Shipped:** 2026-10-12
+**Phases:** 4 (35–38) | **Plans:** 7 (3 of them gap closures)
+
+### What Was Built
+
+- Vue console cleanup, single-column device page with icon actions, safe repository link, exclusive notification groups (35).
+- Full build log from every build list via a shared dialog; summary-only device Build History; TIMEOUT for stale running builds (36).
+- Vue transformer editing persisted as a profile patch; per-device checkbox assignment and create-and-assign (37).
+- Named deploy keys (public-key comment), newest-first list with show/copy, exact-filename deletion; Legacy flow fixed (38).
+
+### What Worked
+
+- Live UAT on `rtm.thinx.cloud` caught three real usability gaps (G-35-4, G-36-3, G-37-5); each became a small gap-closure plan, re-tested live the same day.
+- Debug session in root-cause-only mode for G-36-3 gave the gap plan a measured direction (row-click → heavyweight full-log fetch) instead of a guess.
+- Backward-compatible API change for deploy-key names (optional, stored in the key comment) needed no client migration.
+
+### What Was Inefficient
+
+- The milestone was implemented in one bulk commit (`58027c18`) on 2026-10-09 with one-paragraph SUMMARY files and no browser test; acceptance then waited three days behind v1.15 and its CI.
+- Running v1.16 alongside v1.15 (and v1.17 in a workstream) required STATE.md parking and PR conflict resolution on planning files.
+- Phases 37/38 changed files that 35/36 verification covered, so the close found two `stale` verifications; no milestone audit was run.
+
+### Patterns Established
+
+- UI phases close on live UAT with operator sign-off per gap, recorded in the phase STATE line.
+- Expensive data (full build logs) loads only from an explicit control, never from a row click.
+- User-controlled URLs bind to `href` only after a WHATWG parse with an http/https allow-list.
+
+### Key Lessons
+
+- Write per-plan summaries with real one-liners at execution time; the close relies on them.
+- When later phases touch shared components, re-run the earlier phase's verifier before the close, or plan for the override.
+- Measure the backend cost of a UI entry point before wiring it to every row.
+
+### Cost Observations
+
+- Sessions: implementation in one session (2026-10-09), UAT, gap closures and review fixes in one day (2026-10-12).
+- Notable: small parent diff (+449/−46 in `lib`/`spec`/`test`); most work lived in the console submodule.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -328,6 +371,7 @@
 | v1.13 | 1 | 5 | Fail-open to enforce rollout flag for breaking security controls; operator overrides for criteria whose tool disappeared; first formal `audit-open acknowledge` pass (8 legacy items) |
 | v1.14 | 7 | 47 | Milestone re-audit with an integration regression check standing in for stale phase verifications; gated push-to-redeploy measurement for ops phases; three-mode security rollout switch |
 | v1.15 | 6 | 19 | Infrastructure-only milestone on an external source repo: generated mirror + CI gate, repo-first one-update live changes with auto-revert gates, external scan as the phase gate |
+| v1.16 | 4 | 7 | Feature milestone across parent + console submodule, closed on live UAT with same-day gap-closure plans; no milestone audit |
 
 ### Cumulative Quality
 
@@ -339,6 +383,7 @@
 | v1.13 | CSRF middleware specs (fail-open/enforce paths) | classic + Vue console images; `thinx_api` with `CSRF_ENFORCE` on (2026-09-25 09:02Z) | no milestone audit; Phase 21 VERIFICATION `passed` 19/19 with 3 overrides |
 | v1.14 | CsrfRouteInventory/SessionFlow, Git/BuilderPath/SafePath, SecretsSweep, LogPaging/BuildLogOwner, Influx* (CI 1756 specs, 0 failures) | api, worker, transformer, both consoles; InfluxDB 2.9.1; Swarmpit 1.10 | tech_debt (24/24; override_closeout) |
 | v1.15 | mirror check + `traefik-edge-scan.sh` (EDGE-SCAN OK, 16 hosts) | ~15 live `traefik_traefik` service updates; socket-proxy; tls-config-3 | tech_debt (14/14; override_closeout) |
+| v1.16 | deploy-key Node tests, BuildlogPagingSpec, Vue `milestone-v116` unit suite, whole-page render tests + Cypress specs | api + both consoles via thinx-staging (PR #572, console PR #32 and follow-ups) | no audit (11/11 live UAT; override_closeout) |
 
 ### Recurring Backlog Themes
 
@@ -350,6 +395,7 @@
 - **v1.10 → carried forward to v1.11:** fs-finder removal sweep (now unblocked — the ops loop v1.10 closed was its stated gate), fresh Dependabot triage (5 alerts), the four structurally-orthogonal items above, and the influx-fix prod deploy (`9b6d931c`, CI-green, operator force-rollout pending).
 - **v1.13 → carried forward:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS), WR-06 (session-bound CSRF), WR-04 (`POST /api/v2/user`), console CSP source-of-truth retirement, SEC-CFG-02. TEST-CHAI-01 / OPS-02 / OPS-03 have now been carried through **six** milestones without a keep/drop call. Make that call in v1.14 or move them to Out of Scope.
 - **v1.15 → carried forward:** real client IPs → `ipAllowList`/`rateLimit`, `sniStrict`, socket-proxy repin, edge doc drift. v1.14 carry-overs untouched (v1.15 was edge-only).
+- **v1.16 → carried forward:** AR-36-01 full-log payload size, open review items 35–38, UI-review polish. v1.14/v1.15 carry-overs untouched (v1.16 was console-only).
 - **v1.14 → carried forward:** OPS-SWARM-03, SEC-CSP-02, worker lifecycle / build-queue cron, API-key storage hardening, Rollbar token split, legacy worker `cmd` removal, CI exit on spec failure. TEST-CHAI-01, OPS-02/03, `uuid #194` survive again.
 
 ---
@@ -359,3 +405,4 @@
 *v1.13 milestone section appended: 2026-09-25*
 *v1.14 milestone section appended: 2026-10-05*
 *v1.15 milestone section appended: 2026-10-12*
+*v1.16 milestone section appended: 2026-10-12*
