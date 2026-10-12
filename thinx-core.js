@@ -309,6 +309,7 @@ module.exports = class THiNX extends EventEmitter {
             const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
             const blog = new Buildlog();
             const SocketSession = require("./lib/thinx/socket_session"); // WebSocket owner binding and frame dispatch
+            const SocketUpgrade = require("./lib/thinx/socket_upgrade"); // per-connection upgrade tracking, per-owner cap
 
 
             // DI
@@ -483,55 +484,14 @@ module.exports = class THiNX extends EventEmitter {
               return;
             }
 
-            const socketMap = new Map();
+            // Phase 43 (NOTIF-02): upgrades are tracked per connection and per verified
+            // owner in SocketUpgrade, so several console tabs of one owner can hold
+            // sockets on the same /<owner> path. Each raw socket releases its own slot
+            // on close (REFACTOR-03).
+            const socketUpgrade = new SocketUpgrade({ wss: wss, sessionParser: sessionParser });
 
             this.server.on('upgrade', function (request, socket, head) {
-
-              let socketKey = request.url.replace(/^\/+/, "");
-
-              if (typeof (socketMap.get(socketKey)) !== "undefined") {
-                console.log(`ℹ️ [info] Socket already mapped for ${socketKey}, dropping duplicate upgrade.`);
-                socket.destroy();
-                return;
-              }
-
-              sessionParser(request, {}, () => {
-
-                let cookies = request.headers.cookie;
-
-                if (Util.isDefined(cookies)) {
-                  // other x-thx cookies are now deprecated and can be removed
-                  if (cookies.indexOf("x-thx-core") === -1) {
-                    console.log("Should destroy socket, access unauthorized.", Util.redactCookieHeader(cookies));
-                    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-                    socket.destroy();
-                    return;
-                  }
-                }
-
-                if (typeof (socketMap.get(socketKey)) === "undefined") {
-
-                  socketMap.set(socketKey, socket);
-
-                  // REFACTOR-03: raw-socket close handler — releases the socketMap entry deterministically when the upgrade aborts mid-flight (before wss-level ws.on('close') at :597 gets a chance to attach). Map.delete is idempotent so double-firing with the wss-level handler is safe.
-                  socket.on('close', () => {
-                    socketMap.delete(socketKey);
-                  });
-
-                  try {
-                    wss.handleUpgrade(request, socket, head, function (ws) {
-                      ws.socketKey = socketKey;
-                      console.log("ℹ️ [info] WS Session upgrade...");
-                      wss.emit('connection', ws, request);
-                    });
-                  } catch (_upgradeException) {
-                    // fails on duplicate upgrade, why does it happen?
-                    console.log("☣️ [error] Exception caught upgrading same socket twice.");
-                    socketMap.delete(socketKey);
-                  }
-
-                }
-              });
+              socketUpgrade.handle(request, socket, head);
             });
 
             setInterval(function ping() {
@@ -582,10 +542,6 @@ module.exports = class THiNX extends EventEmitter {
               }
 
               ws.on('pong', heartbeat);
-
-              ws.on('close', () => {
-                socketMap.delete(ws.socketKey);
-              });
             }
 
             wss.on('connection', function (ws, req) {
@@ -601,8 +557,6 @@ module.exports = class THiNX extends EventEmitter {
                 return;
               }
 
-              let socketKey = req.url.replace(/^\/+/, "");
-
               // Quick 261003-v05: the socket owner is the session owner parsed at
               // upgrade and must equal the first path segment. Anything else is
               // closed with 1008 by accept() and gets no listener or registry entry.
@@ -617,9 +571,6 @@ module.exports = class THiNX extends EventEmitter {
               if (owner === null) return;
 
               ws.isAlive = true;
-              ws.socketKey = socketKey;
-
-              socketMap.set(socketKey, ws); // public websocket stored in app, needs to be set to builder/buildlog!
 
               initSocket(ws);
 
