@@ -6,6 +6,12 @@
  *
  * The rules live in evaluateJobs(): given the job names a pipeline runs on a branch, it lists
  * every job that must not run there and every job that must.
+ *   CI-05  gate closed: no console-classic-registry / console-classic-hub /
+ *          snyk-monitor-console-classic on any branch. thinx-staging always needs test,
+ *          api-registry and vue-console-registry, plus console-classic-registry with the gate open.
+ *   CI-04  no snyk-* job outside main and base. main needs test, api-hub, vue-console-hub,
+ *          snyk-code-monitor, snyk-oss-monitor, snyk-monitor-api and snyk-monitor-console-vue,
+ *          plus console-classic-hub and snyk-monitor-console-classic with the gate open.
  *
  * Usage:
  *   node scripts/check-ci-gates.js compile
@@ -42,6 +48,9 @@ const LEGACY_WORKFLOW = "legacy-console";
 const LEGACY_JOBS = ["console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
 const STAGING_REQUIRED = ["test", "api-registry", "vue-console-registry"];
 const COMPILE_BRANCHES = ["thinx-staging", "main"];
+const SNYK_BRANCHES = ["main", "base"];
+const MAIN_REQUIRED = ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
+const MAIN_LEGACY_REQUIRED = ["console-classic-hub", "snyk-monitor-console-classic"];
 
 const RETRIES = 3;
 const BACKOFF_MS = 5000;
@@ -147,6 +156,17 @@ function evaluateJobs(names, options) {
     if (branch === "thinx-staging") {
         for (const job of STAGING_REQUIRED) need(job, "CI-05");
         if (legacy) need("console-classic-registry", "CI-05");
+    }
+    // CI-04: Snyk monitors run on main only (snyk-monitor-base stays on base); thinx-staging and
+    // the thinx-console dev branch run none.
+    if (!SNYK_BRANCHES.includes(branch)) {
+        for (const job of names) {
+            if (String(job).startsWith("snyk-")) problems.push("CI-04: " + job + " ran on " + branch + " (Snyk monitors run on main only)");
+        }
+    }
+    if (branch === "main") {
+        for (const job of MAIN_REQUIRED) need(job, "CI-04");
+        if (legacy) for (const job of MAIN_LEGACY_REQUIRED) need(job, "CI-04");
     }
     return problems;
 }

@@ -159,3 +159,98 @@ test("compile evaluation: legacy-console appears only in the compile with the pa
     assert.ok(evaluateCompiled(false, { valid: false, errors: [{ message: "boom" }] }).problems.some((p) => p.includes("boom")));
     assert.ok(evaluateCompiled(false, simulateCompile(true)).problems.some((p) => p.includes("compiled workflows")));
 });
+
+// ---------------------------------------------------------------------------
+// CI-04: Snyk monitors on main only, console monitors on the Docker Hub images
+// ---------------------------------------------------------------------------
+
+function findJob(name) {
+    const found = [];
+    for (const [workflowName, workflow] of workflowEntries()) {
+        for (const job of jobsOf(workflow)) if (job.name === name) found.push(Object.assign({ workflow: workflowName }, job));
+    }
+    assert.equal(found.length, 1, name + " is defined exactly once");
+    return found[0];
+}
+
+test("every snyk-* job except snyk-monitor-base filters main only; snyk-monitor-base stays on base", () => {
+    let count = 0;
+    for (const [, workflow] of workflowEntries()) {
+        for (const job of jobsOf(workflow)) {
+            if (!job.name.startsWith("snyk-")) continue;
+            count++;
+            const only = job.cfg.filters && job.cfg.filters.branches && job.cfg.filters.branches.only;
+            if (job.name === "snyk-monitor-base") {
+                assert.deepEqual(only, ["base"]);
+                assert.deepEqual(job.cfg.requires, ["build-base"]);
+            } else {
+                assert.deepEqual(only, ["main"], job.name + " filters main only");
+            }
+        }
+    }
+    assert.equal(count, 6, "six Snyk monitors stay defined");
+});
+
+function assertHubMonitor(name, expected) {
+    const job = findJob(name);
+    assert.equal(job.workflow, expected.workflow, name + " workflow");
+    assert.equal(job.jobKey, "snyk-container-monitor");
+    assert.equal(job.cfg.image, "thinxcloud/console");
+    assert.equal(job.cfg.tag, expected.tag);
+    assert.ok(!Object.prototype.hasOwnProperty.call(job.cfg, "registry"), name + " pulls from docker.io (no registry key)");
+    assert.deepEqual(job.cfg.requires, [expected.requires]);
+    assert.deepEqual(job.cfg.filters, { branches: { only: ["main"] } });
+    assert.ok(job.cfg.context.includes("dockerhub"), name + " keeps dockerhub (SNYK_TOKEN, docker.io login)");
+    assert.ok(!job.cfg.context.includes("thinx-docker-repo"), name + " drops thinx-docker-repo");
+    assert.equal(job.cfg.dockerfile, expected.dockerfile);
+    assert.equal(job.cfg.submodules, true);
+}
+
+test("snyk-monitor-console-vue scans thinxcloud/console:vue after vue-console-hub (D-06)", () => {
+    assertHubMonitor("snyk-monitor-console-vue", {
+        workflow: "main",
+        tag: "vue",
+        requires: "vue-console-hub",
+        dockerfile: "services/console/vue/Dockerfile"
+    });
+});
+
+test("snyk-monitor-console-classic scans thinxcloud/console:latest after console-classic-hub, inside the gate (D-07)", () => {
+    assertHubMonitor("snyk-monitor-console-classic", {
+        workflow: LEGACY_WORKFLOW,
+        tag: "latest",
+        requires: "console-classic-hub",
+        dockerfile: "services/console/src/Dockerfile"
+    });
+});
+
+test("thinx-staging and thinx-console run no snyk-* job with the gate closed or open", () => {
+    for (const branch of ["thinx-staging", "thinx-console"]) {
+        for (const value of VALUES) {
+            assert.deepEqual(names(branch, value).filter((job) => job.startsWith("snyk-")), [], branch + "/" + value);
+        }
+    }
+});
+
+test("main runs every monitor; the gate adds the legacy hub build and its monitor", () => {
+    const closed = names("main", false);
+    for (const job of ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"]) {
+        assert.ok(closed.includes(job), job + " runs on main");
+    }
+    const open = names("main", true);
+    for (const job of closed) assert.ok(open.includes(job), job + " still runs on main with the gate open");
+    assert.ok(open.includes("console-classic-hub"));
+    assert.ok(open.includes("snyk-monitor-console-classic"));
+    assert.deepEqual(evaluateJobs(closed, { branch: "main", legacy: false }), []);
+    assert.deepEqual(evaluateJobs(open, { branch: "main", legacy: true }), []);
+});
+
+test("evaluateJobs flags a Snyk job on thinx-staging", () => {
+    const problems = evaluateJobs(["test", "api-registry", "vue-console-registry", "snyk-code-monitor"], { branch: "thinx-staging", legacy: false });
+    assert.ok(problems.some((p) => p.includes("snyk-code-monitor") && p.includes("CI-04")), problems.join("\n"));
+});
+
+test("evaluateJobs requires the main monitors", () => {
+    const problems = evaluateJobs(["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api"], { branch: "main", legacy: false });
+    assert.ok(problems.some((p) => p.includes("snyk-monitor-console-vue") && p.includes("CI-04")), problems.join("\n"));
+});
