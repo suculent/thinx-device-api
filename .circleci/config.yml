@@ -4,6 +4,18 @@ orbs:
   docker: circleci/docker@2.0.3
   slack: circleci/slack@5.0.0
 
+# v1.18 CI-05: legacy console image builds (console-classic-registry,
+# console-classic-hub, snyk-monitor-console-classic) are paused while v1.18 is
+# open. They live in the `legacy-console` workflow, which runs only when this
+# parameter is true. Production keeps serving the existing thinx/console:swarm
+# image. Phase 43 opens the gate for one API-triggered pipeline; Phase 48
+# (CI-06) flips the default to true. Runbook:
+# .planning/runbooks/legacy-console-build-gate.md
+parameters:
+  build_legacy_console:
+    type: boolean
+    default: false
+
 commands:
 
   registry-login:
@@ -883,28 +895,9 @@ workflows:
       #
       #   thinx-staging -> registry.thinx.cloud:5000 (what the swarm pulls)
       #   main          -> Docker Hub (the public mirror)
-
-      - build-console-classic:
-          name: console-classic-registry
-          publish: registry
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - thinx-staging
-
-      - build-console-classic:
-          name: console-classic-hub
-          publish: hub
-          context:
-            - thinx-docker-repo
-            - console
-          filters:
-            branches:
-              only:
-                - main
+      #
+      # The legacy console builds (console-classic-registry / -hub) follow the
+      # same rule but live in the gated `legacy-console` workflow below.
 
       - build-vue-console:
           name: vue-console-registry
@@ -1036,6 +1029,63 @@ workflows:
                 - base
 
       - snyk-container-monitor:
+          name: snyk-monitor-console-vue
+          image: thinx/console
+          tag: vue
+          registry: registry.thinx.cloud:5000
+          dockerfile: services/console/vue/Dockerfile
+          submodules: true
+          context:
+            - dockerhub
+            - thinx-docker-repo
+            - console
+          # Scans the private-registry copy, which thinx-staging (and the
+          # thinx-console dev branch) publishes.
+          requires:
+            - vue-console-registry
+          filters:
+            branches:
+              only:
+                - thinx-console
+                - thinx-staging
+
+  #
+  # v1.18 CI-05: legacy console image builds, gated on the pipeline parameter
+  # build_legacy_console (default false while v1.18 is open). The gate is a
+  # workflow-level `when` because CircleCI 2.1 has no per-job `when` inside a
+  # workflow and `requires` cannot cross workflows, which is why the classic
+  # Snyk monitor lives here with the build it requires.
+  # Runbook: .planning/runbooks/legacy-console-build-gate.md
+  #
+
+  legacy-console:
+    when: << pipeline.parameters.build_legacy_console >>
+
+    jobs:
+
+      - build-console-classic:
+          name: console-classic-registry
+          publish: registry
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - thinx-staging
+
+      - build-console-classic:
+          name: console-classic-hub
+          publish: hub
+          context:
+            - thinx-docker-repo
+            - console
+          filters:
+            branches:
+              only:
+                - main
+
+      - snyk-container-monitor:
           name: snyk-monitor-console-classic
           image: thinx/console
           tag: swarm
@@ -1059,25 +1109,4 @@ workflows:
           filters:
             branches:
               only:
-                - thinx-staging
-
-      - snyk-container-monitor:
-          name: snyk-monitor-console-vue
-          image: thinx/console
-          tag: vue
-          registry: registry.thinx.cloud:5000
-          dockerfile: services/console/vue/Dockerfile
-          submodules: true
-          context:
-            - dockerhub
-            - thinx-docker-repo
-            - console
-          # Scans the private-registry copy, which thinx-staging (and the
-          # thinx-console dev branch) publishes.
-          requires:
-            - vue-console-registry
-          filters:
-            branches:
-              only:
-                - thinx-console
                 - thinx-staging
