@@ -5,35 +5,35 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "The transformer editor stays saveable after a failed load, and Save blanks the transformer"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Clickable History rows take over Enter and Space from the buttons inside them"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "\"Create & Assign\" also saves the user's unsaved transformer selection"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The new top \"Environment\" action silently discards an open environment draft"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Whole-`info` profile writes can now overwrite the transformer list"
   - id: WR-05
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "A failed deploy-key list request shows \"No deploy keys yet.\" with no error"
   - id: WR-06
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Deleting deploy keys has no confirmation"
   - id: WR-07
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The header rename breaks a Cypress spec, and the new unit tests are not run in CI"
   - id: IN-01
     severity: info
@@ -67,23 +67,23 @@ findings:
     severity: info
     disposition: open
     title: "Test coverage gaps"
-open: 16
+open: 8
 total: 16
-recorded: 2026-10-12T10:43:52.603Z
+recorded: 2026-10-12T11:11:40.888Z
 ---
 
 # Phase 35: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
-| WR-03 | warning | open | - |
-| WR-04 | warning | open | - |
-| WR-05 | warning | open | - |
-| WR-06 | warning | open | - |
-| WR-07 | warning | open | - |
+| CR-01 | critical | fixed | 35-REVIEW-FIX.md |
+| WR-01 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-02 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-03 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-04 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-05 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-06 | warning | fixed | 35-REVIEW-FIX.md |
+| WR-07 | warning | fixed | 35-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
