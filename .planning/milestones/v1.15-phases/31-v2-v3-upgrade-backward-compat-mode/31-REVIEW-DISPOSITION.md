@@ -29,11 +29,11 @@ findings:
     title: "`${DOMAIN}` is templated but its resolved value is written in the adjacent comment"
   - id: IN-05
     severity: info
-    disposition: skipped
+    disposition: fixed
     title: "Dead Traefik v1 labels survive in `docker-swarm.yml` and misdescribe the console/vue security posture"
   - id: IN-06
     severity: info
-    disposition: skipped
+    disposition: fixed
     title: "`HeadersRegexp` matcher depends entirely on the deprecated `core.defaultRuleSyntax=v2` switch"
 open: 0
 total: 8
@@ -50,5 +50,5 @@ recorded: 2026-10-08T11:28:55.000Z
 | IN-02 | info | fixed | 31-REVIEW-FIX.md |
 | IN-03 | info | fixed | 31-REVIEW-FIX.md |
 | IN-04 | info | fixed | 31-REVIEW-FIX.md |
-| IN-05 | info | skipped | 31-REVIEW-FIX.md |
-| IN-06 | info | skipped | 31-REVIEW-FIX.md |
+| IN-05 | info | fixed | 31-REVIEW-FIX.md (skipped); fixed later (2026-10-12 re-disposition, 261012-fqh): P33 D-08 removed the v1 frontend labels (thinx-swarm `6dc974b`, this repo `a68a02ff`; 0 `traefik.frontend`; 33-VERIFICATION truth 10) |
+| IN-06 | info | fixed | 31-REVIEW-FIX.md (skipped); fixed later (2026-10-12 re-disposition, 261012-fqh): P32 (EDGE-MIG-03) moved to native v3 `HeaderRegexp` and removed the rule-syntax switch (thinx-swarm `17401bb`; 0 non-comment `HeadersRegexp`/`ruleSyntax`) |

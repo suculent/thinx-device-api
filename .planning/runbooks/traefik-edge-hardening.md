@@ -2559,5 +2559,16 @@ Items deliberately NOT done in Phase 34, carried with their evidence (34-CONTEXT
   `errorpage_errorpage` task, and for ~2 s Traefik logs `the service "errorpage@swarm" does not exist` on the db/influx
   routers (an error page cannot be rendered in that window). Harmless; a second replica or `start-first` update order
   would remove it.
+- **Deferred v1.15 review findings (re-dispositioned 2026-10-12, quick 261012-fqh)** — code/comment quality only, no
+  live exposure; each ledger row (`*-REVIEW-DISPOSITION.md` under `.planning/milestones/v1.15-phases/`) points here:
+  - mirror tooling (`scripts/generate-traefik-mirror.js` / `scripts/check-traefik-mirror.js`, unchanged since
+    `44582e7f`): 29 WR-01..WR-04, IN-01..IN-03;
+  - thinx-swarm clean-up, repo-first with a mirror regen: 30 IN-03 (vpn `1194/udp` comment), the unused `net` overlay
+    (30 IN-04 = 32 IN-08 = 33 IN-05), 32 IN-07 (downtime.yml duplicate comment / trailing spaces) and 32 IN-09
+    (duplicate `error-pages-middleware`; removing one is a live label change);
+  - edge scan script (`scripts/traefik-edge-scan.sh`): 33 IN-01 (port loop matches `open` anywhere on the line),
+    IN-02 (no resolves-to-`EDGE_IP` check);
+  - `traefik.sh`: 33 IN-04 (no strict mode, non-idempotent `docker network create`, unquoted `NODE_ID`);
+  - ssh one-liner guard: 33 IN-06 (no empty-container guard in the AGENTS.md / thinx-swarm README one-liners).
 - **Not scheduled (product decisions):** HSTS preload-list submission for `thinx.cloud`; a management VPN on the swarm
   (`:1194` stays vestigial).
