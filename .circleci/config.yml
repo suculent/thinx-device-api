@@ -688,6 +688,12 @@ jobs:
         command: node scripts/check-console-headers.js && node --test spec/node/ConsoleHeaderParity.test.js
 
     - run:
+        # v1.18 CI-04/CI-05: the Snyk main-only filters and the legacy-console
+        # gate are asserted offline (no CircleCI API, no token).
+        name: CI pipeline gates (CI-04, CI-05)
+        command: node --test spec/node/CiPipelineGates.test.js
+
+    - run:
         name: Traefik mirror staleness (EDGE-RECON-01)
         command: node scripts/check-traefik-mirror.js
 
