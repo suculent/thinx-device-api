@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 36-build-log-access
 source: [36-01-SUMMARY.md]
 started: 2026-10-12T11:40:00Z
-updated: 2026-10-12T11:18:09.937Z
+updated: 2026-10-12T11:52:27.574Z
 ---
 
 ## Current Test
@@ -20,11 +20,10 @@ result: pass
 expected: On the History page, the Builds table has an "Open build log" button on each row that opens the same full-log dialog, and clicking a row with the mouse also opens it. Using the keyboard (Tab to a row's Expand or "Open build log" button, then Enter or Space) triggers that button's own action, and selecting text in a row does not open the dialog.
 result: pass
 
-### 3. Full build log from Device Build History
-expected: On a device's detail page, a row in Build History opens the same full-log dialog for that build, by click or by Enter on the focused row.
-result: issue
-reported: "the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
-severity: major
+### 3. Device Build History is summary-only (re-test after G-36-3)
+expected: On a device's detail page, Build History lists builds summary-only (date, build id, status) with no inline log text and no "Device Logs (last build)" card, and the page loads quickly. Each row has an "Open build log" button that opens the full-log dialog for that build; clicking the row itself does nothing.
+result: pass
+previous_result: issue — "the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now." (fixed by 36-02-PLAN.md)
 
 ### 4. Empty and error states in the log dialog
 expected: Opening the log of a build that produced no log output shows a clear empty message rather than a blank dialog or endless spinner. If the log cannot be loaded, the dialog shows an error message instead of hanging.
@@ -37,8 +36,8 @@ result: pass
 ## Summary
 
 total: 5
-passed: 4
-issues: 1
+passed: 5
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -47,10 +46,12 @@ blocked: 0
 
 - gap_id: G-36-3
   truth: "Device Build History lists builds without loading or showing full build logs inline, so it loads quickly; the full log appears only in the dialog opened via \"Open build log\" -> \"View\""
-  status: failed
+  status: resolved
   reason: "User reported: the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
   severity: major
   test: 3
+  resolved_by: 36-02-PLAN.md
+  resolved_at: 2026-10-12
   root_cause: "DeviceDetail.vue Build History rows are themselves buttons (tabindex=0 role=button, unguarded @click/@keydown.enter/@keydown.space -> openBuildLog), so any row click or keyboard pass fetches the full log via GET /api/v2/logs/build/:id; that response is the whole build.log read synchronously from GlusterFS and sent uncompressed as a JSON Buffer byte array (~3.4x log size). The pre-existing 'Device Logs (last build)' card under Build History also renders log lines inline in a terminal-styled <pre>. The list endpoint itself carries no full logs."
   artifacts:
     - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
