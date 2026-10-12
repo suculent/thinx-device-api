@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 Phase: 43 — Notification Delivery
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-12 — Phase 42 complete, transitioned to Phase 43
+Last activity: 2026-10-12 - Completed quick task 261012-r9z: Fix Codacy findings on PR 573
 
 Progress: [█░░░░░░░░░] 14%
 
@@ -87,6 +87,12 @@ Progress: [█░░░░░░░░░] 14%
 - [Phase 45] v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`; rename touches only the `.pub` comment. Coordinate merge order.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261012-r9z | Fix Codacy findings on PR 573 (no-control-regex x2, unsafe-regex); CodeQL clean | 2026-10-12 | 174cf071 | [261012-r9z-fix-codacy-findings-on-pr-573-no-control](./quick/261012-r9z-fix-codacy-findings-on-pr-573-no-control/) |
 
 ## Deferred Items
 
