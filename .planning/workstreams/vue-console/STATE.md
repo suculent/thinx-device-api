@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 42
 current_phase_name: CI Trim, Login Page & Build Footer
 status: executing
-stopped_at: Completed 42-01-PLAN.md
-last_updated: "2026-10-12T16:29:39.543Z"
+stopped_at: Completed 42-02-PLAN.md
+last_updated: "2026-10-12T16:41:08.109Z"
 last_activity: 2026-10-12
 last_activity_desc: Phase 42 execution started
-state_head: 3a5163f5b71b91880a0468bbc11516f6dd098f75
+state_head: 36e48da61aae51131f594d7675972db711b70fd8
 progress:
   total_phases: 7
   completed_phases: 0
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 42 (CI Trim, Login Page & Build Footer) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-10-12 — Phase 42 execution started
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 42 P01 | 7 min | 3 tasks | 4 files |
+| Phase 42 P02 | 8 min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Progress: [░░░░░░░░░░] 0%
 - Parent API changes: Phase 43 (`thinx-core.js` socket guard, messenger/builder status frames) and Phase 45 (deploy-key rename, FIX-04). Parent CI changes: Phases 42 and 48.
 - [Phase 42]: 42-01: CI-05 gate is workflow legacy-console with when on pipeline parameter build_legacy_console (default false); snyk-monitor-console-classic lives inside it because requires cannot cross workflows
 - [Phase 42]: 42-01: CI-04 Snyk monitors run on main only; console monitors scan thinxcloud/console:vue and :latest on docker.io with the dockerhub context only; gates proven via node scripts/check-ci-gates.js compile
+- [Phase 42]: 42-02: one shared AppFooter (variant auth|layout) on Login, PasswordReset and Layout; build year and 7-hex commit id shown only when valid, so dev/empty/undefined never render
+- [Phase 42]: 42-02: the 460px stacked social-row media block must follow the row rules (same specificity); login-page.cjs asserts the cascade order
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T16:29:39.508Z
-**Stopped At:** Completed 42-01-PLAN.md
+**Last session:** 2026-10-12T16:41:08.072Z
+**Stopped At:** Completed 42-02-PLAN.md
 **Resume File:** None
