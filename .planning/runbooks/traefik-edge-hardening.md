@@ -1854,7 +1854,7 @@ the failure reproduces 5/5 on unchanged application code, so a run 2 would be a 
 stops here for the operator: fix the RSA key specs (or the v1.16 rsakey change) on thinx-staging, or decide otherwise.
 No PASS/FAIL verdict is recorded, because a NO-MEASUREMENT run is never PASS or FAIL.
 
-**Operator decision (2026-10-09 ≈16:30Z, option b): record the SLA as an open gap; no run 2.** CircleCI's own status
+**Operator decision (2026-10-09 ≈16:30Z, option b): record the SLA as an open gap; no run 2.** (superseded 2026-10-11 by `### P34 SLA run 2`: run 2 was measured after all, `sla_verdict: PASS`, 380 s within the 600 s budget) CircleCI's own status
 page shows the service degraded today, `test` stays red on thinx-staging (`03-RsakeySpec`, a v1.16 regression that a
 separate debugger is fixing; `spec/` and `lib/` are out of this plan's scope), and the thinx-swarm error/downtime image
 builds fail at checkout (the operator handles that; not this plan). Nothing was timed, so there is no total, no leg and no
@@ -1973,7 +1973,7 @@ end-state capture is `swarm-configs/traefik-edge.F.post.yml`; the scan is `## Af
 | external stacks (D-09) | `external_stack_labels:` | key sets and rule / entrypoints / middlewares values **identical** | untouched |
 | repo == deployed | thinx-swarm `b04f066` == micro == origin, MIRROR OK at 19 | **thinx-swarm `4e4f315` == micro HEAD (tracked-dirty 0) == origin/master == mirror banner; `MIRROR OK files=1`, 24 `- --` lines; `docker-swarm.yml` vs `thinx.yml` traefik-label parity diff empty** | holds |
 | external scan | `EDGE-SCAN OK` (17 hosts) | **all 16 hosts pass every predicate (composite of run 1 forward + run 6 reversed); 0 predicate failures in six runs; no single full run clean** (superseded 2026-10-11: a clean single run from `vps` — `EDGE-SCAN OK`, rc=0 — is the last section of `traefik-edge-scan.2026-10-09.md`; WINDOWS #20 fixed) — the laptop uplink dropped out at the tail of each run (1.1.1.1:443 lost in the same seconds); Traefik task / index unchanged, no swarm event in the gaps | **deviation:** plan verify (one clean full run) not met from this laptop; edge evidence complete per host |
-| SLA (EDGE-OPS-03) | Phase 28: push_end → Running 31–50 s | **`sla_verdict: OPEN-GAP`** — run 1 NO-MEASUREMENT (CI `test` red on v1.16 `03-RsakeySpec`, CircleCI degraded); `thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` | **open** — ROADMAP criterion 3 not met |
+| SLA (EDGE-OPS-03) | Phase 28: push_end → Running 31–50 s | **`sla_verdict: OPEN-GAP`** — run 1 NO-MEASUREMENT (CI `test` red on v1.16 `03-RsakeySpec`, CircleCI degraded); `thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` | **open** — ROADMAP criterion 3 not met (superseded 2026-10-11 by `### P34 SLA run 2`: `sla_verdict: PASS`, 380 s within the 600 s budget) |
 
 ```
 # the one live mutation of Plan 34-05 Task 2 (after the read-only items; 17:06:07.6Z):
@@ -1986,7 +1986,7 @@ ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "git -C /mnt/gluster/deployment/
 
 Verdict: every edge signal is at its designed Phase 34 end-state value or identical to F.pre. Two items are not
 closed: the external scan has no single clean full run from this laptop today (laptop uplink, evidence above; re-run from
-a stable uplink), and EDGE-OPS-03 is an open gap (`sla_verdict: OPEN-GAP`). Nothing to revert.
+a stable uplink), and EDGE-OPS-03 is an open gap (`sla_verdict: OPEN-GAP`) (superseded 2026-10-11 by `### P34 SLA run 2`: `sla_verdict: PASS`, 380 s within the 600 s budget). Nothing to revert.
 
 ### Live production state at hand-off (Phase 34, 2026-10-09 17:06 UTC)
 
@@ -2031,7 +2031,7 @@ only. Networks: `traefik-public` + `traefik-socket`. Ports 80/443 only. **Versio
 rotated + `removeheader=true`, `thinx-db-http` redirect-only), `thinx_influxdb` idx 38380190 (influx-auth rotated),
 `registry_registry` idx 38380174 (`registry-http` redirect-only). Loopback `29/0`, overview `[29,0,18,6,["Swarm","File"]]`.
 `:7442` / `:1883` / `:8883` OPEN and direct-published by `thinx_api` / `thinx_mosquitto`; harness PASS ×2.
-`thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` (no SLA rollout happened; EDGE-OPS-03 open gap).
+`thinx_api` still task `xaf4k4p5uasz` / digest `44a739f698c5` (no SLA rollout happened; EDGE-OPS-03 open gap) (superseded 2026-10-11 by `### P34 SLA run 2`: `sla_verdict: PASS`, 380 s within the 600 s budget).
 
 Repo state == live state: thinx-swarm `ee408d1` (`4e4f315` + the Plan 05 README commit; origin/master == micro checkout ==
 mirror banner), mirror `MIRROR OK` at 24 flags, `docker-swarm.yml` == `thinx.yml` traefik labels.

@@ -18,7 +18,7 @@ TLS-enforce those paths.
 | 4 | **ACME email** placeholder `${EMAIL}` (resolves to an operator address) + `acme.json` perms + renewal | templated; live resolves to a real address; one expired cert (`checkout.qooldata.com`, 2025-07-06) not renewing | **P33** — **done (Phase 33, 2026-10-09)** | EDGE-TLS-03 |
 | 5 | **TLS min version + HSTS** (`tls.toml` minVersion TLS1.2; `security-headers` HSTS labels) | TLS1.2 min, HSTS via `security-headers@docker` | **P33** — **done (Phase 33, 2026-10-09)** | EDGE-TLS-01 / EDGE-TLS-02 |
 | 6 | **`--log.level=ERROR`** (traefik static command) | ERROR (quieter than the INFO/WARN target — a policy choice, not a regression) | **P34** — **done (Phase 34, 2026-10-09)**: `--log.level=WARN` + JSON access log with RequestPath / RequestLine / ClientUsername dropped (edge runbook `### P34 Stage A record`) | EDGE-OPS-01 |
-| 7 | Raw **`/var/run/docker.sock:ro`** bind mount (traefik service) | read-only docker socket exposed to traefik | **P34** — **done (Phase 34, 2026-10-09)**: `traefik_socket-proxy` (GET-only, internal `traefik-socket` overlay) + `--providers.swarm.endpoint=tcp://socket-proxy:2375`, raw bind removed (`### P34 Stage B1 record`, `### P34 Stage B2 record`) | EDGE-OPS-02 (→ read-only socket-proxy) |
+| 7 | Raw **`/var/run/docker.sock:ro`** bind mount (traefik service) | read-only docker socket exposed to traefik | **P34** — **done (Phase 34, 2026-10-09)**: `traefik_socket-proxy` (GET-only, internal `traefik-socket` overlay) + `--providers.swarm.endpoint=tcp://socket-proxy:2375`, raw bind removed (`### P34 Stage B1 record`, `### P34 Stage B2 record`). Renamed 2026-10-09 (34-REVIEW WR-02, thinx-swarm `9204a8e`): the endpoint is now `tcp://traefik_socket-proxy:2375`, the full service name, because the bare `socket-proxy` alias resolves for any `traefik-public` service (`.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy) | EDGE-OPS-02 (→ read-only socket-proxy) |
 | 8 | **Port-publishing / routing drift** (29-02 finding): traefik publishes only `:80`/`:443`; the `:7442` (thxp), `:1883` (mqtt), `:8883` (mqtts), `:1194` (vpn) entrypoints are **defined in traefik's command but not host-published by traefik** — `:7442` is published directly by `thinx_api`, `:1883`/`:8883` by `thinx_mosquitto`. The `mosquitto-secure` TCP router on `mqtts` therefore does not receive host traffic through traefik today. | current routing model as-is | **P30** (routing-model review; owns deciding whether MQTT/MQTTS/thxp should route through traefik or stay direct) | EDGE-RECON follow-up → P30 scope |
 
 ## Notes
@@ -63,15 +63,52 @@ Rows **#3 (`--api`/8080), #4 (ACME email/perms/renewal), #5 (TLS min + HSTS), #6
 working for legacy `__DISABLE_HTTPS__` devices — verified reachable through the P30 cutover (operator
 confirmed the full check-in → OTT redeem → firmware download flow at the human-verify gate).
 
+## Phase 33 resolutions (2026-10-09)
+
+Phase 33 (EDGE-API-01 / EDGE-API-02, EDGE-TLS-01 / EDGE-TLS-02 / EDGE-TLS-03) closed rows #2–#5 live, one
+`docker service update` per stage from 600-root backups. Verification:
+`.planning/milestones/v1.15-phases/33-dashboard-lockdown-tls-hardening/33-VERIFICATION.md` (passed 23/23). Stage
+records: `.planning/runbooks/traefik-edge-hardening.md`.
+
+- **Row #2 — exposedbydefault: DONE.** Stage B (33-01 Task 3, D-07) set `--providers.swarm.exposedbydefault=false`
+  (the namespace moved docker→swarm in P31). Router inventory was identical before and after, all routers enabled.
+  Evidence: `### Stage B record`, 33-VERIFICATION truth 9.
+- **Row #3 — `--api` + 8080: DONE.** Stage A (33-01 Task 1, D-01..D-03) removed the public dashboard routers and their
+  basic-auth. `api@internal` is served only by the `traefik-mgmt` router on the loopback `mgmt` entrypoint
+  `127.0.0.1:8080` inside the task. There is no `--api.insecure`, and 8080/8443 are closed externally. The `--api` flag
+  and the port-8080 service label stay: `--api` is required for the loopback router, and the label is LOAD-BEARING.
+  Access is via the ssh plane only (AGENTS.md § Traefik dashboard/API access). Evidence: `### Stage A record`,
+  truths 1, 5, 7 and 22, `.planning/runbooks/swarm-configs/traefik-edge-scan.2026-10-08.md`.
+- **Row #4 — ACME: DONE.** Stage E (33-02 Task 3, D-22..D-24). The e-mail stays templated `${EMAIL?Variable not set}`
+  and resolves to a real operator address (the value is never read or written; `example.com` count 0). `acme.json` is
+  600 root. The two stale 2023 files left the live volume, the dead `checkout.qooldata.com` entry was pruned, influx
+  was reissued, and the live task logged 0 ACME failures. Evidence: `### Stage E record`, truths 3 and 20. Later:
+  `### P34 Stage E record` (34-04, D-19) retired `micro.thinx.cloud`, leaving a 16-entry store, 600 root.
+- **Row #5 — TLS min + HSTS: DONE.** Stage C (33-02 Task 1) loaded `tls.toml` via
+  `--providers.file.filename=/traefik/tls.toml` as docker config `tls-config-2`: TLS 1.2+, AEAD-only. Stage D
+  (33-02 Task 2) made `security-headers@swarm` the `https` entrypoint default: exactly one HSTS header on 17 hosts, none
+  on `http`, `thinx.cloud` not submitted to preload (D-19). Evidence: `### Stage C record`, `### Stage D record`,
+  truths 2, 14, 17, 18 and 19. Changed in P34: `### P34 Stage C record` (34-03, thinx-swarm `8a7a693`) moved the
+  middleware into `traefik/tls.toml`, so it is `security-headers@file`, rotated to `tls-config-3` and dropped the curve
+  list (Go default incl. X25519MLKEM768). `### P34 Stage D record` (`3d3a31b`) retired the swarm copy, and 34-05
+  removed `tls-config-2` (recreate path in the edge runbook). Current state: AGENTS.md § Traefik dashboard/API access.
+
+**Hard constraint held:** `:7442` and plain MQTT stayed OPEN and direct-published after every Phase 33 change, with
+device-flow harness PASS (truth 12). HSTS, redirects and TLS never touched the plaintext path.
+
 ## Phase 34 resolutions (2026-10-09)
 
 - **Row #6 — `--log.level=ERROR`: DONE.** Stage A (34-01) set `--log.level=WARN` and a JSON access log with
   `RequestPath`, `RequestLine` and `ClientUsername` dropped (query strings carry OTTs / OAuth codes; canary-proven).
 - **Row #7 — raw `docker.sock:ro`: DONE.** Stage B1 (34-01) created the GET-only `traefik_socket-proxy` on the internal
   `traefik-socket` overlay; Stage B2 (34-02) moved Traefik to `tcp://socket-proxy:2375` and removed the socket bind in one
-  update. Operations: `.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy.
-- The Phase 34 SLA close-out (EDGE-OPS-03) is **not** a fix-forward row and stays an open gap (`sla_verdict: OPEN-GAP`
-  in the edge runbook).
+  update. Since 34-REVIEW WR-02 (2026-10-09, thinx-swarm `9204a8e`) the endpoint is `tcp://traefik_socket-proxy:2375`,
+  the full service name, because the bare `socket-proxy` alias resolves for any `traefik-public` service.
+  Operations: `.planning/runbooks/swarm.md` § Traefik Docker API socket-proxy.
+- The Phase 34 SLA close-out (EDGE-OPS-03) is **not** a fix-forward row. It was an open gap on 2026-10-09 (run 1
+  NO-MEASUREMENT) and **closed on 2026-10-11**: `sla_verdict: PASS`, run 2 total 380 s (L1 CI 331 s, L2 40 s, L3 9 s),
+  within the 600 s budget the operator raised from 300 s on 2026-10-11; against the original 300 s the run fails by
+  80 s. Record: `### P34 SLA run 2` in the edge runbook; `.planning/runbooks/swarm.md` § SLA verification.
 
 **Hard constraint held:** `:7442` and plain MQTT stayed OPEN at every Phase 34 stage; device-flow harness PASS on both
 paths at the end state (2026-10-09 16:53Z).
