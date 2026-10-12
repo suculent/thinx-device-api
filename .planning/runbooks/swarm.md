@@ -380,6 +380,28 @@ either command. (The filter drops the endpoint flag whatever its host name — `
 `traefik_socket-proxy` since.) Repo first: revert thinx-swarm `fcafee0` and `9204a8e` (origin + micro ff) and regenerate
 the mirror (`MIRROR OK`).
 
+**After a rollback: reconcile repo and mirror** (added 2026-10-12, quick 261012-fqh). The restored Args predate later
+changes. Form 1 restores the 23 Args of the pre-B2 backup (2026-10-09 15:16Z): before the 34-REVIEW WR-02 rename to
+`tcp://traefik_socket-proxy:2375` and before the later Phase 34 flag changes (https default `security-headers@file`,
+tls-config-3). Form 2 keeps the current Args minus the endpoint flag (23 Args). Either way the live service no longer
+matches thinx-swarm `traefik.yml`, which still has 24 `- --` flags, the endpoint flag, the `socket-proxy` service and the
+`traefik-socket` network. Once the rollback gate is green, make `traefik.yml` match the live Args exactly (sorted-set
+compare of live Args against the `- --` lines, e-mail masked on both sides, as in the stage records). The two reverts
+above are a starting point, not the target: `9204a8e` also carries 34-REVIEW IN-01..IN-05/IN-07 (healthcheck, gid
+guard, docs), and later commits touch the same file. Commit, push origin, fast-forward micro's checkout
+(`/mnt/gluster/deployment/swarm`). Then, in this repo (a hand-edited mirror fails CI's "Traefik mirror staleness
+(EDGE-RECON-01)" step; until regenerated, the freshness check reports MIRROR-STALE):
+
+```bash
+node scripts/generate-traefik-mirror.js            # default swarm repo ~/Repositories/thinx-swarm
+node scripts/check-traefik-mirror.js --swarm-repo ~/Repositories/thinx-swarm
+# expect: "MIRROR OK files=1"; commit the regenerated docker-compose.traefik.yml on thinx-staging
+```
+
+Update the docs that assert the end state to match the rolled-back Args: the AGENTS.md "24 flags" line, the mirror's
+`- --` count, and this section's endpoint description. `:7442` and plain MQTT `:1883` are not part of these Args; they
+stay published by `thinx_api` / `thinx_mosquitto`. Confirm both OPEN after the rollback, as in every edge gate.
+
 ---
 
 ## Related v1.x backlog items
