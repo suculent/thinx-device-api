@@ -22,8 +22,8 @@ Source: MILESTONE-CONTEXT.md. Checkboxes track implementation. Browser/live acce
 | UI-02 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
 | UI-03 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
 | UI-04 | 35 | Verified; live UAT 5/5 passed 2026-10-12 |
-| BUILD-01 | 36 | Implemented; locally verified |
-| BUILD-02 | 36 | Implemented; locally verified |
+| BUILD-01 | 36 | Verified; live UAT 5/5 passed 2026-10-12 |
+| BUILD-02 | 36 | Verified; live UAT 5/5 passed 2026-10-12 |
 | TRANS-01 | 37 | Implemented; locally verified |
 | TRANS-02 | 37 | Implemented; locally verified |
 | KEY-01 | 38 | Implemented; locally verified |

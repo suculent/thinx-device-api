@@ -1,7 +1,7 @@
 ---
 phase: 36-build-log-access
 verified: 2026-10-12T12:03:38Z
-status: human_needed
+status: passed
 score: 16/16 must-haves verified
 covered_files:
   - ".planning/phases/36-build-log-access/36-01-PLAN.md"

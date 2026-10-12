@@ -4,7 +4,7 @@ milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
 stopped_at: Completed 36-02-PLAN.md
-last_updated: "2026-10-12T11:43:25.810Z"
+last_updated: "2026-10-12T12:20:00Z"
 state_head: 92eca3b7880e442300ff929cd2c1efc2f789f86f
 progress:
   total_phases: 4
@@ -37,6 +37,8 @@ Use thinx-staging baseline, paired console branch and parent submodule pointer. 
 - [Phase 36]: G-36-3: device Build History rows are inert summary rows (date/build id/status); the full build log loads only from the per-row Open build log button into BuildLogDialog, no row-click shortcut (operator direction 2026-10-12)
 
 ## Verification
+
+Phase 36 accepted 2026-10-12: live UAT 5/5 (G-36-3 resolved by 36-02), operator sign-off on console 38eb95b and on the navbar Recent Builds dropdown for BUILD-01; 36-VERIFICATION.md passed; 36-SECURITY.md threats_open 0. Open: 36-REVIEW WR-01 (inert-row test checks only the <tr>), backend full-log payload size (AR-36-01, deferred).
 
 Phase 35 accepted 2026-10-12: live UAT 5/5 passed (G-35-4 fix pushed to console and parent thinx-staging, re-tested live), 35-VERIFICATION.md status passed, 35-SECURITY.md threats_open 0. Code review 35-REVIEW.md: 16 findings open in 35-REVIEW-DISPOSITION.md, including CR-01 (TransformerEditor blanks a transformer on Save after a failed load; Phase 37 scope).
 

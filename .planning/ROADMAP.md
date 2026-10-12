@@ -144,6 +144,8 @@ Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-35-4 (re-teste
 
 Requirements: BUILD-01, BUILD-02
 
+Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-36-3 (device Build History summary-only, re-tested live). Operator signed off console 38eb95b (View button, TIMEOUT colour, readable log column) and accepted the navbar Recent Builds dropdown as the BUILD-01 entry point. Verification passed; threats_open 0.
+
 **Plans:** 2/2 plans executed
 
 - [x] 36-01-PLAN.md — implement and verify all mapped requirements.
