@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 43
 current_phase_name: Notification Delivery
 status: executing
-stopped_at: Completed 43-01-PLAN.md
-last_updated: "2026-10-12T21:06:13.575Z"
+stopped_at: Completed 43-02-PLAN.md
+last_updated: "2026-10-12T21:16:56.219Z"
 last_activity: 2026-10-12
-last_activity_desc: Completed 43-01 (multi-tab WebSocket upgrades, NOTIF-02)
-state_head: 9a9ba69b8cfe553e9f148591c7956ce26c7b807a
+last_activity_desc: Completed 43-02 (Build Status frames to the owner, NOTIF-03)
+state_head: 5afc7f8314a9e12f8b22c2076720937ae8add6e7
 progress:
   total_phases: 7
   completed_phases: 1
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 43 (Notification Delivery) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-10-12 — Completed 43-01 (multi-tab WebSocket upgrades, NOTIF-02)
+Last activity: 2026-10-12 — Completed 43-02 (Build Status frames to the owner, NOTIF-03)
 
 Progress: [█░░░░░░░░░] 14%
 
@@ -57,6 +57,7 @@ Progress: [█░░░░░░░░░] 14%
 | Phase 42 P02 | 8 min | 3 tasks | 11 files |
 | Phase 42 P03 | 8 min | 2 tasks | 1 files |
 | Phase 43 P01 | 10min | 3 tasks | 7 files |
+| Phase 43 P02 | 8min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Progress: [█░░░░░░░░░] 14%
 - [Phase 42]: 42-03: close-out docs commits stay local (a docs-only thinx-staging push would redeploy API and Vue); they ride the next push
 - [Phase 43]: NOTIF-02: WebSocket upgrades tracked per connection and per verified owner in lib/thinx/socket_upgrade.js (path-keyed socketMap guard removed); cap 10 live sockets per owner, 11th gets HTTP 429 with one log line
 - [Phase 43]: Credential-free live probe scripts/check-ws-multitab.js (WS-MULTITAB OK/FAIL) is how 43-03 proves multi-tab upgrades on rtm.thinx.cloud
+- [Phase 43]: 43-02: Build Status frames go through messenger.sendToOwner; run_build binds the owner from br.owner via Builder#consoleNotifiers (caller-supplied owners ignored); route and queue pass only { messenger }
+- [Phase 43]: 43-02: one terminal Build Status frame per build_id (error or Completed; bounded memory 1000); Completed only for an OK status, otherwise the status or Failed as error; raw log lines never reach console sockets
 
 ### Pending Todos
 
@@ -106,6 +109,6 @@ Progress: [█░░░░░░░░░] 14%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T21:06:07.403Z
-**Stopped At:** Completed 43-01-PLAN.md
+**Last session:** 2026-10-12T21:16:49.821Z
+**Stopped At:** Completed 43-02-PLAN.md
 **Resume File:** None

@@ -88,12 +88,12 @@ Plans:
   3. Two Legacy console tabs on the same `/<owner>` socket path both connect without an upgrade refusal and both receive the owner's frames. Closing one tab leaves the other receiving.
   4. A running build's status frames reach the owner's open console sockets and no other owner's sockets.
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 Plans:
 **Wave 1**
 - [x] 43-01-PLAN.md — NOTIF-02: per-connection WebSocket tracking in `lib/thinx/socket_upgrade.js` (path guard removed, cap 10 sockets per owner, 429 refusal), local SocketUpgradeSpec, `scripts/check-ws-multitab.js` live probe, ZZ specs re-expressed (wave 1)
-- [ ] 43-02-PLAN.md — NOTIF-03: builder status frames through `messenger.sendToOwner` with the owner bound in run_build, router and queue pass the messenger, frame rules F-1..F-5, local BuilderStatusFramesSpec (wave 1)
+- [x] 43-02-PLAN.md — NOTIF-03: builder status frames through `messenger.sendToOwner` with the owner bound in run_build, router and queue pass the messenger, frame rules F-1..F-5, local BuilderStatusFramesSpec (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 43-03-PLAN.md — Ship: thinx-staging push with range and scope checks, pipeline and live NOTIF-02 probe, operator-run one-off legacy bypass (NOTIF-01), Legacy rollout and closed-gate proof, D-16 human checks (wave 2)
@@ -236,7 +236,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
-| 43. Notification Delivery | v1.18 | 1/3 | In Progress | - |
+| 43. Notification Delivery | v1.18 | 2/3 | In Progress | - |
 | 44. Device List Parity | v1.18 | 0/? | Not started | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
