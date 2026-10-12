@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 42
 current_phase_name: CI Trim, Login Page & Build Footer
 status: executing
-stopped_at: Phase 42 UI-SPEC approved
-last_updated: "2026-10-12T16:19:28.345Z"
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-10-12T16:29:39.543Z"
 last_activity: 2026-10-12
-last_activity_desc: v1.18 roadmap created (7 phases, 32/32 requirements mapped)
-state_head: c0bab990401b1827e5ca3b2577efa48ce982740c
+last_activity_desc: Phase 42 execution started
+state_head: 3a5163f5b71b91880a0468bbc11516f6dd098f75
 progress:
   total_phases: 7
   completed_phases: 0
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 42, CI Trim, Login Page & Build Footer
+**Current focus:** Phase 42 — CI Trim, Login Page & Build Footer
 
 ## Current Position
 
-Phase: 42 (CI Trim, Login Page & Build Footer) — READY TO EXECUTE
-Plan: — (not planned yet)
+Phase: 42 (CI Trim, Login Page & Build Footer) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-10-12 — v1.18 roadmap created (7 phases, 32/32 requirements mapped)
+Last activity: 2026-10-12 — Phase 42 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -49,6 +49,11 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 42 P01 | 7 min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -60,6 +65,8 @@ Progress: [░░░░░░░░░░] 0%
 - Shared building blocks (platform bullet, icon button with aria-label + hover tip) land in Phase 44 (Device List Parity) and are reused by Phases 45–47.
 - FIX-01 (Phase 35 ledger) maps to Phase 48; Phase 35 items in files opened earlier are fixed in Phases 45 (IN-03/04/05), 46 (IN-02) and 47 (IN-06/07) and recorded in the Phase 48 ledger.
 - Parent API changes: Phase 43 (`thinx-core.js` socket guard, messenger/builder status frames) and Phase 45 (deploy-key rename, FIX-04). Parent CI changes: Phases 42 and 48.
+- [Phase 42]: 42-01: CI-05 gate is workflow legacy-console with when on pipeline parameter build_legacy_console (default false); snyk-monitor-console-classic lives inside it because requires cannot cross workflows
+- [Phase 42]: 42-01: CI-04 Snyk monitors run on main only; console monitors scan thinxcloud/console:vue and :latest on docker.io with the dockerhub context only; gates proven via node scripts/check-ci-gates.js compile
 
 ### Pending Todos
 
@@ -82,6 +89,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T15:35:35.929Z
-**Stopped At:** Phase 42 UI-SPEC approved
-**Resume File:** .planning/workstreams/vue-console/phases/42-ci-trim-login-page-build-footer/42-UI-SPEC.md
+**Last session:** 2026-10-12T16:29:39.508Z
+**Stopped At:** Completed 42-01-PLAN.md
+**Resume File:** None

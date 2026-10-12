@@ -60,10 +60,10 @@ no dependency or infrastructure upgrades.
   4. The Login button is green (success variant), and "Login with Google" and "Login with GitHub" sit directly below it and above "Don't have an account? Sign up now!". Password, Google and GitHub logins still complete against production under CSRF enforcement.
   5. The footer of every Vue console page (login, password reset and the authenticated layout) shows the copyright year of the build date and the short commit id of the deployed build. No hard-coded `2026` remains in the Vue footers, and a local build without a commit id shows no empty or `undefined` placeholder.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 Plans:
 **Wave 1**
-- [ ] 42-01-PLAN.md — CI trim: Snyk monitors on `main` only (Hub console images), legacy console build behind `build_legacy_console`, live job checker and the D-04 bypass runbook (wave 1)
+- [x] 42-01-PLAN.md — CI trim: Snyk monitors on `main` only (Hub console images), legacy console build behind `build_legacy_console`, live job checker and the D-04 bypass runbook (wave 1)
 - [ ] 42-02-PLAN.md — Vue: shared AppFooter with build year and 7-char commit id, branded welcome login with green Login and social logins under it (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -225,7 +225,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 42. CI Trim, Login Page & Build Footer | v1.18 | 0/3 | Planned | - |
+| 42. CI Trim, Login Page & Build Footer | v1.18 | 1/3 | In Progress | - |
 | 43. Notification Delivery | v1.18 | 0/? | Not started | - |
 | 44. Device List Parity | v1.18 | 0/? | Not started | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
