@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 36-build-log-access
 source: [36-01-SUMMARY.md]
 started: 2026-10-12T11:40:00Z
@@ -51,5 +51,16 @@ blocked: 0
   reason: "User reported: the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
   severity: major
   test: 3
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+  root_cause: "DeviceDetail.vue Build History rows are themselves buttons (tabindex=0 role=button, unguarded @click/@keydown.enter/@keydown.space -> openBuildLog), so any row click or keyboard pass fetches the full log via GET /api/v2/logs/build/:id; that response is the whole build.log read synchronously from GlusterFS and sent uncompressed as a JSON Buffer byte array (~3.4x log size). The pre-existing 'Device Logs (last build)' card under Build History also renders log lines inline in a terminal-styled <pre>. The list endpoint itself carries no full logs."
+  artifacts:
+    - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
+      issue: "Build History <tr> is the full-log trigger (no explicit Open build log control); 'Device Logs (last build)' card renders log text inline"
+    - path: "lib/thinx/buildlog.js"
+      issue: "_fetch reads build.log with readFileSync and returns a Buffer (secondary: payload size)"
+    - path: "lib/thinx/util.js"
+      issue: "respond JSON-serializes the Buffer as a byte array, uncompressed (secondary)"
+  missing:
+    - "Operator direction 2026-10-12: remove inline logs from device build history"
+    - "Remove the inline 'Device Logs (last build)' log card from the device detail page"
+    - "Make Build History rows summary-only (no row-as-button full-log trigger); add an explicit per-row 'Open build log' button that opens BuildLogDialog, as History.vue does"
+  debug_session: ".planning/debug/device-build-history-full-logs.md"
