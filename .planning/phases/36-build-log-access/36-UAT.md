@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 36-build-log-access
 source: [36-01-SUMMARY.md]
 started: 2026-10-12T11:40:00Z
-updated: 2026-10-12T11:55:00Z
+updated: 2026-10-12T11:18:09.937Z
 ---
 
 ## Current Test
 
-number: 4
-name: Empty and error states in the log dialog
-expected: |
-  Opening the log of a build that produced no log output shows a clear empty message rather than a blank dialog or endless spinner. If the log cannot be loaded, the dialog shows an error message instead of hanging.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -32,18 +28,18 @@ severity: major
 
 ### 4. Empty and error states in the log dialog
 expected: Opening the log of a build that produced no log output shows a clear empty message rather than a blank dialog or endless spinner. If the log cannot be loaded, the dialog shows an error message instead of hanging.
-result: [pending]
+result: pass
 
 ### 5. Timed-out builds show TIMEOUT
 expected: A build that timed out, or one still marked running long past the build timeout, is shown with a TIMEOUT status (not RUNNING) in Recent Builds, History and Device Build History. Builds that finished keep their real result (success/failed).
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 5
-passed: 2
+passed: 4
 issues: 1
-pending: 2
+pending: 0
 skipped: 0
 blocked: 0
 
