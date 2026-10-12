@@ -14,13 +14,13 @@ upgrades.
 
 ### Global
 
-- [ ] **UI-05**: The footer on every Vue console page shows the copyright year derived from the build date and the short commit id of the build (no hard-coded 2026).
+- [x] **UI-05**: The footer on every Vue console page shows the copyright year derived from the build date and the short commit id of the build (no hard-coded 2026).
 
 ### Login
 
-- [ ] **LOGIN-01**: The login page shows `/assets/thinx/img/logo_white_200.png` above a darkened auth panel, and the panel reads "Welcome to THiNX Management Console." instead of "THiNX Login".
-- [ ] **LOGIN-02**: The "Login with Google" and "Login with GitHub" buttons sit directly below the Login button, above "Don't have an account? Sign up now!".
-- [ ] **LOGIN-03**: The Login button is green (success) instead of red.
+- [x] **LOGIN-01**: The login page shows `/assets/thinx/img/logo_white_200.png` above a darkened auth panel, and the panel reads "Welcome to THiNX Management Console." instead of "THiNX Login".
+- [x] **LOGIN-02**: The "Login with Google" and "Login with GitHub" buttons sit directly below the Login button, above "Don't have an account? Sign up now!".
+- [x] **LOGIN-03**: The Login button is green (success) instead of red.
 
 ### Deploy Keys
 
@@ -76,8 +76,8 @@ upgrades.
 
 ### CI / Delivery
 
-- [ ] **CI-04**: Snyk monitor jobs (snyk-code-monitor, snyk-oss-monitor, snyk-container-monitor incl. snyk-monitor-console-classic / snyk-monitor-console-vue in the parent .circleci/config.yml `main` workflow) run only on branch `main`, never on `thinx-staging`.
-- [ ] **CI-05**: For the duration of v1.18 the legacy console image build (build-console-classic: console-classic-registry / console-classic-hub, plus jobs that require it) is temporarily disabled in CI, so thinx-staging pipelines skip it; production keeps serving the existing thinx/console:swarm image. The change is a single, clearly marked, revertible edit.
+- [x] **CI-04**: Snyk monitor jobs (snyk-code-monitor, snyk-oss-monitor, snyk-container-monitor incl. snyk-monitor-console-classic / snyk-monitor-console-vue in the parent .circleci/config.yml `main` workflow) run only on branch `main`, never on `thinx-staging`.
+- [x] **CI-05**: For the duration of v1.18 the legacy console image build (build-console-classic: console-classic-registry / console-classic-hub, plus jobs that require it) is temporarily disabled in CI, so thinx-staging pipelines skip it; production keeps serving the existing thinx/console:swarm image. The change is a single, clearly marked, revertible edit.
 - [ ] **CI-06**: Before the milestone closes, the legacy console build is re-enabled, and the Legacy console changes made during v1.18 that are not yet live (e.g. FIX-04 / Phase 35 legacy deploy-key items; NOTIF-01 already ships earlier through its one-off build) are built and deployed.
 
 ## Future Requirements
@@ -97,12 +97,12 @@ upgrades.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CI-04 | Phase 42 | Pending |
-| CI-05 | Phase 42 | Pending |
-| UI-05 | Phase 42 | Pending |
-| LOGIN-01 | Phase 42 | Pending |
-| LOGIN-02 | Phase 42 | Pending |
-| LOGIN-03 | Phase 42 | Pending |
+| CI-04 | Phase 42 | Complete |
+| CI-05 | Phase 42 | Complete |
+| UI-05 | Phase 42 | Complete |
+| LOGIN-01 | Phase 42 | Complete |
+| LOGIN-02 | Phase 42 | Complete |
+| LOGIN-03 | Phase 42 | Complete |
 | NOTIF-01 | Phase 43 | Pending |
 | NOTIF-02 | Phase 43 | Pending |
 | NOTIF-03 | Phase 43 | Pending |
