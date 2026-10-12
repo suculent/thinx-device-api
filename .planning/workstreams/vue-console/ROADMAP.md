@@ -44,6 +44,7 @@ no dependency or infrastructure upgrades.
 ## Phase Details
 
 ### Phase 42: CI Trim, Login Page & Build Footer
+
 **Goal**: `thinx-staging` pipelines run only what the milestone needs, and a user opening the Vue console sees a THiNX-branded welcome login with the social logins right under a green Login button, with every page footer telling them which build they are running.
 **Depends on**: Nothing (first v1.18 phase). Runs first because CI-04/CI-05 shorten every later phase's push-to-deploy cycle.
 **Requirements**: CI-04, CI-05, UI-05, LOGIN-01, LOGIN-02, LOGIN-03
@@ -51,16 +52,27 @@ no dependency or infrastructure upgrades.
 - CI-04: `snyk-code-monitor` and `snyk-oss-monitor` currently run on `thinx-staging` and `main`. `snyk-monitor-console-classic` and `snyk-monitor-console-vue` scan the private-registry images and require `console-classic-registry` / `vue-console-registry`, which only `thinx-staging` (and `thinx-console`) build. Moving them to `main` means pointing them at the Docker Hub images and the `*-hub` jobs, the way `snyk-monitor-api` requires `api-hub`.
 - CI-05: one clearly marked block disables `console-classic-registry`, `console-classic-hub` and every job that requires them (today `snyk-monitor-console-classic`), so that Phase 48 can restore it with one revert. Production keeps serving the existing `thinx/console:swarm` Legacy image. Phase 43 needs one legacy build while CI-05 is in effect, so the block should allow a one-pipeline bypass (see Milestone Notes).
 - UI-05: the three footers live in `Layout.vue`, `Login.vue` and `PasswordReset.vue`. `VUE_APP_BUILD_HASH` (first 7 characters of `CIRCLE_SHA1`) is already passed to the Vue image by the parent CI; a further CI change is needed only if the build date cannot be derived inside the Vue build.
+
 **Success Criteria** (what must be TRUE):
   1. A `thinx-staging` pipeline runs no Snyk monitor job (code, OSS, or any container monitor including console-classic and console-vue), and a `main` pipeline still runs the Snyk monitors. The edited config passes CircleCI config validation.
   2. A normal pipeline builds no legacy console image while v1.18 is open: `console-classic-registry`, `console-classic-hub` and the jobs that require them do not run, and production still serves the existing `thinx/console:swarm` Legacy console. The disable is one marked block that a single revert restores.
   3. The login page shows `/assets/thinx/img/logo_white_200.png` above a darkened auth panel headed "Welcome to THiNX Management Console."; the text "THiNX Login" no longer appears.
   4. The Login button is green (success variant), and "Login with Google" and "Login with GitHub" sit directly below it and above "Don't have an account? Sign up now!". Password, Google and GitHub logins still complete against production under CSRF enforcement.
   5. The footer of every Vue console page (login, password reset and the authenticated layout) shows the copyright year of the build date and the short commit id of the deployed build. No hard-coded `2026` remains in the Vue footers, and a local build without a commit id shows no empty or `undefined` placeholder.
-**Plans**: TBD
+
+**Plans**: 3 plans
+Plans:
+**Wave 1**
+- [ ] 42-01-PLAN.md — CI trim: Snyk monitors on `main` only (Hub console images), legacy console build behind `build_legacy_console`, live job checker and the D-04 bypass runbook (wave 1)
+- [ ] 42-02-PLAN.md — Vue: shared AppFooter with build year and 7-char commit id, branded welcome login with green Login and social logins under it (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 42-03-PLAN.md — Ship to `thinx-staging` and verify live: pipeline job list, console.thinx.cloud bundle and logo, Legacy console unchanged (wave 2)
+
 **UI hint**: yes
 
 ### Phase 43: Notification Delivery
+
 **Goal**: Device notifications reach every open console of their owner, build status included, and a device can no longer inject markup into the owner's console toast. The escaped toast is live in production now, not at milestone close.
 **Depends on**: Phase 42 (CI-05 is in effect, so NOTIF-01 ships through a one-off legacy console build). No dependency on Phases 44–47.
 **Requirements**: NOTIF-01, NOTIF-02, NOTIF-03
@@ -69,15 +81,18 @@ no dependency or infrastructure upgrades.
 - Console: the Legacy `LogviewController.js` actionable toast (NOTIF-01). Check whether Vue renders `notification.body` anywhere and escape it there too.
 - CI: one legacy console pipeline with CI-05 bypassed, after which CI-05 is back in effect. At this point the console `thinx-staging` branch carries no other unreleased Legacy change, so the one-off build ships NOTIF-01 only.
 - Device port `:7442` and plain MQTT are not touched. Todo `2026-10-03-console-notification-delivery-gaps` items 2–4.
+
 **Success Criteria** (what must be TRUE):
   1. A device-supplied `notification.body` that contains HTML shows as literal text in the actionable console toast; no markup renders.
   2. The escaped toast is live on `rtm.thinx.cloud` through a one-off legacy console build: CI-05 is bypassed for that one pipeline only, and the next `thinx-staging` pipeline again builds no legacy console image.
   3. Two Legacy console tabs on the same `/<owner>` socket path both connect without an upgrade refusal and both receive the owner's frames. Closing one tab leaves the other receiving.
   4. A running build's status frames reach the owner's open console sockets and no other owner's sockets.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 44: Device List Parity
+
 **Goal**: The Vue device list reads like the Legacy one: platform-named device icons, the Legacy action icons on a single line, platform bullets, and a visible warning on devices without an API key. Repositories show the same platform bullet.
 **Depends on**: Nothing hard (follows Phase 43). Introduces the shared building blocks reused by Phases 45–47: the platform bullet (DEV-04, REPO-01) and the icon button with aria-label and hover tip (DEV-03).
 **Requirements**: DEV-01, DEV-02, DEV-03, DEV-04, DEV-05, REPO-01
@@ -87,10 +102,12 @@ no dependency or infrastructure upgrades.
   2. Device rows use the Legacy status, firmware, build, view-log and edit icons, and edit opens Device Detail. At any viewport width the Actions cell stays on one line; when space runs out it shows icons only, and every icon keeps its text as aria-label and hover tip.
   3. The platform shows as a Legacy-style bullet with no "Platform:" label. Device rows and repository rows render the identical bullet for the same platform, and a repository with no known platform shows `unknown`, never `unknown_platform`.
   4. A device with no API key assigned shows an `fa-warning` icon whose hover tip explains that the device has no API key.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 45: Deploy Key Rename & Row Actions
+
 **Goal**: A user can rename a deploy key without changing the key itself, and manages each key from compact icon actions with a confirmed, single-shot delete on a table that stays readable on small screens. The Phase 38 review items are closed.
 **Depends on**: Phase 44 (shared icon-button pattern)
 **Requirements**: KEY-04, KEY-05, KEY-06, POL-04, FIX-04
@@ -98,16 +115,19 @@ no dependency or infrastructure upgrades.
 - Parent: a rename operation in `lib/router.rsakey.js` and `lib/thinx/rsakey.js` that rewrites only the `.pub` comment, addresses the key by exact filename, is owner-bound and CSRF-guarded, and leaves the list/create/revoke envelopes unchanged. FIX-04 also lands here: one shared name validator (IN-01, IN-02), safe display names (IN-03), revoke de-duplication (IN-04), tests (IN-06), and the GitHub-link key choice in `lib/thinx/github_link.js` (IN-07).
 - Console: the Vue Deploy Keys page. Any Legacy source change made here is verified locally (`npm run build:test`, `test:deploykeys`) and ships when Phase 48 re-enables the legacy build (CI-06).
 - Coordination: v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`. Rename must never read or rewrite private-key files.
+
 **Success Criteria** (what must be TRUE):
   1. A user renames an existing deploy key in Vue. After a reload the key shows the new name, and its public key text and fingerprint are unchanged. A name with control characters, Unicode bidi overrides or line/paragraph separators is refused on create and on rename with a message that names the problem.
   2. Each key row has eye (Show), copy (Copy) and trash (Delete) icon buttons whose text stays as aria-label and hover tip. Delete is outside the generate form, asks for confirmation, shows a pending state and cannot be double-submitted.
   3. On a small screen the Name column is truncated with the full name as hover tip, and the Generated and Public Key columns do not wrap. A failed list reload clears the stale rows and shows a single error message.
   4. GitHub linking pushes a deterministically chosen key that does not depend on the newest-first list order, and a revoke request with duplicate filenames reports each key once. Every Phase 38 item in FIX-04 (IN-01..IN-04, IN-06, IN-07) is fixed or deferred with a recorded reason.
   5. The Legacy console that production serves still lists, creates and revokes deploy keys against the deployed API with unchanged endpoints and envelopes.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 46: Transformers & Environment Globals
+
 **Goal**: Transformers and environment globals are managed with clear icon actions, a safe bulk delete and in-place editing, and no user change is silently lost.
 **Depends on**: Phase 44 (shared icon-button pattern)
 **Requirements**: TRANS-03, TRANS-04, ENV-01, POL-03, FIX-03
@@ -118,10 +138,12 @@ no dependency or infrastructure upgrades.
   3. On Device Detail, Save Transformers shows a pending state while saving and marks unsaved checkbox changes as dirty. Clicking Manage Transformers with unsaved changes warns before the changes are discarded.
   4. Each Environment Globals row has an Edit button that changes the value. If the recreate fails, the original variable is back in the list with its old value and the user sees an error.
   5. Phase 37 review items IN-02 and IN-03 are fixed or deferred with a recorded reason.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 47: Build Log Search & Status Colours
+
 **Goal**: A user can find text inside a full build log, sees the same status colours on every build list, and can open the log from every build list, including the dashboard.
 **Depends on**: Nothing hard (reuses the v1.16 BuildLogDialog; uses Phase 44's icon-button pattern where it fits)
 **Requirements**: BUILD-03, POL-02, FIX-02
@@ -131,10 +153,12 @@ no dependency or infrastructure upgrades.
   2. TIMEOUT shows as warning and FAILED as danger on every build list (navbar Recent Builds, dashboard Recent Builds card, History, device Build History), all from one shared status-to-variant mapping.
   3. The dashboard Recent Builds card opens the full build log. A row without a build id shows no "Open build log" button and never requests `/logs/build/<index>`.
   4. Phase 36 WR-01 and IN-01..IN-03 are fixed or deferred with a recorded reason. In particular, the inert-row test fails if a click or keydown handler is added to any Build History cell.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 48: Deep Links & Close-out
+
 **Goal**: Vue deep links survive a reload, the remaining Phase 35 UI-review and review items are closed, and the legacy console build is back on so every Legacy change of the milestone is live before it closes.
 **Depends on**: Phases 43–47 (the FIX-01 ledger records Phase 35 items closed there, and CI-06 ships their remaining Legacy changes; see Milestone Notes). Runs last.
 **Requirements**: NOTIF-04, POL-01, FIX-01, CI-06
@@ -144,6 +168,7 @@ no dependency or infrastructure upgrades.
   2. Build Firmware shows an in-flight state and ignores a second click until the request settles, the account menu has an accessible name, and the Device Detail content column is width-constrained.
   3. Every Phase 35 review item IN-01..IN-08 is fixed or deferred with a recorded reason, including those closed in Phases 45–47.
   4. The legacy console build is re-enabled (the CI-05 block reverted), a normal `thinx-staging` pipeline builds and publishes the Legacy image again, and every Legacy console change of v1.18 not shipped by the Phase 43 one-off build (for example the Phase 45 deploy-key items) is live on production before the milestone closes.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -200,7 +225,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 42. CI Trim, Login Page & Build Footer | v1.18 | 0/? | Not started | - |
+| 42. CI Trim, Login Page & Build Footer | v1.18 | 0/3 | Planned | - |
 | 43. Notification Delivery | v1.18 | 0/? | Not started | - |
 | 44. Device List Parity | v1.18 | 0/? | Not started | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
