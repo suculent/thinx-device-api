@@ -1,362 +1,247 @@
 # ☢ thinx-device-api
 
-IoT Device Management Server running on node.js.
+THiNX is a self-hosted IoT device management server. You push code to a Git repository, THiNX builds firmware for your
+devices in Docker, and the devices update themselves over the air. This repository is the API server (Node.js) that
+ties it together: device registration, builds, MQTT messaging, and the back end for the web console.
 
-## Build Status
-
-### CircleCI Build status
-
-| Component | Status |
-|:----------|:-------|
-| `thinx-device-api` | [![THiNX](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api/tree/main) |
-| `arduino-docker-build` | [![THiNX](https://circleci.com/gh/suculent/arduino-docker-build/tree/master.svg?style=svg)](https://circleci.com/gh/suculent/arduino-docker-build/tree/master) |
-| `platformio-docker-build` | [![THiNX](https://circleci.com/gh/suculent/platformio-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/platformio-docker-build) |
-| `mongoose-docker-build` | [![THiNX](https://circleci.com/gh/suculent/mongoose-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/mongoose-docker-build) |
-| `micropython-docker-build` | [![THiNX](https://circleci.com/gh/suculent/micropython-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/micropython-docker-build) |
-| `nodemcu-docker-build` | [![THiNX](https://circleci.com/gh/suculent/nodemcu-docker-build.svg?style=svg)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
-
-
-[![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
-<a href="https://scan.coverity.com/projects/suculent-thinx-device-api">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/18787/badge.svg"/>
-</a>
+[![CircleCI](https://circleci.com/gh/suculent/thinx-device-api.svg?style=svg)](https://circleci.com/gh/suculent/thinx-device-api/tree/main)
 [![Coverage Status](https://coveralls.io/repos/github/suculent/thinx-device-api/badge.svg?branch=thinx-staging)](https://coveralls.io/github/suculent/thinx-device-api?branch=thinx-staging)
-[![License](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](https://github.com/suculent/fastlane-plugin-apprepo/blob/master/LICENSE)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9a7d084ad97e430ba12333f384b44255)](https://www.codacy.com/app/suculent/thinx-device-api?utm_source=github.com&utm_medium=referral&utm_content=suculent/thinx-device-api&utm_campaign=badger)
+[![CodeFactor](https://www.codefactor.io/repository/github/suculent/thinx-device-api/badge)](https://www.codefactor.io/repository/github/suculent/thinx-device-api)
+[![License: ISC](https://img.shields.io/badge/license-ISC-green.svg?style=flat)](./LICENSE)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_shield)
-[![Demo Site Availability](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)](https://api.ghostinspector.com/v1/suites/59351b18dad52f0ceb532cf5/status-badge)
 [![Twitter: @thinxcloud](https://img.shields.io/badge/contact-%40thinxcloud-green.svg?style=flat)](https://twitter.com/thinxcloud)
 
-
-
-The CircleCI build is limited and therefore returns mostly bad results. Closer look may show better numbers.
-
-## The Purpose
-
-* Update IoT device by pushing a code to a Git repository. We'll build it.
-* Secure per-device parametrization and reverse-engineering security controls.
-* Swap operating system for another over-the-air.
-* Migrate multiple devices at once between WiFi networks.
-* THiNX provides complete IoT infrastructure for your device (where the data storage and visualisation can be fully up to you).
-* automatic updates for headless devices, or semi-automatic (with user consent after build and tests succeed)
-
-> As a user I have already many IoT new and/or legacy devices at home and new platforms are coming every day.
-
-> Sometimes we need to change WiFi credentials on a wireless switch mounted on a ceiling. The other day I we want to swap whole firmware for new one, but not always to rewrite working legacy Lua or Micropython code to PlatformIO.
-
-That's why we have decided to create the über-platform: THiNX.
-
-## Supported hardware
-
-Currently the platform supports building firmware for Arduino, PlatformIO (also with ESP-IDF), NodeMCU, Mongoose, Micropython and features JavaScript library that is intended to use on any hardware capable of running a Node.js server.
-
-## Features
-
-* Remote Things Management console for monitoring devices, attaching source code, pushing data, managing incoming payloads and firmware updates.
-
-* Supports running in Docker Swarm, allowing to pass firmware-builds to specific nodes, etc.
-
-* Continuous Integration practices to update device apps/configurations from a GitHub repository using commit hooks.
-
-* Building secure MQTTS infrastructure as an optional side-chain transport layer.
-
-* Device registration endpoint while storing device data using CouchDB server and Redis session-store.
-
-* API is a back-end data provider (security agent) for Management Console Application.
-
-* Provides control to a dockerized build servers and pushes new firmware versions to client applications (FCM push) and devices (MQTT).
-
-* Provides HTTP-to-HTTPS proxy to secure legacy IoT devices that are not capable of TLS and/or AES-level encryption.
-
-* Allows transfer of device ownership (e.g. for pre-configured devices).
-
-* Custom firmware builder for MongooseOS, NodeMCU and Micropython (allow module selection, add THiNX as an OS-level library)
-
-* Transfer device to another owner along with sources/firmware.
-
-* Device status messages can be transformed using custom JavaScript lambda-style functions.
-
-* Supports OAuth login with [Google](https://www.google.com) and [GitHub](https://www.github.com).
-
-* Supports LoRaWan server integration.
-
-* Supports [Rollbar](https://rollbar.com) and [Crisp.chat](https://crisp.chat) integrations.
-
-* Message-queue integration using single broker across many instances.
-
-* Supports [Traefik](https://traefik.io) for SSL offloading.
-
-* Supports external changes to device Environment object using API/API-Key. Changes in Environment for a firmware build cause firmware update even if the version of firmware is same, allowing seamless change of WiFi credentials or device build attributes).
-
-* Mosquitto with GoAuth plugin for seamless device support for 100>10000 devices. Authentication backend can be split, or shared between multiple instances (production, staging, test, etc.).
-
-* Docker Container or Docker Swarm Service-based parallel distributed builds with controllable paralellism. Suggested is one worker per node, where the load is managed by Docker Swarm.
-
-## Supported IoT Platforms
-
-* PlatformIO and Arduino IDE (ESP8266P/ESP32)
-* Micropython
-* Lua
-* MongooseOS
-* NodeJS (Mac/Linux/Windows)
-
-* Tested on Wemos D1 Mini, Wemos D1 Mini Pro, RobotDyn D1, RobotDyn D1 Mini, RobotDyn MEGA WiFi and various NodeMCU (Lolin, AI-THINKER) boards with Mongoose, Arduino Core, ESP-IDF, Lua and Micropython-based core firmwares...
-
-* Expected: Arduino and BigClown with networking support
-
-Base THiNXLib Platform Library in C++:
-
-[THiNXLib for ESP8266](https://github.com/suculent/thinx-lib-esp8266)
-
-[THiNXLib for ESP32](https://github.com/suculent/thinx-lib-esp32)
-
-THiNX Platform Library repositories for various IDEs and firmwares:
-
-[Platform.io](https://github.com/suculent/thinx-firmware-esp8266-pio)
-
-[Arduino](https://github.com/suculent/thinx-firmware-esp8266-ino)
-
-[NodeMCU/Lua](https://github.com/suculent/thinx-firmware-esp8266-lua)
-
-[Micropython](https://github.com/suculent/thinx-firmware-esp8266-upy)
-
-[MongooseOS](https://github.com/suculent/thinx-firmware-esp8266-mos)
-
-[NodeJS](https://github.com/suculent/thinx-firmware-js)
-
-[MCP device (NodeJS)](https://github.com/suculent/thinx-mcp-device) - a THiNX device client run as an MCP stdio server: registers, listens on MQTT and downloads (never flashes) OTT firmware updates; it can report itself as an Arduino or PlatformIO device
-
-## Custom Firmwares
-
-With built-in THiNX Client Library:
-
-[NodeMCU/Lua](https://github.com/suculent/nodemcu-firmware)
-
-[Micropython](https://github.com/suculent/nodemcu-micropython)
-
-Arduino, Plaform.io and MongooseOS are firmwares by nature.
-
-## Dockerized Firmware Builders
-
-[PlatformIO](https://github.com/suculent/platformio-docker-build)
-
-[Arduino](https://github.com/suculent/arduino-docker-build)
-
-[MongooseOS](https://github.com/suculent/mongoose-docker-build)
-
-[NodeMCU/Lua](https://github.com/suculent/nodemcu-docker-build/)
-
-[Micropython](https://github.com/suculent/micropython-docker-build/)
-
-## Prerequisites for running own THiNX Server
-
-* Linux Server (min. 2 GB RAM, 32GB SSD, Ubuntu)
-* Docker (supports both docker-compose quick start or scalable Swarm deployment)
-
-## Port mapping
-
-* API runs on HTTP port 7442 (HTTPS 7443)
-* MQTTS runs on port 8883
-* Admin runs on HTTP/HTTPS port (80/443)
-* Status Transformers (internal network only, 7475)
-
-## Logging
-
-Use your favourite service and log-sender agent. Tested successfully with [Logz.io](https://logz.io), [Instana](https://www.instana.com) and [Sematext](https://sematext.com)
-
-## Installation
-
-### Prerequisites
-
-**Suggested:**
-
-* FQDN – Fully Qualified Domain Names (if you're testing on localhost, configure conf/config.json to set `debug: { allow_http_login: true }` )
-  * api.yourdomain.com – THiNX API
-  * console.yourdomain.com – THiNX Management Console
-
-* [Mailgun](https://mailgun.com) account (recently added)
-* [Rollbar](https://rollbar.com) integration
-
-**Optional:**
-
-* [Google Analytics](https://analytics.google.com) integration
-* [Slack](https://slack.com) integration
-* [Crisp.chat](https://crisp.chat) integration
-
-# Management Console
-
-You need to **BUILD YOUR OWN CONSOLE** Docker image, because the build injects various static variables specific for your environment (e.g. API Keys) into HTML on build (see .circleci/config.yml for list of required build-args until this is documented).
-
-For that reason, no pre-built public thinxcloud/console Docker Hub Image is/will be available.
-
-### Using Docker Compose
-
-Make sure you have valid directory structure available at `/mnt/data` (default) and edit the .env file to suit your needs.
-
-You don't need Mailgun for developer installation, just copy-paste the activation URL from api log using `docker-compose logs -f` while creating your first admin account.
-
- git clone <http://github.com/suculent/thinx-device-api>
- cd thinx-device-api
- cp .env.dist .env
- nano .env
- ./copy-envs.sh
- docker-compose up -d --build
-
-Optionally see the ./circleci/config.yml for reference on installation steps.
-
-### Using Docker Swarm on Manager Node
-
-THiNX expects Traefik load-balancer (e.g. with Swarmpit) in Docker Swarm. Example swarm compose file contains appropriate labels for Traefik in Swarm mode.
-
-THiNX also expects some kind of shared storage folder in `/mnt/data` default path. We have this mounted using GluserFS across all nodes so it does not matter where you run thinx app, console, mosquitto broker, worker or builders... all flatfile data are always available everywhere.
-
-> Install GlusterFS to make sure /mnt is available on all nodes in cluster.
-
-Start THiNX on manager node:
+## Why THiNX
+
+Most of us already have a drawer full of IoT devices: some new, some legacy, all on different platforms. Changing the
+WiFi password on a switch mounted to the ceiling shouldn't mean climbing a ladder. Swapping a device's firmware
+shouldn't force you to rewrite working Lua or MicroPython code in PlatformIO either.
+
+THiNX handles that:
+
+* Push to Git and THiNX builds and delivers new firmware. Updates can be automatic, or wait for your approval once the build and tests pass.
+* Change per-device settings remotely and securely, including moving many devices to a new WiFi network at once.
+* Swap one firmware platform for another over the air.
+* Keep your own data storage and visualisation. THiNX manages the devices, not your data.
+
+## What's in the box
+
+* A management console for monitoring devices, attaching source repositories, sending data, and managing payloads and firmware updates. It has OAuth login with Google and GitHub.
+* Device registration, with device data in CouchDB and sessions in Redis.
+* Firmware builds in Docker containers or Docker Swarm services, with controllable parallelism. One worker per node is a good default; Swarm spreads the load.
+* GitHub webhooks: a commit can trigger a build and an update.
+* Mosquitto MQTT (plain and TLS) with the go-auth plugin, sized from a handful of devices to thousands. The auth back end can be shared between instances (production, staging, test).
+* An HTTP port for legacy devices that can't do TLS, next to HTTPS.
+* Environment variables per device, editable through the API or an API key. Changing them triggers a firmware update even when the code version stays the same, which is how WiFi credentials get rotated.
+* Device ownership transfer, with sources and firmware.
+* Status transformers: small JavaScript functions that rewrite device status messages.
+* Integrations: Traefik (TLS termination), Rollbar, Crisp.chat, Mailgun, Slack, LoRaWAN server, FCM push.
+
+## Supported platforms
+
+THiNX builds firmware for Arduino and PlatformIO (ESP8266, ESP32, also with ESP-IDF), NodeMCU (Lua), MongooseOS and
+MicroPython, and ships a JavaScript client for anything that runs Node.js.
+
+It has been tested on Wemos D1 Mini and D1 Mini Pro, RobotDyn D1, D1 Mini and MEGA WiFi, and several NodeMCU boards (Lolin,
+AI-Thinker), with Mongoose, Arduino Core, ESP-IDF, Lua and MicroPython firmware.
+
+### Client libraries
+
+| Platform | Repository |
+|----------|------------|
+| ESP8266 (C++ base library) | [thinx-lib-esp8266](https://github.com/suculent/thinx-lib-esp8266) |
+| ESP32 (C++ base library) | [thinx-lib-esp32](https://github.com/suculent/thinx-lib-esp32) |
+| PlatformIO | [thinx-firmware-esp8266-pio](https://github.com/suculent/thinx-firmware-esp8266-pio) |
+| Arduino | [thinx-firmware-esp8266-ino](https://github.com/suculent/thinx-firmware-esp8266-ino) |
+| NodeMCU/Lua | [thinx-firmware-esp8266-lua](https://github.com/suculent/thinx-firmware-esp8266-lua) |
+| MicroPython | [thinx-firmware-esp8266-upy](https://github.com/suculent/thinx-firmware-esp8266-upy) |
+| MongooseOS | [thinx-firmware-esp8266-mos](https://github.com/suculent/thinx-firmware-esp8266-mos) |
+| Node.js | [thinx-firmware-js](https://github.com/suculent/thinx-firmware-js) |
+| MCP device (Node.js) | [thinx-mcp-device](https://github.com/suculent/thinx-mcp-device): a THiNX device client that runs as an MCP stdio server. It registers, listens on MQTT and downloads (never flashes) OTT firmware updates, and can report itself as an Arduino or PlatformIO device. |
+
+Firmware with the THiNX client built in: [NodeMCU/Lua](https://github.com/suculent/nodemcu-firmware) and
+[MicroPython](https://github.com/suculent/nodemcu-micropython). Arduino, PlatformIO and MongooseOS projects are
+firmware already, so they just include the library.
+
+### Firmware builders
+
+Each builder is a Docker image that the worker runs per build:
+
+| Builder | CI |
+|---------|----|
+| [platformio-docker-build](https://github.com/suculent/platformio-docker-build) | [![CircleCI](https://circleci.com/gh/suculent/platformio-docker-build.svg?style=shield)](https://circleci.com/gh/suculent/platformio-docker-build) |
+| [arduino-docker-build](https://github.com/suculent/arduino-docker-build) | [![CircleCI](https://circleci.com/gh/suculent/arduino-docker-build/tree/master.svg?style=shield)](https://circleci.com/gh/suculent/arduino-docker-build/tree/master) |
+| [mongoose-docker-build](https://github.com/suculent/mongoose-docker-build) | [![CircleCI](https://circleci.com/gh/suculent/mongoose-docker-build.svg?style=shield)](https://circleci.com/gh/suculent/mongoose-docker-build) |
+| [nodemcu-docker-build](https://github.com/suculent/nodemcu-docker-build/) | [![CircleCI](https://circleci.com/gh/suculent/nodemcu-docker-build.svg?style=shield)](https://circleci.com/gh/suculent/nodemcu-docker-build) |
+| [micropython-docker-build](https://github.com/suculent/micropython-docker-build/) | [![CircleCI](https://circleci.com/gh/suculent/micropython-docker-build.svg?style=shield)](https://circleci.com/gh/suculent/micropython-docker-build) |
+
+## Running your own THiNX
+
+### What you need
+
+* A Linux server (Ubuntu works) with at least 2 GB RAM and 32 GB SSD.
+* Docker. Docker Compose is the quick start; Docker Swarm is for scaling out.
+* Two DNS names, for example `api.yourdomain.com` (API) and `console.yourdomain.com` (console). For a localhost test,
+  set `debug: { allow_http_login: true }` in `conf/config.json` instead.
+* Recommended: a [Mailgun](https://mailgun.com) account for account e-mails and [Rollbar](https://rollbar.com) for error
+  tracking. Optional: Google Analytics, Slack, Crisp.chat.
+
+### Ports
+
+| Port | Service |
+|------|---------|
+| 7442 | API over plain HTTP, kept for legacy devices without TLS |
+| 7443 | API over HTTPS |
+| 1883 | MQTT |
+| 8883 | MQTT over TLS |
+| 80 / 443 | Console and API through Traefik |
+| 7475 | Status transformers (internal network only) |
+
+### Quick start with Docker Compose
+
+THiNX keeps its data under `/mnt/data` by default, so make sure that directory exists. Then:
 
 ``` bash
-git pull git@github.com/suculent/thinx-device-api -b swarm
+git clone https://github.com/suculent/thinx-device-api.git
+cd thinx-device-api
+cp .env.dist .env
+nano .env            # set your hostnames, passwords and keys
+./copy-envs.sh
+docker-compose up -d --build
+```
+
+You don't need Mailgun for a development install. When you create your first admin account, take the activation link
+from the API log (`docker-compose logs -f`). `.circleci/config.yml` shows the full set of steps CI uses.
+
+### Docker Swarm
+
+In Swarm, THiNX expects a Traefik load balancer (Swarmpit is a handy companion). `docker-swarm.yml` already carries the
+Traefik labels. It also expects `/mnt/data` to be shared storage on every node. We use GlusterFS, so the API, console,
+broker, worker and builders can run anywhere and still see the same files.
+
+On a manager node:
+
+``` bash
+git clone https://github.com/suculent/thinx-device-api.git
 cd thinx-device-api
 docker network create --scope=swarm nat
-docker stack deploy -c ./docker-swarm.yml
+docker stack deploy -c ./docker-swarm.yml thinx
 sudo ./scripts/install-log-retention-cron.sh
 ```
 
-The last step enables log retention. It installs `/usr/local/sbin/thinx-log-retention.sh` and a daily `/etc/cron.d/thinx-log-retention` entry (09:40 UTC). By default the entry removes only audit logs and build records older than 365 days; build folders are kept. `./scripts/stack-deploy` runs this step for you.
+The last command sets up log retention. It installs `/usr/local/sbin/thinx-log-retention.sh` and a daily
+`/etc/cron.d/thinx-log-retention` entry at 09:40 UTC. By default it deletes audit logs and build records older than
+365 days and keeps build folders. `./scripts/stack-deploy` runs this step for you.
 
-To delete old build folders as well, run a dry run first and check its counts. Then switch the schedule:
+To delete old build folders too, do a dry run first and check the counts, then switch the schedule:
 
 ``` bash
 sudo /usr/local/sbin/thinx-log-retention.sh
 sudo ./scripts/install-log-retention-cron.sh --force --roots deploy,repos
 ```
 
-For another time slot, use `--time HH:MM`. Run the script again with `--force` to change an existing schedule. To disable the job, delete `/etc/cron.d/thinx-log-retention`.
+Use `--time HH:MM` for another time slot, and run the script again with `--force` to change an existing schedule. To
+turn retention off, delete `/etc/cron.d/thinx-log-retention`.
 
-It's perfectly possible to run multiple instances of THiNX in Swarm. Just keep in mind that in order to support legacy HTTP transport devices, you need to have THiNX API port set differently for each instance (e.g. 7442 for production, 7441 for staging) because Swarm does not allow exposing same port twice across different services in same swarm.
+You can run several THiNX instances in one swarm. Give each instance its own plain-HTTP API port (for example 7442 for
+production and 7441 for staging), because Swarm won't publish the same port for two services.
 
-## GitHub Webhook support
+### The management console
 
-You can direct your GitHub web-hooks to <https://rtm.thinx.cloud/api/githook> after adding a valid deploy key from GitHub to THiNX.
+Build your own console image. The build bakes environment-specific values (hostnames, API keys) into the static files.
+The `thinxcloud/console` images on Docker Hub are built for thinx.cloud and won't point at your server. The
+`build-vue-console` and `build-console-classic` jobs in `.circleci/config.yml` list the build arguments you need.
 
-When adding Source, you can enter GitHub Secret to make sure incoming webhooks will be signed and validated. 
+### GitHub webhooks
 
-## Endpoints
+Add a deploy key from GitHub to THiNX, then point the repository's webhook at `https://<your-api-host>/api/githook`
+(for the hosted service, `https://rtm.thinx.cloud/api/githook`). When you add a source, you can also enter a GitHub
+webhook secret; THiNX then validates the signature of every incoming hook.
 
-See 03-test.sh. There is no point of maintaining documentation for this at current stage of development and user base zero.
+### API endpoints
 
-## Upgrading
+The endpoints aren't documented separately yet. The route modules in `lib/router.*.js` and the specs in `spec/jasmine/`
+are the reference for now.
 
-After upgrading from versions before `1.1.5200`, you may have issue with accessing CouchDB database. It's known issue, which can be fixed by editing the `/opt/couchdb/etc/vm.args` file inside the `couchdb` container. Just change the auto-generated domain on last line to `couchdb@localhost` and you should regain your access.
+### Logging
 
-## Development hints
+Use whichever log service and shipping agent you like. [Logz.io](https://logz.io), [Instana](https://www.instana.com)
+and [Sematext](https://sematext.com) have all worked.
 
-In case you don't need all the services running, you can start them as local containers and map them to compose service names using `/etc/hosts`.
+### Upgrading from before 1.1.5200
 
-Redis
+After an upgrade from a version older than `1.1.5200`, you may lose access to CouchDB. Fix it inside the `couchdb`
+container: in `/opt/couchdb/etc/vm.args`, change the auto-generated name on the last line to `couchdb@localhost`.
+
+## Development
+
+You don't need every service running locally. Start the ones you need as containers and map them to the compose
+service names in `/etc/hosts`.
+
+Redis:
 
 ``` bash
 docker run -ti -p 6379:6379 -e REDIS_PASSWORD=changeme! thinxcloud/redis:latest
 ```
 
-CouchDB
+CouchDB (Docker Hardened Images need a Docker Hub login):
 
 ``` bash
-docker login dhi.io   # Docker Hardened Images require a Docker Hub login
+docker login dhi.io
 docker run -p 5984:5984 -e COUCHDB_USER=rtmtest -e COUCHDB_PASSWORD=rtmtest dhi.io/couchdb:3
 ```
 
-## Roadmap Entropy Detector
+### Roadmap entropy detector
 
-`scripts/roadmap-entropy.js` is a dependency-free static analyzer for the GSD
-planning artifacts under `.planning/` (`ROADMAP.md`, `REQUIREMENTS.md`,
-`MILESTONES.md`). It detects roadmap scope creep and drift so planning debt
-surfaces before it compounds.
+`scripts/roadmap-entropy.js` is a small, dependency-free checker for the GSD planning files under `.planning/`
+(`ROADMAP.md`, `REQUIREMENTS.md`, `MILESTONES.md`). It catches scope creep and drift before they pile up, and adds the
+findings into an entropy score (high = 3, medium = 2, low = 1). It looks for four things:
 
-It flags four signal classes and rolls them into an aggregate **entropy score**
-(sum of severity weights: high=3, medium=2, low=1):
+* Traceability drift: active requirements with no phase, and phases citing requirement IDs that don't exist.
+* Coverage drift: traceability entries that disagree with what the phase actually declares in `ROADMAP.md`.
+* Scope creep: requirement IDs that are tracked but never defined, and "out of scope" features showing up again as active requirements.
+* Staleness: unchecked items under a shipped (`✅`) milestone, and an in-progress (`🔄`) milestone whose phases are all done.
 
-* **Traceability drift** — active requirements with no mapped phase, and phases
-  citing requirement IDs that don't exist in `REQUIREMENTS.md`.
-* **Coverage drift** — `REQ → Phase` traceability entries that disagree with the
-  requirements the phase actually declares in `ROADMAP.md`.
-* **Scope creep** — requirement IDs tracked in traceability but never defined,
-  and `Out of Scope` features re-surfacing as active (unchecked) requirements.
-* **Staleness** — unchecked items under a `✅` shipped milestone, and a `🔄`
-  in-progress milestone whose phases are all already checked.
-
-Requirements for already-shipped milestones live in
-`.planning/milestones/*-REQUIREMENTS.md`, so cross-checks against the active
-`REQUIREMENTS.md` are scoped to the current (non-shipped) milestone.
-
-### Usage
+Requirements of shipped milestones live in `.planning/milestones/*-REQUIREMENTS.md`, so the cross-checks only look at
+the current milestone.
 
 ``` bash
-npm run roadmap-entropy               # human-readable summary
-node scripts/roadmap-entropy.js --verbose      # per-finding detail
+npm run roadmap-entropy                        # summary
+node scripts/roadmap-entropy.js --verbose      # every finding in detail
 node scripts/roadmap-entropy.js --json         # machine-readable report
-node scripts/roadmap-entropy.js --threshold=10 # exit 1 if score > 10 (CI gate)
-node scripts/roadmap-entropy.js --strict       # exit 1 on any finding (threshold 0)
+node scripts/roadmap-entropy.js --threshold=10 # exit 1 if the score is above 10
+node scripts/roadmap-entropy.js --strict       # exit 1 on any finding
 ```
 
-| Flag | Effect |
-|------|--------|
-| _(none)_ | Print a human-readable summary; always exit `0`. |
-| `--json` | Emit the full report as JSON. |
-| `--verbose` / `-v` | Show the detail line for each finding. |
-| `--threshold=N` | Exit `1` when the entropy score exceeds `N` (CI gating). |
-| `--strict` | Shorthand for `--threshold=0` — exit `1` on any finding. |
+It exits `0` unless you set a threshold and the score goes over it, so you can gate CI on it without breaking the
+default run.
 
-Exit code is `0` unless a threshold is set and the score exceeds it, so it can
-gate CI on rising roadmap entropy without breaking the default informational
-run.
+## Platform notes
 
-# Platforms State of Union
-
-## Overall
-
-Platform libraries are now stabilised on the basic level, approaching first release version 1.0 with default HTTPS with optional fallback to HTTP for development.
-
-THiNX has now passed version 1.0 upgrading to swarm/docker-compose installation with separate container services (CouchDB, Redis, Transformers, THiNX, Traefik and optional monitoring services).
-
-Data and configuration are being moved to configurable location, which is by default /mnt/data:
+THiNX runs as separate container services: the API, CouchDB, Redis, Mosquitto, transformers, workers and Traefik, plus
+optional monitoring. Data and configuration live under `/mnt/data` by default:
 
 ``` bash
-deploy/ # build products ready for deployment to devices
-mosquitto/ # auth, log, config, data, ...
-repos/ # fetched/watched repositories
-ssh_keys/ # will be moved to vault and provided exlusively to builder
-ssl/ # shared SSL certificates, may be generated by Traefik/ACME/Letsencrypt
+deploy/    # built firmware, ready for devices
+mosquitto/ # broker auth, logs, config and data
+repos/     # fetched and watched repositories
+ssh_keys/  # deploy keys (moving to a vault, used only by the builder)
+ssl/       # shared certificates, for example from Traefik/ACME
 ```
 
-...etc
+Where each firmware platform stands, from our last round of testing:
 
-## Arduino ESP8266/ESP32
-
-* Docker builder works.
-* OTA update works.
-
-## PlatformIO
-
-* Docker builder works.
-* OTA update is ready to be tested.
-
-## Pine 64
-
-* On horizon, builder and platform support is ready, waits for firmware...
-
-## Micropython
-
-* Docker builder works fine but needs tighter integration with sources.
-* Deployment is not verified, therefore update cannot be tested now.
-
-## NodeMCU
-
-* File-based update has been pre-tested. Docker builder works fine but needs tighter integration with sources (`$workdir`).
-* Deployment is not verified, therefore update cannot be tested.
-* Will probably deprecate, because the toolset has not been updated for almost 3 years.
+| Platform | Builder | Over-the-air update |
+|----------|---------|---------------------|
+| Arduino ESP8266/ESP32 | works | works |
+| PlatformIO | works | ready to test |
+| MicroPython | works, needs tighter integration with sources | deployment not verified yet |
+| NodeMCU | works, needs tighter integration with sources (`$workdir`) | file-based update pre-tested; deployment not verified. Likely to be deprecated: its toolchain has seen no updates for years. |
+| Pine64 | builder and platform support ready | waiting for firmware |
 
 ## License
+
+ISC, see [LICENSE](./LICENSE).
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsuculent%2Fthinx-device-api?ref=badge_large)
