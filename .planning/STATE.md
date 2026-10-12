@@ -4,7 +4,7 @@ milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
 status: awaiting_ci_and_acceptance
 stopped_at: Completed 37-02-PLAN.md
-last_updated: "2026-10-12T12:29:13.616Z"
+last_updated: "2026-10-12T12:48:21Z"
 state_head: 04455f8c348ceda73ec0c2d1d452398687ce5bb0
 progress:
   total_phases: 4
@@ -38,6 +38,8 @@ Use thinx-staging baseline, paired console branch and parent submodule pointer. 
 - [Phase 37]: G-37-5: device Transformer Assignment is one stacked checkbox per transformer on editForm.transformers (no multi-select), with an empty-state line; Manage Transformers is a filled orange variant=warning button (operator 2026-10-12)
 
 ## Verification
+
+Phase 37 accepted 2026-10-12: live UAT 6/6 (G-37-5 resolved by 37-02), operator acknowledged the 37-02 prohibitions, review WR-01 + IN-01 fixed in console ff6e809 (pushed with parent 7d56e977); 37-VERIFICATION.md passed; 37-SECURITY.md threats_open 0. Open: 37-REVIEW IN-02/IN-03, 37-UI-REVIEW polish items.
 
 Phase 36 accepted 2026-10-12: live UAT 5/5 (G-36-3 resolved by 36-02), operator sign-off on console 38eb95b and on the navbar Recent Builds dropdown for BUILD-01; 36-VERIFICATION.md passed; 36-SECURITY.md threats_open 0. Open: 36-REVIEW WR-01 (inert-row test checks only the <tr>), backend full-log payload size (AR-36-01, deferred).
 

@@ -155,6 +155,8 @@ Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-36-3 (device B
 
 Requirements: TRANS-01, TRANS-02
 
+Status: complete 2026-10-12. Live UAT 6/6 passed, including gap G-37-5 (checkbox assignment, orange Manage Transformers, re-tested live). Review WR-01 (orphaned assignments) fixed in console ff6e809. Verification passed; threats_open 0.
+
 **Plans:** 2/2 plans executed
 
 - [x] 37-01-PLAN.md — implement and verify all mapped requirements.

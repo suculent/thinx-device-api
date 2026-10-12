@@ -1,7 +1,7 @@
 ---
 phase: 37-transformer-parity
 verified: 2026-10-12T12:55:00Z
-status: human_needed
+status: passed
 score: 11/11 must-haves verified
 covered_files:
   - ".planning/phases/37-transformer-parity/37-01-PLAN.md"
@@ -19,7 +19,7 @@ covered_files:
   - "services/console/vue/src/store/devices.js"
   - "services/console/vue/src/store/transformers.js"
   - "services/console/vue/tests/unit/milestone-v116.cjs"
-covered_digest: "v3:sha256:a479cff8447d624c28b391bdbb3c6531dfebaad0597b4c031cabc05abfcb2406"
+covered_digest: "v3:sha256:9176b94c27e2ca86d9a7d1c8b6238765797312f39261809f4eef76d164e98903"
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
@@ -168,3 +168,8 @@ There are no gaps. All 11 must-haves are verified against the code, the unit cha
 
 _Verified: 2026-10-12T12:55:00Z_
 _Verifier: Claude (gsd-verifier)_
+
+## Operator Sign-Off (2026-10-12)
+
+- The four flagged 37-02 judgment-tier prohibitions were acknowledged by the operator (no executor push, signed commits only, three-file console scope, no logic change).
+- 37-REVIEW WR-01 (orphaned transformer assignments) was fixed at the operator's request in console ff6e809 (parent 7d56e977, both pushed): assigned utids with no transformer get a "(missing) <utid>" checkbox, and the empty state shows only when nothing is assigned. IN-01 (retry hint wording) fixed in the same commit. Unit suite, lint and build pass; the new check fails if the template goes back to transformerOptions.

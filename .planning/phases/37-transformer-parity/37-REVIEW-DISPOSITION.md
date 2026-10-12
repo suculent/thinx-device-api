@@ -5,11 +5,11 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Assigned transformer IDs with no matching option are invisible and cannot be removed; the empty-state line can be false"
   - id: IN-01
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Assignment-failure message still refers to \"the list\""
   - id: IN-02
     severity: info
@@ -19,7 +19,7 @@ findings:
     severity: info
     disposition: open
     title: "Cypress colour assertion is tied to the theme value; the save test does not check UI feedback"
-open: 4
+open: 2
 total: 4
 recorded: 2026-10-12T12:39:16.856Z
 ---
@@ -28,8 +28,8 @@ recorded: 2026-10-12T12:39:16.856Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| IN-01 | info | open | - |
+| WR-01 | warning | fixed (console ff6e809) | - |
+| IN-01 | info | fixed (console ff6e809) | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
 
