@@ -10,7 +10,7 @@
   suffix / network labels in the stale file (so a future sync cannot re-introduce `@docker`); a full
   thinx-stack reconciliation (committed thinx-swarm == gluster deploy copy == live) is an app-stack
   concern outside the P31 edge-static scope.
-  status: open
+  status: acknowledged
   **Found during:** 31-01 Task 1 (authoritative-source resolution). Until reconciled, do not
   `docker stack deploy` the thinx stack from the thinx-swarm checkout (Pitfall 5).
 
@@ -44,7 +44,7 @@
   P31 rollback section names the digest; any future "revert to the committed image line" must do the
   same. After the v3 hop the committed `traefik:v3.7.14` tag and the live digest will coincide; the
   P33/P34 image-pin hygiene pass may want to record the digest in the committed file as a comment.
-  status: open
+  status: acknowledged
   **Found during:** 31-02 Task 2 (rollback dry-verify pre-flight, read-only `docker image inspect`).
 
 ## From phase close-out (2026-10-07 22:29 UTC, orchestrator)
@@ -61,7 +61,7 @@
   synced (requires every external secret to exist in the swarm first). Also to carry into the runbook §Cutover
   mechanism as a post-cutover checklist row (runbook left untouched here to keep the 31-VERIFICATION fingerprint valid;
   add it in the WR-01/WR-02 fix pass).
-  status: open
+  status: acknowledged
   **Found during:** phase 31 close-out (side-agent note, verified read-only by the orchestrator).
   **Update 2026-10-08:** the gluster dir is the thinx-swarm checkout; the in-place label sync + Phase 29/30 traefik.yml reconciliation were committed on top of the production deploy line (`d08aff8`), the Phase 31 v3 `traefik.yml` applied (`25d632e`), origin merged (`15ff004`), pushed to GitHub and fast-forwarded on micro. The `secrets:` block gap remains open.
   **Update 2026-10-08 (secrets):** CLOSED for the deploy file — thinx-swarm `89b0f24` adds the `secrets:` block (13 external) and attaches the live set (api 10 / worker 2 / transformer 1); pushed + ff on micro. Open follow-ups: SEC-CFG-04 (3 unattached swarm secrets on api), `.env` fallback duplicates (9) and un-migrated secret-like keys (9), and `docker-swarm.yml` missing the live `CORS_ENFORCE=true` / `THINX_MQTT_DEVICE_WRITES=1` api env lines.

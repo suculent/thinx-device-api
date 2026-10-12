@@ -9,7 +9,8 @@
 - ✅ **v1.12 — Inbox Drawdown** — Phases 18–20 (shipped 2026-06-29)
 - ✅ **v1.13 — Web Hardening (Console/Edge)** — Phase 21 (shipped 2026-09-25)
 - ✅ **v1.14 — Backlog & Hardening Sweep** — Phases 22–28 (shipped 2026-10-05)
-- 🚧 **v1.15 — Traefik Hardening (Edge)** — Phases 29–34 (in progress)
+- ✅ **v1.15 — Traefik Hardening (Edge)** — Phases 29–34 (shipped 2026-10-12)
+- 🚧 **v1.16 — Console Usability & Deploy Keys** — Phases 35–38 (in progress)
 
 ## Phases
 
@@ -84,135 +85,19 @@ See `.planning/milestones/v1.14-ROADMAP.md`. 24/24 v1.14 requirements (OPS-SWARM
 
 </details>
 
-### 🚧 v1.15 — Traefik Hardening (Edge) (Phases 29–34) — IN PROGRESS
+<details>
+<summary>✅ v1.15 — Traefik Hardening (Edge) (Phases 29–34) — SHIPPED 2026-10-12</summary>
 
-Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard constraint across every phase: the plaintext device entrypoint `:7442` and plain MQTT keep working (legacy `__DISABLE_HTTPS__` devices), and each phase is independently rollback-able within the deploy SLA (600 s push → first response; 5 minutes until 2026-10-11).
+See `.planning/milestones/v1.15-ROADMAP.md`. 14/14 v1.15 requirements; milestone audit `tech_debt`, closed as `override_closeout` (see `.planning/MILESTONES.md`).
 
-### Phase 29: Edge Reconciliation & Source of Truth
+- [x] Phase 29: Edge Reconciliation & Source of Truth (3/3 plans) — completed 2026-10-06
+- [x] Phase 30: v1→v2 Syntax Migration (parity) (2/2 plans) — completed 2026-10-07
+- [x] Phase 31: v2→v3 Upgrade (backward-compat mode) (3/3 plans) — completed 2026-10-08
+- [x] Phase 32: v3 Native Syntax & BC Removal (3/3 plans) — completed 2026-10-08
+- [x] Phase 33: Dashboard Lockdown & TLS Hardening (3/3 plans) — completed 2026-10-09
+- [x] Phase 34: Ops Surface Reduction & SLA Close-out (5/5 plans) — completed 2026-10-11
 
-**Requirements**: EDGE-RECON-01, EDGE-RECON-02
-**Goal**: Establish exactly what Traefik config is deployed (gluster bind-mount suspected) and make the repo authoritative before any change.
-**Success Criteria** (what must be TRUE):
-
-1. The live swarm-host Traefik static flags, dynamic rules, and ACME storage are captured and committed as a dated snapshot.
-2. A diff of live vs repo (`docker-compose.traefik.yml` + `services/traefik/*`) exists; every difference is reconciled into the repo or documented with rationale.
-3. The actual deploy source of truth (repo file vs gluster path) is documented in the swarm runbook.
-4. A rollback snapshot of the current working edge is saved before Phase 30.
-
-**Plans:** 3/3 plans complete (planned 2026-10-06)
-**Wave 1**
-- [x] 29-01-PLAN.md — Tracer: anti-drift spine end-to-end on the `:7442` slice (generator → read-only mirror → staleness check → CI gate)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-- [x] 29-02-PLAN.md — Full live edge capture, live↔repo diff, reconcile `thinx-swarm` (production wins, zero cleanup), ACME cert inventory
-
-**Wave 3** *(blocked on Wave 2 completion)*
-- [x] 29-03-PLAN.md — Out-of-git rollback snapshot (600) on `micro`, source-of-truth runbook section, P30–P34 fix-forward list
-
-### Phase 30: v1→v2 Syntax Migration (parity)
-
-**Requirements**: EDGE-MIG-01, EDGE-MIG-04
-**Goal**: Migrate static flags + Docker labels to v2 syntax on a current v2.x image with identical routing; plaintext device paths preserved.
-**Success Criteria** (what must be TRUE):
-
-1. Static config uses v2 entrypoints / `providers.docker` / `certificatesresolvers`; labels use `http.routers`/`http.services`.
-2. Every existing route (app, landing, dev, console hostnames) serves identically; HTTP→HTTPS redirect intact; ACME issues/renews under the v2 resolver.
-3. Plaintext `:7442` + plain MQTT verified: legacy check-in, OTT redeem, and firmware download all succeed.
-4. Rollback to the Phase 29 snapshot is demonstrated.
-
-**Plans:** 2/2 plans complete (planned 2026-10-07) — 2/2 complete
-**Wave 1**
-- [x] 30-01-PLAN.md — Tracer: pilot-token removal live cutover (thinx-swarm edit → mirror → check → deploy → verify) + v2-syntax parity confirmation (EDGE-MIG-01); `:7442`/plain-MQTT preserved (EDGE-MIG-04) — ✅ 2026-10-07, see `30-01-SUMMARY.md` (live on v2.11, operator-verified)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-- [x] 30-02-PLAN.md — D-06 live rollback+restore cycle to the Phase-29 snapshot + runbook documentation; route parity (EDGE-MIG-01) and `:7442`/plain-MQTT (EDGE-MIG-04) re-verified — ✅ 2026-10-07, see `30-02-SUMMARY.md` (live cycle demonstrated, operator-verified, edge back at P30 end state)
-
-### Phase 31: v2→v3 Upgrade (backward-compat mode)
-
-**Requirements**: EDGE-MIG-02
-**Goal**: Upgrade to current Traefik v3.x with `core.defaultRuleSyntax: v2`, via the official three-phase rollout, rollback-able.
-**Success Criteria** (what must be TRUE):
-
-1. Running current v3.x image with the BC switch; all routes serve identically.
-2. The prepare→migrate-prod→(defer routing) rollout is followed; rollback to v2 is demonstrated or staged-ready.
-3. ACME + TLS posture preserved under v3; plaintext `:7442` + MQTT re-verified.
-
-**Plans:** 3/3 plans complete (planned 2026-10-07)
-**Wave 1**
-- [x] 31-01-PLAN.md — Tracer: convert the v3 static config (swarm provider + `core.defaultRuleSyntax=v2`) + `@docker`→`@swarm`/network-label renames, regenerate the mirror, and prove it off-line via boot-and-discover (every router enabled, zero host traffic) (EDGE-MIG-02)
-
-**Wave 2** *(blocked on Wave 1)*
-- [x] 31-02-PLAN.md — Pre-cutover out-of-git 600 snapshot (`acme.json` + resolved config) on `micro` + staged-ready v3→v2.11 rollback dry-verify (D-02) (EDGE-MIG-02)
-
-**Wave 3** *(blocked on Wave 2)*
-- [x] 31-03-PLAN.md — Live `traefik:v3.7.14` cutover (checkpoint:decision gated) with route/cert parity + human-verify of the legacy device flow over `:7442`/plain-MQTT (EDGE-MIG-02, EDGE-MIG-04)
-
-### Phase 32: v3 Native Syntax & BC Removal
-
-**Requirements**: EDGE-MIG-03
-**Goal**: Convert routing rules to native v3 syntax and remove the BC switch (or document retention).
-**Success Criteria** (what must be TRUE):
-
-1. Routing rules are in native v3 syntax; `core.defaultRuleSyntax` removed or its retention documented.
-2. Full route parity confirmed; plaintext `:7442` + MQTT re-verified.
-3. Repo config matches the deployed v3 config.
-
-**Plans:** 3/3 plans complete (planned 2026-10-08)
-**Wave 1**
-- [x] 32-01-PLAN.md — Tracer: baseline + `D.pre.yml`, boot-and-discover the four native-v3 rules on a throwaway without the BC switch (D-02), then Stage 1 repo-first + live per-router conversion (`HeaderRegexp`, `PathPrefix(`/`)` + `ruleSyntax=v3` overrides, label-only) (EDGE-MIG-03)
-
-**Wave 2** *(blocked on Wave 1)*
-- [x] 32-02-PLAN.md — Stage 2: remove `--core.defaultRuleSyntax=v2` repo-first (17→16 flags) then live `--args` under the D-10 auto-revert gate; Stage 3: strip the four `ruleSyntax=v3` overrides repo-first + live `--label-rm` (EDGE-MIG-03)
-
-**Wave 3** *(blocked on Wave 2)*
-- [x] 32-03-PLAN.md — Full re-verify of the native-v3 end state (route parity vs baseline, serials, `:7442`/`:1883`/`:8883` + device-flow harness, WS 401, bare-IP), `D.post.yml` + runbook close-out, credential shred, then the single blocking-human console gate (EDGE-MIG-03; EDGE-MIG-04 re-verified)
-
-### Phase 33: Dashboard Lockdown & TLS Hardening
-
-**Requirements**: EDGE-API-01, EDGE-API-02, EDGE-TLS-01, EDGE-TLS-02, EDGE-TLS-03
-**Goal**: Close the dashboard/API surface and enforce modern TLS on the v3 edge.
-**Success Criteria** (what must be TRUE):
-
-1. Port 8080 is not externally reachable and `--api.insecure` is disabled; the dashboard is either off in prod or served via `api@internal` behind auth.
-2. HTTPS enforces min TLS 1.2 (prefer 1.3) with a modern cipher set; HSTS is sent; plaintext `:7442` unaffected.
-3. ACME uses the real operator email (not `admin@example.com`); `acme.json` is `600`; renewal verified.
-4. An external scan confirms no open dashboard and the expected TLS posture.
-
-**Plans:** 3/3 plans complete (planned 2026-10-08)
-**Wave 1**
-- [x] 33-01-PLAN.md — Tracer: scan script + `## Before` capture + `E.pre.yml` baseline, D-04 credential compare, Stage A1/A2 (loopback `mgmt` entrypoint `127.0.0.1:8080` + `traefik-mgmt` router to `api@internal`, public dashboard routers + basic-auth removed) proven through the loopback API gate; then the D-08 label bundle (repo-first, label-only live) and Stage B `exposedbydefault=false` under the identical-inventory gate (EDGE-API-01, EDGE-API-02)
-
-**Wave 2** *(blocked on Wave 1)*
-- [x] 33-02-PLAN.md — Stage C: AEAD-only `tls.toml` loaded via the file provider with the immutable `tls-config-2` (one args+config update, TLS handshake triple + harness gate); Stage D: `security-headers@swarm` as the `https` entrypoint default middleware (HSTS 17/17, WS 101 untouched) + redundant per-router ref removal; Stage E: ACME real-e-mail/600 evidence, 600-root snapshot, stale 2023 files deleted, `checkout.qooldata.com` pruned, forced TLS-ALPN reissue of `influx.thinx.cloud` (EDGE-TLS-01, EDGE-TLS-02, EDGE-TLS-03)
-
-**Wave 3** *(blocked on Wave 2)*
-- [x] 33-03-PLAN.md — End-state evidence bundle (19-flag command, loopback-only mgmt, 29/0 inventory, TLS/HSTS/WS/bare-IP/ports/harness/ACME, repo == deployed), external scan `## After` (EDGE-SCAN OK) + `E.post.yml` + README step E, `tls-config-1` removed; runbook re-verify matrix + ordered revert hand-off + Phase 34 record, AGENTS.md dashboard/API access section, thinx-swarm operator README, fix-forward rows closed; then the single blocking-human console gate (D-31; all five requirements)
-
-### Phase 34: Ops Surface Reduction & SLA Close-out
-
-**Requirements**: EDGE-OPS-01, EDGE-OPS-02, EDGE-OPS-03
-**Goal**: Reduce the operational attack surface and confirm the deploy SLA end-to-end.
-**Success Criteria** (what must be TRUE):
-
-1. Log level is `INFO`/`WARN` in production (access logs, if kept, free of secrets).
-2. Traefik reaches the Docker API via a read-only socket-proxy, not a raw `/var/run/docker.sock` mount.
-3. push → CI → Swarmpit measured ≤600 s end-to-end on an edge change (budget raised from 5 minutes by the operator on 2026-10-11); swarm runbook updated.
-
-**Plans:** 5/5 plans complete — verified passed 12/12 on 2026-10-11 (planned 2026-10-09; revised after plan-check — Stage B2 split out)
-**Wave 1**
-- [x] 34-01-PLAN.md — Tracer Stage A: F.pre capture + scan Before, log WARN + JSON access log with RequestPath/RequestLine/ClientUsername dropped (canary-proven); Stage B1: wollomatic socket-proxy (DHI has none) on an internal `traefik-socket` overlay, GET-only allow-list validated on a throwaway and proven live (EDGE-OPS-01, EDGE-OPS-02)
-
-**Wave 2** *(blocked on Wave 1)*
-- [x] 34-02-PLAN.md — Tracer Stage B2: ONE update moves Traefik to `tcp://socket-proxy:2375` and drops the raw socket bind (D-10 auto-revert); deny-from-Traefik, live provider test, harness (EDGE-OPS-02)
-
-**Wave 3** *(blocked on Wave 2)*
-- [x] 34-03-PLAN.md — Tracer Stage C: `tls-config-3` (security-headers in the file provider, Go-default curves incl. X25519MLKEM768) + `security-headers@file` default in one update; Stage D: swarm-label copy retired, db/registry `:80` redirect-only (folded D-15..D-17; EDGE-OPS-03 final edge)
-
-**Wave 4** *(blocked on Wave 3)*
-- [x] 34-04-PLAN.md — Tracer Stage E: prune the seven retired ACME entries (scan HOSTS 17 → 16); operator checkpoint for the new basic-auth password; couch-auth/influx-auth rotation (historic literal proven dead) (folded D-18, D-19); D-20 vault.yml re-pin dropped, moved to v1.17
-
-**Wave 5** *(blocked on Wave 4)*
-- [x] 34-05-PLAN.md — Tracer: the D-12 SLA run (git push → CI → registry → Swarmpit → first response served through Traefik by the new task, three legs, re-run once on a miss; a FAIL stays an open EDGE-OPS-03 gap unless the operator accepts it); F.post + scan After + re-verify matrix, `tls-config-2` removed; swarm.md / AGENTS.md / runbook close-out, one docs push (EDGE-OPS-03)
+</details>
 
 ## Progress
 
@@ -231,19 +116,20 @@ Migration path and rationale: `.planning/research/TRAEFIK-MIGRATION.md`. Hard co
 | 26. Vue Console Log Paging | v1.14 | 10/10 | Complete | 2026-10-03 |
 | 27. InfluxDB 2 Upgrade | v1.14 | 8/8 | Complete | 2026-10-03 |
 | 28. Swarmpit Upgrade & Trim | v1.14 | 4/4 | Complete | 2026-10-05 |
-| 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete    | 2026-10-06 |
-| 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete    | 2026-10-07 |
-| 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete    | 2026-10-08 |
-| 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete    | 2026-10-08 |
-| 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete    | 2026-10-09 |
-| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Complete    | 2026-10-11 |
+| 29. Edge Reconciliation & Source of Truth | v1.15 | 3/3 | Complete | 2026-10-06 |
+| 30. v1→v2 Syntax Migration (parity) | v1.15 | 2/2 | Complete | 2026-10-07 |
+| 31. v2→v3 Upgrade (backward-compat mode) | v1.15 | 3/3 | Complete | 2026-10-08 |
+| 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete | 2026-10-08 |
+| 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete | 2026-10-09 |
+| 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Complete | 2026-10-11 |
+| 35–38. Console Usability & Deploy Keys | v1.16 | 4/4 | Implemented; acceptance pending | — |
 
 ---
-*v1.15 Traefik Hardening (Edge) started 2026-10-06: 14 requirements across 6 phases (29–34). Next: `/gsd-discuss-phase 29`.*
+*v1.15 Traefik Hardening (Edge) shipped 2026-10-12. Active: v1.16 Console Usability & Deploy Keys (Phases 35–38).*
 
 ## v1.16 — Console Usability & Deploy Keys
 
-Active milestone; v1.15 is paused with its original phase artifacts preserved.
+Active milestone (v1.15 shipped 2026-10-12).
 
 ### Phase 35: Console Usability
 

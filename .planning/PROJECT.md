@@ -10,24 +10,13 @@ The v1.0 GA milestone (shipped 2026-05-27) closed the 4 v1 backend gaps the Vue 
 
 The IoT device API stays available and trustworthy across release cycles — every public route the legacy AngularJS console relied on (which Vue inherited) keeps working with no signature breaks. Operational pipeline (push → CI → Swarmpit autoredeploy) stays under a 600 s SLA (push → first response served by the new task; raised from 5 minutes on 2026-10-11).
 
-## Preserved Milestone: v1.15 Traefik Hardening (Edge)
-
-**Goal:** Reconcile the Traefik edge against what is actually deployed, then modernize and harden it — migrating off the outdated `v2.6.1` image driven by v1-syntax flags/labels — without breaking plaintext device check-in (`:7442`) or the deploy SLA (600 s since 2026-10-11, was 5 minutes).
-
-**Target features:**
-- Reconcile repo `docker-compose.traefik.yml` + `services/traefik/*` against the live swarm-host config (gluster bind-mount suspected) to establish source of truth before any change.
-- Version + config modernization: two-hop migration v1→v2 syntax, then v2→v3 (BC switch `core.defaultRuleSyntax: v2`), landing on current Traefik v3.x. See `.planning/research/TRAEFIK-MIGRATION.md`.
-- Dashboard/API lockdown: close/secure port 8080 and the `--api` dashboard.
-- TLS hardening: min TLS 1.2/1.3, modern ciphers, HSTS, real ACME email, `acme.json` 600.
-- Ops surface reduction: `DEBUG → INFO/WARN` logging; broker `docker.sock` via a socket-proxy.
-
-**Hard constraints:** plaintext device entrypoint `:7442` and plain MQTT must survive every hop (legacy `__DISABLE_HTTPS__` devices); each migration hop stays independently rollback-able. This milestone intentionally reverses the prior "edge layer redesign out of scope" boundary.
-
 ## Current State
 
-**In progress — v1.15 Traefik Hardening (Edge):** Phases 29–33 complete; Phase 34 (Ops Surface Reduction & SLA Close-out) next. The production edge runs **Traefik v3.7.14** on native v3 rules (no BC switch, Phase 32) with a **19-flag** static command (Phase 33). The dashboard/API has no public route and no basic-auth: `api@internal` answers only on a loopback `mgmt` entrypoint `127.0.0.1:8080` inside the task, reached over ssh + `docker exec` (EDGE-API-01/02). `exposedbydefault=false`. A file-provider `default` TLS option (swarm config `tls-config-2`) enforces TLS 1.2 minimum with an ECDHE-AEAD-only cipher set, and `security-headers@swarm` is the `https` entrypoint default, so HSTS reaches every HTTPS host (EDGE-TLS-01/02). ACME uses the real operator e-mail, `acme.json` is 600 root and renewal was proven by a forced TLS-ALPN reissue (EDGE-TLS-03). `scripts/traefik-edge-scan.sh` is the committed external scan (`EDGE-SCAN OK` at the end state). `:7442` and plain MQTT `:1883` are untouched. `docker-swarm.yml` stays the authoritative committed thinx-stack source; `docker-compose.traefik.yml` is a generated mirror of `thinx-swarm/traefik.yml` (MIRROR OK). Known follow-ups (runbook `traefik-edge-hardening.md` `## Recorded for Phase 34`): real client IPs (ingress NAT), `ipAllowList` with operator-supplied IPs, couch/influx basic-auth rotation, HSTS middleware in the file provider, public `:8883` MQTTS refused (pre-existing), push `thinx-staging`.
+**In progress — v1.16 Console Usability & Deploy Keys** (Phases 35–38): all plans implemented and locally verified; release CI and browser/live acceptance pending (see `v1.16-VERIFICATION.md`).
 
-**Shipped:** v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
+**Shipped:** v1.15 Traefik Hardening (Edge) (2026-10-12) — 14/14 requirements across Phases 29–34. The production edge runs **Traefik v3.7.14** on native v3 rules with a **24-flag** static command whose only source is `thinx-swarm/traefik.yml`; `docker-compose.traefik.yml` is a generated, CI-checked mirror. The dashboard/API answers only on loopback `127.0.0.1:8080` inside the task (ssh + `docker exec`), `exposedbydefault=false`. TLS 1.2+ AEAD-only and HSTS/security headers come from the file provider (`tls-config-3`, `security-headers@file`); ACME uses the real e-mail with `acme.json` 600. Logs are WARN with a JSON access log that drops `RequestPath`/`RequestLine`/`ClientUsername`; Traefik reads Docker only through the GET-only `traefik_socket-proxy`. The couch/influx edge basic-auth is bcrypt, outside the worker-bound tree. Deploy SLA measured at 380 s against the 600 s budget. `:7442` and plain MQTT `:1883` stayed plaintext throughout; MQTTS is `:8883`. Milestone audit `tech_debt`; closed as `override_closeout`.
+
+Previously: v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
 
 Previously: v1.13 Web Hardening (Console/Edge) (2026-09-25) — 2/2 requirements in Phase 21. The `https:`/`wss:` scheme wildcard is gone from every CSP source; the live policy pins 7 explicit hosts (plus `app.thinx.cloud`). Double-submit CSRF (`XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header, `lib/middleware/csrf.js`) guards the 7 cookie-session login/account POSTs and has been **enforced in production since 2026-09-25 09:02Z**. Both consoles log in cleanly under enforcement. Verification `passed` with 3 operator overrides: HawkScan (the original acceptance scanner) was removed in `bb0ce4a7`, and the production console CSP turned out to come from a gluster bind mount (`/mnt/gluster/deployment/swarm/console/default.conf`) rather than the image configs.
 
@@ -53,7 +42,11 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 ## Next Milestone Goals
 
-Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Deferred Items):
+v1.16 (Console Usability & Deploy Keys) is the active milestone; after it closes, run `/gsd-new-milestone`. Edge candidates carried out of v1.15 (`milestones/v1.15-MILESTONE-AUDIT.md`, runbook `## Recorded for later (after Phase 34)`):
+- Real client IPs at the edge (host-mode publishing or PROXY protocol), then `ipAllowList` / `rateLimit`; `sniStrict=true`; socket-proxy repin
+- Edge doc drift: stale `OPEN-GAP` SLA line and bare socket-proxy name in the fix-forward list, P33 closure rows, post-rollback mirror note; re-disposition review ledgers 29/30/32/33
+
+Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Deferred Items):
 - Worker lifecycle and the build-queue cron that never dispatches waiting builds (todo `2026-09-28-fix-worker-builder-service-polling-completion-detection`)
 - API-key credential/storage hardening (todo `2026-10-03-apikey-hash-credential-and-storage`), Rollbar server/client token split
 - Remove the legacy worker `cmd` path and the last shell-exec sites in `statistics.js`; drop stale env secrets next to the swarm mounts
@@ -61,6 +54,18 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 - Make CI fail on spec failures (`jasmine || true`)
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.15 Traefik Hardening (Edge) (shipped 2026-10-12)</summary>
+
+- ✓ **EDGE-RECON-01/02** — v1.15 (Phase 29) — live edge captured and diffed; thinx-swarm is the source, the device-api file a generated mirror with a CI staleness gate; drift reconciled or documented.
+- ✓ **EDGE-MIG-01/02/03** — v1.15 (Phases 30–32) — v1→v2 syntax on v2.11, v3.7.14 under the BC switch, then native v3 with the switch removed; each hop rollback-able.
+- ✓ **EDGE-MIG-04** — v1.15 (Phases 30–32) — `:7442` and plain MQTT kept legacy check-in, OTT and firmware download working after every hop.
+- ✓ **EDGE-API-01/02** — v1.15 (Phase 33) — no public dashboard/API; `api@internal` on loopback only.
+- ✓ **EDGE-TLS-01/02/03** — v1.15 (Phases 33–34) — AEAD-only TLS 1.2+, edge-wide HSTS not on plaintext paths, real ACME e-mail, `acme.json` 600, renewal proven.
+- ✓ **EDGE-OPS-01/02/03** — v1.15 (Phase 34) — WARN + secret-free access log; GET-only socket-proxy; SLA 380 s ≤ 600 s.
+
+</details>
 
 <details>
 <summary>v1.14 Backlog & Hardening Sweep (shipped 2026-10-05)</summary>
@@ -159,14 +164,14 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 - **G10** (`thinx_worker` silent-loop on `docker pull`) — lives in the worker repo, different codebase
 - **chai-http v5 ESM migration** — dependency lock per `AGENTS.md:82-92`; trigger to reconsider is a Snyk/Dependabot CVE in superagent v3 (tracked as TEST-CHAI-01)
 - **Multi-tenant revamp / v2 API features** — future major milestone, not v1.x
-- **Edge layer redesign** (Traefik labels, nginx rewrites beyond G8 needs) — out of scope except for targeted header hardening (AUTH-API-01 in v1.0, CSP pinning in v1.13)
+- **Edge layer redesign beyond Traefik** (nginx rewrites, console edge consolidation — EDGE-FUT-01) and device mTLS (EDGE-FUT-02). Traefik itself was migrated and hardened in v1.15; replacing it with another proxy stays out of scope
 - **Dashboard data-exposure rework** (AGENTS.md L98) — privacy concern but not a regression vs. legacy; v1.x candidate at most
 - **CONSOLE-LEGACY-JSON-PARSE** — legacy AngularJS console double-parse bug (`JSON.parse` on an already-parsed object at `services/console/src/login.js:173` + `password.js:87`); frontend fault in the sibling submodule, no parent-repo angle. Reclassified out of parent scope at v1.11 start; owned by the `services/console` GSD workspace
 
 ## Context
 
 - **Tech stack:** Node/Express monolith, CommonJS (no ESM migration), chai-http v4 pinned per `AGENTS.md:82-92`
-- **Production deploy:** parent `thinx-staging` push → CircleCI build → private-registry publish → Swarmpit 1.10 autoredeploy (registry push → task Running 31–75 s in v1.14; SLA 5 min). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
+- **Production deploy:** parent `thinx-staging` push → CircleCI build → private-registry publish → Swarmpit 1.10 autoredeploy (registry push → task Running 31–75 s in v1.14; SLA 600 s push → first response since 2026-10-11, measured 380 s in v1.15). Manual `./restart.sh` is the fallback (Phase 3 fix made it unnecessary).
 - **Branch model (since 2026-09-19):** `master` is deleted and `main` is the default branch. `main` is protected — direct pushes are rejected (`GH006`), so changes reach it through a PR. `thinx-staging` accepts direct pushes. Since `3cfd0666` the two branches publish to different registries: `thinx-staging` → `registry.thinx.cloud:5000`, `main` → Docker Hub, which ended the race where both wrote the same tags. All six submodules publish from `main` only.
 - **Signing:** GPG-sign commits is the project default; the 2026-05-26 single-session authorization for unsigned commits is recorded in memory `unsigned-commits-260526` and does not carry forward.
 - **AGENTS.md** at parent root is the existing onboarding doc (Codex-runtime convention) — kept as the ops/deploy + dependency-lock rationale reference alongside `.planning/`.
@@ -239,8 +244,13 @@ Not yet defined — run `/gsd-new-milestone`. Candidates carried out of v1.14 (s
 | Phase 31: v2→v3 cutover via ordered surgical `docker service update` (no stack deploy); operator chose to accept the B1→B2 window over an unqualified-ref bridge | Stack deploy drops the live-only `INFLUXDB_TOKEN` mount and resets edge auth hashes; plan must-haves pin `@swarm` refs | ✓ Good with a lesson — v3's swarm provider rejects services carrying both `traefik.docker.*` and `traefik.swarm.*` labels, so the Stage A "bridge" caused a ~2-min web outage until Stage C ran; future label migrations are single-step |
 | Phase 33: Traefik API/dashboard moved to a loopback-only `mgmt` entrypoint reached over ssh + `docker exec`, no public router and no basic-auth | Operator manages the swarm over ssh already; any overlay- or internet-reachable listener exposes the unauthenticated API to 16 overlay services and the internet; ingress NAT rules out IP allowlists | ✓ Good — scan and verifier confirm 8080 closed everywhere; operator `traefik` shell function opens it in Safari (`/dashboard/` needs the trailing slash) |
 | Phase 33: research amendments to locked decisions accepted (keep the `traefik-public` port label, mgmt router in labels, 19 flags, `${WEB_HOSTNAME}` WS rule) | Local swarm falsification showed the swarm provider drops a port-less service's middlewares and synthesises a phantom router otherwise | ✓ Good — recorded visibly in plans and verification; no outage |
-| Phase 33: explicit `curvePreferences = [X25519, P-256]` | Scannable, explicit TLS policy | ⚠️ Revisit — drops the X25519MLKEM768 PQ hybrid; Phase 34 may omit the key |
+| Phase 33: explicit `curvePreferences = [X25519, P-256]` | Scannable, explicit TLS policy | ✓ Resolved — Phase 34 dropped the curve list (Go default incl. X25519MLKEM768) |
 | Phase 33 code-review fixes limited to repo-only changes; findings needing a live edge change deferred to Phase 34 | thinx-swarm `master` must never disagree with the live spec (P32 D-04) | ✓ Good — CR-01/WR-01/WR-05 fixed, WR-02/03/04 recorded |
+| v1.15: thinx-swarm is the only edge source; every live edge change is one `docker service update`, repo-first, never `stack deploy` | `stack deploy`/`restart.sh` drop live-only secret mounts; one-update changes have a one-command rollback | ✓ Good — 6 phases, no unplanned outage after the 31-03 cutover |
+| Phase 34: HSTS/security headers in the file provider (`security-headers@file`, `tls-config-3`) | A swarm-label middleware is one label update away from vanishing, and a missing default middleware 404s every `:443` router | ✓ Good |
+| Phase 34: Docker API through `traefik_socket-proxy` (GET-only, internal overlay), addressed by full service name | Removes the raw socket from the internet-facing task; a bare `socket-proxy` alias could be claimed by any `traefik-public` service | ✓ Good |
+| Phase 34: SLA budget raised 300 s → 600 s (operator, 2026-10-11) | CI duration dominates (L1 331 s); the edge legs are ~50 s | — Pending — revisit if CI gets faster |
+| Phase 34: real client IPs / `ipAllowList` deferred | Swarm ingress NAT shows every client as `10.0.0.2`; needs host-mode publishing or PROXY protocol first | — Pending |
 
 ## Evolution
 
@@ -261,9 +271,9 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-09 after Phase 33 (dashboard lockdown & TLS hardening)*
+*Last updated: 2026-10-12 after v1.15 milestone*
 
 
 ## Current Milestone: v1.16 — Console Usability & Deploy Keys
 
-Implement all 11 requirements from Drive THiNX/TODOs.md. Parent phase numbers 35–38; Vue and Legacy console submodule plus deploy-key backend. v1.15 phases 29–33 are complete; Phase 34 remains open. Its latest state and requirements are preserved in milestones/v1.15-*-IN-PROGRESS.md, not closed.
+Implement all 11 requirements from Drive THiNX/TODOs.md. Parent phase numbers 35–38; Vue and Legacy console submodule plus deploy-key backend. v1.15 shipped 2026-10-12 (archived in `milestones/v1.15-*`).

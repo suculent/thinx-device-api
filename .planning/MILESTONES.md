@@ -1,5 +1,40 @@
 # Milestones
 
+## v1.15 — Traefik Hardening (Edge) (Shipped: 2026-10-12)
+
+**Delivered:** The production Traefik edge went from an undocumented v2.11 with a public dashboard, DEBUG logs and a raw Docker socket to a repo-authoritative, native-syntax v3.7.14 edge: dashboard/API on loopback only, AEAD-only TLS 1.2+, edge-wide HSTS, WARN logs with a secret-free JSON access log, and Docker API access through a GET-only socket-proxy. 14/14 requirements across Phases 29–34. The plaintext legacy device paths (`:7442`, MQTT 1883) kept working after every hop.
+
+**Stats:**
+
+- Phases: 6 (Phases 29–34) | Plans: 19 | Tasks: 51
+- Timeline: 2026-10-06 → 2026-10-11 (~6 days); closed 2026-10-12
+- Git range: `6af8f4d8` (v1.14 archive) → close on `thinx-staging` (233 commits, 172 files, +29,188 / −346; the range also contains interleaved v1.16 work). Edge changes themselves live in `thinx-swarm` (`traefik.yml`, `traefik/tls.toml`)
+- Milestone audit: `tech_debt` (14/14 requirements, integration 6/6, flows 4/4)
+
+**Key accomplishments:**
+
+- **Source of truth (29):** live edge captured and diffed; one-way chain live → thinx-swarm → generated, redacted mirror `docker-compose.traefik.yml`, enforced by `check-traefik-mirror.js` in CircleCI; out-of-git 600 rollback snapshots on micro.
+- **v1→v2→v3 (30–32):** pilot token removed and v2 parity proven with a live rollback cycle; `traefik:v3.7.14` cutover under `core.defaultRuleSyntax=v2`, then native v3 rules and the BC switch removed — every router enabled at every step.
+- **Dashboard lockdown (33):** no public dashboard/API route on any host; `api@internal` only on loopback `127.0.0.1:8080` inside the task, reached over ssh + `docker exec`; `exposedbydefault=false`.
+- **TLS (33–34):** AEAD-only TLS 1.2+/1.3 from an immutable `tls-config-3`; HSTS/nosniff/frame-deny as the `https` entrypoint default from `security-headers@file`; ACME with real e-mail, `acme.json` 600, renewal proven; retired ACME entries pruned (23 → 16).
+- **Ops surface (34):** log level WARN, JSON access log without `RequestPath`/`RequestLine`/`ClientUsername`; `traefik_socket-proxy` (GET-only) replaces the docker.sock mount; edge basic-auth rotated to bcrypt outside the worker-bound tree.
+- **SLA (34):** push → CI → Swarmpit measured at 380 s against the 600 s budget (the operator raised it from 300 s on 2026-10-11).
+
+**Known verification overrides:** 8 newly acknowledged, 24 carried forward from prior closes (see STATE.md Deferred Items). The 8 are 7 deferred items from Phases 31/33/34 (most since resolved: tls.toml loaded, SLA PASS, clean scan) and the v1.16 debug session `rsakey-spec-revoke-red`. All six phases verified `passed`.
+
+**Closeout type:** `override_closeout` (8 acknowledged open items; milestone audit `tech_debt`).
+
+**Deferred:** real client IPs at the edge (ingress NAT → `10.0.0.2`), then `ipAllowList`/`rateLimit`; `sniStrict=true`; socket-proxy repin trigger; fix-forward doc drift (stale `OPEN-GAP` SLA line, bare socket-proxy name, P33 closure rows, post-rollback mirror note); un-dispositioned review ledgers for 29/30/32/33; no SECURITY.md for 30/32/34. See `v1.15-MILESTONE-AUDIT.md`.
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.15-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.15-REQUIREMENTS.md`
+- Audit: `.planning/milestones/v1.15-MILESTONE-AUDIT.md`
+- Phases: `.planning/milestones/v1.15-phases/`
+
+---
+
 ## v1.14 — Backlog & Hardening Sweep (Shipped: 2026-10-05)
 
 **Delivered:** Closed the v1.13 security follow-ups and the open ops/code findings, and shipped the three long-standing backlog items. 24/24 requirements across Phases 22–28 (OPS-SWARM-03 descoped to Future Requirements). Production enforces session-bound CSRF, builds run argv-only with contained file access, credentials load from swarm secrets, the Vue console pages its logs, stats run on InfluxDB 2 with 90-day retention, and Swarmpit runs 1.10 without its stats stack.

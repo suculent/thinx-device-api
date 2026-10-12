@@ -14,6 +14,7 @@
   by the loopback `29/0` inventory and an authenticated request in the Traefik netns that returns non-502. Before
   fixing, confirm with the operator that db.thinx.cloud is meant to be reachable at all. Evidence:
   `.planning/runbooks/traefik-edge-hardening.md` `### P34 credential rotation record`.
+  status: acknowledged
 
 ## From 34-05 (SLA close-out and end-state evidence, 2026-10-09)
 
@@ -25,3 +26,4 @@
   `swarm-configs/traefik-edge-scan.2026-10-09.md`. WINDOWS #20.
 - **socket-proxy repin trigger** (first `wollomatic/socket-proxy` 1.x.y built with go ≥ 1.26.9) and the **frozen laptop
   grype DB** (operator upgrades it) — carried from 34-01; listed in the edge runbook `## Recorded for later (after Phase 34)`.
+  status: acknowledged
