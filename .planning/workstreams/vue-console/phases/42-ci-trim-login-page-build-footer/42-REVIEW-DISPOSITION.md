@@ -5,15 +5,15 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "CiPipelineGates.test.js is not wired into any test runner or CI job"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "Snyk main-only leaves every image production runs unmonitored"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "The redesigned login keeps a \"Create an Account\" CTA that links back to the login page"
   - id: IN-01
     severity: info
@@ -43,7 +43,7 @@ findings:
     severity: info
     disposition: open
     title: "The dev branch thinx-console still publishes the production Vue tag (pre-existing)"
-open: 10
+open: 7
 total: 10
 recorded: 2026-10-12T17:00:31.327Z
 ---
@@ -52,9 +52,9 @@ recorded: 2026-10-12T17:00:31.327Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
-| WR-03 | warning | open | - |
+| WR-01 | warning | fixed | commit 4e16212c: spec wired into test:node and the CI test job |
+| WR-02 | warning | deferred | operator accepted 2026-10-12: CI-04 trade-off (T-42-04, runbook); revisit at CI-06 |
+| WR-03 | warning | deferred | operator 2026-10-12: D-18 keeps the link; signup routing is backlog |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
