@@ -33,7 +33,7 @@ no dependency or infrastructure upgrades.
 - Integer phases (42–48): Planned milestone work
 - Decimal phases (42.1, 43.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 42: CI Trim, Login Page & Build Footer** - Snyk monitors on `main` only, legacy console build paused for the milestone; THiNX-branded welcome login with social logins under a green Login button; every footer shows the build year and short commit id
+- [x] **Phase 42: CI Trim, Login Page & Build Footer** - Snyk monitors on `main` only, legacy console build paused for the milestone; THiNX-branded welcome login with social logins under a green Login button; every footer shows the build year and short commit id (completed 2026-10-12)
 - [ ] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console)
 - [ ] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning
 - [ ] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console)
@@ -60,7 +60,7 @@ no dependency or infrastructure upgrades.
   4. The Login button is green (success variant), and "Login with Google" and "Login with GitHub" sit directly below it and above "Don't have an account? Sign up now!". Password, Google and GitHub logins still complete against production under CSRF enforcement.
   5. The footer of every Vue console page (login, password reset and the authenticated layout) shows the copyright year of the build date and the short commit id of the deployed build. No hard-coded `2026` remains in the Vue footers, and a local build without a commit id shows no empty or `undefined` placeholder.
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/3 plans complete
 Plans:
 **Wave 1**
 - [x] 42-01-PLAN.md — CI trim: Snyk monitors on `main` only (Hub console images), legacy console build behind `build_legacy_console`, live job checker and the D-04 bypass runbook (wave 1)
@@ -225,7 +225,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | In Progress | - |
+| 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
 | 43. Notification Delivery | v1.18 | 0/? | Not started | - |
 | 44. Device List Parity | v1.18 | 0/? | Not started | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |

@@ -2,17 +2,17 @@
 gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
-current_phase: 42
-current_phase_name: CI Trim, Login Page & Build Footer
-status: verifying
-stopped_at: Completed 42-03-PLAN.md
-last_updated: "2026-10-12T16:53:27.866Z"
+current_phase: 43
+current_phase_name: Notification Delivery
+status: planning
+stopped_at: Phase 42 complete, ready to plan Phase 43
+last_updated: "2026-10-12T17:30:23.227Z"
 last_activity: 2026-10-12
-last_activity_desc: Phase 42 execution started
-state_head: d4f522c50d3b38a3cf3f766712a63d7d4e07c7a5
+last_activity_desc: Phase 42 complete, transitioned to Phase 43
+state_head: "0bf1ec3363db794a27c5589e29356ed9a41df402"
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
   completed_plans: 0
 ---
@@ -24,21 +24,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 42 — CI Trim, Login Page & Build Footer
+**Current focus:** Phase 43 — Notification Delivery
 
 ## Current Position
 
-Phase: 42 (CI Trim, Login Page & Build Footer) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-10-12 — Phase 42 execution started
+Phase: 43 — Notification Delivery
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Phase 42 complete, transitioned to Phase 43
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
+- Total plans completed: 3
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -46,7 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 42 | 3 | - | - |
 
 *Updated after each plan completion*
 **Per-Plan Metrics:**
@@ -80,8 +80,9 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Blockers/Concerns
 
-- [Phase 42/43] CI-05 must allow one bypassed legacy pipeline for NOTIF-01 (Phase 43). Choose the mechanism in Phase 42 planning (e.g. a pipeline parameter gating the block).
-- [Phase 42] CI-04: the console Snyk container monitors scan private-registry images that only `thinx-staging` publishes; on `main` they need the Docker Hub images (`*-hub` jobs) as their source.
+- [Phase 43] The NOTIF-01 legacy build uses the CI-05 bypass: API-triggered thinx-staging pipeline with `build_legacy_console=true` (runbook `.planning/runbooks/legacy-console-build-gate.md`). It also reruns the API and Vue deploy jobs, i.e. a production redeploy (42-REVIEW IN-01).
+- [Phase 42 follow-up] Unpushed on thinx-staging: Phase 42 close-out docs and the WR-01 CI change (`4e16212c`, CI gate spec in test:node + test job). They ride the next thinx-staging push.
+- [Phase 42 follow-up] H6: confirm the first `main` pipeline after Phase 42 runs all four Snyk monitors green (snyk-monitor-console-vue now uses the dockerhub context only). WR-02 accepted: production images are Snyk-scanned only via main.
 - [Phase 43] The WebSocket upgrade change in `thinx-core.js` must keep `ZZ-WebSocketHandshakeRtmSpec` green and keep per-owner frame routing (quick 261003-vn3); no cross-owner delivery.
 - [Phase 45] v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`; rename touches only the `.pub` comment. Coordinate merge order.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
@@ -95,6 +96,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T16:53:27.830Z
-**Stopped At:** Completed 42-03-PLAN.md
+**Last session:** 2026-10-12T17:30:23.171Z
+**Stopped At:** Phase 42 complete, ready to plan Phase 43
 **Resume File:** None
