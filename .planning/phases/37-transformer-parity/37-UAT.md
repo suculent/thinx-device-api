@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 37-transformer-parity
 source: [37-01-SUMMARY.md]
 started: 2026-10-12T12:25:00Z
@@ -55,5 +55,12 @@ blocked: 0
   reason: "User reported: pass, but the list of transformers should have checkboxes rather than selecting lines to see which of those are enabled for the device"
   severity: minor
   test: 5
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+  root_cause: "DeviceDetail.vue:110 renders the device's transformer assignment as <b-form-select multiple v-model=editForm.transformers :select-size=5>: a native multi-select where assignment is shown only by highlighted lines and changed by (ctrl/cmd-)clicking, so it is not obvious which transformers are enabled for the device."
+  artifacts:
+    - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
+      issue: "Line 110: multi-select list instead of one checkbox per transformer"
+  missing:
+    - "Replace the multi-select with a checkbox group (b-form-checkbox-group stacked, same v-model editForm.transformers and transformerOptions), one checkbox per transformer, checked when assigned"
+    - "Keep save, Create & Assign (35 WR-02: assignment built from device.transformers plus the new utid) and the empty state unchanged"
+    - "Unit test in vue/tests/unit/milestone-v116.cjs: the Edit Device form renders a checkbox group bound to editForm.transformers, no multiple select; Cypress assertions that use the select updated"
+  debug_session: ""
