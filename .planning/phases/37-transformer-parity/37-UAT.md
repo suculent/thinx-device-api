@@ -61,6 +61,7 @@ blocked: 0
       issue: "Line 110: multi-select list instead of one checkbox per transformer"
   missing:
     - "Replace the multi-select with a checkbox group (b-form-checkbox-group stacked, same v-model editForm.transformers and transformerOptions), one checkbox per transformer, checked when assigned"
+    - "Operator addition 2026-10-12: \"The \\\"Manage transformers\\\" button should be at least with orange background (not clear/transparent).\" -> variant=warning ($orange #E49400), not variant=link"
     - "Keep save, Create & Assign (35 WR-02: assignment built from device.transformers plus the new utid) and the empty state unchanged"
     - "Unit test in vue/tests/unit/milestone-v116.cjs: the Edit Device form renders a checkbox group bound to editForm.transformers, no multiple select; Cypress assertions that use the select updated"
   debug_session: ""
