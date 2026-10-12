@@ -5,11 +5,11 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "\"Newest first\" sort compares second-precision dates; keys created in the same second keep readdir order"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Throwing fs calls in the async generateKeyPair callback crash the process and leak the claim"
   - id: WR-03
     severity: warning
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "The newest-first sort changes which key GitHub linking pushes"
-open: 13
+open: 11
 total: 13
 recorded: 2026-10-12T14:33:48.523Z
 ---
@@ -64,8 +64,8 @@ recorded: 2026-10-12T14:33:48.523Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
+| WR-01 | warning | fixed (f3845d58) | - |
+| WR-02 | warning | fixed (f3845d58) | - |
 | WR-03 | warning | open | - |
 | WR-04 | warning | open | - |
 | WR-05 | warning | open | - |
