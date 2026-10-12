@@ -498,4 +498,104 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
             }
         });
     });
+
+    // D-12: a build started from the queue (webhook or "queued" route answer) notifies the
+    // owner exactly like one started from the console.
+    describe("queued builds (D-12)", function () {
+
+        const QUEUE_PATH = path.join(__dirname, "../../lib/thinx/queue.js");
+
+        function waitingAction(owner) {
+            const calls = { setError: 0, setStarted: 0, delete: 0 };
+            const action = {
+                action: { udid: UDID, source: SOURCE, owner_id: owner, status: "waiting" },
+                setError() { calls.setError++; },
+                setStarted() { calls.setStarted++; },
+                delete() { calls.delete++; }
+            };
+            return { action, calls };
+        }
+
+        // The Queue's scheduling without its constructor (Redis, port 4000), as in
+        // BuilderRemoteJobSpec's queueWith; `build` stands in for app.builder.build.
+        function queueWith(action, build) {
+            const queue = Object.create(Queue.prototype);
+            queue.workers = { idle: { connected: true, running: false, socket: {} } };
+            queue.notifier = { process() { } };
+            queue.findNext = async () => action;
+            queue.builder = { build: build };
+            return queue;
+        }
+
+        it("Q1 runNext hands builder.build notifiers carrying the queue's messenger", async function () {
+            const m = makeMessenger();
+            const { action, calls } = waitingAction(OWNER_A);
+            const seen = [];
+            const queue = queueWith(action, (owner, build, notifiers) => seen.push({ owner, notifiers }));
+            queue.messenger = m;
+
+            await queue.loop();
+
+            expect(calls.setStarted).to.equal(1);
+            expect(seen.length).to.equal(1);
+            expect(seen[0].owner === OWNER_A, "build owner").to.equal(true);
+            expect(seen[0].notifiers !== null && typeof seen[0].notifiers === "object" && !Array.isArray(seen[0].notifiers), "notifiers object").to.equal(true);
+            expect(seen[0].notifiers.messenger === m, "notifiers.messenger is the queue's messenger").to.equal(true);
+        });
+
+        it("Q2 a queued build of owner A reaches A's sockets through run_build; B gets nothing", async function () {
+            const m = makeMessenger();
+            const a1 = subscribe(m, OWNER_A);
+            const a2 = subscribe(m, OWNER_A);
+            const b1 = subscribe(m, OWNER_B);
+            const builder = refusingBuilder({ udid: UDID, owner: OWNER_A }, () => null);
+            const { action, calls } = waitingAction(OWNER_A);
+            const results = [];
+            const queue = queueWith(action, (owner, build, notifiers, callback, worker) => {
+                builder.run_build(buildRequest(owner, worker), notifiers, (success, response) => {
+                    results.push([success, response]);
+                    callback(success, response);
+                });
+            });
+            queue.messenger = m;
+
+            await queue.loop();
+
+            expect(results).to.deep.equal([[false, "invalid_device"]]);
+            expect(calls.delete).to.equal(1);
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["invalid_device"]);
+                expect(frames(sock)[0].type, name + " type").to.equal("error");
+                expect(frames(sock)[0].build_id, name + " build_id").to.equal(BUILD_X);
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("Q3 a queue without a messenger passes { messenger: null } and the build still runs", async function () {
+            const builder = refusingBuilder({ udid: UDID, owner: OWNER_A }, () => null);
+            const { action } = waitingAction(OWNER_A);
+            const seen = [];
+            const results = [];
+            const queue = queueWith(action, (owner, build, notifiers, callback, worker) => {
+                seen.push(notifiers);
+                builder.run_build(buildRequest(owner, worker), notifiers, (success, response) => {
+                    results.push([success, response]);
+                    callback(success, response);
+                });
+            });
+
+            await queue.loop();
+
+            expect(seen).to.deep.equal([{ messenger: null }]);
+            expect(results).to.deep.equal([[false, "invalid_device"]]);
+        });
+
+        it("S3 the Queue constructor takes the app's messenger and runNext no longer passes [] as notifiers", function () {
+            const src = codeLines(fs.readFileSync(QUEUE_PATH, "utf8")).join("\n");
+            const ctor = src.substring(src.indexOf("constructor("), src.indexOf("this.workers = [];"));
+            expect(ctor.indexOf("di_app.messenger") !== -1, "constructor reads di_app.messenger").to.equal(true);
+            expect(ctor.indexOf("this.messenger =") !== -1, "constructor sets this.messenger").to.equal(true);
+            expect(/\[\],\s*\/\/ notifiers/.test(fs.readFileSync(QUEUE_PATH, "utf8")), "[] notifiers in runNext").to.equal(false);
+        });
+    });
 });
