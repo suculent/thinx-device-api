@@ -40,9 +40,10 @@ test('generation receives a trimmed display name and returns the same name and d
     key.generate=(owner,date,cb,name)=>{assert.equal(owner,OWNER); assert.equal(name,'Firmware'); cb(null,'ssh-rsa fixture '+name);};
     const result=await new Promise(resolve=>key.create(OWNER,(success,response)=>resolve({success,response}),'  Firmware  '));
     assert.equal(result.success,true); assert.equal(result.response.name,'Firmware');
-    assert.equal(new Date(result.response.date).getTime(),12345);
+    assert.equal(result.response.created,12345);
+    assert.equal(result.response.date,new Date(12345).toString(),'date has the same format as list()');
     assert.equal(result.response.pubkey,'ssh-rsa fixture Firmware');
-    assert.equal(path.basename(result.response.filename),OWNER+'-12345.pub');
+    assert.equal(result.response.filename,OWNER+'-12345','filename is the bare list/revoke name, not a server path (38 WR-06)');
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
 test('legacy create(owner, callback) remains valid; invalid names never generate', () => {
@@ -88,7 +89,7 @@ test('two creates in the same millisecond get distinct names and neither key is 
       const base=path.basename(r.response.filename,'.pub');
       assert.equal(fs.readFileSync(path.join(dir,base+'.pub'),'utf8'),r.response.pubkey);
       assert.match(fs.readFileSync(path.join(dir,base),'utf8'),/BEGIN ENCRYPTED PRIVATE KEY/);
-      assert.equal(new Date(r.response.date).getTime(),Number(base.split('-')[1]));
+      assert.equal(r.response.created,Number(base.split('-')[1]));
     }
     assert.notEqual(a.response.pubkey,b.response.pubkey);
   } finally {
@@ -135,4 +136,87 @@ test('a filesystem error after key generation fails the create instead of crashi
     if (prevPass===undefined) delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=prevPass;
     fs.rmSync(dir,{recursive:true,force:true});
   }
+});
+
+async function withPassphrase(fn) {
+  const saved=process.env.GIT_KEY_PASSPHRASE;
+  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
+  require('../../lib/thinx/secrets')._resetCacheForTests();
+  try { return await fn(); } finally {
+    if (typeof saved==='undefined') delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=saved;
+    require('../../lib/thinx/secrets')._resetCacheForTests();
+  }
+}
+test('an unnamed create returns the list() shape: date string name, bare filename (38 WR-06)', async () => {
+  const {dir,key}=fixture();
+  try {
+    key.newUniqueIdentifier=()=>9000;
+    key.generate=(owner,date,cb)=>cb(null,'ssh-rsa fixture thinx-'+date);
+    const r=await new Promise(resolve=>key.create(OWNER,(success,response)=>resolve(response)));
+    assert.equal(typeof r.name,'string'); assert.equal(r.name,new Date(9000).toString());
+    assert.ok(!r.filename.includes('/'),'no server path');
+    assert.ok(!r.filename.endsWith('.pub'));
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('a failed private-key write leaves nothing listed and never touches an existing pair (38 WR-03)', async () => {
+  const {dir,key}=fixture();
+  const fsx=require('fs-extra');
+  const realWrite=fsx.writeFileSync;
+  try {
+    await withPassphrase(async () => {
+      key.newUniqueIdentifier=()=>5100;
+      const privatePath=path.join(dir,OWNER+'-5100');
+      // ENOSPC after open: the private file exists but is truncated.
+      fsx.writeFileSync=(p,data,opts)=>{ if (p===privatePath) { realWrite(p,'trunc',opts); const e=new Error('synthetic ENOSPC'); e.code='ENOSPC'; throw e; } return realWrite(p,data,opts); };
+      const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success),'Full disk'));
+      fsx.writeFileSync=realWrite;
+      assert.equal(ok,false);
+      assert.deepEqual(fs.readdirSync(dir),[],'truncated private key and claim are both removed');
+      assert.deepEqual(key.exportKeysForList(key.getKeyPathsForOwner(OWNER),OWNER),[]);
+    });
+    // EEXIST: a private key already sits under the generated name; it and its .pub stay as they were.
+    await withPassphrase(async () => {
+      const existing=writePair(dir,OWNER,5200,'Existing key');
+      fs.unlinkSync(path.join(dir,existing+'.pub')); // claim succeeds only when the .pub is absent
+      key.newUniqueIdentifier=()=>5200;
+      key.reserveIdentifier=function(owner){ fs.closeSync(fs.openSync(this.newNameWithOwner(owner,5200)+'.pub','wx')); return 5200; };
+      const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success)));
+      assert.equal(ok,false);
+      assert.equal(fs.readFileSync(path.join(dir,existing),'utf8'),'synthetic-private-fixture','existing private key untouched');
+      assert.equal(fs.readFileSync(path.join(dir,existing+'.pub'),'utf8'),'','claimed .pub was never overwritten with a foreign public key');
+    });
+  } finally { fsx.writeFileSync=realWrite; fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('a private key whose .pub is still empty is not listed (38 WR-03)', () => {
+  const {dir,key}=fixture();
+  try {
+    writePair(dir,OWNER,6000,'Done');
+    fs.writeFileSync(path.join(dir,OWNER+'-6001'),'synthetic-private-fixture');
+    fs.writeFileSync(path.join(dir,OWNER+'-6001.pub'),'');
+    assert.deepEqual(key.exportKeysForList(key.getKeyPathsForOwner(OWNER),OWNER).map(k=>k.name),['Done']);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('account deletion removes lone .pub claims; stale empty claims are swept, fresh ones kept (38 WR-04)', () => {
+  const {dir,key}=fixture();
+  try {
+    writePair(dir,OWNER,7000,'Key');
+    fs.writeFileSync(path.join(dir,OWNER+'-7001.pub'),''); // stranded claim
+    writePair(dir,OTHER,7002,'Other owner');
+    key.revokeAllForOwner(OWNER);
+    assert.deepEqual(fs.readdirSync(dir).filter(f=>f.startsWith(OWNER)),[],'no file of the deleted owner remains');
+    assert.equal(fs.readdirSync(dir).filter(f=>f.startsWith(OTHER)).length,2,'other owner untouched');
+    const stale=path.join(dir,OWNER+'-8000.pub'), fresh=path.join(dir,OWNER+'-8001.pub');
+    fs.writeFileSync(stale,''); fs.writeFileSync(fresh,'');
+    const old=new Date(Date.now()-60*60*1000); fs.utimesSync(stale,old,old);
+    assert.equal(key.sweepStaleClaims(OWNER),1);
+    assert.equal(fs.existsSync(stale),false); assert.equal(fs.existsSync(fresh),true,'an in-progress claim is kept');
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('revoke ignores a non-array filenames value instead of throwing (38 WR-05)', () => {
+  const {dir,key}=fixture();
+  try {
+    writePair(dir,OWNER,9100,'Key');
+    for (const bad of [null, 5, {}, true, 'abc']) assert.deepEqual(key.revokeUserKeys(bad,OWNER),[]);
+    assert.equal(fs.readdirSync(dir).length,2,'nothing deleted');
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
