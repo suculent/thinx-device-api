@@ -12,9 +12,9 @@ The IoT device API stays available and trustworthy across release cycles — eve
 
 ## Current State
 
-**In progress — v1.16 Console Usability & Deploy Keys** (Phases 35–38): all plans implemented and locally verified; release CI and browser/live acceptance pending (see `v1.16-VERIFICATION.md`).
+**Shipped:** v1.16 Console Usability & Deploy Keys (2026-10-12) — 11/11 requirements across Phases 35–38, all accepted by live UAT on `rtm.thinx.cloud`. The Vue console lost the template alert, duplicate logout and Inbox, gained a single-column device page with icon actions at the top, resolves the linked repository to its name and an http(s)-only Git link, and keeps All/Important/Informational notifications mutually exclusive. Full build logs open from Recent Builds, History and the device Build History (summary rows plus an explicit "Open build log" button); stale running builds show TIMEOUT. Transformers are created and edited in Vue and persisted as a `profile.info.transformers` patch, assigned per device with checkboxes. Deploy keys take an optional name (stored in the public-key comment, backward compatible), list newest first with show/copy, and delete by exact filename; the Legacy key-generation flow was fixed. No milestone audit was run; closed as `override_closeout`.
 
-**Shipped:** v1.15 Traefik Hardening (Edge) (2026-10-12) — 14/14 requirements across Phases 29–34. The production edge runs **Traefik v3.7.14** on native v3 rules with a **24-flag** static command whose only source is `thinx-swarm/traefik.yml`; `docker-compose.traefik.yml` is a generated, CI-checked mirror. The dashboard/API answers only on loopback `127.0.0.1:8080` inside the task (ssh + `docker exec`), `exposedbydefault=false`. TLS 1.2+ AEAD-only and HSTS/security headers come from the file provider (`tls-config-3`, `security-headers@file`); ACME uses the real e-mail with `acme.json` 600. Logs are WARN with a JSON access log that drops `RequestPath`/`RequestLine`/`ClientUsername`; Traefik reads Docker only through the GET-only `traefik_socket-proxy`. The couch/influx edge basic-auth is bcrypt, outside the worker-bound tree. Deploy SLA measured at 380 s against the 600 s budget. `:7442` and plain MQTT `:1883` stayed plaintext throughout; MQTTS is `:8883`. Milestone audit `tech_debt`; closed as `override_closeout`.
+Previously: v1.15 Traefik Hardening (Edge) (2026-10-12) — 14/14 requirements across Phases 29–34. The production edge runs **Traefik v3.7.14** on native v3 rules with a **24-flag** static command whose only source is `thinx-swarm/traefik.yml`; `docker-compose.traefik.yml` is a generated, CI-checked mirror. The dashboard/API answers only on loopback `127.0.0.1:8080` inside the task (ssh + `docker exec`), `exposedbydefault=false`. TLS 1.2+ AEAD-only and HSTS/security headers come from the file provider (`tls-config-3`, `security-headers@file`); ACME uses the real e-mail with `acme.json` 600. Logs are WARN with a JSON access log that drops `RequestPath`/`RequestLine`/`ClientUsername`; Traefik reads Docker only through the GET-only `traefik_socket-proxy`. The couch/influx edge basic-auth is bcrypt, outside the worker-bound tree. Deploy SLA measured at 380 s against the 600 s budget. `:7442` and plain MQTT `:1883` stayed plaintext throughout; MQTTS is `:8883`. Milestone audit `tech_debt`; closed as `override_closeout`.
 
 Previously: v1.14 Backlog & Hardening Sweep (2026-10-05) — 24/24 requirements across Phases 22–28. Session-bound HMAC CSRF is enforced in production on every cookie-authenticated mutation; builds run git and worker jobs argv-only with `safepath` containment; all `lib/` integration credentials load from swarm secrets; the Vue console pages audit and build logs; stats run on InfluxDB 2.9.1 with a 90-day bucket; Swarmpit runs 1.10 without its stats stack (agent kept). Milestone audit `tech_debt`; closed as `override_closeout`.
 
@@ -42,7 +42,14 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 ## Next Milestone Goals
 
-v1.16 (Console Usability & Deploy Keys) is the active milestone; after it closes, run `/gsd-new-milestone`. Edge candidates carried out of v1.15 (`milestones/v1.15-MILESTONE-AUDIT.md`, runbook `## Recorded for later (after Phase 34)`):
+v1.17 Deploy-Key Vault Transit runs as the `vault-transit` workstream (Phase 39, internal OpenBao on the swarm). For the root track, run `/gsd-new-milestone`.
+
+Carried out of v1.16:
+- Backend full-log payload (AR-36-01): `GET /api/v2/logs/build/:id` reads `build.log` synchronously and returns it as a JSON Buffer byte array (~3.4× size, uncompressed); return a string, add compression or a size cap/tail-first
+- Open review items: 35-REVIEW-DISPOSITION (incl. legacy generic errors IN-03/IN-04), 36-REVIEW WR-01 (inert-row test checks only the `<tr>`), 37-REVIEW IN-02/IN-03, 38-REVIEW IN-01..04/06/07; Vue same-second deploy-key sort relies on API order; UI-review polish across 35–38
+- Legacy AngularJS console is deprecating (KEY-03 live test accepted by operator decision)
+
+Edge candidates carried out of v1.15 (`milestones/v1.15-MILESTONE-AUDIT.md`, runbook `## Recorded for later (after Phase 34)`):
 - Real client IPs at the edge (host-mode publishing or PROXY protocol), then `ipAllowList` / `rateLimit`; `sniStrict=true`; socket-proxy repin
 - Edge doc drift: stale `OPEN-GAP` SLA line and bare socket-proxy name in the fix-forward list, P33 closure rows, post-rollback mirror note; re-disposition review ledgers 29/30/32/33
 
@@ -54,6 +61,16 @@ Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Defe
 - Make CI fail on spec failures (`jasmine || true`)
 
 ## Validated Requirements (Historical)
+
+<details>
+<summary>v1.16 Console Usability & Deploy Keys (shipped 2026-10-12)</summary>
+
+- ✓ **UI-01..04** — v1.16 (Phase 35) — header cleanup and My Profile; icon actions and single-column device page; repository name + safe http(s) Git link; exclusive notification groups incl. hydration and save.
+- ✓ **BUILD-01/02** — v1.16 (Phase 36) — full build log from Recent Builds, History and device Build History with loading/empty/error states; explicit and expired running builds shown as TIMEOUT.
+- ✓ **TRANS-01/02** — v1.16 (Phase 37) — Vue transformer create/edit persisted as a `profile.info.transformers` patch; per-device checkbox assignment and create-and-assign.
+- ✓ **KEY-01..03** — v1.16 (Phase 38) — named deploy keys (Vue + Legacy, persisted across reload); Deploy Keys label, newest first, show/copy; Legacy response/refresh/error handling fixed.
+
+</details>
 
 <details>
 <summary>v1.15 Traefik Hardening (Edge) (shipped 2026-10-12)</summary>
@@ -160,7 +177,7 @@ Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Defe
 
 ## Out of Scope
 
-- **services/console** frontend work — owned by the console submodule's GSD project (`services/console/.planning/`)
+- **services/console** frontend work — owned by the console submodule's GSD project (`services/console/.planning/`) — except where a parent milestone pairs backend and console changes (v1.16 ran Phases 35–38 here with paired console branches)
 - **G10** (`thinx_worker` silent-loop on `docker pull`) — lives in the worker repo, different codebase
 - **chai-http v5 ESM migration** — dependency lock per `AGENTS.md:82-92`; trigger to reconsider is a Snyk/Dependabot CVE in superagent v3 (tracked as TEST-CHAI-01)
 - **Multi-tenant revamp / v2 API features** — future major milestone, not v1.x
@@ -251,6 +268,12 @@ Candidates carried out of v1.14 (see `.planning/MILESTONES.md` and STATE.md Defe
 | Phase 34: Docker API through `traefik_socket-proxy` (GET-only, internal overlay), addressed by full service name | Removes the raw socket from the internet-facing task; a bare `socket-proxy` alias could be claimed by any `traefik-public` service | ✓ Good |
 | Phase 34: SLA budget raised 300 s → 600 s (operator, 2026-10-11) | CI duration dominates (L1 331 s); the edge legs are ~50 s | — Pending — revisit if CI gets faster |
 | Phase 34: real client IPs / `ipAllowList` deferred | Swarm ingress NAT shows every client as `10.0.0.2`; needs host-mode publishing or PROXY protocol first | — Pending |
+| v1.16: console usability work driven from the parent repo (paired console branch + submodule pointer), sourced from Drive THiNX/TODOs.md | Backend and both consoles change together for build logs and deploy keys | ✓ Good — 11/11 accepted live in one day of UAT |
+| G-35-4: repository Git URL bound as a link only for http:/https: (WHATWG URL parse) | Repository URLs are user-controlled; `javascript:`/`data:` must never reach `href` | ✓ Good |
+| G-36-3: device Build History rows are inert summaries; the full log loads only from an explicit "Open build log" button | Full-log fetch is heavyweight (sync GlusterFS read, Buffer JSON); row clicks made the page slow | ✓ Good — backend payload cost deferred as AR-36-01 |
+| G-37-5: per-device transformer assignment as one checkbox per transformer; Manage Transformers as a filled warning button | Multi-select was hard to use; operator direction 2026-10-12 | ✓ Good |
+| Phase 38: deploy-key name optional and stored in the public-key comment; deletion by exact filename | Keeps old keys and API clients working; sorting made index-based selection unsafe | ✓ Good |
+| v1.16 closed without a milestone audit (`override_closeout`); Phases 35/36 verification superseded by live UAT after 37/38 touched shared files | Operator decision 2026-10-12 | — Pending |
 
 ## Evolution
 
@@ -271,9 +294,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-12 after v1.15 milestone*
-
-
-## Current Milestone: v1.16 — Console Usability & Deploy Keys
-
-Implement all 11 requirements from Drive THiNX/TODOs.md. Parent phase numbers 35–38; Vue and Legacy console submodule plus deploy-key backend. v1.15 shipped 2026-10-12 (archived in `milestones/v1.15-*`).
+*Last updated: 2026-10-12 after v1.16 milestone*

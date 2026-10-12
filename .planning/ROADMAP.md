@@ -10,7 +10,7 @@
 - ✅ **v1.13 — Web Hardening (Console/Edge)** — Phase 21 (shipped 2026-09-25)
 - ✅ **v1.14 — Backlog & Hardening Sweep** — Phases 22–28 (shipped 2026-10-05)
 - ✅ **v1.15 — Traefik Hardening (Edge)** — Phases 29–34 (shipped 2026-10-12)
-- 🚧 **v1.16 — Console Usability & Deploy Keys** — Phases 35–38 (in progress)
+- ✅ **v1.16 — Console Usability & Deploy Keys** — Phases 35–38 (shipped 2026-10-12)
 
 ## Phases
 
@@ -99,6 +99,18 @@ See `.planning/milestones/v1.15-ROADMAP.md`. 14/14 v1.15 requirements; milestone
 
 </details>
 
+<details>
+<summary>✅ v1.16 — Console Usability & Deploy Keys (Phases 35–38) — SHIPPED 2026-10-12</summary>
+
+See `.planning/milestones/v1.16-ROADMAP.md`. 11/11 v1.16 requirements, all accepted by live UAT; no milestone audit, closed as `override_closeout` (see `.planning/MILESTONES.md`).
+
+- [x] Phase 35: Console Usability (2/2 plans) — completed 2026-10-12
+- [x] Phase 36: Build Log Access & Timeout Status (2/2 plans) — completed 2026-10-12
+- [x] Phase 37: Transformer Parity (2/2 plans) — completed 2026-10-12
+- [x] Phase 38: Deploy Key Management (1/1 plan) — completed 2026-10-12
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -122,52 +134,10 @@ See `.planning/milestones/v1.15-ROADMAP.md`. 14/14 v1.15 requirements; milestone
 | 32. v3 Native Syntax & BC Removal | v1.15 | 3/3 | Complete | 2026-10-08 |
 | 33. Dashboard Lockdown & TLS Hardening | v1.15 | 3/3 | Complete | 2026-10-09 |
 | 34. Ops Surface Reduction & SLA Close-out | v1.15 | 5/5 | Complete | 2026-10-11 |
-| 35–38. Console Usability & Deploy Keys | v1.16 | 4/4 | Implemented; acceptance pending | — |
+| 35. Console Usability | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 36. Build Log Access & Timeout Status | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 37. Transformer Parity | v1.16 | 2/2 | Complete | 2026-10-12 |
+| 38. Deploy Key Management | v1.16 | 1/1 | Complete | 2026-10-12 |
 
 ---
-*v1.15 Traefik Hardening (Edge) shipped 2026-10-12. Active: v1.16 Console Usability & Deploy Keys (Phases 35–38).*
-
-## v1.16 — Console Usability & Deploy Keys
-
-Active milestone (v1.15 shipped 2026-10-12).
-
-### Phase 35: Console Usability
-
-Requirements: UI-01, UI-02, UI-03, UI-04
-
-Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-35-4 (re-tested after the 35-02 deploy). Verification passed; threats_open 0.
-
-- [x] 35-01-PLAN.md — implement and verify all mapped requirements.
-- [x] 35-02-PLAN.md — gap closure G-35-4: repository Git URL as safe new-tab link (http(s) only).
-
-### Phase 36: Build Log Access & Timeout Status
-
-Requirements: BUILD-01, BUILD-02
-
-Status: complete 2026-10-12. Live UAT 5/5 passed, including gap G-36-3 (device Build History summary-only, re-tested live). Operator signed off console 38eb95b (View button, TIMEOUT colour, readable log column) and accepted the navbar Recent Builds dropdown as the BUILD-01 entry point. Verification passed; threats_open 0.
-
-**Plans:** 2/2 plans executed
-
-- [x] 36-01-PLAN.md — implement and verify all mapped requirements.
-- [x] 36-02-PLAN.md — gap closure G-36-3: device Build History summary-only (inline log card removed, per-row "Open build log" button opens the full log).
-
-### Phase 37: Transformer Parity
-
-Requirements: TRANS-01, TRANS-02
-
-Status: complete 2026-10-12. Live UAT 6/6 passed, including gap G-37-5 (checkbox assignment, orange Manage Transformers, re-tested live). Review WR-01 (orphaned assignments) fixed in console ff6e809. Verification passed; threats_open 0.
-
-**Plans:** 2/2 plans executed
-
-- [x] 37-01-PLAN.md — implement and verify all mapped requirements.
-- [x] 37-02-PLAN.md — gap closure G-37-5: device transformer assignment as one checkbox per transformer (empty-state line), Manage Transformers as a filled orange button.
-
-### Phase 38: Deploy Key Management
-
-Requirements: KEY-01, KEY-02, KEY-03
-
-Status: complete 2026-10-12. Live UAT 6/6 passed (test 6 by operator decision, legacy console deprecating). Backend review WR-01..06 + IN-05 fixed (f3845d58, 7c8fe41a). Verification passed; threats_open 0.
-
-- [x] 38-01-PLAN.md — implement and verify all mapped requirements.
-
-All v1.16 plans implemented and locally verified. Console PR #32 merged; API PR #572 approved for staging. Release CI and browser/live acceptance pending.
+*v1.16 Console Usability & Deploy Keys shipped 2026-10-12. Next: `/gsd-new-milestone` (v1.17 Deploy-Key Vault Transit runs in the `vault-transit` workstream).*

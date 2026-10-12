@@ -1,8 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "UAT gap G-36-3 — the history should not list full build logs (only on \"Open build log\" -> \"View\" / it is to slow to load now."
 created: 2026-10-12T12:00:00Z
-updated: 2026-10-12T12:32:00Z
+updated: 2026-10-12T15:00:00Z
+resolved_by: "36-02 (inert Device Build History rows + Open build log button; live UAT 5/5 2026-10-12). Backend full-log payload size deferred as AR-36-01."
 goal: find_root_cause_only
 ---
 

@@ -1,5 +1,38 @@
 # Milestones
 
+## v1.16 — Console Usability & Deploy Keys (Shipped: 2026-10-12)
+
+**Delivered:** The console usability and deploy-key items from Drive THiNX/TODOs.md: a cleaner Vue console and device page, full build logs reachable from every build list with TIMEOUT status for stale builds, Vue transformer editing with per-device assignment, and named, sortable, copyable deploy keys in Vue and Legacy. 11/11 requirements across Phases 35–38, all accepted by live UAT on `rtm.thinx.cloud` (35: 5/5, 36: 5/5, 37: 6/6, 38: 6/6), including three gap-closure plans (G-35-4, G-36-3, G-37-5).
+
+**Stats:**
+
+- Phases: 4 (Phases 35–38) | Plans: 7 (4 implementation + 3 gap closures)
+- Timeline: 2026-10-09 (`58027c18`, PR #572) → 2026-10-12 (`b4916ab0`)
+- Parent code: 6 files in `lib/`/`spec`/`test`, +449 / −46 (deploy-key names, build-log detail, transformer patch); console submodule ~21 commits (Vue + Legacy)
+- Milestone audit: not run
+
+**Key accomplishments:**
+
+- **Console usability (35):** template alert, duplicate logout and Inbox removed, My Account → My Profile; device actions with icons at the top, single-column sections; linked repository resolved to name + http(s)-only Git link (WHATWG URL allow-list); All notifications exclusive of Important/Informational through hydration and save.
+- **Build logs (36):** shared BuildLogDialog from Recent Builds, History and device Build History (owner-scoped detail fetch, Buffer/nested decoding, loading/empty/error states); device Build History rows are summaries with an explicit "Open build log" button; explicit and expired running builds show TIMEOUT.
+- **Transformers (37):** create/edit in Vue persisted as a `profile.info.transformers` patch (refresh before write, failures surfaced); per-device assignment as one checkbox per transformer with create-and-assign; orphaned-assignment fix (WR-01).
+- **Deploy keys (38):** optional backward-compatible name stored in the public-key comment; newest-first list with show/copy in Vue; deletion by exact filename; Legacy response/digest/refresh/error handling fixed; review WR-01..06 + IN-05 fixed.
+
+**Known verification overrides:** no milestone audit; Phases 35 and 36 report verification `stale` (Phases 37/38 later changed files they cover) — their VERIFICATION.md files say `passed` and live UAT ran after. Debug session `device-build-history-full-logs` resolved by 36-02 and moved to `debug/resolved/`. 32 items carried forward from prior closes.
+
+**Closeout type:** `override_closeout` (operator decision 2026-10-12).
+
+**Deferred:** backend full-log payload size (AR-36-01: sync GlusterFS read, JSON Buffer byte array, no compression); open review items 35 (disposition ledger), 36 WR-01, 37 IN-02/03, 38 IN-01..04/06/07; same-second deploy-key sort relies on API order; UI-review polish across 35–38.
+
+**Archives:**
+
+- Roadmap: `.planning/milestones/v1.16-ROADMAP.md`
+- Requirements: `.planning/milestones/v1.16-REQUIREMENTS.md`
+- Verification evidence: `.planning/milestones/v1.16-VERIFICATION.md`
+- Phases: `.planning/milestones/v1.16-phases/`
+
+---
+
 ## v1.15 — Traefik Hardening (Edge) (Shipped: 2026-10-12)
 
 **Delivered:** The production Traefik edge went from an undocumented v2.11 with a public dashboard, DEBUG logs and a raw Docker socket to a repo-authoritative, native-syntax v3.7.14 edge: dashboard/API on loopback only, AEAD-only TLS 1.2+, edge-wide HSTS, WARN logs with a secret-free JSON access log, and Docker API access through a GET-only socket-proxy. 14/14 requirements across Phases 29–34. The plaintext legacy device paths (`:7442`, MQTT 1883) kept working after every hop.

@@ -2,10 +2,12 @@
 gsd_state_version: "1.0"
 milestone: v1.16
 milestone_name: Console Usability & Deploy Keys
-status: awaiting_ci_and_acceptance
-stopped_at: Completed 37-02-PLAN.md
-last_updated: "2026-10-12T14:44:37Z"
-state_head: 04455f8c348ceda73ec0c2d1d452398687ce5bb0
+status: Awaiting next milestone
+stopped_at: Milestone v1.16 archived
+last_updated: "2026-10-12T14:51:19.690Z"
+last_activity: 2026-10-12
+last_activity_desc: Milestone v1.16 completed and archived
+state_head: b4916ab05eaab4f9392da254a8263acbc3dd0966
 progress:
   total_phases: 4
   completed_phases: 4
@@ -20,38 +22,36 @@ current_phase_name: Deploy Key Management
 
 ## Current Position
 
-v1.16 phases 35–38 implemented and locally verified from Google Drive THiNX/TODOs.md.
+Phase: Milestone v1.16 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-12 — Milestone v1.16 completed and archived
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-10-12 after v1.15). Requirements: `.planning/REQUIREMENTS.md` (v1.16). Roadmap: `.planning/ROADMAP.md` (v1.16 section, Phases 35–38).
+See: `.planning/PROJECT.md` (updated 2026-10-12 after v1.16)
+
+**Core value:** The IoT device API stays available and trustworthy across release cycles — no signature breaks on routes the consoles rely on; push → CI → Swarmpit autoredeploy within the 600 s SLA.
+**Current focus:** Planning next milestone (`/gsd-new-milestone`). v1.17 Deploy-Key Vault Transit runs separately in the `vault-transit` workstream (Phase 39).
 
 ## Previous Milestone
 
-v1.15 Traefik Hardening (Edge) shipped 2026-10-12 (Phases 29–34, 14/14 requirements, audit `tech_debt`, `override_closeout`). Archives: `milestones/v1.15-ROADMAP.md`, `-REQUIREMENTS.md`, `-MILESTONE-AUDIT.md`, `-STATE.md` (full v1.15 operational state and accumulated context), `-phases/`.
+v1.16 Console Usability & Deploy Keys shipped 2026-10-12 (Phases 35–38, 11/11 requirements, all accepted by live UAT; no milestone audit, `override_closeout`). Archives: `milestones/v1.16-ROADMAP.md`, `-REQUIREMENTS.md`, `-VERIFICATION.md`, `-STATE.md` (full v1.16 verification and decision log), `-phases/`.
+
+v1.15 Traefik Hardening (Edge) shipped 2026-10-12 — see `milestones/v1.15-STATE.md`.
 
 ## Decisions
 
-Use thinx-staging baseline, paired console branch and parent submodule pointer. Preserve API signatures, legacy plaintext transport, existing dependency locks. No source credentials in git.
-- [Phase 35]: G-35-4: linkedRepositoryHref binds only http:/https: (WHATWG URL parse) and returns the parsed href; other schemes and parse failures stay plain text
-- [Phase 36]: G-36-3: device Build History rows are inert summary rows (date/build id/status); the full build log loads only from the per-row Open build log button into BuildLogDialog, no row-click shortcut (operator direction 2026-10-12)
-- [Phase 37]: G-37-5: device Transformer Assignment is one stacked checkbox per transformer on editForm.transformers (no multi-select), with an empty-state line; Manage Transformers is a filled orange variant=warning button (operator 2026-10-12)
+Full log in `.planning/PROJECT.md` Key Decisions.
 
-## Verification
+## Open Carry-overs (from v1.16)
 
-Phase 38 accepted 2026-10-12: live UAT 6/6; backend review WR-01..WR-06 + IN-05 fixed in f3845d58 and 7c8fe41a (pushed; live UAT ran before them, tests cover them); 38-VERIFICATION.md passed; 38-SECURITY.md threats_open 0. All v1.16 phases (35-38) accepted. Open: 38-REVIEW IN-01..04/06/07, 35-REVIEW IN-03/IN-04 (legacy generic errors), Vue same-second sort relies on the API order, UI-review polish across 35-38.
-
-Phase 37 accepted 2026-10-12: live UAT 6/6 (G-37-5 resolved by 37-02), operator acknowledged the 37-02 prohibitions, review WR-01 + IN-01 fixed in console ff6e809 (pushed with parent 7d56e977); 37-VERIFICATION.md passed; 37-SECURITY.md threats_open 0. Open: 37-REVIEW IN-02/IN-03, 37-UI-REVIEW polish items.
-
-Phase 36 accepted 2026-10-12: live UAT 5/5 (G-36-3 resolved by 36-02), operator sign-off on console 38eb95b and on the navbar Recent Builds dropdown for BUILD-01; 36-VERIFICATION.md passed; 36-SECURITY.md threats_open 0. Open: 36-REVIEW WR-01 (inert-row test checks only the <tr>), backend full-log payload size (AR-36-01, deferred).
-
-Phase 35 accepted 2026-10-12: live UAT 5/5 passed (G-35-4 fix pushed to console and parent thinx-staging, re-tested live), 35-VERIFICATION.md status passed, 35-SECURITY.md threats_open 0. Code review 35-REVIEW.md: 16 findings open in 35-REVIEW-DISPOSITION.md, including CR-01 (TransformerEditor blanks a transformer on Save after a failed load; Phase 37 scope).
-
-Local unit/regression checks, builds, source security checks, and lint pass. GitHub connector write access restored; console PR #32 is merged and API PR #572 is approved for thinx-staging. CLI credentials remain unavailable. Browser validation could not run because Chromium downloads were invalid. CI and production acceptance pending. See v1.16-VERIFICATION.md.
+- AR-36-01: backend full-log payload (sync GlusterFS read, JSON Buffer byte array, no compression)
+- Review items: 35-REVIEW-DISPOSITION, 36 WR-01, 37 IN-02/03, 38 IN-01..04/06/07; same-second deploy-key sort relies on API order; UI-review polish across 35–38
 
 ## Next Action
 
-API PR #572 is merged into thinx-staging (concurrent v1.15 Phase 34 context preserved). Monitor staging test and registry image jobs, then verify live rollout before closing v1.16.
+`/clear` then `/gsd-new-milestone`.
 
 ### Quick Tasks Completed
 
@@ -60,6 +60,10 @@ API PR #572 is merged into thinx-staging (concurrent v1.15 Phase 34 context pres
 | 261012-fqh | Fix v1.15 edge documentation drift (fix-forward SLA/socket-proxy/P33 rows, swarm.md post-rollback note, review ledgers re-dispositioned) | 2026-10-12 | 88d18fd0 | [261012-fqh-fix-v1-15-edge-documentation-drift](./quick/261012-fqh-fix-v1-15-edge-documentation-drift/) |
 
 ## Deferred Items
+
+### v1.16 close (2026-10-12)
+
+No items newly acknowledged. Debug session `device-build-history-full-logs` resolved by 36-02 (moved to `debug/resolved/`). Verification overrides: no milestone audit; Phases 35/36 verification `stale` (superseded by live UAT). 32 prior acknowledgements carried forward.
 
 ### Acknowledged at v1.15 close (2026-10-12)
 
@@ -134,3 +138,7 @@ Items acknowledged and deferred at prior milestone closes and carried forward. R
 **Last session:** 2026-10-12T11:43:25.750Z
 **Stopped at:** Completed 36-02-PLAN.md
 **Resume file:** None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
