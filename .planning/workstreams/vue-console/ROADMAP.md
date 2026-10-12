@@ -39,7 +39,7 @@ no dependency or infrastructure upgrades.
 - [ ] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console)
 - [ ] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure
 - [ ] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items
-- [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed (console + CI)
+- [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI)
 
 ## Phase Details
 
@@ -161,13 +161,14 @@ Plans:
 
 **Goal**: Vue deep links survive a reload, the remaining Phase 35 UI-review and review items are closed, and the legacy console build is back on so every Legacy change of the milestone is live before it closes.
 **Depends on**: Phases 43–47 (the FIX-01 ledger records Phase 35 items closed there, and CI-06 ships their remaining Legacy changes; see Milestone Notes). Runs last.
-**Requirements**: NOTIF-04, POL-01, FIX-01, CI-06
-**Repos**: `services/console` (Vue `App.vue` deep links for NOTIF-04; Build Firmware, account menu and Device Detail for POL-01; Phase 35 items for FIX-01) and parent `.circleci/config.yml` (revert of the CI-05 block for CI-06; CI-04 stays). No parent API change expected.
+**Requirements**: NOTIF-04, POL-01, FIX-01, CI-06, CI-07
+**Repos**: `services/console` (Vue `App.vue` deep links for NOTIF-04; Build Firmware, account menu and Device Detail for POL-01; Phase 35 items for FIX-01) and parent `.circleci/config.yml` (revert of the CI-05 block for CI-06; CI-04 stays). CI-07: Vue Cypress specs and support (`vue/cypress/`), possibly `vue/src/utils/cookies.js`, the console repo's `.circleci/config.yml` (`test_vue`: same-origin API for the Cypress step, JUnit output) and a parent `vue-console-registry` dependency on the green suite. No parent API change expected.
 **Success Criteria** (what must be TRUE):
   1. Reloading a Vue deep link such as `/#/app/history` while logged in stays on that page instead of redirecting to the dashboard. A logged-out reload still goes to the login page.
   2. Build Firmware shows an in-flight state and ignores a second click until the request settles, the account menu has an accessible name, and the Device Detail content column is width-constrained.
   3. Every Phase 35 review item IN-01..IN-08 is fixed or deferred with a recorded reason, including those closed in Phases 45–47.
   4. The legacy console build is re-enabled (the CI-05 block reverted), a normal `thinx-staging` pipeline builds and publishes the Legacy image again, and every Legacy console change of v1.18 not shipped by the Phase 43 one-off build (for example the Phase 45 deploy-key items) is live on production before the milestone closes.
+  5. The Vue console Cypress job is green on `thinx-staging` (all 10 specs pass or skip by design; root causes from the 2026-10-12 diagnosis: deep-link reload for devices/profile, cross-origin CSRF for oauth-return/login), CircleCI shows its JUnit results, and the parent `vue-console-registry` job only runs after the suite passes.
 
 **Plans**: TBD
 **UI hint**: yes

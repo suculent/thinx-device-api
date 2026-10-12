@@ -79,6 +79,7 @@ upgrades.
 - [x] **CI-04**: Snyk monitor jobs (snyk-code-monitor, snyk-oss-monitor, snyk-container-monitor incl. snyk-monitor-console-classic / snyk-monitor-console-vue in the parent .circleci/config.yml `main` workflow) run only on branch `main`, never on `thinx-staging`.
 - [x] **CI-05**: For the duration of v1.18 the legacy console image build (build-console-classic: console-classic-registry / console-classic-hub, plus jobs that require it) is temporarily disabled in CI, so thinx-staging pipelines skip it; production keeps serving the existing thinx/console:swarm image. The change is a single, clearly marked, revertible edit.
 - [ ] **CI-06**: Before the milestone closes, the legacy console build is re-enabled, and the Legacy console changes made during v1.18 that are not yet live (e.g. FIX-04 / Phase 35 legacy deploy-key items; NOTIF-01 already ships earlier through its one-off build) are built and deployed.
+- [ ] **CI-07**: The Vue console Cypress suite runs green in CI and gates the Vue console deploy: `devices.spec.js` and `profile.spec.js` reach their pages via `cy.visitAppRoute` (or pass natively once NOTIF-04 fixes deep links), `oauth-return.spec.js` runs with a same-origin API (or `ensureCsrfToken` prefers a forced prime over a stale cookie), the live `login.spec.js` test is stubbed or explicit opt-in and no longer falls back to the leaked `test` fixture username, CircleCI stores JUnit results, and the parent `vue-console-registry` job requires the green suite. Legacy console Cypress stays off (deprecating; its specs need a real API and send real e-mail).
 
 ## Future Requirements
 
@@ -129,6 +130,7 @@ upgrades.
 | POL-01 | Phase 48 | Pending |
 | FIX-01 | Phase 48 | Pending |
 | CI-06 | Phase 48 | Pending |
+| CI-07 | Phase 48 | Pending |
 
 **Coverage:**
 - v1.18 requirements: 32 total
@@ -137,4 +139,4 @@ upgrades.
 
 ---
 *Requirements defined: 2026-10-12*
-*Last updated: 2026-10-12 after roadmap creation (CI-04..06 added, NOTIF-01 one-off deploy; 32 requirements mapped to Phases 42–48)*
+*Last updated: 2026-10-12 after adding CI-07 (Vue Cypress suite green and gating, Phase 48)*
