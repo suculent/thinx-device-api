@@ -288,4 +288,214 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
             expect(builder.indexOf("sendToOwner(") !== -1, "sendToOwner( in builder.js").to.equal(true);
         });
     });
+
+    // 43-UI-SPEC "Build Status frame rules": F-1 one terminal frame per build, F-2 failure is
+    // never green, F-3 the terminal frame carries build_id, F-4 no log lines on the socket.
+    describe("frame rules F-1..F-4 (D-10, D-11)", function () {
+
+        const STATUS_OK_LINE = "[builder] THiNX build status: OK\n";
+
+        let m, a1, a2, b1, builder, bound;
+
+        beforeEach(function () {
+            m = makeMessenger();
+            a1 = subscribe(m, OWNER_A);
+            a2 = subscribe(m, OWNER_A);
+            b1 = subscribe(m, OWNER_B);
+            builder = new Builder(fakeRedis);
+            // The success path updates the source's last build and prunes old checkouts.
+            builder.sources = { update() { } };
+            builder.cleanupDeviceRepositories = () => { };
+            bound = builder.consoleNotifiers({ messenger: m }, OWNER_A);
+        });
+
+        function shellOpts(build_id) {
+            return { owner: OWNER_A, build_id: build_id, udid: UDID, source_id: SOURCE, version: "1.0", notifiers: bound };
+        }
+
+        function exitOK(build_id) {
+            builder.processExitData(OWNER_A, build_id, UDID, bound, { status: "OK", completed: true, build_id: build_id });
+        }
+
+        function expectNoOkBody() {
+            for (const [name, sock] of [["A1", a1], ["A2", a2], ["B1", b1]]) {
+                expect(bodies(sock).indexOf("OK"), name + " has an OK frame").to.equal(-1);
+            }
+        }
+
+        function expectSingleCompleted(sock, name, build_id) {
+            const own = framesFor(sock, build_id);
+            expect(own.map((f) => f.body), name + " bodies").to.deep.equal(["Completed"]);
+            expect(own[0].type, name + " type").to.equal("success");
+            expect(own[0].build_id, name + " build_id").to.equal(build_id);
+        }
+
+        // A worker socket that records its listeners, so a spec can deliver job-status itself.
+        function recordingWorker() {
+            const listeners = {};
+            const socket = {
+                connected: true,
+                emitted: [],
+                emit(event, payload) { this.emitted.push([event, payload]); },
+                on(event, fn) { (listeners[event] = listeners[event] || []).push(fn); },
+                off(event, fn) { listeners[event] = (listeners[event] || []).filter((f) => f !== fn); }
+            };
+            return { worker: { connected: true, running: false, socket: socket }, listeners: listeners };
+        }
+
+        it("F1a the status: OK log line then the worker's OK job-status give exactly one Completed (success, with build_id); no OK frame", function () {
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+            exitOK(BUILD_X);
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            expectSingleCompleted(a2, "A2", BUILD_X);
+            expect(a1.sent.length, "A1 frame count").to.equal(1);
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+            expectNoOkBody();
+        });
+
+        it("F1b the reverse order, with the log line repeated, still gives one Completed per socket", function () {
+            exitOK(BUILD_X);
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            expectSingleCompleted(a2, "A2", BUILD_X);
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+            expectNoOkBody();
+        });
+
+        it("F1c a full successful build shows Pulling repository, Building..., Completed, all success with one build_id", function () {
+            builder.notify(UDID, BUILD_X, bound, "Pulling repository", true);
+            builder.notify(UDID, BUILD_X, bound, "Building...", true);
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+            exitOK(BUILD_X);
+
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["Pulling repository", "Building...", "Completed"]);
+                expect(frames(sock).map((f) => f.type), name + " types").to.deep.equal(["success", "success", "success"]);
+                expect(frames(sock).every((f) => f.build_id === BUILD_X), name + " build_id").to.equal(true);
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("F2a a failed exit status gives one error frame with its reason and nothing green after it", function () {
+            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { status: "Failed", build_id: BUILD_X });
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+            exitOK(BUILD_X);
+
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["Failed"]);
+                expect(frames(sock)[0].type, name + " type").to.equal("error");
+                expect(frames(sock)[0].build_id, name + " build_id").to.equal(BUILD_X);
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("F2a' a worker's own non-OK status string is the reason of the error frame", function () {
+            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { status: "BUILD FAILED", completed: true, build_id: BUILD_X });
+
+            expect(bodies(a1)).to.deep.equal(["BUILD FAILED"]);
+            expect(frames(a1)[0].type).to.equal("error");
+        });
+
+        it("F2b an exit code, a null payload and a spawn error each give one error frame Failed and never throw", function () {
+            const BUILD_Z = "43020000-3333-11f0-9d4a-0b5e6f7a8c9d";
+            const cases = [[BUILD_X, 2], [BUILD_Y, null], [BUILD_Z, "spawn ENOENT"]];
+            for (const [build_id, payload] of cases) {
+                expect(() => builder.processExitData(OWNER_A, build_id, UDID, bound, payload), "payload " + typeof payload).to.not.throw();
+            }
+            for (const [build_id] of cases) {
+                const own = framesFor(a1, build_id);
+                expect(own.map((f) => f.body), build_id + " bodies").to.deep.equal(["Failed"]);
+                expect(own[0].type, build_id + " type").to.equal("error");
+            }
+            expect(a1.sent.length, "A1 frame count").to.equal(3);
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("F2c the remote-worker guard frame is type error", function () {
+            const worker = { connected: false, running: true, socket: { connected: false, on() { }, emit() { } } };
+
+            const emitted = builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE);
+
+            expect(emitted).to.equal(false);
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["ERROR: worker needs a connected socket for remote builds"]);
+                expect(frames(sock)[0].type, name + " type").to.equal("error");
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("F2d a worker refusal (worker_busy, no onRefused) gives one error frame worker_busy, not a second Failed", function () {
+            const { worker, listeners } = recordingWorker();
+            expect(builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE)).to.equal(true);
+            expect((listeners["job-status"] || []).length, "job-status listeners").to.equal(1);
+
+            listeners["job-status"][0]({ status: "Failed", details: "worker_busy", build_id: BUILD_X });
+
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["worker_busy"]);
+                expect(frames(sock)[0].type, name + " type").to.equal("error");
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        it("F4 a raw build log line is never sent to any socket", function () {
+            builder.processShellData(shellOpts(BUILD_X), "plain log line\n");
+            builder.processShellData(shellOpts(BUILD_X), "Compiling sketch with secret-looking text\r\nmore output\n");
+
+            for (const [name, sock] of [["A1", a1], ["A2", a2], ["B1", b1]]) {
+                expect(sock.sent.length, name + " frame count").to.equal(0);
+            }
+        });
+
+        it("P1 a build that ends without a terminal status sends no Completed frame", function () {
+            builder.notify(UDID, BUILD_X, bound, "Pulling repository", true);
+            builder.notify(UDID, BUILD_X, bound, "Building...", true);
+            builder.processShellData(shellOpts(BUILD_X), "linking firmware.bin\n");
+
+            expect(bodies(a1)).to.deep.equal(["Pulling repository", "Building..."]);
+            expect(bodies(a2)).to.deep.equal(["Pulling repository", "Building..."]);
+        });
+
+        it("E concurrent builds of one owner keep their own build_id and their own Completed; a closed socket is pruned without blocking the other", function () {
+            builder.notify(UDID, BUILD_X, bound, "Pulling repository", true);
+            builder.notify(UDID, BUILD_Y, bound, "Pulling repository", true);
+            builder.notify(UDID, BUILD_X, bound, "Building...", true);
+            a1.readyState = 3; // tab closed mid-build, its close event not yet seen
+            builder.notify(UDID, BUILD_Y, bound, "Building...", true);
+            builder.processShellData(shellOpts(BUILD_Y), STATUS_OK_LINE);
+            builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
+            exitOK(BUILD_X);
+            exitOK(BUILD_Y);
+
+            expect(framesFor(a2, BUILD_X).map((f) => f.body), "A2 X").to.deep.equal(["Pulling repository", "Building...", "Completed"]);
+            expect(framesFor(a2, BUILD_Y).map((f) => f.body), "A2 Y").to.deep.equal(["Pulling repository", "Building...", "Completed"]);
+            expect(frames(a2).every((f) => f.type === "success"), "A2 types").to.equal(true);
+            expect(a1.sent.length, "A1 frames before it closed").to.equal(3);
+            expect(m.subscriberCount(OWNER_A), "A sockets after pruning").to.equal(1);
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+            expectNoOkBody();
+        });
+
+        it("M1 the terminal-frame memory is bounded: the oldest build_id is evicted after 1000 more", function () {
+            const id = (n) => "43020000-" + String(n).padStart(4, "0") + "-11f0-9d4a-0b5e6f7a8c9d";
+            const sends = spyOn(m, "sendToOwner").and.returnValue(0);
+            for (let n = 0; n <= 1000; n++) builder.notify(UDID, id(n), bound, "Completed", true);
+            expect(sends.calls.count(), "first terminal frames").to.equal(1001);
+
+            builder.notify(UDID, id(1000), bound, "Completed", true); // remembered: suppressed
+            expect(sends.calls.count(), "duplicate of a remembered build").to.equal(1001);
+            builder.notify(UDID, id(0), bound, "Failed", false); // evicted: sent again
+            expect(sends.calls.count(), "duplicate of an evicted build").to.equal(1002);
+        });
+
+        it("S2 builder.js has no websocket notifier path, wsOK, sendNotificationIfSocketAlive or buildStatusNotification", function () {
+            const src = codeLines(fs.readFileSync(BUILDER_PATH, "utf8")).join("\n");
+            for (const needle of ["notifiers.websocket", "wsOK", "sendNotificationIfSocketAlive", "buildStatusNotification", "message == \"OK\""]) {
+                expect(src.indexOf(needle), needle + " in builder.js").to.equal(-1);
+            }
+        });
+    });
 });
