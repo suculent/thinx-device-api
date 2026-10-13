@@ -230,7 +230,10 @@ describe("SocketUpgradeSpec (Phase 43, NOTIF-02)", function () {
       const r = raws.pop();
       try { r.sock.destroy(); } catch (_e) { /* ignore */ }
     }
-    if (h.upgrade !== null) await waitFor(() => h.upgrade.liveSocketCount() === 0, 3000);
+    // IN-03: a slot leaked by one test fails that test, not a later one.
+    if (h.upgrade !== null) {
+      expect(await waitFor(() => h.upgrade.liveSocketCount() === 0, 3000), "slots released after test").to.equal(true);
+    }
   });
 
   function openClient(urlPath, cookie) {
