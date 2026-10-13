@@ -42,12 +42,12 @@ upgrades.
 
 ### Transformers
 
-- [ ] **TRANS-03**: The Edit button has a white wrench icon, Delete a trash icon, and "Add Transformer" a `+` sign.
-- [ ] **TRANS-04**: A user can tick several transformers and delete them with one Delete (trash) button, after typing `confirm` into the confirmation dialog's text field.
+- [x] **TRANS-03**: The Edit button has a white wrench icon, Delete a trash icon, and "Add Transformer" a `+` sign.
+- [x] **TRANS-04**: A user can tick several transformers and delete them with one Delete (trash) button, after typing `confirm` into the confirmation dialog's text field.
 
 ### Environment Globals
 
-- [ ] **ENV-01**: Each Environment Globals row has an Edit button to change the value (delete + recreate); if the recreate fails, the original variable is restored and the user sees an error. The edit is one atomic overwrite (`PUT /api/v2/env` replaces the value in a single write, so a failed edit keeps the old value); the delete + recreate wording is superseded by Phase 46 D-01 (operator, 2026-10-13).
+- [x] **ENV-01**: Each Environment Globals row has an Edit button to change the value (delete + recreate); if the recreate fails, the original variable is restored and the user sees an error. The edit is one atomic overwrite (`PUT /api/v2/env` replaces the value in a single write, so a failed edit keeps the old value); the delete + recreate wording is superseded by Phase 46 D-01 (operator, 2026-10-13).
 
 ### Repositories
 
@@ -118,9 +118,9 @@ upgrades.
 | KEY-06 | Phase 45 | Complete |
 | POL-04 | Phase 45 | Complete |
 | FIX-04 | Phase 45 | Complete |
-| TRANS-03 | Phase 46 | Pending |
-| TRANS-04 | Phase 46 | Pending |
-| ENV-01 | Phase 46 | Pending |
+| TRANS-03 | Phase 46 | Complete |
+| TRANS-04 | Phase 46 | Complete |
+| ENV-01 | Phase 46 | Complete |
 | POL-03 | Phase 46 | Complete |
 | FIX-03 | Phase 46 | Complete |
 | BUILD-03 | Phase 47 | Pending |
