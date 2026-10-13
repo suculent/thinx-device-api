@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 46
 current_phase_name: Transformers & Environment Globals
 status: executing
-stopped_at: Completed 46-01-PLAN.md
-last_updated: "2026-10-13T20:35:35.187Z"
+stopped_at: Completed 46-02-PLAN.md
+last_updated: "2026-10-13T20:51:39.492Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 46 execution started
-state_head: e8dfffb958347235b028da60e2475df6bf8e5ed5
+state_head: 44a2a79684e5346b0f023ff5876ce9b5bd36cc8e
 progress:
   total_phases: 7
   completed_phases: 4
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 46 (Transformers & Environment Globals) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-10-13 — Phase 46 execution started
 
@@ -67,6 +67,7 @@ Progress: [██████░░░░] 57%
 | Phase 44 P03 | 8m 35s | 2 tasks | 1 files |
 | Phase 45 P05 | 11 min | 2 tasks | 1 files |
 | Phase 46 P01 | 3 min | 2 tasks | 4 files |
+| Phase 46 P02 | 14 min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Progress: [██████░░░░] 57%
 - [Phase 44]: 44-03: shipped console cfff199..6a34102 and parent 4fcacece..d630652e via pipeline 5662 (legacy-off, no Snyk, CI-GATES PIPELINE OK); console.thinx.cloud serves id d630652 with all Phase 44 markers; Legacy files byte-identical; 9 human checks pending UAT
 - [Phase 45]: 45-05: shipped as pipeline 5666 (legacy-off); console 604258c..31ed738, parent cad3088d..c3f78558; SUMMARY/close-out docs stay local until the next thinx-staging push
 - [Phase 46]: 46-01: apienv.create replaces only the entry named exactly String(key) (D-02); one redis.set and all env envelopes unchanged
+- [Phase 46]: 46-02: saveTransformers returns refreshed: false when only the re-read fails (35 IN-02 fixed in console ed429ec); pages reload separately
+- [Phase 46]: 46-02: transformers/deleteItems(utids) re-reads and writes once; devices/loadDevices throws so the usage line can fall back to the generic sentence
+- [Phase 46]: 46-02: shared Phase 46 rules live in vue/src/styles/_settings-pages.scss (imported after deploy-keys); 46-03/46-04 append to it
 
 ### Pending Todos
 
@@ -129,6 +133,6 @@ Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T20:35:34.837Z
-**Stopped At:** Completed 46-01-PLAN.md
+**Last session:** 2026-10-13T20:51:39.331Z
+**Stopped At:** Completed 46-02-PLAN.md
 **Resume File:** None
