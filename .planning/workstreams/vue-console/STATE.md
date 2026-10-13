@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 45
 current_phase_name: Deploy Key Rename & Row Actions
 status: executing
-stopped_at: Completed 45-04-PLAN.md (45-05 ship next)
-last_updated: "2026-10-13T12:59:15.711Z"
+stopped_at: Completed 45-05-PLAN.md (Phase 45 shipped; operator UAT 1-10 pending)
+last_updated: "2026-10-13T15:44:30.235Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 44 complete, transitioned to Phase 45
-state_head: a16f9ac2049b3f8349c746f0438d5ee63d54e2b6
+state_head: c3f78558a1680e70ea1b371df4d9106d724be5d4
 progress:
   total_phases: 7
   completed_phases: 3
@@ -25,13 +25,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 44 — Device List Parity
+**Current focus:** Phase 45 — Deploy Key Rename & Row Actions
 
 ## Current Position
 
 Phase: 45 — Deploy Key Rename & Row Actions
 Plan: 5 of 5
-Status: Executing — 45-01..45-04 done, 45-05 (ship) next
+Status: Executing — 45-01..45-05 done; shipped (pipeline 5666, parent c3f78558, console 31ed738); operator UAT 1-10 pending, then phase verification
 Last activity: 2026-10-13 — Phase 44 complete, transitioned to Phase 45
 
 Progress: [████░░░░░░] 43%
@@ -65,6 +65,7 @@ Progress: [████░░░░░░] 43%
 | Phase 44 P01 | 10m 27s | 3 tasks | 9 files |
 | Phase 44 P02 | 10m 27s | 3 tasks | 8 files |
 | Phase 44 P03 | 8m 35s | 2 tasks | 1 files |
+| Phase 45 P05 | 11 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Progress: [████░░░░░░] 43%
 - [Phase 44]: 44-02: Build in-flight guard is a buildingUdids list released in finally; buildDevice and openLastBuild also guard their own disabled states
 - [Phase 44]: 44-02: icomoon ported as woff+ttf byte copies with only .icomoon-hammer_icon; URLs relative to theme.scss like flaticon
 - [Phase 44]: 44-03: shipped console cfff199..6a34102 and parent 4fcacece..d630652e via pipeline 5662 (legacy-off, no Snyk, CI-GATES PIPELINE OK); console.thinx.cloud serves id d630652 with all Phase 44 markers; Legacy files byte-identical; 9 human checks pending UAT
+- [Phase 45]: 45-05: shipped as pipeline 5666 (legacy-off); console 604258c..31ed738, parent cad3088d..c3f78558; SUMMARY/close-out docs stay local until the next thinx-staging push
 
 ### Pending Todos
 
@@ -125,6 +127,6 @@ Progress: [████░░░░░░] 43%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T12:00:37.920Z
-**Stopped At:** Phase 44 complete, ready to plan Phase 45
+**Last session:** 2026-10-13T15:44:30.125Z
+**Stopped At:** Completed 45-05-PLAN.md (Phase 45 shipped; operator UAT 1-10 pending)
 **Resume File:** None
