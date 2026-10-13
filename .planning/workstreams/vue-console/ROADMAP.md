@@ -37,7 +37,7 @@ no dependency or infrastructure upgrades.
 - [x] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console) (completed 2026-10-13)
 - [x] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning (completed 2026-10-13)
 - [x] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console) (completed 2026-10-13)
-- [ ] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure
+- [x] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure (completed 2026-10-14)
 - [ ] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items
 - [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI)
 
@@ -173,7 +173,7 @@ Plans:
   4. Each Environment Globals row has an Edit button that changes the value. If the recreate fails, the original variable is back in the list with its old value and the user sees an error.
   5. Phase 37 review items IN-02 and IN-03 are fixed or deferred with a recorded reason.
 
-**Plans**: 6/6 plans executed
+**Plans**: 6/6 plans complete
 
 Plans:
 **Wave 1**
@@ -301,7 +301,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
-| 46. Transformers & Environment Globals | v1.18 | 6/6 | In Progress | - |
+| 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 

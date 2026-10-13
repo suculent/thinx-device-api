@@ -2,19 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
-current_phase: 46
-current_phase_name: Transformers & Environment Globals
-status: executing
-stopped_at: Completed 46-06-PLAN.md
-last_updated: "2026-10-13T22:39:15.906Z"
+current_phase: 47
+current_phase_name: Build Log Search & Status Colours
+status: planning
+stopped_at: Phase 46 complete, ready to plan Phase 47
+last_updated: "2026-10-13T23:17:02.325Z"
 last_activity: 2026-10-14
-last_activity_desc: Phase 46 execution started
-state_head: 9c46f887ff20547fd5e45ad15158027e822d0ad8
+last_activity_desc: Phase 46 complete, transitioned to Phase 47
+state_head: c377458951fd898ccd37a1d7bcc7cb876c17fe89
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 6
   completed_plans: 7
+  percent: 71
 ---
 
 # Project State
@@ -24,21 +25,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 46 — Transformers & Environment Globals
+**Current focus:** Phase 47 — Build Log Search & Status Colours
 
 ## Current Position
 
-Phase: 46 (Transformers & Environment Globals) — EXECUTING
-Plan: 6 of 6 (46-06 gap closure complete, deployed as 6d47a5fb)
-Status: Ready for verification (re-run /gsd-verify-work 46 --ws vue-console)
-Last activity: 2026-10-14 — 46-06 Device Detail draft fix (CR-01, WR-05) shipped
+Phase: 47 — Build Log Search & Status Colours
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-14 — Phase 46 complete, transitioned to Phase 47
 
-Progress: [██████░░░░] 57%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -50,6 +51,7 @@ Progress: [██████░░░░] 57%
 | 43 | 3 | - | - |
 | 44 | 3 | - | - |
 | 45 | 5 | - | - |
+| 46 | 6 | - | - |
 
 *Updated after each plan completion*
 **Per-Plan Metrics:**
@@ -127,6 +129,8 @@ Progress: [██████░░░░] 57%
 - [Phase 42 follow-up] H6: confirm the first `main` pipeline after Phase 42 runs all four Snyk monitors green (snyk-monitor-console-vue now uses the dockerhub context only). WR-02 accepted: production images are Snyk-scanned only via main.
 - [Phase 43] The WebSocket upgrade change in `thinx-core.js` must keep `ZZ-WebSocketHandshakeRtmSpec` green and keep per-owner frame routing (quick 261003-vn3); no cross-owner delivery.
 - [Phase 45] v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`; rename touches only the `.pub` comment. Coordinate merge order.
+- [Phase 46 follow-up] 46-SECURITY.md residual R2: the operator still has to decide WR-01 (46-VERIFICATION.md:192): fix the apienv write acknowledgement, or ratify T-46-06 (AR-46-01). The decision should also cover the unchecked `redis.get` error at apienv.js:26-28. R1 (unisolated name in the single-delete question), R3 (overlapping Device Detail saves) and R4/R5 are listed there too.
+- [UAT] Hard-reload the console (bypass the cache) before production UAT. Phase 46 test 1 first failed on a stale cached bundle.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
 
@@ -145,6 +149,6 @@ Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T22:38:55.541Z
-**Stopped At:** Completed 46-06-PLAN.md
+**Last session:** 2026-10-14
+**Stopped At:** Phase 46 complete, ready to plan Phase 47
 **Resume File:** None
