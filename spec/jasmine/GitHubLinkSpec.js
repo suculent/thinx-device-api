@@ -86,4 +86,76 @@ describe("GitHubLink.link", function () {
     });
   });
 
+  // Phase 45 D-13 (38 IN-07): list() is newest first, so pushing list[0] made the
+  // newest key (often a repository-specific one) the account-wide GitHub key.
+  // Linking now pushes the OLDEST key by the millisecond timestamp in its filename,
+  // whatever order list() returns.
+  const NEW = { filename: OWNER + "-3000", pubkey: "ssh-rsa NEW" };
+  const OLD = { filename: OWNER + "-1000", pubkey: "ssh-rsa OLD" };
+  const MID = { filename: OWNER + "-2000", pubkey: "ssh-rsa MID" };
+
+  function expectPush(existingKeys, expected, done) {
+    const { calls, deps } = makeDeps({ existingKeys: existingKeys });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r.status).to.equal(200);
+      expect(calls.created).to.equal(false);
+      expect(calls.pushed).to.equal(expected);
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: false });
+      done();
+    });
+  }
+
+  it("G1 pushes the oldest key from a newest-first list (D-13, IN-07)", function (done) {
+    expectPush([NEW, OLD, MID], "ssh-rsa OLD", done);
+  });
+
+  it("G2 pushes the oldest key whatever the list order (D-13)", function (done) {
+    // G1's list reversed, then shuffled with the oldest key last.
+    expectPush([NEW, OLD, MID].reverse(), "ssh-rsa OLD", () => {
+      expectPush([MID, NEW, OLD], "ssh-rsa OLD", done);
+    });
+  });
+
+  it("G3 skips the oldest key when it has no pubkey (D-13)", function (done) {
+    expectPush([NEW, { filename: OLD.filename, pubkey: "" }, MID], "ssh-rsa MID", done);
+  });
+
+  it("G4 picks an untimestamped key only when no timestamped key has a pubkey; first in list order wins", function (done) {
+    const noName = { pubkey: "ssh-rsa NONAME" };
+    const badTs = { filename: OWNER + "-abc", pubkey: "ssh-rsa BADTS" };
+    const nonString = { filename: 42, pubkey: "ssh-rsa NONSTRING" };
+    expectPush([noName, badTs, NEW], "ssh-rsa NEW", () => {
+      expectPush([badTs, noName, { filename: OLD.filename, pubkey: null }], "ssh-rsa BADTS", () => {
+        expectPush([nonString, badTs], "ssh-rsa NONSTRING", done);
+      });
+    });
+  });
+
+  function expectCreate(overrides, done) {
+    const { calls, deps } = makeDeps(overrides);
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r.status).to.equal(200);
+      expect(calls.created).to.equal(true);
+      expect(calls.pushed).to.equal("ssh-rsa NEWKEY");
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: true });
+      done();
+    });
+  }
+
+  it("G5 creates and pushes a key when no listed key has a pubkey, the list is empty, or list() fails", function (done) {
+    expectCreate({ existingKeys: [{ filename: OLD.filename, pubkey: "" }, { filename: NEW.filename }] }, () => {
+      expectCreate({ existingKeys: [] }, () => {
+        const { calls, deps } = makeDeps({ existingKeys: [OLD] });
+        deps.rsakey.list = (owner, cb) => cb(false, [OLD]);
+        GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+          expect(r.status).to.equal(200);
+          expect(calls.created).to.equal(true);
+          expect(calls.pushed).to.equal("ssh-rsa NEWKEY");
+          expect(r.response).to.deep.equal({ key_pushed: true, created_key: true });
+          done();
+        });
+      });
+    });
+  });
+
 });
