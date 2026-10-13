@@ -173,7 +173,7 @@ Plans:
   4. Each Environment Globals row has an Edit button that changes the value. If the recreate fails, the original variable is back in the list with its old value and the user sees an error.
   5. Phase 37 review items IN-02 and IN-03 are fixed or deferred with a recorded reason.
 
-**Plans**: 3/5 plans executed
+**Plans**: 4/5 plans executed
 
 Plans:
 **Wave 1**
@@ -184,7 +184,7 @@ Plans:
 - [x] 46-03-PLAN.md — Vue Environment Globals: page-local table, Edit value dialog with one atomic PUT and failure reload, guarded bulk delete with a plain confirm, Add without silent overwrite, load states (ENV-01, D-01, D-03, D-04, D-16) (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 46-04-PLAN.md — Vue Device Detail and editor: dirty note, shared `confirmLeave` route guard, Saving… and in-card result, editor Name copy, Cypress 37 IN-03, 37-REVIEW-DISPOSITION and Phase 48 ledger records (POL-03, FIX-03) (wave 3)
+- [x] 46-04-PLAN.md — Vue Device Detail and editor: dirty note, shared `confirmLeave` route guard, Saving… and in-card result, editor Name copy, Cypress 37 IN-03, 37-REVIEW-DISPOSITION and Phase 48 ledger records (POL-03, FIX-03) (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 46-05-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live bundle, API-surface, port 7442, WS and unchanged-Legacy proofs after the profile route answers 401, operator UAT incl. the P46_WIFI / P46_WIFI_SSID exact-key edit (wave 4)
@@ -298,7 +298,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
-| 46. Transformers & Environment Globals | v1.18 | 3/5 | In Progress | - |
+| 46. Transformers & Environment Globals | v1.18 | 4/5 | In Progress | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 
