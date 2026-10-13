@@ -110,6 +110,23 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
+  // Phase 45 D-14 (38 IN-04): a filename named twice in one request is deleted once
+  // and reported once.
+  it("(04b) should report a key named twice in one revoke only once", function(done) {
+    rsakey.create(owner, (success, response) => {
+      expect(success).to.equal(true);
+      var k = listFilename(response);
+      rsakey.revoke(owner, [k, k], function(_res, succ, mess) {
+        expect(succ).to.equal(true);
+        expect(mess).to.deep.equal([k]);
+        expect(rsakey.getKeyPathsForOwner(owner)).to.not.include(k);
+        expect(fs.existsSync(rsakey.ssh_keys + "/" + k + ".pub")).to.equal(false);
+        expect(rsakey.getKeyPathsForOwner(owner)).to.include(first_key);
+        done();
+      }, {});
+    });
+  }, 30000);
+
 
   // 34-REVIEW IN-08: keys are named <owner>-<timestamp>; two concurrent
   // create() calls (a double-clicked console button) usually land in the same

@@ -66,9 +66,14 @@ test('legacy create(owner, callback) remains valid; invalid names never generate
     let generated=0;
     key.generate=(owner,date,cb,name)=>{generated++;assert.equal(name,undefined);cb(null,'ssh-rsa fixture thinx-'+date);};
     key.create(OWNER,success=>assert.equal(success,true));
-    for (const name of ['', '  ', 'key\nother', 'key\u0000', 'x'.repeat(121), {}, [], 'a\tb', 'a\rb', 'a\u001fb', 'a\u007fb']) {
-      key.create(OWNER,(success,response)=>{assert.equal(success,false);assert.equal(response,'invalid_key_name');},name);
+    // 38 IN-06: the asserts below sit inside callbacks, so count the callbacks too; a
+    // create that never calls back would otherwise pass silently.
+    const invalidNames=['', '  ', 'key\nother', 'key\u0000', 'x'.repeat(121), {}, [], 'a\tb', 'a\rb', 'a\u001fb', 'a\u007fb'];
+    let refused=0;
+    for (const name of invalidNames) {
+      key.create(OWNER,(success,response)=>{refused++;assert.equal(success,false);assert.equal(response,'invalid_key_name');},name);
     }
+    assert.equal(refused,invalidNames.length,'exactly one callback per invalid name');
     assert.equal(generated,1);
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
@@ -645,5 +650,96 @@ test('create refuses invalid names with a reason before generating; routers answ
     assert.deepEqual([r.success, r.response, r.reason], [false, 'invalid_key_name', 'bidi']);
     assert.equal(generated, 0);
     assert.deepEqual(fs.readdirSync(dir), [], 'no name claimed');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+
+// ---------------------------------------------------------------------------
+// Phase 45: revoke duplicates (D-14, 38 IN-04) and the remaining 38 IN-06 gaps (D-16).
+// The other two IN-06 gaps are covered above: keys 1 ms apart list newest first
+// ('keys created within the same second still list newest first (38 WR-01)') and the
+// library ignores a non-array `filenames` ('revoke ignores a non-array filenames value ...').
+// ---------------------------------------------------------------------------
+
+test('D1 revoke handles and reports a filename named twice once; a foreign key is never deleted (D-14, IN-04)', () => {
+  const {dir, key} = fixture();
+  try {
+    const f = writePair(dir, OWNER, 1000, 'Twice');
+    const kept = writePair(dir, OWNER, 2000, 'Kept');
+    const other = writePair(dir, OTHER, 3000, 'Other owner');
+    assert.deepEqual(key.revokeUserKeys([f, f, other], OWNER), [f]);
+    assert.equal(fs.existsSync(path.join(dir, f)), false);
+    assert.equal(fs.existsSync(path.join(dir, f + '.pub')), false);
+    assert.equal(fs.existsSync(path.join(dir, kept)), true, 'unselected key kept');
+    assert.equal(fs.existsSync(path.join(dir, other)), true, 'other owner untouched');
+    assert.equal(fs.existsSync(path.join(dir, other + '.pub')), true);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+
+test('D2 router revoke: duplicates reported once on v2 and v1; null, 5 and {} answer 400 invalid_filenames (D-14, IN-04, IN-06)', async () => {
+  const dir = path.join(TEST_HOME, '.ssh');
+  const session = { owner: OWNER };
+  try {
+    const kept = writePair(dir, OWNER, 1000, 'Kept');
+    for (const filenames of [null, 5, {}]) {
+      for (const [routeKey, method] of [['DELETE /api/v2/rsakey', 'DELETE'], ['POST /api/user/rsakey/revoke', 'POST']]) {
+        assert.deepEqual(await callRoute(routeKey, { method, session, body: { filenames } }),
+          { status: 400, body: { success: false, response: 'invalid_filenames' } }, routeKey + ' ' + JSON.stringify(filenames));
+      }
+    }
+    assert.deepEqual(fs.readdirSync(dir).sort(), [kept, kept + '.pub'].sort(), 'a refused body deletes nothing');
+    const f = writePair(dir, OWNER, 2000, 'Twice v2');
+    assert.deepEqual(await callRoute('DELETE /api/v2/rsakey', { method: 'DELETE', session, body: { filenames: [f, f] } }),
+      { status: 200, body: { success: true, response: [f] } });
+    const g = writePair(dir, OWNER, 3000, 'Twice v1');
+    assert.deepEqual(await callRoute('POST /api/user/rsakey/revoke', { method: 'POST', session, body: { filenames: [g, g] } }),
+      { status: 200, body: { success: true, response: [g] } });
+    assert.deepEqual(fs.readdirSync(dir).sort(), [kept, kept + '.pub'].sort(), 'only the named keys are gone');
+  } finally { clearRouterKeys(); }
+});
+
+test('S1 router create takes the name from req.query for GET and req.body otherwise; a bad name is 400 with its reason (IN-06)', async () => {
+  const realCreate = RSAKey.prototype.create;
+  const seen = [];
+  try {
+    loadRouter(); // registers with the real prototype; the recorder replaces it below
+    RSAKey.prototype.create = function (owner, cb, name) { seen.push(name); cb(true, { name: name || 'unnamed' }); };
+    const session = { owner: OWNER };
+    const both = { query: { name: 'From query' }, body: { name: 'From body' } };
+    assert.deepEqual(await callRoute('GET /api/user/rsakey/create', Object.assign({ method: 'GET', session }, both)),
+      { status: 200, body: { success: true, response: { name: 'From query' } } });
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', Object.assign({ method: 'PUT', session }, both)),
+      { status: 200, body: { success: true, response: { name: 'From body' } } });
+    assert.deepEqual(seen, ['From query', 'From body']);
+    // Without a name the key is unnamed: create gets undefined, not the other source's name.
+    await callRoute('GET /api/user/rsakey/create', { method: 'GET', session, query: {}, body: { name: 'From body' } });
+    await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, query: { name: 'From query' }, body: {} });
+    assert.deepEqual(seen, ['From query', 'From body', undefined, undefined]);
+    assert.deepEqual(await callRoute('GET /api/user/rsakey/create', { method: 'GET', session, query: { name: '  ' } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'empty' } });
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'a' + ch(0x202e) + 'b' } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'bidi' } });
+    assert.equal(seen.length, 4, 'a bad name never reaches create');
+  } finally { RSAKey.prototype.create = realCreate; }
+});
+
+test('G1 a named real generate lists that name and an OpenSSH SHA256 fingerprint (IN-06)', async () => {
+  const {dir, key} = fixture();
+  try {
+    await withPassphrase(async () => {
+      const r = await new Promise((resolve) => key.create(OWNER,
+        (success, response) => resolve({ success, response }), '  Firmware Repository  '));
+      assert.equal(r.success, true);
+      assert.equal(r.response.name, 'Firmware Repository');
+      const pub = fs.readFileSync(path.join(dir, r.response.filename + '.pub'), 'utf8');
+      const parts = tokens(pub);
+      assert.equal(parts[0], 'ssh-rsa');
+      assert.equal(parts.slice(2).join(' '), 'Firmware Repository', 'the trimmed name is the .pub comment');
+      const listed = key.exportKeysForList(key.getKeyPathsForOwner(OWNER), OWNER);
+      assert.equal(listed.length, 1);
+      assert.equal(listed[0].filename, r.response.filename);
+      assert.equal(listed[0].name, 'Firmware Repository');
+      assert.match(listed[0].fingerprint, /^SHA256:[A-Za-z0-9+/]{43}$/);
+      assert.equal(listed[0].fingerprint, RSAKey.fingerprint(pub.trim()));
+    });
   } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
