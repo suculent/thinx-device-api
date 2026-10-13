@@ -16,8 +16,12 @@ function makeDeps(overrides) {
     calls,
     deps: {
       GitHub: {
-        validateAccessToken: (token, cb) => { calls.validated = token; cb(overrides.tokenValid !== false); },
-        addPublicKey: (token, key, cb) => { calls.pushed = key; cb(overrides.pushOk !== false); }
+        validateAccessToken: (token, cb) => { calls.validated = token; cb(overrides.tokenValid !== false, overrides.accountKeys || []); },
+        addPublicKey: (token, key, cb) => {
+          calls.pushed = key;
+          if (overrides.pushOutcome) return cb(false, overrides.pushOutcome);
+          cb(overrides.pushOk !== false, { status: overrides.pushOk === false ? 500 : 201 });
+        }
       },
       rsakey: {
         list: (owner, cb) => cb(true, overrides.existingKeys || []),
@@ -45,7 +49,7 @@ describe("GitHubLink.link", function () {
   });
 
   it("stores a valid token and pushes an existing key (GH-01 + GH-02)", function (done) {
-    const { calls, deps } = makeDeps({ existingKeys: [{ pubkey: "ssh-rsa EXISTING" }] });
+    const { calls, deps } = makeDeps({ existingKeys: [{ pubkey: "ssh-rsa EXISTING", fingerprint: "SHA256:e" }] });
     GitHubLink.link(deps, OWNER, TOKEN, (r) => {
       expect(r.status).to.equal(200);
       expect(r.success).to.equal(true);
@@ -79,7 +83,7 @@ describe("GitHubLink.link", function () {
   });
 
   it("never includes the token in the response payload", function (done) {
-    const { deps } = makeDeps({ existingKeys: [{ pubkey: "ssh-rsa EXISTING" }] });
+    const { deps } = makeDeps({ existingKeys: [{ pubkey: "ssh-rsa EXISTING", fingerprint: "SHA256:e" }] });
     GitHubLink.link(deps, OWNER, TOKEN, (r) => {
       expect(JSON.stringify(r)).to.not.contain(TOKEN);
       done();
@@ -90,9 +94,9 @@ describe("GitHubLink.link", function () {
   // newest key (often a repository-specific one) the account-wide GitHub key.
   // Linking now pushes the OLDEST key by the millisecond timestamp in its filename,
   // whatever order list() returns.
-  const NEW = { filename: OWNER + "-3000", pubkey: "ssh-rsa NEW" };
-  const OLD = { filename: OWNER + "-1000", pubkey: "ssh-rsa OLD" };
-  const MID = { filename: OWNER + "-2000", pubkey: "ssh-rsa MID" };
+  const NEW = { filename: OWNER + "-3000", pubkey: "ssh-rsa NEW", fingerprint: "SHA256:new" };
+  const OLD = { filename: OWNER + "-1000", pubkey: "ssh-rsa OLD", fingerprint: "SHA256:old" };
+  const MID = { filename: OWNER + "-2000", pubkey: "ssh-rsa MID", fingerprint: "SHA256:mid" };
 
   function expectPush(existingKeys, expected, done) {
     const { calls, deps } = makeDeps({ existingKeys: existingKeys });
@@ -117,15 +121,15 @@ describe("GitHubLink.link", function () {
   });
 
   it("G3 skips the oldest key when it has no pubkey (D-13)", function (done) {
-    expectPush([NEW, { filename: OLD.filename, pubkey: "" }, MID], "ssh-rsa MID", done);
+    expectPush([NEW, { filename: OLD.filename, pubkey: "", fingerprint: "SHA256:old" }, MID], "ssh-rsa MID", done);
   });
 
   it("G4 picks an untimestamped key only when no timestamped key has a pubkey; first in list order wins", function (done) {
-    const noName = { pubkey: "ssh-rsa NONAME" };
-    const badTs = { filename: OWNER + "-abc", pubkey: "ssh-rsa BADTS" };
-    const nonString = { filename: 42, pubkey: "ssh-rsa NONSTRING" };
+    const noName = { pubkey: "ssh-rsa NONAME", fingerprint: "SHA256:n" };
+    const badTs = { filename: OWNER + "-abc", pubkey: "ssh-rsa BADTS", fingerprint: "SHA256:b" };
+    const nonString = { filename: 42, pubkey: "ssh-rsa NONSTRING", fingerprint: "SHA256:s" };
     expectPush([noName, badTs, NEW], "ssh-rsa NEW", () => {
-      expectPush([badTs, noName, { filename: OLD.filename, pubkey: null }], "ssh-rsa BADTS", () => {
+      expectPush([badTs, noName, { filename: OLD.filename, pubkey: null, fingerprint: "SHA256:old" }], "ssh-rsa BADTS", () => {
         expectPush([nonString, badTs], "ssh-rsa NONSTRING", done);
       });
     });
@@ -158,4 +162,44 @@ describe("GitHubLink.link", function () {
     });
   });
 
+  // 45-REVIEW WR-01: list() keeps an unparseable (often PEM-era) .pub "as stored" with
+  // fingerprint null. D-13 must never pin such a key as the account key, and a push that
+  // GitHub refused must never be reported as key_pushed: true.
+  const DAMAGED = { filename: OWNER + "-500", pubkey: "-----BEGIN PUBLIC KEY-----\nGARBAGE", fingerprint: null };
+
+  it("W1 skips an older key without a fingerprint and pushes the oldest fingerprinted one", function (done) {
+    expectPush([NEW, DAMAGED, MID, { filename: OWNER + "-1", pubkey: "ssh-rsa X", fingerprint: "" }], "ssh-rsa MID", done);
+  });
+
+  it("W2 creates and pushes a new key when every listed key is damaged", function (done) {
+    expectCreate({ existingKeys: [DAMAGED, { filename: OLD.filename, pubkey: "ssh-rsa OLD" }] }, done);
+  });
+
+  function expectLinked(overrides, keyPushed, done) {
+    const { calls, deps } = makeDeps(Object.assign({ existingKeys: [OLD] }, overrides));
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r.status).to.equal(200);
+      expect(calls.pushed).to.equal("ssh-rsa OLD");
+      expect(r.response).to.deep.equal({ key_pushed: keyPushed, created_key: false });
+      done();
+    });
+  }
+
+  it("W3 reports key_pushed false when GitHub refuses the key (422 invalid, 401, 5xx)", function (done) {
+    expectLinked({ pushOutcome: { status: 422, result: "rejected" } }, false, () => {
+      expectLinked({ pushOutcome: { status: 401, result: "rejected" } }, false, () => {
+        expectLinked({ pushOk: false }, false, done);
+      });
+    });
+  });
+
+  it("W4 'key is already in use' counts as pushed only when the key is on this account", function (done) {
+    const inUse = { status: 422, result: "already_in_use" };
+    expectLinked({ pushOutcome: inUse, accountKeys: [{ id: 1, key: "ssh-rsa OTHER" }, { id: 2, key: "ssh-rsa OLD" }] }, true, () => {
+      // In use elsewhere (another account, a repository deploy key): not on this account.
+      expectLinked({ pushOutcome: inUse, accountKeys: [{ id: 1, key: "ssh-rsa OTHER" }] }, false, () => {
+        expectLinked({ pushOutcome: inUse, accountKeys: "not a list" }, false, done);
+      });
+    });
+  });
 });

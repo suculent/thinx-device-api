@@ -124,3 +124,55 @@ describe("GitHub request logging (45-REVIEW CR-01)", function () {
     });
   }
 });
+
+// 45-REVIEW WR-01: every 422 used to count as a push, and the "already in use" test read
+// `errors.message` although GitHub sends `errors` as an array. Only 201 is a push; a 422
+// whose errors[].message is "key is already in use" is reported as such, so the caller
+// can check the account's own key list before calling it pushed.
+describe("GitHub.addPublicKey outcome (45-REVIEW WR-01)", function () {
+
+  // Resolves with what addPublicKey reported for one stubbed GitHub answer.
+  function outcomeOf(reply) {
+    return new Promise((resolve) => {
+      const stub = stubHttps("request", reply);
+      const out = captureConsole();
+      GitHub.addPublicKey(TOKEN, "ssh-rsa AAAAB3CR01 thinx", (pushed, outcome) => {
+        out.restore();
+        stub.restore();
+        resolve({ pushed: pushed, outcome: outcome });
+      });
+    });
+  }
+
+  async function expectOutcome(reply, ok, result) {
+    const got = await outcomeOf(reply);
+    expect(got.pushed).to.equal(ok);
+    expect(got.outcome).to.deep.equal({ status: reply.status, result: result });
+  }
+
+  const inUse = (message) => JSON.stringify({ message: "Validation Failed", errors: [{ resource: "PublicKey", code: "custom", field: "key", message: message }] });
+
+  it("201 is a push", async function () {
+    await expectOutcome({ status: 201, body: JSON.stringify({ id: 7, key: "ssh-rsa AAAAB3CR01" }) }, true, "created");
+  });
+
+  it("422 'key is already in use' is reported as already_in_use, not as a push", async function () {
+    await expectOutcome({ status: 422, body: inUse("key is already in use") }, false, "already_in_use");
+    await expectOutcome({ status: 422, body: inUse("Key is already in use ") }, false, "already_in_use");
+  });
+
+  it("any other 422, 4xx, 5xx, 200 or non-JSON answer is rejected", async function () {
+    await expectOutcome({ status: 422, body: inUse("key is invalid. You must supply a key in OpenSSH public key format") }, false, "rejected");
+    // `errors` as an object (what the old check read) is not GitHub's shape.
+    await expectOutcome({ status: 422, body: JSON.stringify({ message: "Validation Failed", errors: { message: "key is already in use" } }) }, false, "rejected");
+    await expectOutcome({ status: 401, body: JSON.stringify({ message: "Bad credentials" }) }, false, "rejected");
+    await expectOutcome({ status: 502, body: "<html>bad gateway</html>" }, false, "rejected");
+    await expectOutcome({ status: 200, body: "{}" }, false, "rejected");
+  });
+
+  it("a transport error is reported as error", async function () {
+    const got = await outcomeOf({ error: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" }) });
+    expect(got.pushed).to.equal(false);
+    expect(got.outcome).to.deep.equal({ status: null, result: "error" });
+  });
+});
