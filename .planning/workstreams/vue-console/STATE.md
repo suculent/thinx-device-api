@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
-current_phase: 44
-current_phase_name: Device List Parity
-status: verifying
-stopped_at: Completed 44-03-PLAN.md
-last_updated: "2026-10-13T12:00:38.005Z"
+current_phase: 45
+current_phase_name: Deploy Key Rename & Row Actions
+status: planning
+stopped_at: Phase 44 complete, ready to plan Phase 45
+last_updated: "2026-10-13T12:59:15.711Z"
 last_activity: 2026-10-13
-last_activity_desc: Completed 44-03 (shipped via pipeline 5662, console.thinx.cloud serves d630652, Legacy unchanged; operator UAT pending)
-state_head: d630652e04f28ac275b0d7aab2f0cec638dabede
+last_activity_desc: Phase 44 complete, transitioned to Phase 45
+state_head: a16f9ac2049b3f8349c746f0438d5ee63d54e2b6
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 3
   completed_plans: 3
-  percent: 29
+  percent: 43
 ---
 
 # Project State
@@ -29,17 +29,17 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 44 — Device List Parity
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-10-13 — Completed 44-03 (shipped via pipeline 5662, console.thinx.cloud serves d630652, Legacy unchanged; operator UAT pending)
+Phase: 45 — Deploy Key Rename & Row Actions
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-13 — Phase 44 complete, transitioned to Phase 45
 
-Progress: [███░░░░░░░] 29%
+Progress: [████░░░░░░] 43%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 9
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -49,6 +49,7 @@ Progress: [███░░░░░░░] 29%
 |-------|-------|-------|----------|
 | 42 | 3 | - | - |
 | 43 | 3 | - | - |
+| 44 | 3 | - | - |
 
 *Updated after each plan completion*
 **Per-Plan Metrics:**
@@ -124,5 +125,5 @@ Progress: [███░░░░░░░] 29%
 ## Session Continuity
 
 **Last session:** 2026-10-13T12:00:37.920Z
-**Stopped At:** Completed 44-03-PLAN.md
+**Stopped At:** Phase 44 complete, ready to plan Phase 45
 **Resume File:** None

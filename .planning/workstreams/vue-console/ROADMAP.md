@@ -35,7 +35,7 @@ no dependency or infrastructure upgrades.
 
 - [x] **Phase 42: CI Trim, Login Page & Build Footer** - Snyk monitors on `main` only, legacy console build paused for the milestone; THiNX-branded welcome login with social logins under a green Login button; every footer shows the build year and short commit id (completed 2026-10-12)
 - [x] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console) (completed 2026-10-13)
-- [ ] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning
+- [x] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning (completed 2026-10-13)
 - [ ] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console)
 - [ ] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure
 - [ ] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items
@@ -112,7 +112,7 @@ Plans:
   3. The platform shows as a Legacy-style bullet with no "Platform:" label. Device rows and repository rows render the identical bullet for the same platform, and a repository with no known platform shows `unknown`, never `unknown_platform`.
   4. A device with no API key assigned shows an `fa-warning` icon whose hover tip explains that the device has no API key.
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -260,7 +260,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 |-------|-----------|----------------|--------|-----------|
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
-| 44. Device List Parity | v1.18 | 3/3 | In Progress | - |
+| 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
