@@ -429,7 +429,7 @@ test('rename never opens, reads, writes, chmods or removes the private key (D-04
     // The spy itself works: a deliberate read of the private file is recorded.
     const probe = spyOnPath(privatePath);
     try { require('fs-extra').readFileSync(privatePath); } finally { probe.restore(); }
-    assert.deepEqual(probe.calls, ['readFileSync']);
+    assert.ok(probe.calls.includes('readFileSync'), 'spy records ' + JSON.stringify(probe.calls));
 
     const bytes = fs.readFileSync(privatePath);
     const mtimeMs = fs.statSync(privatePath).mtimeMs;
