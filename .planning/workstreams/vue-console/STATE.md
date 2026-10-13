@@ -4,12 +4,12 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 43
 current_phase_name: Notification Delivery
-status: executing
-stopped_at: Completed 43-02-PLAN.md
-last_updated: "2026-10-12T21:16:56.219Z"
-last_activity: 2026-10-12
-last_activity_desc: Completed 43-02 (Build Status frames to the owner, NOTIF-03)
-state_head: 5afc7f8314a9e12f8b22c2076720937ae8add6e7
+status: verifying
+stopped_at: Completed 43-03-PLAN.md
+last_updated: "2026-10-13T07:37:24.055Z"
+last_activity: 2026-10-13
+last_activity_desc: Completed 43-03 (Phase 43 shipped; skip-bypass; D-16 UAT pending)
+state_head: b1126b6c9db3bfee5b6c1e90d1241536f5dbd2e1
 progress:
   total_phases: 7
   completed_phases: 1
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 Phase: 43 (Notification Delivery) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-10-12 — Completed 43-02 (Build Status frames to the owner, NOTIF-03)
+Status: Phase complete — ready for verification
+Last activity: 2026-10-13 — Completed 43-03 (Phase 43 shipped via pipeline 5659; legacy bypass skipped by operator; D-16 UAT pending)
 
 Progress: [█░░░░░░░░░] 14%
 
@@ -58,6 +58,7 @@ Progress: [█░░░░░░░░░] 14%
 | Phase 42 P03 | 8 min | 2 tasks | 1 files |
 | Phase 43 P01 | 10min | 3 tasks | 7 files |
 | Phase 43 P02 | 8min | 3 tasks | 4 files |
+| Phase 43 P03 | 25min | 3 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Progress: [█░░░░░░░░░] 14%
 - [Phase 43]: Credential-free live probe scripts/check-ws-multitab.js (WS-MULTITAB OK/FAIL) is how 43-03 proves multi-tab upgrades on rtm.thinx.cloud
 - [Phase 43]: 43-02: Build Status frames go through messenger.sendToOwner; run_build binds the owner from br.owner via Builder#consoleNotifiers (caller-supplied owners ignored); route and queue pass only { messenger }
 - [Phase 43]: 43-02: one terminal Build Status frame per build_id (error or Completed; bounded memory 1000); Completed only for an OK status, otherwise the status or Failed as error; raw log lines never reach console sockets
+- [Phase 43]: 43-03: operator chose skip-bypass; no build_legacy_console=true pipeline ran. NOTIF-01 is live through the pre-CI-05 legacy build (served LogviewController byte-identical to console cfff199, carries thinxEscapeHtml); roadmap Phase 43 criterion 2 (one-off legacy build) not executed
+- [Phase 43]: 43-03: shipped 7cec687b..b1126b6c via pipeline 5659 (legacy-off, no Snyk); WS-MULTITAB FAIL 1/2 -> OK 2/2 on rtm.thinx.cloud; D-16 human checks pending UAT
 
 ### Pending Todos
 
@@ -87,7 +90,7 @@ Progress: [█░░░░░░░░░] 14%
 ### Blockers/Concerns
 
 - [Phase 48] CI-07: the Vue Cypress job in thinx-cloud/console has been red since at least 2026-10-01 (4/10 specs: devices, profile, login, oauth-return; diagnosis 2026-10-12). Also check `services/console/src/cypress/.env.test`, which is tracked in git (not read; secret-file guard), for committed credentials, and stop CI logging in as the leaked fixture user `test`.
-- [Phase 43] The NOTIF-01 legacy build uses the CI-05 bypass: API-triggered thinx-staging pipeline with `build_legacy_console=true` (runbook `.planning/runbooks/legacy-console-build-gate.md`). It also reruns the API and Vue deploy jobs, i.e. a production redeploy (42-REVIEW IN-01).
+- [Phase 43] Resolved 2026-10-13: the NOTIF-01 one-off legacy bypass was skipped by the operator (`skip-bypass`); the served Legacy image already carries the escape. Roadmap Phase 43 criterion 2 is recorded as not executed (43-03-SUMMARY); `thinx/console:swarm` is refreshed only by CI-06 (Phase 48).
 - [Phase 42 follow-up] Pushed 2026-10-12 (operator, `2e018d7f..b7ea0959`): Phase 42 close-out, WR-01, quick 261012-r9z Codacy fixes, the `-s ours` main merge `87525c98` and the README rewrite. Confirm the Codacy PR #573 status once re-analysed.
 - [Phase 42 follow-up] H6: confirm the first `main` pipeline after Phase 42 runs all four Snyk monitors green (snyk-monitor-console-vue now uses the dockerhub context only). WR-02 accepted: production images are Snyk-scanned only via main.
 - [Phase 43] The WebSocket upgrade change in `thinx-core.js` must keep `ZZ-WebSocketHandshakeRtmSpec` green and keep per-owner frame routing (quick 261003-vn3); no cross-owner delivery.
@@ -109,6 +112,6 @@ Progress: [█░░░░░░░░░] 14%
 
 ## Session Continuity
 
-**Last session:** 2026-10-12T21:16:49.821Z
-**Stopped At:** Completed 43-02-PLAN.md
+**Last session:** 2026-10-13T07:37:23.997Z
+**Stopped At:** Completed 43-03-PLAN.md
 **Resume File:** None

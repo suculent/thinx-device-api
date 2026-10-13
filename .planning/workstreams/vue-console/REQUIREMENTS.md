@@ -69,9 +69,9 @@ upgrades.
 
 ### Notifications
 
-- [ ] **NOTIF-01**: The actionable console toast HTML-escapes the device-supplied `notification.body`, so no markup injection is possible; the fix is deployed to production via a one-off legacy console build while CI-05 is in effect, not deferred to CI-06.
-- [ ] **NOTIF-02**: A second Legacy console tab on the same `/<owner>` socket path is accepted and both tabs receive frames.
-- [ ] **NOTIF-03**: Build status frames reach the owner's console sockets.
+- [x] **NOTIF-01**: The actionable console toast HTML-escapes the device-supplied `notification.body`, so no markup injection is possible; the fix is deployed to production via a one-off legacy console build while CI-05 is in effect, not deferred to CI-06.
+- [x] **NOTIF-02**: A second Legacy console tab on the same `/<owner>` socket path is accepted and both tabs receive frames.
+- [x] **NOTIF-03**: Build status frames reach the owner's console sockets.
 - [ ] **NOTIF-04**: Reloading a Vue deep link such as `/#/app/history` stays on that page instead of redirecting to the dashboard.
 
 ### CI / Delivery
@@ -104,9 +104,9 @@ upgrades.
 | LOGIN-01 | Phase 42 | Complete |
 | LOGIN-02 | Phase 42 | Complete |
 | LOGIN-03 | Phase 42 | Complete |
-| NOTIF-01 | Phase 43 | Pending |
-| NOTIF-02 | Phase 43 | Pending |
-| NOTIF-03 | Phase 43 | Pending |
+| NOTIF-01 | Phase 43 | Complete |
+| NOTIF-02 | Phase 43 | Complete |
+| NOTIF-03 | Phase 43 | Complete |
 | DEV-01 | Phase 44 | Pending |
 | DEV-02 | Phase 44 | Pending |
 | DEV-03 | Phase 44 | Pending |
