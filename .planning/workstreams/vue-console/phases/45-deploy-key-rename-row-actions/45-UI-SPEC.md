@@ -45,7 +45,7 @@ No new npm dependency. New or changed files (paths are the recommended discretio
 | File | Content |
 |------|---------|
 | `src/utils/keyNames.js` (new) | `validateKeyName(name)` → `{ ok, reason }`, a client mirror of the server rule D-05/D-06 with the same reason codes and the same length unit as the server function; `keyNameMessage(reason)` → the sentence from the Copywriting Contract. The server stays the authority |
-| `src/styles/_deploy-keys.scss` (new) | `.deploy-keys-table` group striping, `.key-name`, `.key-fingerprint`, `.key-text`, `.key-toolbar`, `.key-name-feedback`, `.key-name-help`; imported from `theme.scss` after `platforms` |
+| `src/styles/_deploy-keys.scss` (new) | `.key-create-form`, `.deploy-keys-table` group striping, `.key-name`, `.key-fingerprint`, `.key-text`, `.key-toolbar`, `.key-name-feedback`, `.key-name-help`; imported from `theme.scss` after `platforms` |
 | `src/core/api.js` | `$patch(path, body)` → `this.request('PATCH', path, body)` (no PATCH helper exists today; see Integration prerequisites) |
 | `src/store/rsakeys.js` | `renameItem({ filename, name })` → `PATCH /rsakey` with body `{ filename, name }`, returns the API result unchanged (no refresh inside; the page reloads) |
 
@@ -71,7 +71,7 @@ executor may use any other bootstrap-vue export without asking.
 | Component | Import path | Notes |
 |-----------|-------------|-------|
 | `IconButton` (Phase 44) | `@/components/IconButton/IconButton` | The four row actions (UI-K05). Unchanged component; `aria-expanded` / `aria-controls` / `data-cy` pass through `$attrs` onto the inner button |
-| `BButton` (`<b-button>`) | global plugin registration | Generate (existing), bulk Delete in the new toolbar, rename modal Cancel / Save |
+| `BButton` (`<b-button>`) | global plugin registration | Generate (existing), bulk Delete in the new toolbar, rename modal `Keep current name` / `Save name` |
 | `BForm`, `BFormInput`, `BFormGroup` | global plugin registration | Generate form (existing) and the rename form inside the modal |
 | `BFormCheckbox` | global plugin registration | Row selection, unchanged |
 | `BModal` (`<b-modal>`) | global plugin registration | New rename modal `rsakey-rename-modal`; existing `rsakey-result-modal` unchanged |
@@ -88,8 +88,8 @@ Declared values for anything this phase adds or changes (multiples of 4):
 | Token | Value | Usage in this phase |
 |-------|-------|---------------------|
 | xs | 4px | Gap between row `IconButton`s (inherited `.icon-button:not(:last-child)`); icon-to-text gap in `IconButton` and in the bulk Delete button; gap between a name field and its feedback line |
-| sm | 8px | Bulk toolbar bottom margin; inner padding of the expanded key text block |
-| md | 16px | not used |
+| sm | 8px | Bulk toolbar bottom margin; inner padding of the expanded key text block; gap between the Generate form's label, input and button (`.key-create-form`, horizontal and between wrapped lines) |
+| md | 16px | Generate form bottom margin (`.key-create-form`, replaces `mb-3`) |
 | lg | 24px | not used |
 | xl | 32px | `IconButton` and bulk Delete minimum height 32px (inherited from UI-D08) |
 | 2xl | 48px | not used |
@@ -97,9 +97,13 @@ Declared values for anything this phase adds or changes (multiples of 4):
 
 Width limits (multiples of 8): Name column text `max-width: 160px` below 768px, `240px` from 768px (UI-K03).
 
-Exceptions (inherited, not touched): the generate form's Bootstrap `rem` utilities (`mr-2` 7px, `mb-2` 7px, `mb-3`
-14px), table cell padding (`.75rem` = 10.5px), modal header/body/footer padding (`1rem` = 14px). The form label gets
-the same `mb-2` the input and button already have, so the row lines up when it wraps (38-UI-REVIEW Pillar 5).
+Exceptions (inherited, not touched): table cell padding (`.75rem` = 10.5px), modal header/body/footer padding (`1rem` =
+14px). No Bootstrap `rem` spacing utility is added in this phase.
+
+Generate form (UI-K15, 38-UI-REVIEW Pillar 5): the off-grid utilities `mr-2` / `mb-2` (7px) on the input and button,
+`ml-2 mb-2` on the old Delete and `mb-3` (14px) on the form are removed. The form gets one class,
+`.key-create-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }`, and its label,
+input and button carry no margin classes, so they line up on one row and stay 8px apart when the row wraps.
 
 ---
 
@@ -111,7 +115,7 @@ are inherited.
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body (table cells, empty row, confirm text, modal body, field label) | 14px (`1rem`) | 300 (`$font-weight-base`) | 1.5 |
-| Label (IconButton text at ≥ 992px, bulk Delete, Save / Cancel, field feedback and help line) | 12.25px (`.875rem`) | 400 | 1.5 |
+| Label (IconButton text at ≥ 992px, bulk Delete, `Save name` / `Keep current name`, field feedback and help line) | 12.25px (`.875rem`) | 400 | 1.5 |
 | Monospace (fingerprint cell, expanded public key) | 12.25px (`.875rem`), `$font-family-monospace` | 400 | 1.5 |
 | Heading (`h1.page-title`, `.modal-title`) | inherited, unchanged | inherited | inherited |
 
@@ -126,18 +130,20 @@ Page and modal surfaces are unchanged. Contrast was computed with the WCAG 2.x f
 | Role | Value | Usage |
 |------|-------|-------|
 | Dominant (60%) | radial gradient `#333867` → `#17193B` (`$default-bg`); modal surface rgb(35, 38, 66) | Page, transparent table, group stripes `rgba(0,0,0,.05)`, rename modal; unchanged |
-| Secondary (30%) | `#474D84` (`$default`, `.btn-default`, white glyph 7.89:1); key text block `#040620` (`$pre-bg`, text 6.70:1) | Show / Hide, Copy, Rename `IconButton`s (`variant="default"`), rename Cancel; expanded key background |
+| Secondary (30%) | `#474D84` (`$default`, `.btn-default`, white glyph 7.89:1); key text block `#040620` (`$pre-bg`, text 6.70:1) | Show / Hide, Copy, Rename `IconButton`s (`variant="default"`), rename `Keep current name`; expanded key background |
 | Accent (10%) | `#2477FF` (`$blue`, Bootstrap `primary`) | Nothing in this phase. No element added here is blue |
-| Constructive CTA (existing) | `#2D8515` (`$green`, `success`, white 4.69:1) | `Generate Deploy Key` (existing) and the rename modal `Save` only |
+| Constructive CTA (existing) | `#2D8515` (`$green`, `success`, white 4.69:1) | `Generate Deploy Key` (existing) and the rename modal `Save name` only |
 | Destructive | `#C93C3C` (`$red`, `danger`, white 5.01:1) | Row Delete `IconButton`, bulk `Delete selected` button, confirm OK `Delete` only |
 | Field error text (new) | `#FF8A8A` — 4.86:1 on `#333867`, 7.47:1 on `#17193B`, 6.46:1 on the modal | The name feedback line under the Generate form and under the rename field only. Bootstrap's `.invalid-feedback` `#C93C3C` measures 2.93:1 on the modal and 2.21:1 on the page and is not used; Phase 44's `#FF6B6B` measures 3.98:1 on the page, under 4.5:1 for text |
 | Body text | `rgba(#F4F4F5, .6)` — 4.75:1 page worst case, 5.77:1 modal | Every cell, the empty row and the rename help line. `text-muted` is not used for content (3.14:1, Phase 44 rule) |
 
 Accent reserved for: nothing new. The only blue on the page stays the theme's link colour; the CTA is green (Generate,
-Save) and the only red elements are the three Delete controls.
+Save name) and the only red elements are the three Delete controls.
 
 Pre-existing, not changed: `.alert-danger` paints `rgba(#F4F4F5, .9)` text on `#C93C3C` (3.96:1). The action-error and
-load-error alerts reuse it as every Vue page does; a theme-wide fix belongs to Phase 48 (UI review), not here.
+load-error alerts reuse it as every Vue page does. Deferred to **Phase 48 (Deep Links & Close-out)**, which owns the
+console UI-review items: the fix is theme-wide (`_overrides.scss` `@mixin alert`) and touches every page, so it is not
+made here.
 
 ---
 
@@ -155,6 +161,12 @@ the bulk Delete is no longer in that form.
 | UI-K02 | Each key renders as its own `<tbody class="key-group" data-cy="deploy-key-group">` holding the key row (`data-cy="deploy-key-row"`) and, when shown, its detail row (UI-K06). Striping is per group: `.deploy-keys-table > tbody.key-group:nth-of-type(odd) > tr { background-color: rgba(0,0,0,.05); }` and `table-striped` is dropped, so opening a key never shifts the stripes of the rows below it | D-09, discretion |
 | UI-K03 | Name cell: `<td><span class="key-name" dir="auto" :title="item.name" data-cy="key-name">{{ item.name }}</span></td>`; `.key-name { display: block; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: isolate; }`, `max-width: 240px` from 768px. The limit sits on a block inside the `<td>`, as the Phase 44 firmware fix (`max-width` on a table cell has no effect, 44 IN-03). `dir="auto"` + isolation keep a right-to-left name from reordering the cells next to it | D-12, KEY-06 |
 | UI-K04 | Generated cell `<td class="text-nowrap">{{ formatDate(item.date) }}</td>`; a missing or unparseable date renders `—` (never `Invalid Date`). Public key cell `<td class="text-nowrap"><span class="key-fingerprint" title="SHA-256 fingerprint of the public key" data-cy="key-fingerprint">{{ item.fingerprint }}</span></td>`, the fingerprint string as the API sends it (D-01, `SHA256:` + 43 base64 characters), not shortened; a missing or non-string value renders `—`. `.key-fingerprint { font-family: $font-family-monospace; font-size: .875rem; font-weight: 400; color: inherit; }` (no `<code>`: its theme colour is pink). Actions cell `<td class="actions-cell">` (Phase 44 rule: `white-space: nowrap; width: 1%`). On narrow screens the table scrolls horizontally inside `.table-responsive`; the page never does | D-01, D-12, KEY-06, 38-UI-REVIEW Pillar 2 |
+
+### Generate form (POL-04)
+
+| ID | Decision | Source |
+|----|----------|--------|
+| UI-K15 | `<b-form inline class="key-create-form" @submit.prevent="create">` holds only the label `Key name`, the input and `Generate Deploy Key`, none of them with a margin utility. `.key-create-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }`: one 8px gap between items and between wrapped lines, 16px below the form. The name feedback line (UI-K09) follows the form | D-11, 38-UI-REVIEW Pillar 5 |
 
 ### Row actions (KEY-05, D-09, D-11)
 
@@ -179,16 +191,16 @@ from 992px; label = visible text = `aria-label` = hover tip):
 
 | ID | Decision | Source |
 |----|----------|--------|
-| UI-K07 | `<b-modal id="rsakey-rename-modal" title="Rename deploy key">` with a custom footer. Body: `<b-form id="rsakey-rename-form" @submit.prevent="saveRename">` holding `<label for="rename-key-name">Key name</label>`, `<b-form-input id="rename-key-name" v-model="renameName" maxlength="120" :disabled="renaming" :aria-invalid="String(!!renameReason)" aria-describedby="rename-key-name-feedback rename-key-name-help" data-cy="rename-key-input" />`, then the feedback line `<p id="rename-key-name-feedback" class="key-name-feedback" aria-live="polite" data-cy="rename-key-feedback">` (UI-K09), then `<p id="rename-key-name-help" class="key-name-help">Up to 120 characters. The key itself does not change.</p>`. Footer: `Cancel` (`variant="default"`, `data-cy="rename-key-cancel"`) then `Save` (`variant="success"`, `type="submit" form="rsakey-rename-form"`, `data-cy="rename-key-save"`). Enter in the field submits. On open the field is prefilled with the row's displayed `item.name` and focused with its text selected; focus returns to the row's Rename button on close (bootstrap-vue default) | D-10 |
-| UI-K08 | Submit: the name is trimmed; the client check (`validateKeyName`) runs first and an invalid name sends nothing. A trimmed name equal to the current name closes the modal without a request. Otherwise `renaming = true`: Save shows `Saving…` and is disabled, the field and Cancel are disabled, and the modal ignores Esc, backdrop clicks and the header close (`@hide` → `preventDefault()` while `renaming`). One click sends one `PATCH`. Success (`result.success`): close, toast `Deploy key renamed` (success, 2000ms, same call as the copy toast), reload the list. `success: false` with `response === "invalid_key_name"`: the modal stays open, the field is re-enabled and focused, and the feedback line shows the sentence for `result.reason` (unknown or missing reason → the generic sentence). Any other failure or a thrown request: the modal stays open with `Could not rename the deploy key. Try again.` in the same line (not marked `aria-invalid`). Save is also disabled while the client check fails | D-07, D-10 |
+| UI-K07 | `<b-modal id="rsakey-rename-modal" title="Rename deploy key">` with a custom footer. Body: `<b-form id="rsakey-rename-form" @submit.prevent="saveRename">` holding `<label for="rename-key-name">Key name</label>`, `<b-form-input id="rename-key-name" v-model="renameName" maxlength="120" :disabled="renaming" :aria-invalid="String(!!renameReason)" aria-describedby="rename-key-name-feedback rename-key-name-help" data-cy="rename-key-input" />`, then the feedback line `<p id="rename-key-name-feedback" class="key-name-feedback" aria-live="polite" data-cy="rename-key-feedback">` (UI-K09), then `<p id="rename-key-name-help" class="key-name-help">Up to 120 characters. The key itself does not change.</p>`. Footer: `Keep current name` (`variant="default"`, `data-cy="rename-key-cancel"`, closes without a request) then `Save name` (`variant="success"`, `type="submit" form="rsakey-rename-form"`, `data-cy="rename-key-save"`). Enter in the field submits. On open the field is prefilled with the row's displayed `item.name` and focused with its text selected; focus returns to the row's Rename button on close (bootstrap-vue default) | D-10 |
+| UI-K08 | Submit: the name is trimmed; the client check (`validateKeyName`) runs first and an invalid name sends nothing. A trimmed name equal to the current name closes the modal without a request. Otherwise `renaming = true`: `Save name` shows `Saving…` and is disabled, the field and `Keep current name` are disabled, and the modal ignores Esc, backdrop clicks and the header close (`@hide` → `preventDefault()` while `renaming`). One click sends one `PATCH`. Success (`result.success`): close, toast `Deploy key renamed` (success, 2000ms, same call as the copy toast), reload the list. `success: false` with `response === "invalid_key_name"`: the modal stays open, the field is re-enabled and focused, and the feedback line shows the sentence for `result.reason` (unknown or missing reason → the generic sentence). Any other failure or a thrown request: the modal stays open with `Could not rename the deploy key. Try again.` in the same line (not marked `aria-invalid`). `Save name` is also disabled while the client check fails | D-07, D-10 |
 | UI-K09 | Name feedback line, both forms: `.key-name-feedback { margin: 4px 0 0; color: #FF8A8A; font-size: .875rem; font-weight: 400; }`, rendered empty (no height, `:empty { display: none; }`) when there is nothing to say. The message updates as the user types. The `empty` reason shows its sentence in the rename modal only (the user removed a prefilled name); on the Generate form an empty field just keeps Generate disabled, as today. Generate form: the line sits right after the form (`id="deploy-key-name-feedback"`, `data-cy="create-key-feedback"`), the input gets `aria-describedby="deploy-key-name-feedback"` and `aria-invalid`, Generate is disabled while the check fails, and a server `invalid_key_name` answer shows its reason sentence there (the field keeps the typed name). `.key-name-help { margin: 4px 0 0; color: inherit; font-size: .875rem; }` (body colour, not `form-text`'s muted grey) | D-06, D-07, KEY-04 SC 1 |
 
 ### Delete: per-row, bulk, pending (KEY-05, POL-04, D-11)
 
 | ID | Decision | Source |
 |----|----------|--------|
-| UI-K10 | Per-row Delete calls `this.$bvModal.msgBoxConfirm(text, { title: 'Confirm Delete', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel', autoFocusButton: 'cancel', bodyClass: 'text-break' })` with the row text from the Copywriting Contract; the key name is passed as plain text (never HTML). Cancel or a closed dialog deletes nothing. A `confirming` flag makes every Delete click (row or bulk) a no-op while a confirmation is open, so a fast double click opens one dialog. After OK the key's id joins a reactive `deletingIds` set until the request settles; success reloads the list (the row disappears); failure removes the id, re-enables the row and shows `Could not delete the deploy key. Try again.` in the action-error alert | D-11, 38-UI-REVIEW fix 3 |
-| UI-K11 | Bulk toolbar, its own row between the intro paragraph and the table, rendered only when the list has at least one key: `<div class="key-toolbar" role="toolbar" aria-label="Selected deploy keys">` with `.key-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-bottom: 8px; }`. One `<b-button size="sm" variant="danger" data-cy="key-bulk-delete">` with `<i class="fa fa-trash" aria-hidden="true">` + 4px + text: `Delete selected` (no selection, disabled), `Delete selected (N)` (N ≥ 1), `Deleting…` (bulk request in flight, disabled). It keeps the existing confirm text and options (UI-K10 options, count wording unchanged) and the same `confirming` / `deletingIds` guard: the selected keys' row buttons are disabled while it runs. Success clears the selection and reloads; failure keeps the selection and shows `Could not delete the deploy keys. Try again.` The Generate `<b-form>` contains no Delete button any more | D-11, POL-04, 38-UI-REVIEW fix 1 |
+| UI-K10 | Per-row Delete calls `this.$bvModal.msgBoxConfirm(text, { title: 'Confirm Delete', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Keep key', autoFocusButton: 'cancel', bodyClass: 'text-break' })` with the row text from the Copywriting Contract; the key name is passed as plain text (never HTML). `Keep key` or a closed dialog deletes nothing. A `confirming` flag makes every Delete click (row or bulk) a no-op while a confirmation is open, so a fast double click opens one dialog. After OK the key's id joins a reactive `deletingIds` set until the request settles; success reloads the list (the row disappears); failure removes the id, re-enables the row and shows `Could not delete the deploy key. Try again.` in the action-error alert | D-11, 38-UI-REVIEW fix 3 |
+| UI-K11 | Bulk toolbar, its own row between the intro paragraph and the table, rendered only when the list has at least one key: `<div class="key-toolbar" role="toolbar" aria-label="Selected deploy keys">` with `.key-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-bottom: 8px; }`. One `<b-button size="sm" variant="danger" data-cy="key-bulk-delete">` with `<i class="fa fa-trash" aria-hidden="true">` + 4px + text: `Delete selected` (no selection, disabled), `Delete selected (N)` (N ≥ 1), `Deleting…` (bulk request in flight, disabled). It keeps the existing confirm text (count wording unchanged) and the UI-K10 options, with `cancelTitle` `Keep key` for one selected key and `Keep keys` for several and the same `confirming` / `deletingIds` guard: the selected keys' row buttons are disabled while it runs. Success clears the selection and reloads; failure keeps the selection and shows `Could not delete the deploy keys. Try again.` The Generate `<b-form>` contains no Delete button any more | D-11, POL-04, 38-UI-REVIEW fix 1 |
 
 ### Load, reload and selection (POL-04, D-12)
 
@@ -210,19 +222,22 @@ own right-aligned row above the table, away from the green CTA (38-UI-REVIEW Pil
 
 | Element | Copy |
 |---------|------|
-| Primary CTA | `Generate Deploy Key` / `Generating…` (existing, unchanged). Rename modal primary: `Save` / `Saving…` (U+2026) |
+| Primary CTA | `Generate Deploy Key` / `Generating…` (existing, unchanged). Rename modal primary: `Save name` / `Saving…` (U+2026); its dismiss button: `Keep current name` |
 | Row actions | `Show key` / `Hide key`; `Copy key`; `Rename`; `Delete` / `Deleting…`. Single verbs follow the Phase 44 accepted convention: the row gives the object, and the label is also the aria-label and tip (D-09) |
 | Bulk action | `Delete selected` / `Delete selected (N)` / `Deleting…`; toolbar group label `Selected deploy keys` |
 | Table | headers `Select` (screen-reader only), `Name`, `Generated`, `Public key`, `Actions`; caption `Deploy keys` (screen-reader only); fingerprint tip `SHA-256 fingerprint of the public key`; missing value `—` |
-| Rename modal | title `Rename deploy key`; field label `Key name`; help `Up to 120 characters. The key itself does not change.`; buttons `Cancel`, `Save`; success toast `Deploy key renamed` |
+| Rename modal | title `Rename deploy key`; field label `Key name`; help `Up to 120 characters. The key itself does not change.`; buttons `Keep current name`, `Save name`; success toast `Deploy key renamed` |
 | Name validation (`reason` → sentence, Vue and client check, D-07) | `empty` → `Enter a name for the key.`; `too_long` → `The name is longer than 120 characters.`; `control_chars` → `The name contains a control character, such as a tab or a line break.`; `line_separator` → `The name contains a hidden line or paragraph separator.`; `bidi` → `The name contains a hidden direction-override character.`; unknown or missing reason → `This name is not allowed. Choose a different name.` |
 | Empty state heading | Not used: the table shows a single-line empty row, like the device list |
 | Empty state body | `No deploy keys yet. Generate one with the form above.` |
 | Error state | Load: `Could not load deploy keys. Refresh to retry.` (one non-dismissible alert, no empty-row text). Generate: `Could not generate the deploy key. Try again.` (replaces `Failed to generate deploy key.`). Rename: `Could not rename the deploy key. Try again.` (in the modal). Row delete: `Could not delete the deploy key. Try again.` Bulk delete: `Could not delete the deploy keys. Try again.` (replaces `Failed to delete deploy keys.`). Copy: `Could not copy the key. Use Show key and copy the text manually.` (the old text pointed at a key that is no longer on screen) |
-| Destructive confirmation | Row Delete: title `Confirm Delete`, body `Delete the deploy key "{name}"? This cannot be undone. Repositories that use it stop building until a new key is generated and added to the Git host.`, OK `Delete` (danger), Cancel `Cancel` (focused). Bulk: same title and buttons, body unchanged: `Delete this deploy key? …` for one, `Delete N deploy keys? … Repositories that use them stop building …` for several |
+| Destructive confirmation | Row Delete: title `Confirm Delete`, body `Delete the deploy key "{name}"? This cannot be undone. Repositories that use it stop building until a new key is generated and added to the Git host.`, OK `Delete` (danger), dismiss `Keep key` (focused). Bulk: same title and OK, dismiss `Keep key` (one) / `Keep keys` (several), body unchanged: `Delete this deploy key? …` for one, `Delete N deploy keys? … Repositories that use them stop building …` for several |
 
-Forbidden strings in `Rsakeys.vue` after this phase: `Delete (` (old bulk label), `text-muted`, `>Select<` as a visible
-header, `Deploy keys could not be loaded`, `Failed to delete deploy keys`, `Failed to generate deploy key`.
+Forbidden strings in `Rsakeys.vue` after this phase: `cancelTitle: 'Cancel'`, `>Cancel<`, `>Save<` (generic modal and
+confirm buttons), `Delete (` (old bulk label), `text-muted`, `>Select<` as a visible header,
+`Deploy keys could not be loaded`, `Failed to delete deploy keys`, `Failed to generate deploy key`. Inside the Generate
+`<b-form>` (the form element and its children only): `mr-2`, `mb-2`, `ml-2`, `mb-3`. The unchanged `rsakey-result-modal`
+keeps its own markup.
 
 ---
 
@@ -232,7 +247,7 @@ Probe: `ui-consideration-probe.cjs` `applicableCategories` over 6 elements with 
 table — list-collection; E2 row action icon buttons — interactive-control; E3 rename modal form — form; E4 bulk Delete
 toolbar — interactive-control; E5 Generate form name field — form; E6 expanded public key text — static-content), 25
 applicable categories, 0 unclassified. The heuristic classifier also proposed list-collection + media + static-content
-for E2 and interactive-control for E3; corrected by the author (E2 is four buttons inside a row, E3's Save button is
+for E2 and interactive-control for E3; corrected by the author (E2 is four buttons inside a row, E3's `Save name` button is
 part of the form and covered by its loading/error rows). Resolved in autonomous mode: 22 covered, 3 backstop, 0
 unresolved, 0 dismissed. Copy is in the Copywriting Contract.
 
@@ -250,8 +265,8 @@ Applicable state considerations resolved: 22 covered, 3 backstop, 0 unresolved.
 | loading | E2 | ✅ covered | During a delete the trash shows `fa-spin fa-circle-o-notch` with `Deleting…`, and the row's four buttons and checkbox are disabled until the request settles (UI-K05, UI-K10) |
 | error | E2 | ✅ covered | A failed row delete re-enables the row and shows the row-delete error copy; a failed copy shows the copy error copy |
 | long-text | E2 | ✅ covered | Labels are fixed short strings; below 992px only glyphs show, the text stays as aria-label and tip |
-| empty | E3 | ✅ covered | Clearing the prefilled name shows `Enter a name for the key.` and disables Save |
-| loading | E3 | ✅ covered | While the PATCH is in flight Save reads `Saving…`, the field, Cancel and Save are disabled and the modal cannot be dismissed (UI-K08) |
+| empty | E3 | ✅ covered | Clearing the prefilled name shows `Enter a name for the key.` and disables `Save name` |
+| loading | E3 | ✅ covered | While the PATCH is in flight `Save name` reads `Saving…`, the field, `Keep current name` and `Save name` are disabled and the modal cannot be dismissed (UI-K08) |
 | error | E3 | ✅ covered | A server `invalid_key_name` shows the reason sentence under the field and keeps the modal open; any other failure shows the rename error copy there |
 | partial | E3 | ✅ covered | A whitespace-only name counts as empty; leading/trailing spaces are trimmed before the check and the request; an unchanged name closes without a request |
 | long-text | E3 | 🧪 backstop | `{ statement: "A 120-character name with no spaces can be saved through the rename modal; afterwards the Name cell shows it ellipsised with the full name as title, and its per-row delete confirmation wraps the name inside the dialog with no horizontal overflow", verification: backstop }` |
@@ -262,7 +277,7 @@ Applicable state considerations resolved: 22 covered, 3 backstop, 0 unresolved.
 | loading | E5 | ✅ covered | `Generating…` with the field and button disabled (existing) |
 | error | E5 | ✅ covered | A client-detected or server-reported invalid name shows its reason sentence on the feedback line under the form; any other failure shows the generate error copy in the action alert |
 | partial | E5 | ✅ covered | Leading/trailing spaces are trimmed before the check and the request; the typed name stays in the field after an invalid-name answer |
-| long-text | E5 | ✅ covered | `maxlength="120"` (existing); the inline form wraps under `sm` with label, input and button aligned by the shared `mb-2` |
+| long-text | E5 | ✅ covered | `maxlength="120"` (existing); the inline form wraps under `sm` with label, input and button 8px apart on every line (`.key-create-form` gap, UI-K15) |
 | overflow | E6 | ✅ covered | The key text is `white-space: pre-wrap; word-break: break-all` inside a `colspan="5"` cell, so it wraps inside the row instead of widening the table |
 | long-text | E6 | 🧪 backstop | `{ statement: "With a 4096-bit RSA public key expanded at 375px viewport width, the key text wraps inside its detail row, the table's scroll width is the same as with the key hidden, and the rendered text equals item.pubkey", verification: backstop }` |
 
@@ -291,11 +306,13 @@ New plain-node unit test `vue/tests/unit/deploy-key-actions.cjs`, appended to th
   `key-bulk-delete` exists outside it; no `text-muted` anywhere in the template.
 - Show toggle: clicking `key-show` renders `[data-cy=key-text]` with the pubkey and flips the label to `Hide key` and
   `aria-expanded` to `true`; a second click removes it.
-- Delete: cancelled confirm sends nothing; confirm text contains the key name; two rapid clicks open one confirm and send
+- Delete: cancelled confirm sends nothing; the row confirm options have `cancelTitle: 'Keep key'`, the bulk ones `Keep key`
+  (one) / `Keep keys` (several), and no confirm uses `Cancel`; confirm text contains the key name; two rapid clicks open one confirm and send
   one request; while pending the row's four buttons are disabled and the trash label is `Deleting…`; a failure re-enables
   them and sets the row-delete error copy. Bulk: label `Delete selected` when nothing is selected, `Delete selected (2)`
   with two; same single-request guard.
-- Rename: invalid client name sends no request and shows the sentence; unchanged name sends no request; a
+- Rename: the modal footer buttons read `Keep current name` and `Save name` (no `Cancel` / `Save` text in the template);
+  invalid client name sends no request and shows the sentence; unchanged name sends no request; a
   `{ success: false, response: 'invalid_key_name', reason: 'bidi' }` answer keeps the modal open with the bidi sentence;
   success calls `renameItem({ filename, name })` once with the trimmed name, toasts `Deploy key renamed` and reloads;
   `Saving…` while pending, and a hide event during pending is prevented.
@@ -303,7 +320,9 @@ New plain-node unit test `vue/tests/unit/deploy-key-actions.cjs`, appended to th
   and the rendered page has the load alert and no table; a successful reload prunes `selectedIds` to existing ids.
   **Update** `tests/unit/milestone-v116.cjs:264`, which asserts `error === 'Could not load deploy keys.'` (now `loadFailed`
   only, with the alert copy above).
-- SCSS: `theme.scss` compiles; output contains `.key-name` with `text-overflow: ellipsis`, `.key-text` with
+- Generate form: the `b-form` has class `key-create-form`, and neither it nor its label, input and button carries
+  `mr-2`, `mb-2`, `ml-2` or `mb-3`.
+- SCSS: `theme.scss` compiles; output contains `.key-create-form` with `gap: 8px` and `margin-bottom: 16px`, `.key-name` with `text-overflow: ellipsis`, `.key-text` with
   `word-break: break-all`, `.key-toolbar` with `gap: 4px`, and `.key-name-feedback` with `#FF8A8A` / `#ff8a8a`.
 - `npm run test:unit` is not run in CI: run it locally before shipping (D-16), plus the console build, `test:csp:dist`
   and `perf:spotter` as in Phase 44. Ship via `thinx-staging` (console submodule first, then the parent gitlink, D-16).
