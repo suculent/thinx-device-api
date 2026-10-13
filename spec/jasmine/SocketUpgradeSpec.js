@@ -159,6 +159,11 @@ function startHarness(options, done) {
     h.upgrade.handle(request, socket, head);
   });
   h.wss.on("connection", (ws, request) => SocketSession.accept(ws, request, h.ctx));
+  // WR-01: thinx-core starts the same heartbeat on its wss; the interval is injectable.
+  h.heartbeat = null;
+  if ((SocketUpgrade !== null) && (typeof options.heartbeatMs === "number") && (typeof SocketUpgrade.startHeartbeat === "function")) {
+    h.heartbeat = SocketUpgrade.startHeartbeat(h.wss, options.heartbeatMs);
+  }
   h.server.listen(0, "127.0.0.1", () => {
     h.port = h.server.address().port;
     done();
@@ -167,6 +172,7 @@ function startHarness(options, done) {
 }
 
 function stopHarness(h, done) {
+  if (h.heartbeat) clearInterval(h.heartbeat);
   for (const s of h.wss.clients) { try { s.terminate(); } catch (_e) { /* ignore */ } }
   h.wss.close(() => h.server.close(() => done()));
 }
@@ -433,6 +439,91 @@ describe("SocketUpgradeSpec (Phase 43, NOTIF-02)", function () {
     }, 15000);
   });
 
+  // WR-01: the per-owner cap is released on the raw socket's 'close'. A peer that vanishes
+  // without a FIN (laptop sleep, Wi-Fi switch, killed mobile browser) never sends one, so the
+  // heartbeat must terminate a socket that did not answer the previous ping.
+  describe("WS heartbeat: dead peers are terminated and release their slot (WR-01)", function () {
+
+    const HEARTBEAT_MS = 100;
+    let hb;
+    const hbClients = [];
+
+    beforeAll(function (done) {
+      hb = startHarness({ heartbeatMs: HEARTBEAT_MS }, done);
+    });
+
+    afterAll(function (done) {
+      stopHarness(hb, done);
+    });
+
+    afterEach(async function () {
+      while (hbClients.length) {
+        try { hbClients.pop().ws.terminate(); } catch (_e) { /* ignore */ }
+      }
+      if (hb.upgrade !== null) {
+        expect(await waitFor(() => hb.upgrade.liveSocketCount() === 0, 3000), "heartbeat harness slots released").to.equal(true);
+      }
+    });
+
+    // autoPong: false makes the client a peer that is gone without having closed.
+    async function openHb(autoPong) {
+      hb.ctx.messenger = h.ctx.messenger;
+      const before = hb.ctx.messenger.initWithOwner.calls.count();
+      const ws = new WebSocket("ws://127.0.0.1:" + hb.port + "/" + OWNER_A, { headers: { Cookie: COOKIE_A }, autoPong: autoPong });
+      const client = { ws: ws, opened: false, close: null, pings: 0 };
+      ws.on("open", () => { client.opened = true; });
+      ws.on("ping", () => { client.pings++; });
+      ws.on("close", (code) => { client.close = { code: code }; });
+      ws.on("error", () => { /* close decides */ });
+      hbClients.push(client);
+      expect(await waitFor(() => client.opened || client.close !== null, 3000), "open").to.equal(true);
+      expect(client.opened, "opened").to.equal(true);
+      ws.send(JSON.stringify({ init: OWNER_A }));
+      expect(await waitFor(() => hb.ctx.messenger.initWithOwner.calls.count() === before + 1, 3000), "initWithOwner called").to.equal(true);
+      return client;
+    }
+
+    it("H1 a socket that stops answering pings is terminated within two intervals and frees its owner slot and subscription; one that answers stays", async function () {
+      expect(SocketUpgrade, "lib/thinx/socket_upgrade.js").to.not.equal(null);
+      expect(typeof SocketUpgrade.startHeartbeat, "SocketUpgrade.startHeartbeat").to.equal("function");
+      expect(SocketUpgrade.HEARTBEAT_INTERVAL_MS, "production interval").to.equal(30000);
+      const m = h.ctx.messenger;
+      const alive = await openHb(true);
+      const dead = await openHb(false);
+      expect(await waitFor(() => m.subscriberCount(OWNER_A) === 2, 3000), "both subscribed").to.equal(true);
+      expect(hb.upgrade.ownerSocketCount(OWNER_A), "A sockets before").to.equal(2);
+
+      const t0 = Date.now();
+      expect(await waitFor(() => hb.upgrade.ownerSocketCount(OWNER_A) === 1, 2000), "dead socket slot released").to.equal(true);
+      const elapsed = Date.now() - t0;
+      expect(elapsed <= (3 * HEARTBEAT_MS) + 150, "released within two intervals (+ slack), took " + elapsed + " ms").to.equal(true);
+      expect(await waitFor(() => m.subscriberCount(OWNER_A) === 1, 2000), "dead socket unsubscribed").to.equal(true);
+      expect(await waitFor(() => dead.close !== null, 2000), "dead client saw the close").to.equal(true);
+      expect(dead.pings >= 1, "dead client was pinged").to.equal(true);
+
+      // Several more intervals: the answering socket is pinged and kept.
+      await sleep(6 * HEARTBEAT_MS);
+      expect(alive.close, "answering socket closed").to.equal(null);
+      expect(alive.pings >= 3, "answering socket pinged every interval").to.equal(true);
+      expect(hb.upgrade.ownerSocketCount(OWNER_A), "A sockets after").to.equal(1);
+      expect(m.sendToOwner(OWNER_A, { notification: { title: "P43 H1", body: "x", type: "info" } }), "sendToOwner(A)").to.equal(1);
+    }, 15000);
+
+    it("H2 a raw upgrade that never reads its frames (half-open peer) is reaped and the count returns to baseline", async function () {
+      expect(typeof SocketUpgrade.startHeartbeat, "SocketUpgrade.startHeartbeat").to.equal("function");
+      const baseLive = hb.upgrade.liveSocketCount();
+      const r = openRawUpgrade(hb.port, "/" + OWNER_A, COOKIE_A);
+      try {
+        expect(await waitFor(() => r.data.indexOf("HTTP/1.1 101") === 0, 3000), "handshake answered 101").to.equal(true);
+        expect(hb.upgrade.liveSocketCount(), "admitted").to.equal(baseLive + 1);
+        expect(await waitFor(() => hb.upgrade.liveSocketCount() === baseLive, 2000), "reaped by the heartbeat").to.equal(true);
+        expect(await waitFor(() => r.closed, 2000), "server closed the raw socket").to.equal(true);
+      } finally {
+        r.sock.destroy();
+      }
+    }, 15000);
+  });
+
   describe("WS probe: scripts/check-ws-multitab.js", function () {
 
     function runProbe(url) {
@@ -496,6 +587,13 @@ describe("SocketUpgradeSpec (Phase 43, NOTIF-02)", function () {
       expect(/messenger:\s*app\.messenger\b/.test(conn), "messenger: app.messenger").to.equal(true);
 
       expect(src.split("http.createServer(app).listen(listenPort").length - 1, "HTTP listen line").to.equal(1);
+    });
+
+    it("S2 thinx-core runs SocketUpgrade's heartbeat on its wss and keeps no ping loop of its own (WR-01)", function () {
+      const code = codeLines(fs.readFileSync(CORE_PATH, "utf8")).join("\n");
+      expect(/SocketUpgrade\.startHeartbeat\(\s*wss\b/.test(code), "SocketUpgrade.startHeartbeat(wss").to.equal(true);
+      expect(code.indexOf(".ping("), ".ping( in thinx-core.js").to.equal(-1);
+      expect(code.indexOf("setInterval(function ping"), "own ping interval").to.equal(-1);
     });
   });
 });
