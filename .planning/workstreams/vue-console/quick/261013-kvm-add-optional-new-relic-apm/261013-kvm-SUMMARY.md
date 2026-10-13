@@ -114,3 +114,17 @@ None beyond the plan's threat model. The new egress to New Relic and the env cop
 
 - FOUND: lib/thinx/newrelic.js, spec/jasmine/NewRelicLoaderSpec.js, thinx.js, package.json, package-lock.json, docker-swarm.yml
 - FOUND commits: 3603f0ae, d4a9dd7b, 33cb0ed1 (ancestors of HEAD; measured 3 commits from 8260549b)
+
+## Rollout (orchestrator, 2026-10-13)
+
+- `97ea9f78` raised the `protobufjs` override 7.1.1 → 7.6.6 (CVE-2023-36665; newrelic's proto-loader needs ^7.5.5).
+- Pipeline 5664 (`97ea9f7`): `CI-GATES PIPELINE OK`, legacy-off. New api task logged
+  `NEW_RELIC_LICENSE_KEY not set, New Relic disabled` before the attach (graceful disable confirmed live).
+- Secret `NEW_RELIC_LICENSE_KEY` was created on the swarm from the operator's staged `/root/.newrelic_key`, which was
+  then shredded (`shred -u`); the value was never printed. `/root` is not in the daily gluster backup.
+- `docker service update --secret-add source=NEW_RELIC_LICENSE_KEY,target=NEW_RELIC_LICENSE_KEY,mode=0400 thinx_api`
+  (10 → 11 secrets). The new task logged `agent loaded, app name THiNX`, the agent connected to
+  `collector.eu01.nr-data.net:443` and reached `started`. Key prefix appears 0 times in the task log.
+- After: `/api/user/profile` 401 (API up), `:7442` 200, `WS-MULTITAB OK 2/2`. Kill switch: `--secret-rm NEW_RELIC_LICENSE_KEY`.
+- thinx-swarm `2121066` mounts the secret in `thinx.yml` (pushed to origin and fast-forwarded on micro); mirror regenerated.
+- Noise: the agent logs one "Failed to get information about vendor azure" utilization probe error at start (harmless).

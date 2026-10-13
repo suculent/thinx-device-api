@@ -28,6 +28,8 @@ networks:
 #                GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY,
 #                GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET,
 #                INFLUXDB_TOKEN (Phase 27, mounted 2026-10-03)
+#                NEW_RELIC_LICENSE_KEY (quick 261013-kvm, mounted 2026-10-13;
+#                thinx-swarm thinx.yml 2121066)
 #   worker       WORKER_SECRET, ROLLBAR_SERVER_TOKEN
 #   transformer  ROLLBAR_SERVER_TOKEN
 #

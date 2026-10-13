@@ -1,4 +1,4 @@
-# GENERATED — do not edit. source: thinx-swarm@88d0e5a70e802d3db7d122a760affa5041abb221 generated:2026-10-11T17:21:39Z by scripts/generate-traefik-mirror.js
+# GENERATED — do not edit. source: thinx-swarm@2121066fedf4ff4245ca80d3d18c6c499c0e0195 generated:2026-10-13T13:32:30Z by scripts/generate-traefik-mirror.js
 # mirror-sha256:5c8f6bd034d97dddfb39a37c05f8b188275d801853ba842adcd6b80099e04260
 version: '3.7'
 
