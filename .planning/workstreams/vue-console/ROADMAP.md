@@ -165,6 +165,7 @@ Plans:
 **Depends on**: Phase 44 (shared icon-button pattern)
 **Requirements**: TRANS-03, TRANS-04, ENV-01, POL-03, FIX-03
 **Repos**: `services/console` (Vue) only. Transformers keep persisting as the v1.16 `profile.info.transformers` patch. The environment edit uses the existing env add and revoke endpoints (delete + recreate). No parent API change expected.
+**Recorded deviations (46-CONTEXT)**: D-01: the Edit is one atomic overwrite through the existing env add endpoint (`PUT /api/v2/env`), no delete + recreate; success criterion 4 reads "if the edit fails, the variable keeps its old value and the user sees an error". D-02: parent API change, `lib/thinx/apienv.js` replaces only the exact key, so editing WIFI keeps WIFI_SSID; Legacy `/api/user/env/*` envelopes unchanged; spec `spec/jasmine/ApienvExactKeySpec.js`.
 **Success Criteria** (what must be TRUE):
   1. On the Transformers page, Edit shows a white wrench icon, Delete a trash icon and "Add Transformer" a `+` sign. The field is called "Name" on every transformer surface.
   2. A user ticks several transformers and deletes them with one trash button, but only after typing `confirm` into the dialog's text field. The dialog warns that devices using them will stop applying them, and after a reload exactly the ticked transformers are gone.

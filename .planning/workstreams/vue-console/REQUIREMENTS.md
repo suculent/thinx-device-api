@@ -47,7 +47,7 @@ upgrades.
 
 ### Environment Globals
 
-- [ ] **ENV-01**: Each Environment Globals row has an Edit button to change the value (delete + recreate); if the recreate fails, the original variable is restored and the user sees an error.
+- [ ] **ENV-01**: Each Environment Globals row has an Edit button to change the value (delete + recreate); if the recreate fails, the original variable is restored and the user sees an error. The edit is one atomic overwrite (`PUT /api/v2/env` replaces the value in a single write, so a failed edit keeps the old value); the delete + recreate wording is superseded by Phase 46 D-01 (operator, 2026-10-13).
 
 ### Repositories
 
