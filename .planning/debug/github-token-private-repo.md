@@ -54,3 +54,14 @@ on that account cannot read the repo even with the right scope.
   `keys_in_use_elsewhere`; Vue explains skipped keys. 422 diagnostics now log `errors=key_in_use|key_invalid`.
 - Open: `onAccount` only sees the first 100 account keys (per_page=100); an account with >100 keys may show a false
   "not pushed" warning for a key that is present.
+
+## Update 2026-10-13 ~19:30Z
+- Key fallback live: pipeline 5669 (`db85439`), thinx_api task started 19:13:32Z; `/api/user/profile` 401,
+  `WS-MULTITAB OK 2/2`, Vue bundle carries the skipped-key message.
+- Operator request: deleted every SSH key titled exactly `THiNX Key` from GitHub account `suculent` via `gh`
+  (token refreshed by the operator with admin:public_key): 185 deleted, 0 failed, 0 left. Kept: mini-id-rsa,
+  McBooczech, CircleCI: thinx-cloud/redis, CircleCI: thinx-cloud/transformer, penrep, thinx2github.
+  The 185 keys dated 2026-09-18T22:01Z..2026-10-13T19:09:10Z (the last one from the operator's re-link), so the
+  token's GitHub account is `suculent`, and with 191 keys the account was past the 100 keys `GET /user/keys` reads.
+- Next: re-link the token in THiNX (pushes a key back), then re-add git@github.com:suculent/thinx-autoflood.git and
+  read the `[github]` / `[git] … cause=` lines.
