@@ -132,3 +132,12 @@ Not touched: port 7442, plain MQTT, `messenger.js` routing, `services/console`.
 _Fixed: 2026-10-13T09:30:00Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
+
+## Follow-up: CI race after WR-04 (orchestrator)
+
+Pipeline 5660 (`8e81d6c1`) failed one spec, `XBuildlogSpec (03) should be able to append existing log`, with CouchDB 409
+"Document update conflict." on the shared test build document. WR-04 turned a failed exit's `blog.state(undefined)`
+(a no-op) into a real `"error"` write, which now races log appends on the same document. The failed job was rerun
+green and deployed. Fix `4fcacece`: `lib/thinx/buildlog.js` retries the `state` and `log` atomic updates on 409
+(4 attempts, short backoff; a 409 writes nothing, so a retry cannot duplicate). Pipeline 5661 (`4fcacece`):
+`CI-GATES PIPELINE OK`, legacy-off; `WS-MULTITAB OK 2/2` after rollout.
