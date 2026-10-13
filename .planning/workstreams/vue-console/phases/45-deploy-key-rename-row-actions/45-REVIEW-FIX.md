@@ -262,3 +262,9 @@ _Iteration: 1_
   together; the per-code-unit equality tests updated. `test:deploykeys` 38/38, Vue `test:unit` 251 ok / 0 FAIL.
 - CR-01 exposure check: the only remaining `thinx_api` container (started 2026-10-13 15:42Z) has 0 `[github] calling`
   log lines; logs of earlier containers are gone, so tokens logged by GitHub links before the fix cannot be ruled out.
+- Shipped: console `31ed738..efc8cd2`, parent `c3f78558..3b578cbe` (thinx-staging, all signed, main unchanged
+  `14c08c1f`). Pipeline 5667 `CI-GATES PIPELINE OK` (test incl. `DeployKeyNames.test.js` in `Dockerfile.test`).
+  Live bundle `3b578cb` carries the new copy; new `thinx_api` task started 18:41:33Z with the CR-01 fix (old
+  logging line absent in the image) and `[newrelic] agent loaded`. After start: `/api/user/profile` 401, `:7442` 200,
+  unauthenticated PATCH 403 on both hosts, `WS-MULTITAB OK 2/2` (0/2 only while the task was still starting),
+  5 Legacy files on rtm still equal the 45-05 baseline.
