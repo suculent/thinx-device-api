@@ -208,6 +208,9 @@ Plans:
 - `LogviewController.js:227` `deviceBuilds[udid].push` throws for a device with no build history, so its build toasts are lost (43-UI-REVIEW fix 3).
 - A Legacy tab whose first socket opens from the log overlay never sends `{init}` and gets no frames until reload (43-REVIEW IN-04).
 
+**Carried from Phase 45** (Legacy; 45-CONTEXT D-16 locked "No Legacy change", so they ship with CI-06):
+- Phase 35 review IN-03, IN-04, IN-05 (Legacy deploy-key items the Milestone Notes assigned to Phase 45) go to the FIX-01 ledger here.
+
 **Carried from Phase 44** (Vue, small; record in the FIX-01 ledger or fix):
 - Theme-wide `.alert-danger` text contrast 3.96:1 (below 4.5:1); fix in `_overrides.scss` (45-UI-SPEC deferral).
 - List/grid view toggles have no `aria-label` (pre-existing; 44-UI-REVIEW #5).
