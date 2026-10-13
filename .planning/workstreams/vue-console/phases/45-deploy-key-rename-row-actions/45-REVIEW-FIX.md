@@ -254,3 +254,11 @@ leftovers, real `~/.ssh` untouched).
 _Fixed: 2026-10-13T18:35:00Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
+
+## Follow-up (orchestrator)
+
+- IN-01 adjusted to D-06: U+200C ZWNJ and U+200D ZWJ are allowed again (emoji ZWJ sequences, Persian/Indic names);
+  U+200B, U+2060 and U+FEFF stay `invisible`; a name made only of ZWNJ/ZWJ is `empty`. Server and client changed
+  together; the per-code-unit equality tests updated. `test:deploykeys` 38/38, Vue `test:unit` 251 ok / 0 FAIL.
+- CR-01 exposure check: the only remaining `thinx_api` container (started 2026-10-13 15:42Z) has 0 `[github] calling`
+  log lines; logs of earlier containers are gone, so tokens logged by GitHub links before the fix cannot be ruled out.
