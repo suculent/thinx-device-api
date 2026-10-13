@@ -29,6 +29,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
 ## Phase Details
 
 ### Phase 39: Internal OpenBao on the Swarm
+
 **Goal**: The API has an OpenBao that it can reach over a verified-TLS internal overlay and that nothing else can reach. OpenBao unseals itself after a restart and gives the `thinx-api` AppRole encrypt/decrypt/rewrap on a non-exportable Transit key, and no other permission.
 **Depends on**: Nothing (first v1.17 phase). Coordinates with v1.15 Phase 34 D-20 (see Milestone Notes, D-05).
 **Requirements**: VAULT-01, VAULT-02, VAULT-03, VAULT-04, VAULT-05, VAULT-06, VAULT-07, VAULT-08
@@ -39,9 +40,27 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   3. After `docker service update --force` on the OpenBao service, OpenBao reports `sealed=false` without operator input. It unseals through `seal "static"` with `current_key = "file://…"`, a root-only 32-byte key on the manager node's local disk (never GlusterFS). Recovery keys exist and the documented seal-key rotation (`previous_key`/`previous_key_id`) is exercised once.
   4. Logged in as the `thinx-api` AppRole (role_id/secret_id mounted on `thinx_api` as swarm secrets), a test payload round-trips through `transit/encrypt` and `transit/decrypt` on `thinx-deploy-keys`. Export, backup, delete, rotate and every other path are denied. The key reads back as `aes256-gcm96`, `exportable=false`, `allow_plaintext_backup=false`, `deletion_allowed=false`, and the bootstrap root token no longer exists.
   5. Those requests appear in the node-local file audit log. A Raft snapshot is written outside `ssh_keys` and the Gluster backups, and it restores into a throwaway OpenBao. The runbook (ssh + `docker exec` only) covers bootstrap, static-seal key custody and rotation, recovery keys, snapshot, restore, and how an operator gets a short-lived privileged token when no root token persists.
-**Plans**: TBD
+
+**Plans**: 6 plans across 5 waves
+
+**Wave 1**
+- [ ] 39-01-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 39-02-PLAN.md
+- [ ] 39-03-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 39-04-PLAN.md
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 39-05-PLAN.md
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 39-06-PLAN.md
 
 ### Phase 40: Transit-Encrypted Deploy Keys in the API
+
 **Goal**: A deploy key generated in THiNX is stored only as Transit ciphertext, and a keyed build decrypts it in memory. Every legacy passphrase-encrypted key keeps building, so the cut-over breaks no build.
 **Depends on**: Phase 39, for the production cut-over only. Code and CI run against an OpenBao dev server and can start before Phase 39 is live.
 **Requirements**: KEYENC-01, KEYENC-02, KEYENC-03, KEYENC-04, KEYENC-05, KEYENC-06
@@ -52,9 +71,11 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   3. In the same release, an owner's existing legacy passphrase-encrypted key still builds. The read path is chosen by file format, so no keyed build breaks at cut-over.
   4. With OpenBao sealed, unreachable or denying, key generation is refused with an explicit error and a keyed build fails with an explicit, logged status. A new key never falls back to the passphrase. Public HTTPS builds, device check-in on `:7442` and plain MQTT keep working.
   5. The OpenBao client logs in with AppRole (credentials through `readSecret`), renews or logs in again before its token lapses, and times out instead of hanging. `SecretsSweepSpec` asserts that no token, plaintext key or ciphertext reaches a log line. Unit specs with a mocked OpenBao and an integration spec against an OpenBao dev server in `docker-compose.test.yml` pass, and CI is green.
+
 **Plans**: TBD
 
 ### Phase 41: Key Migration, Passphrase Retirement & Rotation
+
 **Goal**: Every stored deploy key is Transit ciphertext at the latest key version, and the static passphrase no longer exists anywhere. The key files alone decrypt nothing.
 **Depends on**: Phase 39 and Phase 40 (dual-read Transit cut-over live in production).
 **Requirements**: KEYMIG-01, KEYMIG-02, KEYMIG-03
@@ -63,6 +84,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   1. The migration script's `--dry-run` reports counts and writes nothing. The real run reports migrated / already-transit / failed, and a second run reports 0 migrated and 0 failed, i.e. zero legacy keys left. Pre-migration copies sit in a root-only backup location that is not on GlusterFS.
   2. After zero legacy keys are reported, `GIT_KEY_PASSPHRASE` and the legacy read path are gone from the code, the Dockerfiles, the compose files, `thinx.yml`, `docker-swarm.yml`, the live `thinx_api` spec (neither secret nor env) and `docker secret ls`. No `*.sh` askpass file is left in `ssh_keys`. CI is green, and keyed builds for migrated owners still succeed.
   3. After `thinx-deploy-keys` is rotated and the rewrap job has run, every key file carries the latest `vault:vN:` prefix and `min_decryption_version` equals N. OpenBao refuses an older-version ciphertext, and a keyed build still succeeds.
+
 **Plans**: TBD
 
 ## Milestone Notes
@@ -92,7 +114,7 @@ Phases execute in numeric order: 39 → 40 → 41. Phase 40 code and CI work may
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 39. Internal OpenBao on the Swarm | v1.17 | 0/? | Not started | - |
+| 39. Internal OpenBao on the Swarm | v1.17 | 0/6 | Planned     | - |
 | 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 0/? | Not started | - |
 | 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 0/? | Not started | - |
 
