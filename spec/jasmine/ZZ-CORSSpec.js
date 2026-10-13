@@ -127,7 +127,7 @@ describe("ZZ-CORSSpec (SEC-CORS-01)", function () {
             expect(res._headers["Access-Control-Allow-Origin"]).to.equal("https://console.thinx.cloud");
             expect(res._headers["Vary"]).to.equal("Origin");
             expect(res._headers["Access-Control-Allow-Credentials"]).to.equal("true");
-            expect(res._headers["Access-Control-Allow-Methods"]).to.equal("GET,PUT,POST,DELETE,OPTIONS");
+            expect(res._headers["Access-Control-Allow-Methods"]).to.equal("GET,PUT,POST,DELETE,PATCH,OPTIONS");
             expect(res._headers["Access-Control-Allow-Headers"]).to.equal("Content-type,Accept,X-Access-Token,X-Key,X-XSRF-TOKEN");
             expect(warnings.length).to.equal(0);
         });

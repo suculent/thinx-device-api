@@ -3,6 +3,16 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const crypto = require('node:crypto');
+const url = require('node:url');
+// 34-REVIEW WR-05 / Phase 45: in development Globals.app_config().ssh_keys resolves to
+// $HOME/.ssh, the developer's real key directory, and lib/router.rsakey.js builds its RSAKey
+// when it is required. HOME points at a throwaway directory before any lib/ module loads, so
+// no test here can list, write or delete a real key.
+const TEST_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-home-'));
+fs.mkdirSync(path.join(TEST_HOME, '.ssh'), { mode: 0o700 });
+process.env.HOME = TEST_HOME;
+test.after(() => fs.rmSync(TEST_HOME, { recursive: true, force: true }));
 process.env.ENVIRONMENT = 'development';
 const RSAKey = require('../../lib/thinx/rsakey');
 const Util = require('../../lib/thinx/util');
@@ -14,6 +24,9 @@ function fixture() {
   key.ssh_keys = dir;
   return {dir, key};
 }
+test('tests run against a temporary HOME, never the real ~/.ssh (34-REVIEW WR-05)', () => {
+  assert.equal(new RSAKey().ssh_keys, path.join(TEST_HOME, '.ssh'));
+});
 function writePair(dir, owner, time, name) {
   const filename = owner + '-' + time;
   fs.writeFileSync(path.join(dir, filename), 'synthetic-private-fixture');
@@ -248,4 +261,283 @@ test('revoke ignores a non-array filenames value instead of throwing (38 WR-05)'
     for (const bad of [null, 5, {}, true, 'abc']) assert.deepEqual(key.revokeUserKeys(bad,OWNER),[]);
     assert.equal(fs.readdirSync(dir).length,2,'nothing deleted');
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+
+// ---------------------------------------------------------------------------
+// Phase 45: deploy-key rename (KEY-04), one name validator (FIX-04 IN-01/IN-02).
+// ---------------------------------------------------------------------------
+
+// GitHub's RSA host key: the `ssh-rsa` entry of `ssh_keys` in https://api.github.com/meta
+// (unauthenticated GET, 2026-10-13). A real, parseable public key with a published
+// fingerprint (`ssh_key_fingerprints.SHA256_RSA`); no network at test time.
+const GITHUB_RSA = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=';
+// Control, separator and direction characters are built from their code, so this file
+// carries no escape sequence for them (Codacy no-control-regex, quick 261012-r9z).
+const ch = (code) => String.fromCharCode(code);
+const tokens = (text) => String(text).trim().split(/\s+/);
+
+function writeKey(dir, owner, time, pubText, mode) {
+  const filename = owner + '-' + time;
+  fs.writeFileSync(path.join(dir, filename), 'synthetic-private-fixture', { mode: 0o600 });
+  fs.writeFileSync(path.join(dir, filename + '.pub'), pubText);
+  fs.chmodSync(path.join(dir, filename + '.pub'), typeof mode === 'number' ? mode : 0o644);
+  return filename;
+}
+// Every file in the directory, by name, with its bytes (a leftover temp file shows up too).
+function snapshot(dir) {
+  const out = {};
+  for (const f of fs.readdirSync(dir).sort()) out[f] = fs.readFileSync(path.join(dir, f)).toString('base64');
+  return out;
+}
+function renameKey(key, owner, filename, name) {
+  return new Promise((resolve) => key.rename(owner, filename, name,
+    (success, response, reason) => resolve({ success, response, reason })));
+}
+let PEM_CACHE = null;
+function testPem() {
+  if (PEM_CACHE === null) {
+    PEM_CACHE = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    }).publicKey;
+  }
+  return PEM_CACHE;
+}
+
+// The contract shared with 45-02, 45-04 (Vue mirrors exactly these) and 45-05.
+const NAME_CASES = [
+  ['Firmware 🚀', null], ['Ünïcödé', null], ['مفتاح', null], ['Firmware Repository', null], ['x'.repeat(120), null],
+  ['', 'empty'], ['   ', 'empty'], [{}, 'empty'], [[], 'empty'], [42, 'empty'], [null, 'empty'], [undefined, 'empty'],
+  ['x'.repeat(121), 'too_long'],
+  [ch(0x09), 'control_chars'], ['a' + ch(0x09) + 'b', 'control_chars'], ['a' + ch(0x7f) + 'b', 'control_chars'],
+  ['a' + ch(0x85) + 'b', 'control_chars'], ['Firmware' + ch(0x0a), 'control_chars'],
+  ['a' + ch(0x2028) + 'b', 'line_separator'], ['a' + ch(0x2029) + 'b', 'line_separator'], [ch(0x2028), 'line_separator'],
+  ['a' + ch(0x202e) + 'b', 'bidi'], ['a' + ch(0x202a) + 'b', 'bidi'], ['a' + ch(0x2066) + 'b', 'bidi'],
+  ['a' + ch(0x2069) + 'b', 'bidi'], ['a' + ch(0x200e) + 'b', 'bidi'], ['a' + ch(0x200f) + 'b', 'bidi']
+];
+test('validateKeyName returns the D-06 reason for every shared case (D-05, D-06, IN-02)', () => {
+  for (const [name, reason] of NAME_CASES) {
+    const label = JSON.stringify(name === undefined ? 'undefined' : name);
+    const expected = reason === null ? { ok: true } : { ok: false, reason };
+    assert.deepEqual(RSAKey.validateKeyName(name), expected, label);
+  }
+});
+test('validateKeyName classifies every UTF-16 code unit between two letters', () => {
+  const BIDI = new Set([0x200e, 0x200f, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e, 0x2066, 0x2067, 0x2068, 0x2069]);
+  for (let c = 0; c <= 0xffff; c++) {
+    let expected = { ok: true };
+    if (c < 0x20 || c === 0x7f || (c >= 0x80 && c <= 0x9f)) expected = { ok: false, reason: 'control_chars' };
+    else if (c === 0x2028 || c === 0x2029) expected = { ok: false, reason: 'line_separator' };
+    else if (BIDI.has(c)) expected = { ok: false, reason: 'bidi' };
+    assert.deepEqual(RSAKey.validateKeyName('a' + ch(c) + 'b'), expected, 'code unit 0x' + c.toString(16).padStart(4, '0'));
+  }
+  // The first offending unit decides; the scan runs before trimming.
+  assert.deepEqual(RSAKey.validateKeyName(ch(0x202e) + 'a' + ch(0x09)), { ok: false, reason: 'bidi' });
+  assert.deepEqual(RSAKey.validateKeyName('  ' + 'x'.repeat(120) + '  '), { ok: true });
+});
+
+test('rename rewrites only the .pub comment, keeps the key tokens and the file mode (KEY-04, D-02, D-04)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n', 0o640);
+    const r = await renameKey(key, OWNER, filename, '  New name  ');
+    assert.equal(r.success, true);
+    assert.deepEqual(Object.keys(r.response).sort(), ['date', 'filename', 'fingerprint', 'name', 'pubkey']);
+    assert.equal(r.response.name, 'New name');
+    assert.equal(r.response.filename, filename);
+    const [type, blob] = tokens(GITHUB_RSA);
+    assert.equal(fs.readFileSync(path.join(dir, filename + '.pub'), 'utf8'), type + ' ' + blob + ' New name\n');
+    assert.equal(fs.statSync(path.join(dir, filename + '.pub')).mode & 0o777, 0o640, 'mode preserved');
+    assert.deepEqual(fs.readdirSync(dir).sort(), [filename, filename + '.pub'].sort(), 'no temp file left');
+    assert.equal(fs.readFileSync(path.join(dir, filename), 'utf8'), 'synthetic-private-fixture');
+    assert.equal(key.exportKeysForList([filename], OWNER)[0].name, 'New name');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('rename converts a PEM .pub to one OpenSSH line with the same key material (D-03)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const pem = testPem();
+    const filename = writeKey(dir, OWNER, 1100, pem, 0o644);
+    const r = await renameKey(key, OWNER, filename, 'New name');
+    assert.equal(r.success, true);
+    const text = fs.readFileSync(path.join(dir, filename + '.pub'), 'utf8');
+    assert.match(text, /^ssh-rsa [A-Za-z0-9+/]+=* New name\n$/);
+    assert.deepEqual(tokens(text).slice(0, 2), tokens(RSAKey.toOpenSSH(pem)).slice(0, 2));
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('rename refuses foreign, traversing, absolute, .pub, unknown and claim-only names; no file changes (T-45-01/02)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const mine = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Mine\n');
+    const theirs = writeKey(dir, OTHER, 2000, GITHUB_RSA + ' Theirs\n');
+    fs.writeFileSync(path.join(dir, OWNER + '-3000.pub'), ''); // a name claim, no private half
+    const pending = writeKey(dir, OWNER, 4000, ''); // private written, .pub still empty
+    const broken = writeKey(dir, OWNER, 5000, 'ssh-rsa not*base64 Broken\n');
+    const before = snapshot(dir);
+    const cases = [
+      [theirs, 'key_not_found'], ['../' + mine, 'key_not_found'], [path.join(dir, mine), 'key_not_found'],
+      [mine + '.pub', 'key_not_found'], [OWNER + '-999', 'key_not_found'], [5, 'key_not_found'],
+      [null, 'key_not_found'], [OWNER + '-3000', 'key_not_found'], [pending, 'key_not_found'],
+      [broken, 'rename_failed']
+    ];
+    for (const [filename, expected] of cases) {
+      const r = await renameKey(key, OWNER, filename, 'New name');
+      assert.deepEqual([r.success, r.response], [false, expected], String(filename));
+      assert.deepEqual(snapshot(dir), before, 'nothing changed for ' + String(filename));
+    }
+    const r = await renameKey(key, OWNER, mine, 'a' + ch(0x202e) + 'b');
+    assert.deepEqual([r.success, r.response, r.reason], [false, 'invalid_key_name', 'bidi']);
+    assert.deepEqual(snapshot(dir), before);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+
+// Every fs / fs-extra function that could open, read, write, chmod, move or remove a file.
+const SPIED = ['open', 'openSync', 'readFile', 'readFileSync', 'writeFile', 'writeFileSync', 'appendFileSync',
+  'copyFile', 'copyFileSync', 'rename', 'renameSync', 'chmod', 'chmodSync', 'chown', 'chownSync', 'unlink',
+  'unlinkSync', 'truncate', 'truncateSync', 'rm', 'rmSync', 'utimes', 'utimesSync', 'createReadStream',
+  'createWriteStream', 'remove', 'removeSync', 'move', 'moveSync', 'copy', 'copySync', 'outputFile', 'outputFileSync'];
+const TWO_PATHS = new Set(['copyFile', 'copyFileSync', 'rename', 'renameSync', 'move', 'moveSync', 'copy', 'copySync']);
+function spyOnPath(target) {
+  const calls = [];
+  const restorers = [];
+  const asPath = (a) => {
+    if (typeof a === 'string') return path.resolve(a);
+    if (Buffer.isBuffer(a)) return path.resolve(a.toString());
+    if (a instanceof URL) return path.resolve(url.fileURLToPath(a));
+    return null;
+  };
+  for (const mod of [require('fs'), require('fs-extra')]) {
+    for (const name of SPIED) {
+      const real = mod[name];
+      if (typeof real !== 'function') continue;
+      mod[name] = function (...args) {
+        const paths = TWO_PATHS.has(name) ? [args[0], args[1]] : [args[0]];
+        if (paths.some((a) => asPath(a) === target)) calls.push(name);
+        return real.apply(this, args);
+      };
+      restorers.push(() => { mod[name] = real; });
+    }
+  }
+  return { calls, restore: () => restorers.forEach((r) => r()) };
+}
+test('rename never opens, reads, writes, chmods or removes the private key (D-04, T-45-05)', async () => {
+  const {dir, key} = fixture();
+  const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+  const privatePath = path.resolve(dir, filename);
+  try {
+    // The spy itself works: a deliberate read of the private file is recorded.
+    const probe = spyOnPath(privatePath);
+    try { require('fs-extra').readFileSync(privatePath); } finally { probe.restore(); }
+    assert.deepEqual(probe.calls, ['readFileSync']);
+
+    const bytes = fs.readFileSync(privatePath);
+    const mtimeMs = fs.statSync(privatePath).mtimeMs;
+    const locked = (typeof process.getuid === 'function' && process.getuid() !== 0) ? 0o000 : 0o600;
+    fs.chmodSync(privatePath, locked); // any read attempt now fails (unless root)
+    const spy = spyOnPath(privatePath);
+    let r;
+    try { r = await renameKey(key, OWNER, filename, 'New name'); } finally { spy.restore(); }
+    assert.equal(r.success, true);
+    assert.deepEqual(spy.calls, [], 'no fs call on the private key path');
+    const stat = fs.statSync(privatePath);
+    assert.equal(stat.mode & 0o777, locked, 'private mode unchanged');
+    assert.equal(stat.mtimeMs, mtimeMs, 'private mtime unchanged');
+    fs.chmodSync(privatePath, 0o600);
+    assert.deepEqual(fs.readFileSync(privatePath), bytes, 'private bytes unchanged');
+  } finally {
+    try { fs.chmodSync(privatePath, 0o600); } catch { /* already removed */ }
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});
+test('a failed .pub replace reports rename_failed, keeps the old .pub and leaves no temp file (T-45-06)', async () => {
+  const {dir, key} = fixture();
+  const fsx = require('fs-extra'); // rsakey.js writes through fs-extra
+  const realRename = fsx.renameSync;
+  try {
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    const before = snapshot(dir);
+    fsx.renameSync = () => { const e = new Error('synthetic EIO'); e.code = 'EIO'; throw e; };
+    let r;
+    try { r = await renameKey(key, OWNER, filename, 'New name'); } finally { fsx.renameSync = realRename; }
+    assert.deepEqual([r.success, r.response], [false, 'rename_failed']);
+    assert.deepEqual(snapshot(dir), before, 'old .pub kept, no dot-prefixed temp file left');
+    assert.deepEqual(fs.readdirSync(dir).filter((f) => f.startsWith('.')), []);
+  } finally { fsx.renameSync = realRename; fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('account deletion also removes the owner\'s leftover rename temp files (T-45-06)', () => {
+  const {dir, key} = fixture();
+  try {
+    writeKey(dir, OWNER, 7000, GITHUB_RSA + ' Key\n');
+    fs.writeFileSync(path.join(dir, '.' + OWNER + '-7000.pub.0123456789ab.tmp'), 'partial');
+    writeKey(dir, OTHER, 7001, GITHUB_RSA + ' Other\n');
+    fs.writeFileSync(path.join(dir, '.' + OTHER + '-7001.pub.ba9876543210.tmp'), 'partial');
+    key.revokeAllForOwner(OWNER);
+    assert.deepEqual(fs.readdirSync(dir).filter((f) => f.includes(OWNER)), [], 'no file of the deleted owner remains');
+    assert.equal(fs.readdirSync(dir).filter((f) => f.includes(OTHER)).length, 3, 'other owner untouched');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+
+// Router harness: a fake app records every registration; handlers run without Express.
+let ROUTES = null;
+function loadRouter() {
+  if (ROUTES !== null) return ROUTES;
+  const routes = {};
+  const app = {};
+  for (const method of ['get', 'put', 'post', 'delete', 'patch']) {
+    app[method] = (route, ...handlers) => { routes[method.toUpperCase() + ' ' + route] = handlers; };
+  }
+  require('../../lib/router.rsakey.js')(app);
+  ROUTES = routes;
+  return ROUTES;
+}
+function fakeRes(resolve) {
+  const res = {
+    statusCode: 200,
+    status(code) { res.statusCode = code; return res; },
+    header() { return res; },
+    end(text) { resolve({ status: res.statusCode, body: text ? JSON.parse(text) : undefined }); }
+  };
+  return res;
+}
+function callRoute(routeKey, req) {
+  const handlers = loadRouter()[routeKey];
+  assert.ok(Array.isArray(handlers), routeKey + ' is registered');
+  return new Promise((resolve) => handlers[handlers.length - 1](Object.assign({ query: {} }, req), fakeRes(resolve)));
+}
+function clearRouterKeys() {
+  const dir = path.join(TEST_HOME, '.ssh');
+  for (const f of fs.readdirSync(dir)) fs.rmSync(path.join(dir, f), { force: true });
+}
+test('PATCH /api/v2/rsakey: CSRF first, session, body, filename, name reason, owner-bound key (KEY-04, D-02, D-07)', async () => {
+  const handlers = loadRouter()['PATCH /api/v2/rsakey'];
+  assert.ok(Array.isArray(handlers), 'PATCH /api/v2/rsakey is registered');
+  assert.equal(handlers.length, 2);
+  assert.equal(handlers[0].name, 'verifyCsrfToken');
+  const dir = path.join(TEST_HOME, '.ssh');
+  try {
+    const mine = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    const theirs = writeKey(dir, OTHER, 2000, GITHUB_RSA + ' Theirs\n');
+    const theirsBefore = fs.readFileSync(path.join(dir, theirs + '.pub'), 'utf8');
+    const patch = (session, body) => callRoute('PATCH /api/v2/rsakey', { method: 'PATCH', session, body });
+    assert.equal((await patch(undefined, { filename: mine, name: 'New name' })).status, 401);
+    assert.deepEqual(await patch({ owner: OWNER }, undefined),
+      { status: 400, body: { success: false, response: 'invalid_body' } });
+    assert.deepEqual(await patch({ owner: OWNER }, [mine]),
+      { status: 400, body: { success: false, response: 'invalid_body' } });
+    assert.deepEqual(await patch({ owner: OWNER }, { filename: 5, name: 'New name' }),
+      { status: 400, body: { success: false, response: 'invalid_filename' } });
+    assert.deepEqual(await patch({ owner: OWNER }, { filename: mine, name: 'a' + ch(0x202e) + 'b' }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'bidi' } });
+    assert.deepEqual(await patch({ owner: OWNER }, { filename: theirs, name: 'New name' }),
+      { status: 404, body: { success: false, response: 'key_not_found' } });
+    assert.equal(fs.readFileSync(path.join(dir, mine + '.pub'), 'utf8'), GITHUB_RSA + ' Old name\n', 'refusals change nothing');
+    const ok = await patch({ owner: OWNER }, { filename: mine, name: 'New name' });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.success, true);
+    assert.equal(ok.body.response.name, 'New name');
+    assert.equal(ok.body.response.filename, mine);
+    assert.equal(fs.readFileSync(path.join(dir, mine + '.pub'), 'utf8'), GITHUB_RSA + ' New name\n');
+    assert.equal(fs.readFileSync(path.join(dir, theirs + '.pub'), 'utf8'), theirsBefore, 'other owner untouched');
+  } finally { clearRouterKeys(); }
 });
