@@ -173,7 +173,7 @@ Plans:
   4. Each Environment Globals row has an Edit button that changes the value. If the recreate fails, the original variable is back in the list with its old value and the user sees an error.
   5. Phase 37 review items IN-02 and IN-03 are fixed or deferred with a recorded reason.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 
 Plans:
 **Wave 1**
@@ -190,7 +190,7 @@ Plans:
 - [x] 46-05-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live bundle, API-surface, port 7442, WS and unchanged-Legacy proofs after the profile route answers 401, operator UAT incl. the P46_WIFI / P46_WIFI_SSID exact-key edit (wave 4)
 
 **Wave 5** *(gap closure, blocked on Wave 4 completion)*
-- [ ] 46-06-PLAN.md — Gap closure CR-01 + WR-05: Device Detail `loadDevice` keeps unsaved drafts the triggering save did not write, saves apply their written values locally and the re-read goes through the throwing `devices/loadDevices`, unit checks K1..K6 on the real reload, review disposition, console + gitlink ship to `thinx-staging` with live proofs and the CR-01 operator UAT (POL-03) (wave 5)
+- [x] 46-06-PLAN.md — Gap closure CR-01 + WR-05: Device Detail `loadDevice` keeps unsaved drafts the triggering save did not write, saves apply their written values locally and the re-read goes through the throwing `devices/loadDevices`, unit checks K1..K6 on the real reload, review disposition, console + gitlink ship to `thinx-staging` with live proofs and the CR-01 operator UAT (POL-03) (wave 5)
 
 **UI hint**: yes
 
@@ -301,7 +301,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
-| 46. Transformers & Environment Globals | v1.18 | 5/5 | In Progress | - |
+| 46. Transformers & Environment Globals | v1.18 | 6/6 | In Progress | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 

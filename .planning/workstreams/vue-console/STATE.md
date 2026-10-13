@@ -3,13 +3,13 @@ gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 46
-current_phase_name: transformers-environment-globals
+current_phase_name: Transformers & Environment Globals
 status: executing
-stopped_at: Completed 46-05-PLAN.md
-last_updated: "2026-10-13T22:08:59.217Z"
-last_activity: 2026-10-13
+stopped_at: Completed 46-06-PLAN.md
+last_updated: "2026-10-13T22:39:15.906Z"
+last_activity: 2026-10-14
 last_activity_desc: Phase 46 execution started
-state_head: 7064f23c477057b7214ea5044bfb767d43210cb8
+state_head: 9c46f887ff20547fd5e45ad15158027e822d0ad8
 progress:
   total_phases: 7
   completed_phases: 4
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 46 (transformers-environment-globals) — READY TO EXECUTE
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-10-13 — Phase 46 execution started
+Phase: 46 (Transformers & Environment Globals) — EXECUTING
+Plan: 6 of 6 (46-06 gap closure complete, deployed as 6d47a5fb)
+Status: Ready for verification (re-run /gsd-verify-work 46 --ws vue-console)
+Last activity: 2026-10-14 — 46-06 Device Detail draft fix (CR-01, WR-05) shipped
 
 Progress: [██████░░░░] 57%
 
@@ -71,6 +71,7 @@ Progress: [██████░░░░] 57%
 | Phase 46 P03 | 13min | 3 tasks | 4 files |
 | Phase 46 P04 | 17min | 3 tasks | 9 files |
 | Phase 46 P05 | 12 min | 2 tasks | 1 files |
+| Phase 46 P06 | 25 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Progress: [██████░░░░] 57%
 - [Phase 46]: 46-04: Device Detail saveTransformers decides success only from updateDevice; Transformers saved. is set before the reload, card messages clear on the checkbox user change event, not a watcher
 - [Phase 46]: 46-04: 37 IN-02 fixed by console dac2c5e + d526ff7, 37 IN-03 by a16307a; Phase 35 IN-02 (console ed429ec) listed under Closed in Phase 46 in ROADMAP Phase 48 for the FIX-01 ledger
 - [Phase 46]: 46-05: shipped without a rebase (origin/thinx-staging still 17d63319); pipeline 5671 legacy-off OK; bundle 656bb9e live; SUMMARY and close-out docs ride the next thinx-staging push
+- [Phase 46]: 46-06: Device Detail loadDevice keeps every draft that differs from the device on screen; each save first applies what it wrote to a copy of the device (CR-01)
+- [Phase 46]: 46-06: Device Detail reads the device list through the throwing devices/loadDevices; a failed re-read keeps the written values on screen (WR-05)
 
 ### Pending Todos
 
@@ -142,6 +145,6 @@ Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T21:39:21.952Z
-**Stopped At:** Completed 46-05-PLAN.md
+**Last session:** 2026-10-13T22:38:55.541Z
+**Stopped At:** Completed 46-06-PLAN.md
 **Resume File:** None

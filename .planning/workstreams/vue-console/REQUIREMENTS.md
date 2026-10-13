@@ -64,7 +64,7 @@ upgrades.
 
 - [ ] **POL-01**: (35-UI-REVIEW) Build Firmware shows an in-flight state and cannot be double-submitted; the account menu has an accessible name; the Device Detail content column is width-constrained.
 - [ ] **POL-02**: (36-UI-REVIEW) One shared status→variant mapping distinguishes TIMEOUT (warning) from FAILED (danger); the dashboard Recent Builds card can open the build log; rows without a build id show no "Open build log" button.
-- [ ] **POL-03**: (37-UI-REVIEW) Save Transformers has pending and dirty states; the field is called "Name" on every surface; deleting a transformer warns that devices using it will stop applying it.
+- [x] **POL-03**: (37-UI-REVIEW) Save Transformers has pending and dirty states; the field is called "Name" on every surface; deleting a transformer warns that devices using it will stop applying it.
 - [x] **POL-04**: (38-UI-REVIEW) Deploy-key Delete is out of the generate form, has a pending state and cannot be double-submitted; a failed reload clears stale rows and shows a single error message.
 
 ### Notifications
@@ -121,7 +121,7 @@ upgrades.
 | TRANS-03 | Phase 46 | Gaps Found |
 | TRANS-04 | Phase 46 | Gaps Found |
 | ENV-01 | Phase 46 | Gaps Found |
-| POL-03 | Phase 46 | Gaps Found |
+| POL-03 | Phase 46 | Complete |
 | FIX-03 | Phase 46 | Gaps Found |
 | BUILD-03 | Phase 47 | Pending |
 | POL-02 | Phase 47 | Pending |
