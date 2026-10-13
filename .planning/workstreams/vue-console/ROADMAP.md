@@ -227,6 +227,9 @@ Plans:
 **Carried from Phase 45** (Legacy; 45-CONTEXT D-16 locked "No Legacy change", so they ship with CI-06):
 - Phase 35 review IN-03, IN-04, IN-05 (Legacy deploy-key items the Milestone Notes assigned to Phase 45) go to the FIX-01 ledger here.
 
+**Closed in Phase 46** (record in the FIX-01 ledger):
+- Phase 35 review IN-02 (a transformer write whose list re-fetch failed was reported as a failed create): fixed in console `ed429ec` (46-02), `saveTransformers` resolves `refreshed: false` and the page reloads once.
+
 **Carried from Phase 44** (Vue, small; record in the FIX-01 ledger or fix):
 - Theme-wide `.alert-danger` text contrast 3.96:1 (below 4.5:1); fix in `_overrides.scss` (45-UI-SPEC deferral).
 - List/grid view toggles have no `aria-label` (pre-existing; 44-UI-REVIEW #5).
