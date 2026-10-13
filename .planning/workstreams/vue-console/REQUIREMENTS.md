@@ -30,10 +30,10 @@ upgrades.
 
 ### Devices
 
-- [ ] **DEV-01**: The device list shows the Legacy `device-icon` / `device-icon-symbol` assets on a category background whose class/label is named after the platform, not a colour description such as `grey-mint`.
+- [x] **DEV-01**: The device list shows the Legacy `device-icon` / `device-icon-symbol` assets on a category background whose class/label is named after the platform, not a colour description such as `grey-mint`.
 - [ ] **DEV-02**: Device rows use the Legacy status, firmware, build, view-log and edit (= Detail) icons.
 - [ ] **DEV-03**: The Actions cell never wraps; when space runs out it shows icons only, with the text kept as aria-label and hover tip.
-- [ ] **DEV-04**: The platform is shown as a Legacy-style bullet without the "Platform:" label.
+- [x] **DEV-04**: The platform is shown as a Legacy-style bullet without the "Platform:" label.
 - [ ] **DEV-05**: Devices with no API key assigned show `fa-warning` with an explanatory hover tip.
 
 ### Build Log
@@ -51,7 +51,7 @@ upgrades.
 
 ### Repositories
 
-- [ ] **REPO-01**: Repository rows show the platform with the same bullet design as Devices, and the user-facing fallback is `unknown` instead of `unknown_platform`.
+- [x] **REPO-01**: Repository rows show the platform with the same bullet design as Devices, and the user-facing fallback is `unknown` instead of `unknown_platform`.
 
 ### Review Leftovers (v1.16)
 
@@ -107,12 +107,12 @@ upgrades.
 | NOTIF-01 | Phase 43 | Complete |
 | NOTIF-02 | Phase 43 | Complete |
 | NOTIF-03 | Phase 43 | Complete |
-| DEV-01 | Phase 44 | Pending |
+| DEV-01 | Phase 44 | Complete |
 | DEV-02 | Phase 44 | Pending |
 | DEV-03 | Phase 44 | Pending |
-| DEV-04 | Phase 44 | Pending |
+| DEV-04 | Phase 44 | Complete |
 | DEV-05 | Phase 44 | Pending |
-| REPO-01 | Phase 44 | Pending |
+| REPO-01 | Phase 44 | Complete |
 | KEY-04 | Phase 45 | Pending |
 | KEY-05 | Phase 45 | Pending |
 | KEY-06 | Phase 45 | Pending |

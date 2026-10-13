@@ -4,17 +4,17 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 44
 current_phase_name: Device List Parity
-status: planning
-stopped_at: Phase 43 complete, ready to plan Phase 44
-last_updated: "2026-10-13T09:40:54.872Z"
+status: executing
+stopped_at: Completed 44-01-PLAN.md
+last_updated: "2026-10-13T11:36:58.833Z"
 last_activity: 2026-10-13
-last_activity_desc: Phase 43 complete, transitioned to Phase 44
-state_head: 363dc0eb7241ffa71dcac0966d53b889f56e35c5
+last_activity_desc: Completed 44-01 (platform module, PlatformBullet, device icon tiles, platform filter)
+state_head: 8bd1e74be7ac12cdc3bc8ba112f4669bcceecba5
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
   percent: 29
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 43 — Notification Delivery
+**Current focus:** Phase 44 — Device List Parity
 
 ## Current Position
 
 Phase: 44 — Device List Parity
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-13 — Phase 43 complete, transitioned to Phase 44
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-10-13 — Completed 44-01 (platform module, PlatformBullet, device icon tiles, platform filter)
 
 Progress: [███░░░░░░░] 29%
 
@@ -61,6 +61,7 @@ Progress: [███░░░░░░░] 29%
 | Phase 43 P01 | 10min | 3 tasks | 7 files |
 | Phase 43 P02 | 8min | 3 tasks | 4 files |
 | Phase 43 P03 | 25min | 3 tasks | 0 files |
+| Phase 44 P01 | 10m 27s | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Progress: [███░░░░░░░] 29%
 - [Phase 43]: 43-02: one terminal Build Status frame per build_id (error or Completed; bounded memory 1000); Completed only for an OK status, otherwise the status or Failed as error; raw log lines never reach console sockets
 - [Phase 43]: 43-03: operator chose skip-bypass; no build_legacy_console=true pipeline ran. NOTIF-01 is live through the pre-CI-05 legacy build (served LogviewController byte-identical to console cfff199, carries thinxEscapeHtml); roadmap Phase 43 criterion 2 (one-off legacy build) not executed
 - [Phase 43]: 43-03: shipped 7cec687b..b1126b6c via pipeline 5659 (legacy-off, no Snyk); WS-MULTITAB FAIL 1/2 -> OK 2/2 on rtm.thinx.cloud; D-16 human checks pending UAT
+- [Phase 44]: 44-01: Devices filter field is platformFilter (filterPlatform contains the forbidden string Platform:)
+- [Phase 44]: 44-01: PlatformBullet + utils/platforms.js are the shared platform contract; colours only in _platforms.scss keyed list
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ Progress: [███░░░░░░░] 29%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T07:37:23.997Z
-**Stopped At:** Phase 43 complete, ready to plan Phase 44
+**Last session:** 2026-10-13T11:36:43.544Z
+**Stopped At:** Completed 44-01-PLAN.md
 **Resume File:** None
