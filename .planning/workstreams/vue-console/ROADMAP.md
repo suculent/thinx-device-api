@@ -173,11 +173,11 @@ Plans:
   4. Each Environment Globals row has an Edit button that changes the value. If the recreate fails, the original variable is back in the list with its old value and the user sees an error.
   5. Phase 37 review items IN-02 and IN-03 are fixed or deferred with a recorded reason.
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 46-01-PLAN.md — API: `apienv.create` replaces only the exact key (D-02, editing WIFI keeps WIFI_SSID), `ApienvExactKeySpec` (local and CI, envelopes unchanged), ENV-01 / D-01 and D-02 deviation records (ENV-01) (wave 1)
+- [x] 46-01-PLAN.md — API: `apienv.create` replaces only the exact key (D-02, editing WIFI keeps WIFI_SSID), `ApienvExactKeySpec` (local and CI, envelopes unchanged), ENV-01 / D-01 and D-02 deviation records (ENV-01) (wave 1)
 - [ ] 46-02-PLAN.md — Vue Transformers: IconButton white wrench and trash, `+` Add, typed-`confirm` dialog for row and bulk delete with the device-usage warning, `deleteItems` one write, Name copy, shared `_settings-pages.scss`, Phase 35 IN-02 (TRANS-03, TRANS-04, POL-03) (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -295,7 +295,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
-| 46. Transformers & Environment Globals | v1.18 | 0/5 | Not started | - |
+| 46. Transformers & Environment Globals | v1.18 | 1/5 | In Progress | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 

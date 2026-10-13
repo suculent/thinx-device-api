@@ -4,18 +4,17 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 46
 current_phase_name: Transformers & Environment Globals
-status: planning
-stopped_at: Phase 46 planned (5 plans, 4 waves), ready to execute
-last_updated: "2026-10-13T19:33:31.779Z"
+status: executing
+stopped_at: Completed 46-01-PLAN.md
+last_updated: "2026-10-13T20:35:35.187Z"
 last_activity: 2026-10-13
-last_activity_desc: Phase 46 planned; plan check passed (0 blockers, 1 advisory)
-state_head: 17d63319651eee31c871b45878aa38c7f1a5f726
+last_activity_desc: Phase 46 execution started
+state_head: e8dfffb958347235b028da60e2475df6bf8e5ed5
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 3
   completed_plans: 7
-  percent: 57
 ---
 
 # Project State
@@ -25,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 45 — Deploy Key Rename & Row Actions
+**Current focus:** Phase 46 — Transformers & Environment Globals
 
 ## Current Position
 
-Phase: 46 — Transformers & Environment Globals
-Plan: Not started
+Phase: 46 (Transformers & Environment Globals) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-10-13 — Phase 45 complete, transitioned to Phase 46
+Last activity: 2026-10-13 — Phase 46 execution started
 
 Progress: [██████░░░░] 57%
 
@@ -67,6 +66,7 @@ Progress: [██████░░░░] 57%
 | Phase 44 P02 | 10m 27s | 3 tasks | 8 files |
 | Phase 44 P03 | 8m 35s | 2 tasks | 1 files |
 | Phase 45 P05 | 11 min | 2 tasks | 1 files |
+| Phase 46 P01 | 3 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -97,6 +97,7 @@ Progress: [██████░░░░] 57%
 - [Phase 44]: 44-02: icomoon ported as woff+ttf byte copies with only .icomoon-hammer_icon; URLs relative to theme.scss like flaticon
 - [Phase 44]: 44-03: shipped console cfff199..6a34102 and parent 4fcacece..d630652e via pipeline 5662 (legacy-off, no Snyk, CI-GATES PIPELINE OK); console.thinx.cloud serves id d630652 with all Phase 44 markers; Legacy files byte-identical; 9 human checks pending UAT
 - [Phase 45]: 45-05: shipped as pipeline 5666 (legacy-off); console 604258c..31ed738, parent cad3088d..c3f78558; SUMMARY/close-out docs stay local until the next thinx-staging push
+- [Phase 46]: 46-01: apienv.create replaces only the entry named exactly String(key) (D-02); one redis.set and all env envelopes unchanged
 
 ### Pending Todos
 
@@ -128,6 +129,6 @@ Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T15:44:30.125Z
-**Stopped At:** Phase 45 complete, ready to plan Phase 46
+**Last session:** 2026-10-13T20:35:34.837Z
+**Stopped At:** Completed 46-01-PLAN.md
 **Resume File:** None
