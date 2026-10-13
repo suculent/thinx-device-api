@@ -1,3 +1,4 @@
+require("./lib/thinx/newrelic.js").start(); // New Relic APM: must load before thinx-core.js (quick 261013-kvm)
 const THiNX = require("./thinx-core.js");
 const Notifier = require("./lib/thinx/notifier.js");
 
