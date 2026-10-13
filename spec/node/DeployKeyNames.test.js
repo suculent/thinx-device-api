@@ -506,6 +506,43 @@ test('a failed .pub replace reports rename_failed, keeps the old .pub and leaves
     assert.deepEqual(fs.readdirSync(dir).filter((f) => f.startsWith('.')), []);
   } finally { fsx.renameSync = realRename; fs.rmSync(dir, {recursive: true, force: true}); }
 });
+// 45-REVIEW IN-04: rename() is synchronous, so only another API process on the shared key
+// volume can revoke the pair mid-rename. These tests play that process from inside the fs
+// calls rename makes. Either way the answer is key_not_found and no orphan .pub, no temp
+// file and no other file of that key is left behind.
+function revokeOnDisk(dir, filename) {
+  fs.rmSync(path.join(dir, filename), { force: true });
+  fs.rmSync(path.join(dir, filename + '.pub'), { force: true });
+}
+test('a key revoked before the .pub replace is not recreated (IN-04)', async () => {
+  const {dir, key} = fixture();
+  const fsx = require('fs-extra');
+  const realChmod = fsx.chmodSync;
+  try {
+    const keep = writeKey(dir, OWNER, 2000, GITHUB_RSA + ' Keep me\n');
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    // The temp file's chmod is the last step before the check and the final renameSync.
+    fsx.chmodSync = (p, mode) => { const r = realChmod(p, mode); if (String(p).endsWith('.tmp')) revokeOnDisk(dir, filename); return r; };
+    let r;
+    try { r = await renameKey(key, OWNER, filename, 'New name'); } finally { fsx.chmodSync = realChmod; }
+    assert.deepEqual([r.success, r.response], [false, 'key_not_found']);
+    assert.deepEqual(fs.readdirSync(dir).sort(), [keep, keep + '.pub'], 'no orphan .pub, no temp file');
+  } finally { fsx.chmodSync = realChmod; fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('a key revoked between the check and the final rename leaves no orphan .pub (IN-04)', async () => {
+  const {dir, key} = fixture();
+  const fsx = require('fs-extra');
+  const realRename = fsx.renameSync;
+  try {
+    const keep = writeKey(dir, OWNER, 2000, GITHUB_RSA + ' Keep me\n');
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    fsx.renameSync = (from, to) => { revokeOnDisk(dir, filename); return realRename(from, to); };
+    let r;
+    try { r = await renameKey(key, OWNER, filename, 'New name'); } finally { fsx.renameSync = realRename; }
+    assert.deepEqual([r.success, r.response], [false, 'key_not_found']);
+    assert.deepEqual(fs.readdirSync(dir).sort(), [keep, keep + '.pub'], 'the orphan .pub the rename wrote is removed');
+  } finally { fsx.renameSync = realRename; fs.rmSync(dir, {recursive: true, force: true}); }
+});
 test('account deletion also removes the owner\'s leftover rename temp files (T-45-06)', () => {
   const {dir, key} = fixture();
   try {
