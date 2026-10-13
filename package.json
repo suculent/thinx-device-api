@@ -65,6 +65,7 @@
     "mongo-sanitize": "^1.1.0",
     "mqtt": "^5.16.0",
     "nano": "^11.0.7",
+    "newrelic": "14.5.1",
     "node-forge": "^1.4.0",
     "node-schedule": "^2.1.1",
     "redis": "^5.8.2",
