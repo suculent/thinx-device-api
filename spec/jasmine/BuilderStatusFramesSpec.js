@@ -485,6 +485,25 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
             expect(updates.calls.mostRecent().args.slice(0, 3), "sources.update args").to.deep.equal([OWNER_A, SOURCE, "last_build"]);
         });
 
+        // WR-03: the worker's builder reports a successful dry run as DRY_RUN_OK (notifier.js
+        // treats it as success). It is a green Completed, not a red error frame.
+        it("F1f (WR-03) a DRY_RUN_OK job-status gives one Completed (success, with build_id) and no error frame; no prune, no last_build", function () {
+            const updates = spyOn(builder.sources, "update");
+            let pruned = 0;
+            builder.cleanupDeviceRepositories = () => { pruned++; };
+            builder.processShellData(shellOpts(BUILD_X), "[builder] Build Stage completed with status: DRY_RUN_OK\n");
+            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { status: "DRY_RUN_OK", completed: true, build_id: BUILD_X }, { source_id: SOURCE });
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            expectSingleCompleted(a2, "A2", BUILD_X);
+            expect(frames(a1).filter((f) => f.type === "error").length, "A1 error frames").to.equal(0);
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+            expect(states, "build log states").to.deep.equal(["DRY_RUN_OK"]);
+            expect(pruned, "cleanupDeviceRepositories calls").to.equal(0);
+            expect(updates.calls.count(), "sources.update calls").to.equal(0);
+        });
+
         // A local build runs ./builder directly. That script exits 0 whether the build passed
         // or not, so the outcome is the status the builder itself printed last.
         describe("local builds (WR-02)", function () {
@@ -540,6 +559,14 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
 
                 expect(bodies(a1)).to.deep.equal(["FAILED"]);
                 expect(frames(a1)[0].type).to.equal("error");
+            });
+
+            it("L5 (WR-03) a local dry run (the builder printed DRY_RUN_OK) and exit 0 give one Completed, not an error", function () {
+                out("[builder] Build Stage completed with status: DRY_RUN_OK\nSTATUS DRY_RUN_OK\n");
+                shell.emit("exit", 0);
+
+                expectSingleCompleted(a1, "A1", BUILD_X);
+                expect(frames(a1).filter((f) => f.type === "error").length, "A1 error frames").to.equal(0);
             });
 
             it("L4 exit 0 without any builder status sends no terminal frame; a non-zero exit is Failed even after status: OK output", function () {
