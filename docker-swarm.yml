@@ -40,6 +40,18 @@ networks:
 # INFLUXDB_ADMIN_PASSWORD also exist in the swarm but are mounted on NO service
 # and are not declared here (D-11): they are operator-only.
 #
+# NEW_RELIC_LICENSE_KEY (quick 261013-kvm) is the New Relic ingest license key
+# for optional APM, on the api service only. lib/thinx/newrelic.js loads the
+# agent only when this secret (or the env var) is present, so detaching it is
+# the kill switch: on the next start the API logs "NEW_RELIC_LICENSE_KEY not
+# set, New Relic disabled". It is created by piping the key on stdin into
+# `docker secret create NEW_RELIC_LICENSE_KEY -` and is never printed or
+# stored elsewhere. Like every secret here it is external, so it must exist
+# before any `docker stack deploy` of this file. There is deliberately no
+# environment entry for it: a service env var is readable by anything that can
+# read the service spec (`docker service inspect`, and the Traefik
+# socket-proxy's GET /services). It is not mounted on worker or transformer.
+#
 # Every secret below is declared `external: true`, so it MUST exist in the
 # swarm before any `docker stack deploy`, or the deploy is rejected with
 # "secret not found". They were created on a manager node: carried-over values
@@ -89,6 +101,8 @@ secrets:
   CSRF_SECRET:
     external: true
   INFLUXDB_TOKEN:
+    external: true
+  NEW_RELIC_LICENSE_KEY:
     external: true
 
 services:
@@ -288,6 +302,7 @@ services:
       - GIT_KEY_PASSPHRASE
       - CSRF_SECRET
       - INFLUXDB_TOKEN
+      - NEW_RELIC_LICENSE_KEY
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
