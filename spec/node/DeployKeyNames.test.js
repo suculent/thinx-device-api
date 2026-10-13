@@ -544,6 +544,36 @@ test('a key revoked between the check and the final rename leaves no orphan .pub
     assert.deepEqual(fs.readdirSync(dir).sort(), [keep, keep + '.pub'], 'the orphan .pub the rename wrote is removed');
   } finally { fsx.renameSync = realRename; fs.rmSync(dir, {recursive: true, force: true}); }
 });
+function failListingFrom(key, callNumber) {
+  const real = key.getKeyPathsForOwner.bind(key);
+  let calls = 0;
+  key.getKeyPathsForOwner = (owner) => {
+    calls += 1;
+    if (calls >= callNumber) throw Object.assign(new Error('EMFILE: too many open files'), { code: 'EMFILE' });
+    return real(owner);
+  };
+}
+test('a failed key listing after the .pub replace keeps the key (45-VERIFICATION warning)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    failListingFrom(key, 3); // ownership check, pre-rename check pass; the post-rename check fails
+    const r = await renameKey(key, OWNER, filename, 'New name');
+    assert.deepEqual([r.success, r.response], [false, 'rename_failed']);
+    assert.deepEqual(fs.readdirSync(dir).sort(), [filename, filename + '.pub'], 'private key and .pub both stay');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('a failed key listing before the .pub replace leaves the old .pub unchanged', async () => {
+  const {dir, key} = fixture();
+  try {
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    failListingFrom(key, 2); // ownership check passes; the pre-rename check fails
+    const r = await renameKey(key, OWNER, filename, 'New name');
+    assert.deepEqual([r.success, r.response], [false, 'rename_failed']);
+    assert.deepEqual(fs.readdirSync(dir).sort(), [filename, filename + '.pub'], 'no temp file left');
+    assert.match(fs.readFileSync(path.join(dir, filename + '.pub'), 'utf8'), / Old name\n$/);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
 test('account deletion also removes the owner\'s leftover rename temp files (T-45-06)', () => {
   const {dir, key} = fixture();
   try {
