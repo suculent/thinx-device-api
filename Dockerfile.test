@@ -149,6 +149,13 @@ RUN node --test spec/node/StaticCsp.test.js
 # contract (jasmine failures must fail the api container). A failure fails the build.
 RUN node --test spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js
 
+# Deploy-key safety contracts (Phase 45, 45-REVIEW WR-02): rename is owner-bound and refuses
+# traversal, never touches the private key, and leaves no temp file. The suite needs the
+# installed node_modules (not on the CI host), points HOME at a mkdtemp directory and sets
+# ENVIRONMENT=development itself, so it uses the repo's spec config and no service.
+# vault-transit Phase 40 rewrites private-key storage in rsakey.js; a regression fails the build.
+RUN node --test spec/node/DeployKeyNames.test.js
+
 RUN mkdir -p ./.nyc_output
 
 # only for test mocking (may not work, will need structure with mock data in repo)
