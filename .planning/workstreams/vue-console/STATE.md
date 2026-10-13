@@ -4,17 +4,17 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 44
 current_phase_name: Device List Parity
-status: executing
-stopped_at: Completed 44-02-PLAN.md
-last_updated: "2026-10-13T11:49:42.576Z"
+status: verifying
+stopped_at: Completed 44-03-PLAN.md
+last_updated: "2026-10-13T12:00:38.005Z"
 last_activity: 2026-10-13
-last_activity_desc: Completed 44-02 (IconButton actions, hammer build guard, view log, status, firmware, API-key warning)
-state_head: 6cd25c7b00a3e21cb91725777ee48052d12a6bab
+last_activity_desc: Completed 44-03 (shipped via pipeline 5662, console.thinx.cloud serves d630652, Legacy unchanged; operator UAT pending)
+state_head: d630652e04f28ac275b0d7aab2f0cec638dabede
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 29
 ---
 
@@ -31,8 +31,8 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 Phase: 44 — Device List Parity
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-10-13 — Completed 44-02 (IconButton actions, hammer build guard, view log, status, firmware, API-key warning)
+Status: Phase complete — ready for verification
+Last activity: 2026-10-13 — Completed 44-03 (shipped via pipeline 5662, console.thinx.cloud serves d630652, Legacy unchanged; operator UAT pending)
 
 Progress: [███░░░░░░░] 29%
 
@@ -63,6 +63,7 @@ Progress: [███░░░░░░░] 29%
 | Phase 43 P03 | 25min | 3 tasks | 0 files |
 | Phase 44 P01 | 10m 27s | 3 tasks | 9 files |
 | Phase 44 P02 | 10m 27s | 3 tasks | 8 files |
+| Phase 44 P03 | 8m 35s | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,7 @@ Progress: [███░░░░░░░] 29%
 - [Phase 44]: 44-02: IconButton (icon, label, variant, disabled; inheritAttrs false) is the shared row action button; the label is visible text from lg, aria-label and wrapper tip
 - [Phase 44]: 44-02: Build in-flight guard is a buildingUdids list released in finally; buildDevice and openLastBuild also guard their own disabled states
 - [Phase 44]: 44-02: icomoon ported as woff+ttf byte copies with only .icomoon-hammer_icon; URLs relative to theme.scss like flaticon
+- [Phase 44]: 44-03: shipped console cfff199..6a34102 and parent 4fcacece..d630652e via pipeline 5662 (legacy-off, no Snyk, CI-GATES PIPELINE OK); console.thinx.cloud serves id d630652 with all Phase 44 markers; Legacy files byte-identical; 9 human checks pending UAT
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ Progress: [███░░░░░░░] 29%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T11:49:42.489Z
-**Stopped At:** Completed 44-02-PLAN.md
+**Last session:** 2026-10-13T12:00:37.920Z
+**Stopped At:** Completed 44-03-PLAN.md
 **Resume File:** None

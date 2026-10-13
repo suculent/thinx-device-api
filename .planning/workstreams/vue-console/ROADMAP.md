@@ -112,7 +112,7 @@ Plans:
   3. The platform shows as a Legacy-style bullet with no "Platform:" label. Device rows and repository rows render the identical bullet for the same platform, and a repository with no known platform shows `unknown`, never `unknown_platform`.
   4. A device with no API key assigned shows an `fa-warning` icon whose hover tip explains that the device has no API key.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -122,7 +122,7 @@ Plans:
 - [x] 44-02-PLAN.md — Shared `IconButton` (text as aria-label and tip), one-line `actions-cell`, Legacy hammer (icomoon port) with in-flight guard, view-log, edit and revoke icons, heartbeat status, firmware cogs and the missing-API-key warning (DEV-02, DEV-03, DEV-05) (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 44-03-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live console.thinx.cloud bundle and unchanged Legacy proof, operator UAT of the device list (all six requirements) (wave 3)
+- [x] 44-03-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live console.thinx.cloud bundle and unchanged Legacy proof, operator UAT of the device list (all six requirements) (wave 3)
 
 **UI hint**: yes
 
@@ -253,7 +253,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 |-------|-----------|----------------|--------|-----------|
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
-| 44. Device List Parity | v1.18 | 2/3 | In Progress | - |
+| 44. Device List Parity | v1.18 | 3/3 | In Progress | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
