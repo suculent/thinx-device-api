@@ -3,7 +3,7 @@ status: complete
 phase: 46-transformers-environment-globals
 source: [46-VERIFICATION.md]
 started: 2026-10-13T22:46:51Z
-updated: 2026-10-13T23:02:21.423Z
+updated: 2026-10-13T23:07:28Z
 ---
 
 ## Current Test
@@ -14,9 +14,8 @@ updated: 2026-10-13T23:02:21.423Z
 
 ### 1. CR-01 on production Device Detail (46-06 UAT items 13-14)
 expected: After each alias/description/environment save the message shows, the tick and the 'Unsaved changes' note stay, Save Transformers stays enabled and Manage Transformers opens the 'Unsaved Changes' dialog; after Save Transformers, 'Transformers saved.' shows and the typed Alias is still in the field, unsaved
-result: issue
-reported: "after changing alias, and ticking transformer and saving transformer the alias gets reverted to its previously saved state"
-severity: major
+result: pass
+note: "Retested 2026-10-14 after a hard reload: the edited Alias stays changed after Save Transformers. The first report (alias reverted) came from a stale cached bundle, not from the deployed code. Operator: 'probably my mistake when UAT testing (not hard-reloaded) previously'."
 
 ### 2. 46-05 UAT items 1-12 (46-05-SUMMARY.md § Pending end-of-phase UAT)
 expected: Every item behaves as described in 46-05-SUMMARY.md (rollout, Transformers icons and Name copy, typed-confirm bulk and row delete, Device Detail dirty note / leave guard / Saving state / failure, P46_WIFI vs P46_WIFI_SSID exact-key edit, edit failure with blocked /api/v2/env, Add duplicate refusal and bulk delete, Phase 37 records, Legacy environment page)
@@ -45,19 +44,12 @@ result: pass
 ## Summary
 
 total: 7
-passed: 6
-issues: 1
+passed: 7
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-- gap_id: G-46-1
-  truth: "After typing an Alias without saving, ticking a transformer and pressing Save Transformers, 'Transformers saved.' shows and the typed Alias is still in the field, unsaved"
-  status: failed
-  reason: "User reported: after changing alias, and ticking transformer and saving transformer the alias gets reverted to its previously saved state"
-  severity: major
-  test: 1
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+[none — the test 1 report (G-46-1) was withdrawn after a hard-reload retest]
