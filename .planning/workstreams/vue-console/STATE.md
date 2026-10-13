@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 46
 current_phase_name: Transformers & Environment Globals
 status: executing
-stopped_at: Completed 46-02-PLAN.md
-last_updated: "2026-10-13T20:51:39.492Z"
+stopped_at: Completed 46-03-PLAN.md
+last_updated: "2026-10-13T21:08:30.916Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 46 execution started
-state_head: 44a2a79684e5346b0f023ff5876ce9b5bd36cc8e
+state_head: 745067982e189046c95b96323fc54051d78359d7
 progress:
   total_phases: 7
   completed_phases: 4
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 46 (Transformers & Environment Globals) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-10-13 — Phase 46 execution started
 
@@ -68,6 +68,7 @@ Progress: [██████░░░░] 57%
 | Phase 45 P05 | 11 min | 2 tasks | 1 files |
 | Phase 46 P01 | 3 min | 2 tasks | 4 files |
 | Phase 46 P02 | 14 min | 3 tasks | 10 files |
+| Phase 46 P03 | 13min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Progress: [██████░░░░] 57%
 - [Phase 46]: 46-02: saveTransformers returns refreshed: false when only the re-read fails (35 IN-02 fixed in console ed429ec); pages reload separately
 - [Phase 46]: 46-02: transformers/deleteItems(utids) re-reads and writes once; devices/loadDevices throws so the usage line can fall back to the generic sentence
 - [Phase 46]: 46-02: shared Phase 46 rules live in vue/src/styles/_settings-pages.scss (imported after deploy-keys); 46-03/46-04 append to it
+- [Phase 46]: 46-03: enviros createItem/deleteItems resolve refreshed: false when only the follow-up GET /env fails (console aef5a22), so a stored edit is never reported as keeping the old value
+- [Phase 46]: 46-03: Add Variable loads the list first when it is loading or failed and refuses while it cannot be read, so a blind PUT never overwrites a listed key (T-46-13)
 
 ### Pending Todos
 
@@ -133,6 +136,6 @@ Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T20:51:39.331Z
-**Stopped At:** Completed 46-02-PLAN.md
+**Last session:** 2026-10-13T21:08:22.910Z
+**Stopped At:** Completed 46-03-PLAN.md
 **Resume File:** None
