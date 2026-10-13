@@ -34,7 +34,7 @@ no dependency or infrastructure upgrades.
 - Decimal phases (42.1, 43.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 42: CI Trim, Login Page & Build Footer** - Snyk monitors on `main` only, legacy console build paused for the milestone; THiNX-branded welcome login with social logins under a green Login button; every footer shows the build year and short commit id (completed 2026-10-12)
-- [ ] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console)
+- [x] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console) (completed 2026-10-13)
 - [ ] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning
 - [ ] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console)
 - [ ] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure
@@ -88,7 +88,7 @@ Plans:
   3. Two Legacy console tabs on the same `/<owner>` socket path both connect without an upgrade refusal and both receive the owner's frames. Closing one tab leaves the other receiving.
   4. A running build's status frames reach the owner's open console sockets and no other owner's sockets.
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -179,6 +179,11 @@ Plans:
   4. The legacy console build is re-enabled (the CI-05 block reverted), a normal `thinx-staging` pipeline builds and publishes the Legacy image again, and every Legacy console change of v1.18 not shipped by the Phase 43 one-off build (for example the Phase 45 deploy-key items) is live on production before the milestone closes.
   5. The Vue console Cypress job is green on `thinx-staging` (all 10 specs pass or skip by design; root causes from the 2026-10-12 diagnosis: deep-link reload for devices/profile, cross-origin CSRF for oauth-return/login), CircleCI shows its JUnit results, and the parent `vue-console-registry` job only runs after the suite passes.
 
+**Carried from Phase 43** (Legacy, ship with CI-06; Phase 43 skipped the one-off legacy build, so `thinx/console:swarm` is still the 2026-10-12 image):
+- The "THiNX Builder / Click to show build log..." toast shows `undefined` (`DevicesController.js:117` renders `response.status`, which the build route reply does not carry; pre-existing since 2022, operator UAT 2026-10-13).
+- `LogviewController.js:227` `deviceBuilds[udid].push` throws for a device with no build history, so its build toasts are lost (43-UI-REVIEW fix 3).
+- A Legacy tab whose first socket opens from the log overlay never sends `{init}` and gets no frames until reload (43-REVIEW IN-04).
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -236,7 +241,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
-| 43. Notification Delivery | v1.18 | 3/3 | In Progress | - |
+| 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 0/? | Not started | - |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
