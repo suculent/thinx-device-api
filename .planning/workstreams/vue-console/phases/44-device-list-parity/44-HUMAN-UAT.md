@@ -37,7 +37,7 @@ result: pass (operator "all pass", 2026-10-13, against live build d4a32c9 after 
 
 ### 3. U3 (DEV-05): API-key warning
 test: Find a device without an API key.
-expected: An orange warning triangle sits right after the heartbeat. Its hover tip reads "No API key assigned. The device cannot check in until you assign one." Devices with a key show none. If no device lacks a key, record that.
+expected: An orange warning triangle sits right after the heartbeat. Its hover tip reads "No API Key assigned" Devices with a key show none. If no device lacks a key, record that.
 result: pass (operator "all pass", 2026-10-13, against live build d4a32c9 after the review fixes)
 
 ### 4. U4 (DEV-01, DEV-04): filter, sort and grid view
@@ -75,7 +75,7 @@ test: Read the Prohibitions table in 44-VERIFICATION.md (44-01 x4, 44-02 x4, 44-
 expected: The operator accepts the verifier's non-authoritative verdicts: "not violated" where the code or git history shows it, and the SUMMARY attestation for the items that code cannot show (no ssh, no login, no `.env*` read, no env dump, no `npm run eslint/lint`).
 result: pass (operator "all pass", 2026-10-13, against live build d4a32c9 after the review fixes)
 
-## Follow-ups (not UAT items)
+## Follow-ups (not UAT items; the four UI-review warnings below were fixed in console 6a34102..604258c, see 44-REVIEW-FIX.md)
 
 From 44-UI-REVIEW.md (19/24), not blocking the phase goal:
 - Bulk Revoke / Transfer / Push Config act on selected devices that the platform filter now hides. Prune `selectedUdids` to `filteredItems`, or name the hidden count in the confirmation.
