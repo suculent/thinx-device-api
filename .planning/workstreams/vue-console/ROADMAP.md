@@ -36,7 +36,7 @@ no dependency or infrastructure upgrades.
 - [x] **Phase 42: CI Trim, Login Page & Build Footer** - Snyk monitors on `main` only, legacy console build paused for the milestone; THiNX-branded welcome login with social logins under a green Login button; every footer shows the build year and short commit id (completed 2026-10-12)
 - [x] **Phase 43: Notification Delivery** - escaped actionable toast live via a one-off legacy console build; several Legacy tabs per owner; build status frames reach the owner's consoles (API + console) (completed 2026-10-13)
 - [x] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning (completed 2026-10-13)
-- [ ] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console)
+- [x] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console) (completed 2026-10-13)
 - [ ] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure
 - [ ] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items
 - [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI)
@@ -143,7 +143,7 @@ Plans:
   4. GitHub linking pushes a deterministically chosen key that does not depend on the newest-first list order, and a revoke request with duplicate filenames reports each key once. Every Phase 38 item in FIX-04 (IN-01..IN-04, IN-06, IN-07) is fixed or deferred with a recorded reason.
   5. The Legacy console that production serves still lists, creates and revokes deploy keys against the deployed API with unchanged endpoints and envelopes.
 
-**Plans**: 5/5 plans executed
+**Plans**: 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -278,7 +278,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
-| 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | In Progress | - |
+| 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
