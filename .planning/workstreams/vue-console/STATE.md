@@ -115,6 +115,7 @@ Progress: [████░░░░░░] 43%
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 261012-r9z | Fix Codacy findings on PR 573 (no-control-regex x2, unsafe-regex); CodeQL clean | 2026-10-12 | 174cf071 | [261012-r9z-fix-codacy-findings-on-pr-573-no-control](./quick/261012-r9z-fix-codacy-findings-on-pr-573-no-control/) |
+| 261013-kvm | Optional New Relic APM for the API: loader on thinx.js line 1, newrelic 14.5.1 pinned, NEW_RELIC_LICENSE_KEY external secret on api (unpushed) | 2026-10-13 | 33cb0ed1 | [261013-kvm-add-optional-new-relic-apm](./quick/261013-kvm-add-optional-new-relic-apm/) |
 
 ## Deferred Items
 
