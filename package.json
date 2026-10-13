@@ -130,7 +130,7 @@
     "moment": "2.31.0",
     "netmask": "2.0.2",
     "path-to-regexp": "8.4.0",
-    "protobufjs": "7.1.1",
+    "protobufjs": "7.6.6",
     "serialize-javascript": "^7.0.5",
     "proxy-addr": "2.0.8",
     "proxy-agent": "4.0.1",
