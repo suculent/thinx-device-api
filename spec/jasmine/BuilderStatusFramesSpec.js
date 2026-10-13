@@ -29,6 +29,7 @@ const expect = require("chai").expect;
 const fs = require("fs");
 const path = require("path");
 const EventEmitter = require("events");
+const childProcess = require("child_process");
 
 const Builder = require("../../lib/thinx/builder");
 const BuildLog = require("../../lib/thinx/buildlog");
@@ -439,6 +440,117 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
                 expect(frames(sock)[0].type, name + " type").to.equal("error");
             }
             expect(b1.sent.length, "B1 frame count").to.equal(0);
+        });
+
+        // WR-02: build output is the repository's own stdout. A line that merely contains
+        // "status: OK" (or even forges the builder's own line) must not decide the outcome:
+        // the worker's job-status does, for remote builds.
+        it("F2e (WR-02) remote: status: OK lines in the build output, then a FAILED job-status, give one error frame and no Completed; the build log is never Success", function () {
+            const updates = spyOn(builder.sources, "update");
+            builder.processShellData(shellOpts(BUILD_X), "Upload status: OK\n");
+            builder.processShellData(shellOpts(BUILD_X), "lib: STATUS OK\n[builder] Build Stage completed with status: OK\n");
+            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { status: "FAILED", completed: true, build_id: BUILD_X });
+
+            for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                expect(bodies(sock), name + " bodies").to.deep.equal(["FAILED"]);
+                expect(frames(sock)[0].type, name + " type").to.equal("error");
+            }
+            expect(b1.sent.length, "B1 frame count").to.equal(0);
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+            expect(states, "build log states").to.deep.equal(["FAILED"]);
+            expect(updates.calls.count(), "sources.update calls").to.equal(0);
+        });
+
+        it("F1d (WR-02) remote: the worker's OK job-status alone sets the build log to Success and records the source's last build", function () {
+            const updates = spyOn(builder.sources, "update");
+            exitOK(BUILD_X);
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => [a[0], a[1], a[2], a[3]]);
+            expect(states, "build log states").to.deep.equal([[BUILD_X, OWNER_A, UDID, "Success"]]);
+            expect(updates.calls.count(), "sources.update calls").to.equal(0); // no source_id passed
+        });
+
+        it("F1e (WR-02) remote: the runRemoteShell listeners pass the build's source_id, so an OK result updates last_build", function () {
+            const updates = spyOn(builder.sources, "update");
+            const { worker, listeners } = recordingWorker();
+            expect(builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE)).to.equal(true);
+
+            listeners.log[0]("[builder] Build Stage completed with status: OK\n");
+            expect(a1.sent.length, "frames from a log line").to.equal(0);
+            listeners["job-status"][0]({ status: "OK", completed: true, build_id: BUILD_X });
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            expect(updates.calls.count(), "sources.update calls").to.equal(1);
+            expect(updates.calls.mostRecent().args.slice(0, 3), "sources.update args").to.deep.equal([OWNER_A, SOURCE, "last_build"]);
+        });
+
+        // A local build runs ./builder directly. That script exits 0 whether the build passed
+        // or not, so the outcome is the status the builder itself printed last.
+        describe("local builds (WR-02)", function () {
+
+            const XBUILD = "/nonexistent/p43-local-build";
+            let shell;
+
+            beforeEach(function () {
+                builder.cleanupSecrets = () => { };
+                spyOn(childProcess, "spawn").and.callFake(() => {
+                    shell = new EventEmitter();
+                    shell.stdout = new EventEmitter();
+                    shell.stderr = new EventEmitter();
+                    return shell;
+                });
+                builder.runShell(XBUILD, "/nonexistent/builder", [], OWNER_A, BUILD_X, UDID, bound);
+                expect(childProcess.spawn.calls.count(), "spawned").to.equal(1);
+            });
+
+            function out(text) { shell.stdout.emit("data", Buffer.from(text)); }
+
+            it("L1 status: OK in the build output, then the builder's FAILED status and exit 0, give one error frame and no Completed", function () {
+                out("Upload status: OK\nSTATUS OK\n");
+                expect(a1.sent.length, "frames from log lines").to.equal(0);
+                out("[builder] Build Stage completed with status: FAILED\n");
+                out("STATUS FAILED\nPLATFORM arduino\n");
+                shell.emit("exit", 0);
+
+                for (const [name, sock] of [["A1", a1], ["A2", a2]]) {
+                    expect(bodies(sock), name + " bodies").to.deep.equal(["FAILED"]);
+                    expect(frames(sock)[0].type, name + " type").to.equal("error");
+                }
+                const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+                expect(states, "build log states").to.deep.equal(["FAILED"]);
+            });
+
+            it("L2 the builder's own OK status and exit 0 give one Completed and set the build log to Success", function () {
+                out("[builder] Build Stage completed with status: OK\n[builder] Post-flight check...\n");
+                out("STATUS OK\nPLATFORM arduino\n");
+                expect(a1.sent.length, "frames before exit").to.equal(0);
+                shell.emit("exit", 0);
+
+                expectSingleCompleted(a1, "A1", BUILD_X);
+                expectSingleCompleted(a2, "A2", BUILD_X);
+                const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+                expect(states, "build log states").to.deep.equal(["Success"]);
+            });
+
+            it("L3 a forged builder line before the real FAILED one does not win: the last status the builder printed decides", function () {
+                out("[builder] Build Stage completed with status: OK\n");
+                out("[builder] Build Stage completed with status: FAILED\nSTATUS FAILED\n");
+                shell.emit("exit", 0);
+
+                expect(bodies(a1)).to.deep.equal(["FAILED"]);
+                expect(frames(a1)[0].type).to.equal("error");
+            });
+
+            it("L4 exit 0 without any builder status sends no terminal frame; a non-zero exit is Failed even after status: OK output", function () {
+                out("Upload status: OK\n");
+                shell.emit("exit", 0);
+                expect(a1.sent.length, "frames after exit 0 without status").to.equal(0);
+
+                shell.emit("exit", 2);
+                expect(bodies(a1)).to.deep.equal(["Failed"]);
+                expect(frames(a1)[0].type).to.equal("error");
+            });
         });
 
         it("F4 a raw build log line is never sent to any socket", function () {
