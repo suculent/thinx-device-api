@@ -726,6 +726,51 @@ test('create refuses invalid names with a reason before generating; routers answ
   } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
 
+// 45-REVIEW IN-02: list() hides a comment equal to thinx-<timestamp> (the generated default)
+// and shows the date instead. A rename or create to exactly that name reported success while
+// the list kept showing the date, so both refuse it with the reason `reserved`.
+test('rename and create refuse the key\'s own generated default name thinx-<timestamp> (IN-02)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const filename = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    const before = snapshot(dir);
+    for (const name of ['thinx-1000', '  thinx-1000 ']) {
+      const r = await renameKey(key, OWNER, filename, name);
+      assert.deepEqual([r.success, r.response, r.reason], [false, 'invalid_key_name', 'reserved'], JSON.stringify(name));
+    }
+    assert.deepEqual(snapshot(dir), before, 'a refused rename changes nothing');
+    // Another key's default is an ordinary name: stored, answered and listed as sent.
+    const r = await renameKey(key, OWNER, filename, 'thinx-2000');
+    assert.equal(r.success, true);
+    assert.equal(r.response.name, 'thinx-2000');
+    const listed = await new Promise((resolve) => key.list(OWNER, (ok, list) => resolve(list)));
+    assert.equal(listed[0].name, 'thinx-2000');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+  const created = fixture();
+  try {
+    let generated = 0;
+    created.key.newUniqueIdentifier = () => 5000;
+    created.key.generate = (owner, date, cb) => { generated++; cb(null, 'ssh-rsa fixture x'); };
+    const r = await new Promise((resolve) => created.key.create(OWNER,
+      (success, response, reason) => resolve({ success, response, reason }), 'thinx-5000'));
+    assert.deepEqual([r.success, r.response, r.reason], [false, 'invalid_key_name', 'reserved']);
+    assert.equal(generated, 0, 'nothing generated');
+    assert.deepEqual(fs.readdirSync(created.dir), [], 'the claimed name is released');
+  } finally { fs.rmSync(created.dir, {recursive: true, force: true}); }
+  const dirOfRouter = path.join(TEST_HOME, '.ssh');
+  const realId = RSAKey.prototype.newUniqueIdentifier;
+  try {
+    const mine = writeKey(dirOfRouter, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    const session = { owner: OWNER };
+    assert.deepEqual(await callRoute('PATCH /api/v2/rsakey', { method: 'PATCH', session, body: { filename: mine, name: 'thinx-1000' } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'reserved' } });
+    RSAKey.prototype.newUniqueIdentifier = () => 6000;
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'thinx-6000' } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'reserved' } });
+    assert.deepEqual(fs.readdirSync(dirOfRouter).sort(), [mine, mine + '.pub']);
+  } finally { RSAKey.prototype.newUniqueIdentifier = realId; clearRouterKeys(); }
+});
+
 // ---------------------------------------------------------------------------
 // Phase 45: revoke duplicates (D-14, 38 IN-04) and the remaining 38 IN-06 gaps (D-16).
 // The other two IN-06 gaps are covered above: keys 1 ms apart list newest first
