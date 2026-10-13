@@ -219,8 +219,16 @@ describe("GitHub rejection diagnostics (debugging the token scope error)", funct
         "x-github-request-id": "Bearer " + TOKEN
       }
     });
-    expect(text).to.contain("[github] POST /user/keys 403 message=other token_scopes=- accepted_scopes=- accepted_permissions=- request_id=-");
+    expect(text).to.contain("[github] POST /user/keys 403 message=other errors=none token_scopes=- accepted_scopes=- accepted_permissions=- request_id=-");
     expectClean(text);
+  });
+
+  it("names the 422 reason: key in use or key invalid", async function () {
+    const inUse = await run("post", { status: 422, body: JSON.stringify({ message: "Validation Failed", errors: [{ message: "key is already in use" }] }) });
+    expect(inUse).to.contain("[github] POST /user/keys 422 message=validation_failed errors=key_in_use");
+    const invalid = await run("post", { status: 422, body: JSON.stringify({ message: "Validation Failed", errors: [{ message: "key is invalid. You must supply a key in OpenSSH public key format" }] }) });
+    expect(invalid).to.contain("errors=key_invalid");
+    expectClean(inUse + invalid);
   });
 
   it("adds nothing for a 2xx answer", async function () {

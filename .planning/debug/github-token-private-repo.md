@@ -40,3 +40,17 @@ on that account cannot read the repo even with the right scope.
 2. Re-add the repo; read the `cause=` codes. `publickey_denied` with the key on GitHub → the linked GitHub account
    cannot read the repo (check which account `grammatyk` linked and its collaborator access).
 3. Only `branch_not_found`: the repo's default branch may be `main`, not `master`.
+
+## Update 2026-10-13 ~19:20Z (operator retry with admin:public_key)
+- Token accepted: `[github] GET /user/keys 200`. Key upload: `[github] POST /user/keys 422` → UI warning
+  "existing RSA key was used but the public key could not be pushed". Attempt ran before the diagnostics deployed
+  (task 19:04Z), so the 422 reason was not logged.
+- Owner has four 4096-bit OpenSSH RSA keys (valid format) and none of them is on github.com/suculent.keys
+  (194 public keys; GET /user/keys reads only the first 100). `grammatyk` is not a GitHub user (404).
+- Most likely 422 = "key is already in use": the oldest THiNX key (D-13 always picks it) is registered on another
+  GitHub account or as a repository deploy key, so linking could never succeed.
+- Fix: linking tries usable keys oldest first, skips keys GitHub reports in use elsewhere, and creates and pushes a
+  fresh key when all are taken; any other refusal stops at once (GitHubLinkSpec W5–W8). Response gains
+  `keys_in_use_elsewhere`; Vue explains skipped keys. 422 diagnostics now log `errors=key_in_use|key_invalid`.
+- Open: `onAccount` only sees the first 100 account keys (per_page=100); an account with >100 keys may show a false
+  "not pushed" warning for a key that is present.

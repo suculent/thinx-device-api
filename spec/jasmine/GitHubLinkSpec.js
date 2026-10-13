@@ -19,6 +19,11 @@ function makeDeps(overrides) {
         validateAccessToken: (token, cb) => { calls.validated = token; cb(overrides.tokenValid !== false, overrides.accountKeys || []); },
         addPublicKey: (token, key, cb) => {
           calls.pushed = key;
+          (calls.pushes = calls.pushes || []).push(key);
+          if (overrides.pushByKey) {
+            const outcome = overrides.pushByKey(key);
+            return outcome === "created" ? cb(true, { status: 201, result: "created" }) : cb(false, outcome);
+          }
           if (overrides.pushOutcome) return cb(false, overrides.pushOutcome);
           cb(overrides.pushOk !== false, { status: overrides.pushOk === false ? 500 : 201 });
         }
@@ -125,7 +130,7 @@ describe("GitHubLink.link", function () {
       expect(r.status).to.equal(200);
       expect(calls.created).to.equal(false);
       expect(calls.pushed).to.equal(expected);
-      expect(r.response).to.deep.equal({ key_pushed: true, created_key: false });
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: false, keys_in_use_elsewhere: 0 });
       done();
     });
   }
@@ -162,7 +167,7 @@ describe("GitHubLink.link", function () {
       expect(r.status).to.equal(200);
       expect(calls.created).to.equal(true);
       expect(calls.pushed).to.equal("ssh-rsa NEWKEY");
-      expect(r.response).to.deep.equal({ key_pushed: true, created_key: true });
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: true, keys_in_use_elsewhere: 0 });
       done();
     });
   }
@@ -176,7 +181,7 @@ describe("GitHubLink.link", function () {
           expect(r.status).to.equal(200);
           expect(calls.created).to.equal(true);
           expect(calls.pushed).to.equal("ssh-rsa NEWKEY");
-          expect(r.response).to.deep.equal({ key_pushed: true, created_key: true });
+          expect(r.response).to.deep.equal({ key_pushed: true, created_key: true, keys_in_use_elsewhere: 0 });
           done();
         });
       });
@@ -201,7 +206,7 @@ describe("GitHubLink.link", function () {
     GitHubLink.link(deps, OWNER, TOKEN, (r) => {
       expect(r.status).to.equal(200);
       expect(calls.pushed).to.equal("ssh-rsa OLD");
-      expect(r.response).to.deep.equal({ key_pushed: keyPushed, created_key: false });
+      expect(r.response).to.deep.equal({ key_pushed: keyPushed, created_key: false, keys_in_use_elsewhere: 0 });
       done();
     });
   }
@@ -214,13 +219,60 @@ describe("GitHubLink.link", function () {
     });
   });
 
-  it("W4 'key is already in use' counts as pushed only when the key is on this account", function (done) {
+  it("W4 'key is already in use' counts as pushed when the key is on this account", function (done) {
     const inUse = { status: 422, result: "already_in_use" };
-    expectLinked({ pushOutcome: inUse, accountKeys: [{ id: 1, key: "ssh-rsa OTHER" }, { id: 2, key: "ssh-rsa OLD" }] }, true, () => {
-      // In use elsewhere (another account, a repository deploy key): not on this account.
-      expectLinked({ pushOutcome: inUse, accountKeys: [{ id: 1, key: "ssh-rsa OTHER" }] }, false, () => {
-        expectLinked({ pushOutcome: inUse, accountKeys: "not a list" }, false, done);
-      });
+    expectLinked({ pushOutcome: inUse, accountKeys: [{ id: 1, key: "ssh-rsa OTHER" }, { id: 2, key: "ssh-rsa OLD" }] }, true, done);
+  });
+
+  const IN_USE = { status: 422, result: "already_in_use" };
+
+  it("W5 a key in use elsewhere is skipped and the next-oldest key is pushed", function (done) {
+    const { calls, deps } = makeDeps({
+      existingKeys: [NEW, MID, OLD],
+      accountKeys: [],
+      pushByKey: (key) => (key === "ssh-rsa OLD" ? IN_USE : "created")
+    });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(calls.pushes).to.deep.equal(["ssh-rsa OLD", "ssh-rsa MID"]);
+      expect(calls.created).to.equal(false);
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: false, keys_in_use_elsewhere: 1 });
+      done();
+    });
+  });
+
+  it("W6 when every key is in use elsewhere a fresh key is created and pushed", function (done) {
+    const { calls, deps } = makeDeps({
+      existingKeys: [NEW, OLD],
+      accountKeys: "not a list",
+      pushByKey: (key) => (key === "ssh-rsa NEWKEY" ? "created" : IN_USE)
+    });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(calls.pushes).to.deep.equal(["ssh-rsa OLD", "ssh-rsa NEW", "ssh-rsa NEWKEY"]);
+      expect(calls.created).to.equal(true);
+      expect(r.response).to.deep.equal({ key_pushed: true, created_key: true, keys_in_use_elsewhere: 2 });
+      done();
+    });
+  });
+
+  it("W7 any other refusal stops at once, without trying more keys or creating one", function (done) {
+    const { calls, deps } = makeDeps({
+      existingKeys: [NEW, OLD],
+      pushByKey: () => ({ status: 422, result: "rejected" })
+    });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(calls.pushes).to.deep.equal(["ssh-rsa OLD"]);
+      expect(calls.created).to.equal(false);
+      expect(r.response).to.deep.equal({ key_pushed: false, created_key: false, keys_in_use_elsewhere: 0 });
+      done();
+    });
+  });
+
+  it("W8 the fresh key is reported not pushed when GitHub also refuses it", function (done) {
+    const { calls, deps } = makeDeps({ existingKeys: [OLD], accountKeys: [], pushByKey: () => IN_USE });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(calls.pushes).to.deep.equal(["ssh-rsa OLD", "ssh-rsa NEWKEY"]);
+      expect(r.response).to.deep.equal({ key_pushed: false, created_key: true, keys_in_use_elsewhere: 1 });
+      done();
     });
   });
 });
