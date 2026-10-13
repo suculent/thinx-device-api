@@ -143,7 +143,20 @@ Plans:
   4. GitHub linking pushes a deterministically chosen key that does not depend on the newest-first list order, and a revoke request with duplicate filenames reports each key once. Every Phase 38 item in FIX-04 (IN-01..IN-04, IN-06, IN-07) is fixed or deferred with a recorded reason.
   5. The Legacy console that production serves still lists, creates and revokes deploy keys against the deployed API with unchanged endpoints and envelopes.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+**Wave 1**
+- [ ] 45-01-PLAN.md — API: PATCH /api/v2/rsakey rename (owner-bound, CSRF, exact filename, `.pub`-only atomic write, private key never touched), shared `validateKeyName` with reason codes on create and rename, OpenSSH SHA256 fingerprint, safe display names, PATCH in CORS (KEY-04, FIX-04 IN-01..IN-03) (wave 1)
+- [ ] 45-03-PLAN.md — Vue: key groups with IconButton Show/Copy/Delete, confirmed single-shot row and toolbar delete, ellipsised names and fingerprint column, single load error, `deploy-key-actions.cjs` (KEY-05, KEY-06, POL-04) (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 45-02-PLAN.md — API: GitHub linking pushes the oldest key, revoke de-dup, IN-06 test gaps, PATCH in the ZZ and CSRF-guard specs, vault-transit note, Phase 38 dispositions (FIX-04 IN-04, IN-06, IN-07) (wave 2)
+- [ ] 45-04-PLAN.md — Vue: Rename icon and dialog, `keyNames.js` client mirror, `$patch` through the CSRF client, reason sentences on both name fields (KEY-04) (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 45-05-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live API (PATCH 401/403, CORS preflight), bundle and unchanged-Legacy proofs, operator UAT (wave 3)
+
 **UI hint**: yes
 
 ### Phase 46: Transformers & Environment Globals
@@ -262,7 +275,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 42. CI Trim, Login Page & Build Footer | v1.18 | 3/3 | Complete    | 2026-10-12 |
 | 43. Notification Delivery | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
-| 45. Deploy Key Rename & Row Actions | v1.18 | 0/? | Not started | - |
+| 45. Deploy Key Rename & Row Actions | v1.18 | 0/5 | Planned | - |
 | 46. Transformers & Environment Globals | v1.18 | 0/? | Not started | - |
 | 47. Build Log Search & Status Colours | v1.18 | 0/? | Not started | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
