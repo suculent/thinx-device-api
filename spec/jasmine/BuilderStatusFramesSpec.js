@@ -380,8 +380,10 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
             expect(b1.sent.length, "B1 frame count").to.equal(0);
         });
 
-        it("F2a a failed exit status gives one error frame with its reason and nothing green after it", function () {
-            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { status: "Failed", build_id: BUILD_X });
+        // WR-04: the worker reports a failed exit and a spawn error as
+        // { udid, build_id, state: "Failed", reason } (services/worker/class.js), with no status.
+        it("F2a the worker's failed-exit payload gives one error frame Failed, nothing green after it, and sets the build log to error", function () {
+            builder.processExitData(OWNER_A, BUILD_X, UDID, bound, { udid: UDID, build_id: BUILD_X, state: "Failed", reason: "p43 builder exited 2" });
             builder.processShellData(shellOpts(BUILD_X), STATUS_OK_LINE);
             exitOK(BUILD_X);
 
@@ -391,6 +393,20 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
                 expect(frames(sock)[0].build_id, name + " build_id").to.equal(BUILD_X);
             }
             expect(b1.sent.length, "B1 frame count").to.equal(0);
+            const first = BuildLog.prototype.state.calls.first().args;
+            expect([first[0], first[1], first[2], first[3]], "first build log state").to.deep.equal([BUILD_X, OWNER_A, UDID, "error"]);
+        });
+
+        it("F2a'' (WR-04) the worker's failed-exit payload, delivered through the runRemoteShell listener, records the failure in the build log", function () {
+            const { worker, listeners } = recordingWorker();
+            expect(builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE)).to.equal(true);
+
+            listeners["job-status"][0]({ udid: UDID, build_id: BUILD_X, state: "Failed", reason: "spawn ENOENT" });
+
+            expect(bodies(a1)).to.deep.equal(["Failed"]);
+            expect(frames(a1)[0].type).to.equal("error");
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+            expect(states, "build log states").to.deep.equal(["error"]);
         });
 
         it("F2a' a worker's own non-OK status string is the reason of the error frame", function () {
@@ -398,6 +414,7 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
 
             expect(bodies(a1)).to.deep.equal(["BUILD FAILED"]);
             expect(frames(a1)[0].type).to.equal("error");
+            expect(BuildLog.prototype.state.calls.allArgs().map((a) => a[3]), "build log states").to.deep.equal(["BUILD FAILED"]);
         });
 
         it("F2b an exit code, a null payload and a spawn error each give one error frame Failed and never throw", function () {
