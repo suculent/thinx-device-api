@@ -36,6 +36,27 @@ function makeDeps(overrides) {
 
 describe("GitHubLink.link", function () {
 
+  it("answers 403 github_token_missing_scope when GitHub refuses the key list (403) and stores nothing", function (done) {
+    const { calls, deps } = makeDeps({ tokenValid: false, accountKeys: { status: 403 } });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r.status).to.equal(403);
+      expect(r.success).to.equal(false);
+      expect(r.response).to.equal("github_token_missing_scope");
+      expect(calls.stored).to.equal(null);
+      expect(calls.pushed).to.equal(null);
+      done();
+    });
+  });
+
+  it("keeps 401 github_token_invalid for a 401 from GitHub", function (done) {
+    const { deps } = makeDeps({ tokenValid: false, accountKeys: { status: 401 } });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r.status).to.equal(401);
+      expect(r.response).to.equal("github_token_invalid");
+      done();
+    });
+  });
+
   it("rejects an invalid token with 401 and stores nothing (GH-01)", function (done) {
     const { calls, deps } = makeDeps({ tokenValid: false });
     GitHubLink.link(deps, OWNER, TOKEN, (r) => {

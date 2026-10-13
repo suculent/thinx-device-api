@@ -31,11 +31,11 @@ function captureConsole() {
   };
 }
 
-function fakeResponse(status, body) {
+function fakeResponse(status, body, headers) {
   const res = new EventEmitter();
   res.statusCode = status;
   // Response headers can carry request data too (a redirect location, a request id).
-  res.headers = { "x-github-request-id": "ABCD", "x-echo": "Bearer " + TOKEN };
+  res.headers = Object.assign({ "x-github-request-id": "ABCD", "x-echo": "Bearer " + TOKEN }, headers || {});
   process.nextTick(() => {
     if (body !== null) res.emit("data", Buffer.from(body));
     res.emit("end");
@@ -55,7 +55,7 @@ function stubHttps(method, reply) {
     req.end = () => {
       process.nextTick(() => {
         if (reply.error) req.emit("error", reply.error);
-        else callback(fakeResponse(reply.status, reply.body));
+        else callback(fakeResponse(reply.status, reply.body, reply.headers));
       });
     };
     if (method === "get") req.end();
@@ -176,3 +176,57 @@ describe("GitHub.addPublicKey outcome (45-REVIEW WR-01)", function () {
     expect(got.outcome).to.deep.equal({ status: null, result: "error" });
   });
 });
+
+describe("GitHub rejection diagnostics (debugging the token scope error)", function () {
+
+  function run(method, reply) {
+    return new Promise((resolve) => {
+      const stub = stubHttps(method === "get" ? "get" : "request", reply);
+      const out = captureConsole();
+      const finish = () => setImmediate(() => { out.restore(); stub.restore(); resolve(out.text()); });
+      if (method === "get") GitHub.validateAccessToken(TOKEN, finish);
+      else GitHub.addPublicKey(TOKEN, "ssh-rsa AAAAB3CR01 thinx", finish);
+    });
+  }
+
+  it("logs the message code and the scope headers of a 403 on GET /user/keys", async function () {
+    const text = await run("get", {
+      status: 403,
+      body: JSON.stringify({ message: "Resource not accessible by personal access token" }),
+      headers: {
+        "x-oauth-scopes": "repo, read:org",
+        "x-accepted-oauth-scopes": "admin:public_key, read:public_key",
+        "x-accepted-github-permissions": "keys=read",
+        "x-github-request-id": "C0DE:1234:ABCD"
+      }
+    });
+    expect(text).to.contain("[github] GET /user/keys 403 message=pat_lacks_permission");
+    expect(text).to.contain("token_scopes=repo, read:org");
+    expect(text).to.contain("accepted_scopes=admin:public_key, read:public_key");
+    expect(text).to.contain("accepted_permissions=keys=read");
+    expect(text).to.contain("request_id=C0DE:1234:ABCD");
+    expectClean(text);
+  });
+
+  it("never logs a header or message that is not a plain scope list or known message", async function () {
+    const text = await run("post", {
+      status: 403,
+      body: echoBody(),
+      headers: {
+        "x-oauth-scopes": "Bearer " + TOKEN,
+        "x-accepted-oauth-scopes": TOKEN,
+        "x-accepted-github-permissions": "keys=read; " + TOKEN,
+        "x-github-request-id": "Bearer " + TOKEN
+      }
+    });
+    expect(text).to.contain("[github] POST /user/keys 403 message=other token_scopes=- accepted_scopes=- accepted_permissions=- request_id=-");
+    expectClean(text);
+  });
+
+  it("adds nothing for a 2xx answer", async function () {
+    const text = await run("get", { status: 200, body: "[]" });
+    expect(text).to.contain("[github] GET /user/keys 200");
+    expect(text).to.not.contain("message=");
+  });
+});
+
