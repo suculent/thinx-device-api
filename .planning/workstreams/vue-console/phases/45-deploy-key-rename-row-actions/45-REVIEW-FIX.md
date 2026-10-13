@@ -268,3 +268,6 @@ _Iteration: 1_
   logging line absent in the image) and `[newrelic] agent loaded`. After start: `/api/user/profile` 401, `:7442` 200,
   unauthenticated PATCH 403 on both hosts, `WS-MULTITAB OK 2/2` (0/2 only while the task was still starting),
   5 Legacy files on rtm still equal the 45-05 baseline.
+- 45-VERIFICATION warning fixed (`git log -1 -- lib/thinx/rsakey.js`): a failed key listing during rename is
+  "unknown", never a revoke; the .pub is kept and the answer is `rename_failed`. Two new tests in
+  `DeployKeyNames.test.js` (failed before the fix, pass after); `test:deploykeys` 40/40.
