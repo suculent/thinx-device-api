@@ -195,7 +195,7 @@ visible (UI-D05). The label text carries the meaning; the colour is redundant.
 | ID | Decision | Source |
 |----|----------|--------|
 | UI-D13 | Status cell (table "Status" column and the grid status line), in this order with 8px gaps: `<i class="fa fa-heartbeat" aria-hidden="true">`, then the API-key warning if any (UI-D14), then the status text, then the `#e` / `#w` marker if any. Status text: `device.status` with control characters removed; empty, missing or ≤ 1 character → `Registered`; longer than 22 characters → first 22 + `…`, full text in `title`. `#e` (case-insensitive substring) → `<span class="status-alert" role="img" aria-label="Device reported an error" title="Device reported an error"><i class="fa fa-warning" aria-hidden="true"></i></span>` in `#FF6B6B`; `#w` → same shape, class `status-warning`, `#F0AD4E`, text `Device reported a warning`. "Registered" uses the body text colour (Legacy `.opacity-50` measures 2.30:1 and is not ported). | D-05, Legacy :146-150 |
-| UI-D14 | API-key warning when `device.keyhash` is `null`, `undefined` or `''`: `<span class="api-key-indicator" role="img" aria-label="No API key assigned. The device cannot check in until you assign one." title="No API key assigned. The device cannot check in until you assign one."><i class="fa fa-warning" aria-hidden="true"></i></span>`, colour `#FFA500`, `data-cy="api-key-warning"`. Shown in both views, next to the heartbeat. A device with any non-empty `keyhash` shows nothing. | D-13, D-14, D-15 |
+| UI-D14 | API-key warning when `device.keyhash` is `null`, `undefined` or `''`: `<span class="api-key-indicator" role="img" aria-label="No API Key assigned" title="No API Key assigned"><i class="fa fa-warning" aria-hidden="true"></i></span>`, colour `#FFA500`, `data-cy="api-key-warning"`. Shown in both views, next to the heartbeat. A device with any non-empty `keyhash` shows nothing. *Revised 2026-10-13 (44-REVIEW CR-01): Legacy text "No API Key assigned"; the earlier check-in claim was false.* | D-13, D-14, D-15 |
 | UI-D15 | Firmware cell (table) and line (grid): `<i class="fa fa-cogs" aria-hidden="true">` + 8px + `device.firmware`; empty → `—`. Table cell: `max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;` with the full firmware string as `title`. Grid line wraps (`overflow-wrap: anywhere`). | D-05 |
 
 ### Actions (DEV-02, DEV-03)
@@ -208,8 +208,8 @@ Row order, left to right, 4px apart. All are `IconButton` (UI-D06..08):
 | 1 | Build | `platformInfo(...).build === false` (Sigfox) | `fa fa-ban` | `Not supported` | `default` | disabled | `row-build` / `card-build` |
 | 1 | Build | buildable, no `device.source` | `fa fa-ban` | `No source` | `default` | disabled | `row-build` / `card-build` |
 | 1 | Build | otherwise | `icomoon-hammer_icon` | `Build` | `default` | enabled; click dispatches `buildFirmware({ udid, source_id: device.source })` | `row-build` / `card-build` |
-| 2 | View log | `device.last_build_id` is a non-empty string | `fa fa-eye` | `View log` | `default` | enabled; opens `BuildLogDialog` for that build | `row-log` / `card-log` |
-| 2 | View log | no `last_build_id` | `fa fa-eye` | `No build yet` | `default` | disabled | `row-log` / `card-log` |
+| 2 | View log | the build log list holds a build for the udid, or `device.last_build_id` is a non-empty string | `fa fa-eye` | `View log` | `default` | enabled; opens `BuildLogDialog` for the newest build of the device, failed ones included (revised 2026-10-13, 44-REVIEW WR-02) | `row-log` / `card-log` |
+| 2 | View log | no build in the list and no `last_build_id` | `fa fa-eye` | `No build yet` | `default` | disabled | `row-log` / `card-log` |
 | 3 | Edit | always | `fa fa-pencil` | `Edit` | `default` | enabled; `viewDevice(udid)` → `DeviceDetail` | `row-detail` / `card-detail` |
 | 4 | Revoke | table only | `fa fa-trash` | `Revoke` | `danger` | enabled; existing `revokeRow(udid)` confirmation | `row-revoke` / — |
 
@@ -258,7 +258,7 @@ single action competes, and only Revoke is red. There is no new page-level call 
 | Row actions | `Build` / `Building…` (U+2026) / `No source` / `Not supported`; `View log` / `No build yet`; `Edit`; `Revoke` |
 | Status placeholder | `Registered` (no or ≤ 1-character status) |
 | Status markers | `Device reported an error` (`#e`), `Device reported a warning` (`#w`) — aria-label and tip |
-| API-key warning | `No API key assigned. The device cannot check in until you assign one.` (aria-label and tip, D-14) |
+| API-key warning | `No API Key assigned` (aria-label and tip, D-14, revised 2026-10-13 for 44-REVIEW CR-01) |
 | Device icon | alt `{label} device icon` (e.g. `Arduino device icon`, `unknown device icon`); tile tip `{label}` |
 | Platform bullet | Display labels from the palette table; fallback `unknown` (never `unknown_platform`, never `Unknown`) |
 | Platform filter | `All` + display labels; group label `Filter by platform` |

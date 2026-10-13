@@ -45,6 +45,10 @@ Out of scope: Legacy console changes (Phase 48 batch), the Device Detail page be
   confirmation and `data-cy="row-revoke"`.
 - **D-07:** View log opens the existing `vue/src/components/BuildLogDialog` for `last_build_id`; disabled with the tip
   "No build yet" when the device has no build.
+  *Revised 2026-10-13 (operator, 44-REVIEW WR-02):* `last_build_id` only moves on builds that produced an artifact.
+  View log opens the newest build of the device from the build log list (`buildlog` store, GET /logs/build, newest
+  first, as Legacy `deviceBuilds[udid][0]`), failed builds included, with `last_build_id` as the fallback; "No build
+  yet" only when neither has a build.
 - **D-08:** Shared `IconButton` component: icon, `aria-label` and native `title` tip from the same text. The Actions cell
   uses `white-space: nowrap`; at `lg` and wider buttons show icon + text, below `lg` icons only (text kept as
   aria-label + title). Existing `data-cy` hooks (`row-detail`, `row-build`, `row-revoke`, `device-row`, `device-card`)
@@ -66,6 +70,9 @@ Out of scope: Legacy console changes (Phase 48 batch), the Device Detail page be
 - **D-13:** Warning shows when `keyhash` is null, missing or an empty string.
 - **D-14:** Icon `fa-warning` in orange (port Legacy `.api-key-indicator`), tip and aria-label: "No API key assigned. The
   device cannot check in until you assign one."
+  *Revised 2026-10-13 (operator, 44-REVIEW CR-01):* tip and aria-label are Legacy's "No API Key assigned". `keyhash` is
+  the key chosen for the device in the console (builds use it); check-in uses the key the device sends, so the old text
+  was false. D-13 (warning on an empty `keyhash`) is unchanged.
 - **D-15:** Placed next to the status icon in both grid and table views.
 - **D-16:** Tests: new plain-node unit tests in `vue/tests/unit/*.cjs`, appended to the explicit `npm run test:unit`
   chain, covering `PlatformBullet`, `IconButton`, Devices (no `grey-mint`, icons, warning, one-line actions class) and
