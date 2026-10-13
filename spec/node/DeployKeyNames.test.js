@@ -322,11 +322,12 @@ const NAME_CASES = [
   ['a' + ch(0x2069) + 'b', 'bidi'], ['a' + ch(0x200e) + 'b', 'bidi'], ['a' + ch(0x200f) + 'b', 'bidi'],
   // 45-REVIEW IN-01: U+061C ARABIC LETTER MARK is the third implicit mark next to LRM/RLM.
   ['a' + ch(0x061c) + 'b', 'bidi'],
-  // Zero-width and invisible format characters are refused anywhere, also inside an emoji
-  // ZWJ sequence; a name without them is unaffected.
-  ['a' + ch(0x200b) + 'b', 'invisible'], ['a' + ch(0x200c) + 'b', 'invisible'], ['a' + ch(0x200d) + 'b', 'invisible'],
+  // ZWSP, word joiner and BOM are refused anywhere; ZWNJ/ZWJ are allowed (emoji ZWJ
+  // sequences, Persian/Indic names, D-06), but a name made only of them is empty.
+  ['a' + ch(0x200b) + 'b', 'invisible'], ['a' + ch(0x200c) + 'b', null], ['a' + ch(0x200d) + 'b', null],
+  [ch(0x200c) + ch(0x200d), 'empty'],
   ['a' + ch(0x2060) + 'b', 'invisible'], [ch(0xfeff) + 'ab', 'invisible'], [ch(0x200b) + ch(0x2060), 'invisible'],
-  [String.fromCodePoint(0x1f469) + ch(0x200d) + String.fromCodePoint(0x1f4bb), 'invisible'],
+  [String.fromCodePoint(0x1f469) + ch(0x200d) + String.fromCodePoint(0x1f4bb), null], // emoji ZWJ sequence (D-06)
   // A name that shows nothing (only whitespace and default-ignorable characters) is empty.
   [ch(0x00ad), 'empty'], [ch(0x00ad) + ' ' + ch(0x3164), 'empty'], [ch(0xfe0f), 'empty'], [ch(0x034f) + ch(0x115f), 'empty'],
   [String.fromCodePoint(0xe0001) + String.fromCodePoint(0xe0041), 'empty'], [String.fromCodePoint(0x1d173), 'empty'],
@@ -344,7 +345,7 @@ test('validateKeyName returns the D-06 reason for every shared case (D-05, D-06,
 });
 test('validateKeyName classifies every UTF-16 code unit between two letters', () => {
   const BIDI = new Set([0x061c, 0x200e, 0x200f, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e, 0x2066, 0x2067, 0x2068, 0x2069]);
-  const INVISIBLE = new Set([0x200b, 0x200c, 0x200d, 0x2060, 0xfeff]);
+  const INVISIBLE = new Set([0x200b, 0x2060, 0xfeff]);
   for (let c = 0; c <= 0xffff; c++) {
     let expected = { ok: true };
     if (c < 0x20 || c === 0x7f || (c >= 0x80 && c <= 0x9f)) expected = { ok: false, reason: 'control_chars' };
