@@ -5,16 +5,16 @@ milestone_name: Console Improvements
 current_phase: 44
 current_phase_name: Device List Parity
 status: executing
-stopped_at: Completed 44-01-PLAN.md
-last_updated: "2026-10-13T11:36:58.833Z"
+stopped_at: Completed 44-02-PLAN.md
+last_updated: "2026-10-13T11:49:42.576Z"
 last_activity: 2026-10-13
-last_activity_desc: Completed 44-01 (platform module, PlatformBullet, device icon tiles, platform filter)
-state_head: 8bd1e74be7ac12cdc3bc8ba112f4669bcceecba5
+last_activity_desc: Completed 44-02 (IconButton actions, hammer build guard, view log, status, firmware, API-key warning)
+state_head: 6cd25c7b00a3e21cb91725777ee48052d12a6bab
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 29
 ---
 
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 44 — Device List Parity
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-10-13 — Completed 44-01 (platform module, PlatformBullet, device icon tiles, platform filter)
+Last activity: 2026-10-13 — Completed 44-02 (IconButton actions, hammer build guard, view log, status, firmware, API-key warning)
 
 Progress: [███░░░░░░░] 29%
 
@@ -62,6 +62,7 @@ Progress: [███░░░░░░░] 29%
 | Phase 43 P02 | 8min | 3 tasks | 4 files |
 | Phase 43 P03 | 25min | 3 tasks | 0 files |
 | Phase 44 P01 | 10m 27s | 3 tasks | 9 files |
+| Phase 44 P02 | 10m 27s | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Progress: [███░░░░░░░] 29%
 - [Phase 43]: 43-03: shipped 7cec687b..b1126b6c via pipeline 5659 (legacy-off, no Snyk); WS-MULTITAB FAIL 1/2 -> OK 2/2 on rtm.thinx.cloud; D-16 human checks pending UAT
 - [Phase 44]: 44-01: Devices filter field is platformFilter (filterPlatform contains the forbidden string Platform:)
 - [Phase 44]: 44-01: PlatformBullet + utils/platforms.js are the shared platform contract; colours only in _platforms.scss keyed list
+- [Phase 44]: 44-02: IconButton (icon, label, variant, disabled; inheritAttrs false) is the shared row action button; the label is visible text from lg, aria-label and wrapper tip
+- [Phase 44]: 44-02: Build in-flight guard is a buildingUdids list released in finally; buildDevice and openLastBuild also guard their own disabled states
+- [Phase 44]: 44-02: icomoon ported as woff+ttf byte copies with only .icomoon-hammer_icon; URLs relative to theme.scss like flaticon
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ Progress: [███░░░░░░░] 29%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T11:36:43.544Z
-**Stopped At:** Completed 44-01-PLAN.md
+**Last session:** 2026-10-13T11:49:42.489Z
+**Stopped At:** Completed 44-02-PLAN.md
 **Resume File:** None
