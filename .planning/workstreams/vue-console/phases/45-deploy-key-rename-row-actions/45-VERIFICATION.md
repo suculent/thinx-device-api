@@ -43,7 +43,7 @@ covered_files:
   - spec/jasmine/ZZ-CSRFRouteGuardSpec.js
   - spec/jasmine/ZZ-RouterRSAKeySpec.js
   - spec/node/DeployKeyNames.test.js
-covered_digest: "v3:sha256:e2dc4ade03f088e134b3256e548b49dba51b3dbe054b48ace0b97dd2c97fa117"
+covered_digest: "v3:sha256:f9b8b6524d8a4324daf1626695dcb88ff767f1ed9273c3cc29d73ca27d437739"
 behavior_unverified: 0
 overrides_applied: 0
 re_verification:
@@ -217,3 +217,11 @@ No gaps. Every roadmap success criterion has code, wiring and passing behavioura
 
 _Verified: 2026-10-13T19:29:33Z_
 _Verifier: Claude (gsd-verifier)_
+
+## Addendum (orchestrator, 2026-10-13)
+
+The warning above (a failed key listing after the `.pub` replace deleted a live key's `.pub`) is fixed in
+`a5eb672b`: `keyStillListed` answers `null` for an unreadable directory, and rename then keeps the `.pub` and answers
+`rename_failed`; only a listing that succeeded without the key counts as a revoke. Two new tests in
+`spec/node/DeployKeyNames.test.js` fail without the fix and pass with it; `test:deploykeys` 40/40, eslint clean.
+`covered_digest` recomputed with `query verification.fingerprint` over the same covered files.
