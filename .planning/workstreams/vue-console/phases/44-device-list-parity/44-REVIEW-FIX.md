@@ -186,3 +186,11 @@ There was no `npm install`, no lint/eslint run, no ssh, no pipeline and no push.
 _Fixed: 2026-10-13T12:31:23Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
+
+## Follow-up (orchestrator)
+
+- N-1 residual fixed in console `604258c`: `alias`, `firmware` and `mac` render, search and sort through `asText`
+  (strings, numbers, booleans; anything else empty). Unit check with `{toString:1}` in all three fields, both views.
+- WR-01 extended: `mongooseos` (accepted by `lib/thinx/deployment.js` supportedPlatform) maps to `mongoose`.
+- Both checks failed before the change and pass after; `test:unit` 213 ok / 0 FAIL, build, `test:csp:dist` and
+  `perf:spotter` pass.
