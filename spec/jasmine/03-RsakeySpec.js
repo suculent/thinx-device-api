@@ -228,4 +228,46 @@ describe("RSA Key", function() {
     });
   }, 10000);
 
+  // Phase 45 (KEY-04, D-01): a rename changes the name only. The fingerprint is the
+  // OpenSSH SHA256 of the key blob, so it survives the rename, and the private key
+  // file is never touched (vault-transit Phase 40 safety).
+  it("(14) should rename a key without changing its fingerprint, key material or private file", function (done) {
+    rsakey.create(owner, (success, created) => {
+      expect(success).to.equal(true);
+      const filename = listFilename(created);
+      const privatePath = rsakey.ssh_keys + "/" + filename;
+      const privateBefore = fs.readFileSync(privatePath);
+      const find = (list) => list.find(key => key.filename === filename);
+      rsakey.list(owner, (_ok, before) => {
+        const original = find(before);
+        expect(original.name).to.equal("P45 original");
+        expect(original.fingerprint).to.match(/^SHA256:[A-Za-z0-9+/]{43}$/);
+        rsakey.rename(owner, filename, "P45 renamed", (renamedOk, renamed) => {
+          expect(renamedOk).to.equal(true);
+          expect(renamed.filename).to.equal(filename);
+          rsakey.list(owner, (_ok2, after) => {
+            const entry = find(after);
+            expect(entry.name).to.equal("P45 renamed");
+            expect(entry.fingerprint).to.equal(original.fingerprint);
+            expect(entry.pubkey.split(" ").slice(0, 2)).to.deep.equal(original.pubkey.split(" ").slice(0, 2));
+            expect(fs.readFileSync(privatePath).equals(privateBefore)).to.equal(true);
+            rsakey.revoke(owner, [filename], (_res, revokedOk, revoked) => {
+              expect(revokedOk).to.equal(true);
+              expect(revoked).to.deep.equal([filename]);
+              done();
+            }, {});
+          });
+        });
+      });
+    }, "P45 original");
+  }, 15000);
+
+  // GitHub's RSA host key, the `ssh-rsa` entry of `ssh_keys` in https://api.github.com/meta
+  // (fetched 2026-10-13), and its published `ssh_key_fingerprints.SHA256_RSA`.
+  const GITHUB_RSA = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=";
+
+  it("(15) should fingerprint the GitHub RSA host key as GitHub publishes it", function () {
+    expect(RSAKey.fingerprint(GITHUB_RSA)).to.equal("SHA256:uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s");
+  });
+
 });

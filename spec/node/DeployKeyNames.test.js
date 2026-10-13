@@ -541,3 +541,109 @@ test('PATCH /api/v2/rsakey: CSRF first, session, body, filename, name reason, ow
     assert.equal(fs.readFileSync(path.join(dir, theirs + '.pub'), 'utf8'), theirsBefore, 'other owner untouched');
   } finally { clearRouterKeys(); }
 });
+
+// ---------------------------------------------------------------------------
+// Phase 45: OpenSSH fingerprints (D-01), safe display names (D-08, IN-03),
+// one validator for create (D-05, IN-01).
+// ---------------------------------------------------------------------------
+
+// GitHub's published fingerprint for GITHUB_RSA (`ssh_key_fingerprints.SHA256_RSA`).
+const GITHUB_RSA_SHA256 = 'SHA256:uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s';
+const DAMAGED_PEM = '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\nAAAAnotakey\n-----END PUBLIC KEY-----\n';
+
+test('fingerprint is the OpenSSH SHA256 of the decoded key blob; the comment never matters (D-01)', () => {
+  assert.equal(RSAKey.fingerprint(GITHUB_RSA), GITHUB_RSA_SHA256);
+  assert.equal(RSAKey.fingerprint(GITHUB_RSA + ' Another name'), GITHUB_RSA_SHA256);
+  assert.equal(RSAKey.fingerprint(GITHUB_RSA + ' thinx-1000\n'), GITHUB_RSA_SHA256);
+  const blob = tokens(GITHUB_RSA)[1];
+  const bad = ['', 'ssh-rsa', 'ssh-rsa not*base64 x', testPem(), GITHUB_RSA + ' One' + ch(0x0a) + GITHUB_RSA + ' Two',
+    42, null, undefined, {}, 'ssh-ed25519 ' + blob + ' type mismatch', 'ssh-rsa AAAA', 'ssh-rsa ' + blob.slice(0, 40)];
+  for (const value of bad) assert.equal(RSAKey.fingerprint(value), null, String(value).slice(0, 40));
+});
+test('fingerprint equals ssh-keygen -lf for a freshly generated key (D-01)', (t) => {
+  const { spawnSync } = require('node:child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-fp-'));
+  try {
+    const line = RSAKey.toOpenSSH(testPem(), 'p45');
+    const file = path.join(dir, 'key.pub');
+    fs.writeFileSync(file, line + '\n');
+    const out = spawnSync('ssh-keygen', ['-l', '-f', file], { encoding: 'utf8' });
+    if (out.error || out.status !== 0) { t.skip('ssh-keygen is not runnable here'); return; }
+    const printed = out.stdout.trim().split(/\s+/)[1];
+    assert.match(printed, /^SHA256:[A-Za-z0-9+/]{43}$/);
+    assert.equal(RSAKey.fingerprint(line), printed);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('list() fingerprints: GitHub vector, PEM via its OpenSSH form, kept across a rename, null when unparseable (D-01)', async () => {
+  const {dir, key} = fixture();
+  try {
+    const github = writeKey(dir, OWNER, 1000, GITHUB_RSA + ' Old name\n');
+    const pem = writeKey(dir, OWNER, 2000, testPem());
+    const junk = writeKey(dir, OWNER, 3000, 'ssh-rsa synthetic-public-fixture Junk\n');
+    const byName = () => Object.fromEntries(key.exportKeysForList(key.getKeyPathsForOwner(OWNER), OWNER)
+      .map((k) => [k.filename, k.fingerprint]));
+    const before = byName();
+    assert.equal(before[github], GITHUB_RSA_SHA256);
+    assert.equal(before[pem], RSAKey.fingerprint(RSAKey.toOpenSSH(testPem())));
+    assert.match(before[pem], /^SHA256:[A-Za-z0-9+/]{43}$/);
+    assert.equal(before[junk], null);
+    for (const filename of [github, pem]) {
+      const r = await renameKey(key, OWNER, filename, 'Renamed ' + filename.slice(-4));
+      assert.equal(r.success, true);
+      assert.equal(r.response.fingerprint, before[filename], 'rename keeps the fingerprint');
+    }
+    assert.deepEqual(byName(), before);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('list() shows a stored comment only when it is a safe name on a single-line ssh- key (D-08, IN-03)', () => {
+  const {dir, key} = fixture();
+  try {
+    const cases = [
+      [1001, GITHUB_RSA + ' Firmware\n', 'Firmware'],
+      [1002, GITHUB_RSA + ' thinx-1002\n', null],
+      [1003, GITHUB_RSA + '\n', null],
+      [1004, GITHUB_RSA + ' a' + ch(0x202e) + 'b\n', null],
+      [1005, GITHUB_RSA + ' a' + ch(0x09) + 'b\n', null],
+      [1006, testPem(), null],
+      [1007, DAMAGED_PEM, null],
+      [1008, GITHUB_RSA + ' One\n' + GITHUB_RSA + ' Two\n', null]
+    ];
+    for (const [time, text] of cases) writeKey(dir, OWNER, time, text);
+    const listed = Object.fromEntries(key.exportKeysForList(key.getKeyPathsForOwner(OWNER), OWNER)
+      .map((k) => [k.filename, k]));
+    for (const [time, , name] of cases) {
+      const entry = listed[OWNER + '-' + time];
+      assert.equal(entry.name, name === null ? new Date(time).toString() : name, 'key ' + time);
+      assert.ok(!entry.name.startsWith('KEY-----'), 'never a PEM fragment');
+    }
+    assert.equal(listed[OWNER + '-1007'].pubkey, DAMAGED_PEM, 'a damaged PEM keeps its raw text');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+test('create refuses invalid names with a reason before generating; routers answer 400 with it (D-05, D-07, IN-01)', async () => {
+  const realCreate = RSAKey.prototype.create;
+  const seen = [];
+  try {
+    loadRouter(); // registers with the real prototype; the recorder replaces it below
+    RSAKey.prototype.create = function (owner, cb, name) { seen.push(name); cb(true, { name: name }); };
+    const session = { owner: OWNER };
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'a' + ch(0x2028) + 'b' } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'line_separator' } });
+    assert.deepEqual(await callRoute('GET /api/user/rsakey/create', { method: 'GET', session, query: { name: 'x'.repeat(121) } }),
+      { status: 400, body: { success: false, response: 'invalid_key_name', reason: 'too_long' } });
+    assert.deepEqual(seen, [], 'neither request reached create');
+    // The name still comes from the query for GET and from the body otherwise.
+    await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'From body' }, query: { name: 'From query' } });
+    await callRoute('GET /api/user/rsakey/create', { method: 'GET', session, query: { name: 'From query' }, body: { name: 'From body' } });
+    assert.deepEqual(seen, ['From body', 'From query']);
+  } finally { RSAKey.prototype.create = realCreate; }
+  const {dir, key} = fixture();
+  try {
+    let generated = 0;
+    key.generate = (owner, date, cb) => { generated++; cb(null, 'ssh-rsa fixture x'); };
+    const r = await new Promise((resolve) => key.create(OWNER,
+      (success, response, reason) => resolve({ success, response, reason }), 'a' + ch(0x202e) + 'b'));
+    assert.deepEqual([r.success, r.response, r.reason], [false, 'invalid_key_name', 'bidi']);
+    assert.equal(generated, 0);
+    assert.deepEqual(fs.readdirSync(dir), [], 'no name claimed');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
