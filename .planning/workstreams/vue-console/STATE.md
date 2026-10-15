@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-01-PLAN.md
-last_updated: "2026-10-15T15:12:50.995Z"
+stopped_at: Completed 48-02-PLAN.md
+last_updated: "2026-10-15T15:18:41.976Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: 7e5d002c5ccb8bdaf4d14aa8f16953ae2d9a4096
+state_head: e06b70bf5323ea378611b4b1b3a449d72541b9fe
 progress:
   total_phases: 7
   completed_phases: 6
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48 (Deep Links & Close-out) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-10-15 — Phase 48 execution started
 
@@ -80,6 +80,7 @@ Progress: [█████████░] 86%
 | Phase 47 P04 | 10 min | 3 tasks | 10 files |
 | Phase 47 P05 | 13 min | 2 tasks | 4 files |
 | Phase 48 P01 | 16 min | 3 tasks | 12 files |
+| Phase 48 P02 | 4 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,9 @@ Progress: [█████████░] 86%
 - [Phase 47]: 47-05: ship-plan path gate grep -vxE '|services/console' is vacuous on macOS BSD grep (empty subexpression); use grep -vx -e '' -e 'services/console' in future ship plans
 - [Phase 48]: 48-01: App.vue waits for router.onReady (success and error) and reads router.currentRoute before the default-route decision (NOTIF-04)
 - [Phase 48]: 48-01: IN-01 guards live in the stores (profile keeps its initial object, list stores commit an empty list), so pages keep their empty-state copy
+- [Phase 48]: 48-02: test-vue-console (no context, anonymous public image) gates vue-console-registry and vue-console-hub; it carries the union of their branch filters (CI-07, D-01)
+- [Phase 48]: 48-02: build_legacy_console default true restores the legacy builds; parameter and legacy-console workflow stay as the kill switch (CI-06, D-08)
+- [Phase 48]: 48-02: check-ci-gates.js pipeline defaults to --expect legacy-on, matching the new pipeline default
 
 ### Pending Todos
 
@@ -167,6 +171,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T15:12:43.418Z
-**Stopped At:** Completed 48-01-PLAN.md
+**Last session:** 2026-10-15T15:18:41.788Z
+**Stopped At:** Completed 48-02-PLAN.md
 **Resume File:** None
