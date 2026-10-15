@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-04-PLAN.md
-last_updated: "2026-10-15T15:48:40.929Z"
+stopped_at: Completed 48-05-PLAN.md
+last_updated: "2026-10-15T17:43:59.227Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: 646ea2d36ef0645174c16d51d6f3b18e94d1a602
+state_head: 0271f3a742657f31c6bd4827e21d697082214d34
 progress:
   total_phases: 7
   completed_phases: 6
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48 (Deep Links & Close-out) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-10-15 — Phase 48 execution started
 
@@ -83,6 +83,7 @@ Progress: [█████████░] 86%
 | Phase 48 P02 | 4 min | 2 tasks | 4 files |
 | Phase 48 P03 | 17min | 3 tasks | 11 files |
 | Phase 48 P04 | 6 min | 2 tasks | 6 files |
+| Phase 48 P05 | 2h 0m | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -144,6 +145,9 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-04: Legacy deploy-key create mirrors vue keyNames.js sentences (deploykey.cjs D10 compares them); client check only C0/DEL/120 units, server invalid_key_name reasons map to the same sentences; reset in finally + .always (console 2105310)
 - [Phase 48]: 48-04: Legacy wss.onopen always sends {init} then the logtail; wsstailLog sends only on readyState 1; deviceBuilds map and per-udid array initialised before push; updateDeploykeys uses goals.length > 0 (console bff9552)
 - [Phase 48]: 48-04: DevicesController.js:135 build refusal toast still reads response.status; left unchanged as flagged, follow-up candidate for the 48-06 ledger
+- [Phase 48]: 48-05: Vue Cypress runs same-origin (VUE_APP_API_HOSTNAME= empty) with cy:test:ci junit results in vue/cypress/results; CI logs in via cy.stubLogin(), the real-API login needs CYPRESS_LIVE_LOGIN=1 plus explicit credentials; full suite 11 specs 77 tests 0 failing (console a076889..1d68915)
+- [Phase 48]: 48-05: operator option A: bootstrap-vue 2.21.2 BButton renders aria-pressed only from a boolean pressed prop, so Devices.vue toggles and pills bind :pressed (console 1d68915); unit harness attrsOf mirrors BButton; .active darkens the pressed btn-light (visual UAT queued)
+- [Phase 48]: 48-05: the Legacy Cypress env file under console src/cypress is untracked and ignored without being read (console 44a9db6, D-05); operator name+length inspection and any rotation queued for the 48-06 UAT list
 
 ### Pending Todos
 
@@ -178,6 +182,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T15:48:40.686Z
-**Stopped At:** Completed 48-04-PLAN.md
+**Last session:** 2026-10-15T17:43:58.783Z
+**Stopped At:** Completed 48-05-PLAN.md
 **Resume File:** None
