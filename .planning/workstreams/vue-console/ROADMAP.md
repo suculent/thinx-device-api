@@ -38,7 +38,7 @@ no dependency or infrastructure upgrades.
 - [x] **Phase 44: Device List Parity** - Legacy device icons and action icons, non-wrapping icon-only actions, platform bullets (shared with Repositories), missing-API-key warning (completed 2026-10-13)
 - [x] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console) (completed 2026-10-13)
 - [x] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure (completed 2026-10-14)
-- [ ] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items
+- [x] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items (completed 2026-10-15)
 - [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI)
 
 ## Phase Details
@@ -206,7 +206,7 @@ Plans:
   3. The dashboard Recent Builds card opens the full build log. A row without a build id shows no "Open build log" button and never requests `/logs/build/<index>`.
   4. Phase 36 WR-01 and IN-01..IN-03 are fixed or deferred with a recorded reason. In particular, the inert-row test fails if a click or keydown handler is added to any Build History cell.
 
-**Plans**: 5/5 plans executed (gap closure 47-04, 47-05 shipped 2026-10-15, pipeline 5674; re-verification and UAT pending)
+**Plans**: 5/5 plans complete (gap closure 47-04, 47-05 shipped 2026-10-15, pipeline 5674; re-verification and UAT pending)
 
 Plans:
 **Wave 1**
@@ -325,7 +325,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
-| 47. Build Log Search & Status Colours | v1.18 | 5/5 | In Progress | - |
+| 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 
 ---

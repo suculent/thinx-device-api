@@ -2,43 +2,44 @@
 gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
-current_phase: 47
-current_phase_name: Build Log Search & Status Colours
-status: verifying
-stopped_at: Completed 47-05-PLAN.md
-last_updated: "2026-10-15T11:10:21.318Z"
+current_phase: 48
+current_phase_name: Deep Links & Close-out
+status: planning
+stopped_at: Phase 47 complete, ready to plan Phase 48
+last_updated: "2026-10-15T12:11:11.871Z"
 last_activity: 2026-10-15
-last_activity_desc: Phase 47 execution started
-state_head: 2ff1a2d203056f9677a82a27b5ca26d6e213066c
+last_activity_desc: Phase 47 complete, transitioned to Phase 48
+state_head: 5b8a091f17fdd28da4a4a5e5b8f50e171d0cea60
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 5
   completed_plans: 7
+  percent: 86
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
+See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 47 — Build Log Search & Status Colours
+**Current focus:** Phase 48 — Deep Links & Close-out
 
 ## Current Position
 
-Phase: 47 (Build Log Search & Status Colours) — VERIFYING
-Plan: 5 of 5 (gap closure 47-04 and 47-05 complete and shipped)
-Status: Phase complete — ready for verification (re-verify gap UI E6, then end-of-phase UAT: 6 gap items + 11 from 47-03)
-Last activity: 2026-10-15 — 47-05 shipped: console 54734af, parent fc0fa013 on thinx-staging, pipeline 5674 legacy-off OK, bundle fc0fa01 live; docs commits after fc0fa013 are local
+Phase: 48 — Deep Links & Close-out
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-15 — Phase 47 complete, transitioned to Phase 48
 
-Progress: [███████░░░] 71%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 25
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -51,6 +52,7 @@ Progress: [███████░░░] 71%
 | 44 | 3 | - | - |
 | 45 | 5 | - | - |
 | 46 | 6 | - | - |
+| 47 | 5 | - | - |
 
 *Updated after each plan completion*
 **Per-Plan Metrics:**
@@ -143,6 +145,7 @@ Progress: [███████░░░] 71%
 - [Phase 43] The WebSocket upgrade change in `thinx-core.js` must keep `ZZ-WebSocketHandshakeRtmSpec` green and keep per-owner frame routing (quick 261003-vn3); no cross-owner delivery.
 - [Phase 45] v1.17 Phase 40 (`vault-transit`) rewrites private-key storage in the same `lib/thinx/rsakey.js`; rename touches only the `.pub` comment. Coordinate merge order.
 - [Phase 46 follow-up] 46-SECURITY.md residual R2: the operator still has to decide WR-01 (46-VERIFICATION.md:192): fix the apienv write acknowledgement, or ratify T-46-06 (AR-46-01). The decision should also cover the unchecked `redis.get` error at apienv.js:26-28. R1 (unisolated name in the single-delete question), R3 (overlapping Device Detail saves) and R4/R5 are listed there too.
+- [Phase 48] From the Phase 47 re-review (47-REVIEW-DISPOSITION.md, 9 info open): IN-10 — assert the History row's `rowListeners()` keys are exactly `['click']` (the source guard can no longer see listeners added there); IN-07 — `Devices.vue:475` rejects whitespace-only build ids that `hasBuildLog` accepts, and the P3 guard does not cover `item.build_id` or Devices.vue.
 - [UAT] Hard-reload the console (bypass the cache) before production UAT. Phase 46 test 1 first failed on a stale cached bundle.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
@@ -163,5 +166,5 @@ Progress: [███████░░░] 71%
 ## Session Continuity
 
 **Last session:** 2026-10-15T11:10:21.183Z
-**Stopped At:** Completed 47-05-PLAN.md
+**Stopped At:** Phase 47 complete, ready to plan Phase 48
 **Resume File:** None
