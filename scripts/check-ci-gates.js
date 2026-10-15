@@ -2,16 +2,17 @@
 /**
  * CircleCI gate checker for the parent pipeline. v1.18 Phase 42: CI-04 (Snyk monitors on main
  * only) and CI-05 (legacy console image builds behind the `build_legacy_console` pipeline
- * parameter).
+ * parameter). Phase 48 (CI-06, D-08): that parameter is now a kill switch whose default is true,
+ * so a normal pipeline builds the legacy console again; CI-07 (D-01) adds the test-vue-console gate.
  *
  * The rules live in evaluateJobs(): given the job names a pipeline runs on a branch, it lists
  * every job that must not run there and every job that must.
- *   CI-05  gate closed: no console-classic-registry / console-classic-hub /
+ *   CI-05  switch off: no console-classic-registry / console-classic-hub /
  *          snyk-monitor-console-classic on any branch. thinx-staging always needs test,
- *          api-registry and vue-console-registry, plus console-classic-registry with the gate open.
+ *          api-registry and vue-console-registry, plus console-classic-registry with the switch on.
  *   CI-04  no snyk-* job outside main and base. main needs test, api-hub, vue-console-hub,
  *          snyk-code-monitor, snyk-oss-monitor, snyk-monitor-api and snyk-monitor-console-vue,
- *          plus console-classic-hub and snyk-monitor-console-classic with the gate open.
+ *          plus console-classic-hub and snyk-monitor-console-classic with the switch on.
  *   CI-07  thinx-staging and main also need test-vue-console, the Vue/Legacy unit, build and
  *          Cypress suite that vue-console-registry and vue-console-hub require (Phase 48, D-01).
  *
@@ -28,7 +29,8 @@
  *   node scripts/check-ci-gates.js pipeline --pipeline-id <uuid> [--expect ...] [--wait] [--timeout-min 30]
  *       Reads a real pipeline's job list through the public CircleCI API v2 (unauthenticated GETs,
  *       project gh/suculent/thinx-device-api) and checks it with evaluateJobs(); --expect legacy-on
- *       means the CI-05 gate was open for that pipeline (default legacy-off).
+ *       (the default since Phase 48) means the kill switch was on for that pipeline, as on every
+ *       normal push; --expect legacy-off checks a pipeline run with the switch off.
  *       --revision finds the newest push (trigger webhook) pipeline on --branch whose revision
  *       starts with <sha> (at least 7 hex characters), polling every 15 s until it appears.
  *       --pipeline-id addresses one pipeline directly (e.g. the API-triggered Phase 43 bypass);
@@ -189,7 +191,7 @@ function evaluateJobs(names, options) {
     const ran = new Set(names);
     const problems = [];
 
-    // CI-05: no legacy console image build while the gate is closed.
+    // CI-05: no legacy console image build while the kill switch is off.
     if (!legacy) {
         for (const job of LEGACY_JOBS) {
             if (ran.has(job)) problems.push("CI-05: " + job + " ran on " + branch + " with build_legacy_console closed");
@@ -268,7 +270,8 @@ function parsePipelineArgs(args) {
     }
     const branch = seen["--branch"] === undefined ? "thinx-staging" : seen["--branch"];
     if (!/^[A-Za-z0-9._/-]+$/.test(branch)) throw new UsageError("--branch has unexpected characters");
-    const expect = seen["--expect"] === undefined ? "legacy-off" : seen["--expect"];
+    // Phase 48 (CI-06): the tool's default matches the pipeline default (build_legacy_console true).
+    const expect = seen["--expect"] === undefined ? "legacy-on" : seen["--expect"];
     if (expect !== "legacy-off" && expect !== "legacy-on") throw new UsageError("--expect must be legacy-off or legacy-on");
     const timeoutText = seen["--timeout-min"] === undefined ? "30" : seen["--timeout-min"];
     const timeoutMin = Number(timeoutText);

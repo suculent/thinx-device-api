@@ -1,5 +1,7 @@
 // v1.18 Phase 42 (CI-04, CI-05): offline checks of the parent CircleCI gates in .circleci/config.yml
-// and of the rules in scripts/check-ci-gates.js. The live compiler run is
+// and of the rules in scripts/check-ci-gates.js. Phase 48: CI-06 restored the legacy console builds
+// (build_legacy_console defaults to true and stays as a kill switch, D-08) and CI-07 gates both Vue
+// image jobs on the test-vue-console suite (D-01). The live compiler run is
 // `node scripts/check-ci-gates.js compile`; this spec needs no network.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -51,12 +53,30 @@ function simulateCompile(value) {
     return { valid: true, errors: null, "output-yaml": YAML.stringify({ version: 2, workflows }) };
 }
 
-test("build_legacy_console is a boolean pipeline parameter with a boolean default", () => {
+test("build_legacy_console is a boolean pipeline parameter whose default is true (CI-06, D-08)", () => {
     const param = config.parameters && config.parameters[PARAM];
     assert.ok(param, "parameters." + PARAM + " is declared");
     assert.equal(param.type, "boolean");
-    // The value is not asserted: Phase 48 (CI-06) flips it in one line and must not need a test edit.
-    assert.equal(typeof param.default, "boolean");
+    // D-08: Phase 48 restored the legacy builds by flipping the default, not by deleting the
+    // parameter; it stays as the kill switch, and a normal push runs the legacy jobs.
+    assert.equal(param.default, true);
+});
+
+test("a default pipeline runs the legacy jobs; an explicit false is the kill switch (CI-06, D-08)", () => {
+    const staging = selectJobs(config, "thinx-staging", {}).map((job) => job.name);
+    for (const job of ["console-classic-registry", "test", "test-vue-console", "api-registry", "vue-console-registry"]) {
+        assert.ok(staging.includes(job), job + " runs on a default thinx-staging pipeline");
+    }
+    const main = selectJobs(config, "main", {}).map((job) => job.name);
+    for (const job of ["console-classic-hub", "snyk-monitor-console-classic"]) {
+        assert.ok(main.includes(job), job + " runs on a default main pipeline");
+    }
+    for (const branch of BRANCHES) {
+        const ran = selectJobs(config, branch, { [PARAM]: false }).map((job) => job.name);
+        for (const job of LEGACY_JOBS) assert.ok(!ran.includes(job), job + " runs on " + branch + " with the kill switch off");
+    }
+    assert.deepEqual(evaluateJobs(staging, { branch: "thinx-staging", legacy: true }), []);
+    assert.deepEqual(evaluateJobs(main, { branch: "main", legacy: true }), []);
 });
 
 test("exactly one workflow, legacy-console, is gated on build_legacy_console and holds exactly the legacy jobs", () => {
@@ -326,12 +346,12 @@ test("parseArgs: pipeline needs exactly one of --revision or --pipeline-id", () 
 
 test("parseArgs: pipeline defaults and flag forms", () => {
     assert.deepEqual(parseArgs(["pipeline", "--revision", "ABC1234"]), {
-        command: "pipeline", revision: "abc1234", branch: "thinx-staging", pipelineId: undefined, expect: "legacy-off", wait: false, timeoutMin: 30
+        command: "pipeline", revision: "abc1234", branch: "thinx-staging", pipelineId: undefined, expect: "legacy-on", wait: false, timeoutMin: 30
     });
-    const byId = parseArgs(["pipeline", "--pipeline-id=27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--expect", "legacy-on", "--wait", "--timeout-min", "5"]);
+    const byId = parseArgs(["pipeline", "--pipeline-id=27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--expect", "legacy-off", "--wait", "--timeout-min", "5"]);
     assert.equal(byId.pipelineId, "27d73a7d-4afd-4fbb-932f-e853ebef5eb4");
     assert.equal(byId.branch, undefined);
-    assert.equal(byId.expect, "legacy-on");
+    assert.equal(byId.expect, "legacy-off");
     assert.equal(byId.wait, true);
     assert.equal(byId.timeoutMin, 5);
     assert.throws(() => parseArgs(["pipeline", "--pipeline-id", "27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--branch", "main"]), UsageError);
