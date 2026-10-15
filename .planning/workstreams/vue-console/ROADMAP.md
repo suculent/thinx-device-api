@@ -264,7 +264,24 @@ Plans:
 - View log reads only the owner's newest 100 builds and does not refresh after Build; the build spinner ends when `POST /build` returns (44-REVIEW-FIX WR-02 limits, IN-02).
 - `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07).
 
-**Plans**: TBD
+**Plans:** 6 plans
+
+Plans:
+**Wave 1**
+- [ ] 48-01-PLAN.md — Vue deep-link reload: App.vue waits for the resolved initial route (`waitForInitialRoute`), `cy.visitAppRoute` becomes a plain hard load, new `deep-link.spec.js` and `close-out-v118.cjs`; 35 IN-01 `parseResult` with caller audit; 35 IN-08 Vue behavioural cases (NOTIF-04, FIX-01, CI-07) (wave 1)
+- [ ] 48-02-PLAN.md — Parent CI: `test-vue-console` job gating `vue-console-registry`/`-hub` with JUnit results (D-01), `build_legacy_console` default `true` as a kill switch (D-08), CiPipelineGates spec, `check-ci-gates.js` and the kill-switch runbook (CI-06, CI-07) (wave 1, parent repo only)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 48-03-PLAN.md — Vue POL-01 and carried Phase 44 items: Build Firmware in-flight state and 1140px Device Detail column, Account menu name and icon, `.alert-danger` contrast, labelled view toggles, focusable warning markers with tips, label platform sort (`comparePlatformKeys`), udid checkbox ids (POL-01, FIX-01) (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 48-04-PLAN.md — Legacy D-09 fixes: deploy-key create errors and reset (35 IN-03, IN-04), build toast copy, `deviceBuilds` initialisation, `{init}` on first socket open, `goals.length > 0` (35 IN-05); `deploykey.cjs` and new `legacy-close-out.cjs` (FIX-01, CI-06) (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 48-05-PLAN.md — Vue Cypress green: same-origin `test`/`test:ci` with JUnit results, console `test_vue` stores them, stubbed CI login and `CYPRESS_LIVE_LOGIN` opt-in without the leaked fixture, devices/device-detail spec rewrite and double-click check, `src/cypress/.env.test` untracked (CI-07, POL-01, FIX-01) (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 48-06-PLAN.md — Records and ship: 35-REVIEW-DISPOSITION IN-01..IN-08 fixed, carried items recorded (D-15 deferred), console then parent `thinx-staging` push, `check-ci-gates.js pipeline --expect legacy-on`, JUnit proof, live Vue and Legacy markers, unchanged API and port 7442, operator UAT (FIX-01, CI-06, CI-07, NOTIF-04, POL-01) (wave 5)
 **UI hint**: yes
 
 ## Milestone Notes
