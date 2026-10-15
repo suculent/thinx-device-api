@@ -37,37 +37,37 @@ findings:
     title: "The header rename breaks a Cypress spec, and the new unit tests are not run in CI"
   - id: IN-01
     severity: info
-    disposition: open
+    disposition: fixed
     title: "`parseResult` now returns `{}` instead of `undefined` for envelopes with no data key"
   - id: IN-02
     severity: info
-    disposition: open
+    disposition: fixed
     title: "A failed re-fetch after a successful transformer write is reported as a failed create"
   - id: IN-03
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Legacy create handler: dead parse branch, and an exception in `.done` skips `.always`"
   - id: IN-04
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Server-side key-name rejections show a generic error"
   - id: IN-05
     severity: info
-    disposition: open
+    disposition: fixed
     title: "The legacy deploy-key goal check no longer matches its sibling handlers"
   - id: IN-06
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Markup and status-styling issues in the new clickable lists"
   - id: IN-07
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Minor `BuildLogDialog` issues"
   - id: IN-08
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Test coverage gaps"
-open: 8
+open: 0
 total: 16
 recorded: 2026-10-12T11:11:40.888Z
 ---
@@ -84,14 +84,14 @@ recorded: 2026-10-12T11:11:40.888Z
 | WR-05 | warning | fixed | 35-REVIEW-FIX.md |
 | WR-06 | warning | fixed | 35-REVIEW-FIX.md |
 | WR-07 | warning | fixed | 35-REVIEW-FIX.md |
-| IN-01 | info | open | - |
-| IN-02 | info | open | - |
-| IN-03 | info | open | - |
-| IN-04 | info | open | - |
-| IN-05 | info | open | - |
-| IN-06 | info | open | - |
-| IN-07 | info | open | - |
-| IN-08 | info | open | - |
+| IN-01 | info | fixed | console `056ef3c` (Phase 48, 48-01) |
+| IN-02 | info | fixed | console `ed429ec` (Phase 46, 46-02) |
+| IN-03 | info | fixed | console `2105310` (Phase 48, 48-04, Legacy) |
+| IN-04 | info | fixed | console `31ed738` (Phase 45, Vue); console `2105310` (Phase 48, 48-04, Legacy) |
+| IN-05 | info | fixed | console `bff9552` (Phase 48, 48-04, Legacy) |
+| IN-06 | info | fixed | console `38eb95b`, `f64a153` (Phase 47) |
+| IN-07 | info | fixed | console `002e051` (Phase 47, 47-01) |
+| IN-08 | info | fixed | console `824687f`, `794f357` (Phase 48, 48-01, Vue) and `efc66f6` (Phase 48, 48-04, Legacy); existing checks cited in 48-01-SUMMARY (IN-08 coverage map) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.

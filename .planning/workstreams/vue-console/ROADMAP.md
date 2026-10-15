@@ -242,12 +242,12 @@ Plans:
   5. The Vue console Cypress job is green on `thinx-staging` (all 10 specs pass or skip by design; root causes from the 2026-10-12 diagnosis: deep-link reload for devices/profile, cross-origin CSRF for oauth-return/login), CircleCI shows its JUnit results, and the parent `vue-console-registry` job only runs after the suite passes.
 
 **Carried from Phase 43** (Legacy, ship with CI-06; Phase 43 skipped the one-off legacy build, so `thinx/console:swarm` is still the 2026-10-12 image):
-- The "THiNX Builder / Click to show build log..." toast shows `undefined` (`DevicesController.js:117` renders `response.status`, which the build route reply does not carry; pre-existing since 2022, operator UAT 2026-10-13).
-- `LogviewController.js:227` `deviceBuilds[udid].push` throws for a device with no build history, so its build toasts are lost (43-UI-REVIEW fix 3).
-- A Legacy tab whose first socket opens from the log overlay never sends `{init}` and gets no frames until reload (43-REVIEW IN-04).
+- The "THiNX Builder / Click to show build log..." toast shows `undefined` (`DevicesController.js:117` renders `response.status`, which the build route reply does not carry; pre-existing since 2022, operator UAT 2026-10-13). — fixed in console `bff9552` (48-04)
+- `LogviewController.js:227` `deviceBuilds[udid].push` throws for a device with no build history, so its build toasts are lost (43-UI-REVIEW fix 3). — fixed in console `bff9552` (48-04)
+- A Legacy tab whose first socket opens from the log overlay never sends `{init}` and gets no frames until reload (43-REVIEW IN-04). — fixed in console `bff9552` (48-04)
 
 **Carried from Phase 45** (Legacy; 45-CONTEXT D-16 locked "No Legacy change", so they ship with CI-06):
-- Phase 35 review IN-03, IN-04, IN-05 (Legacy deploy-key items the Milestone Notes assigned to Phase 45) go to the FIX-01 ledger here.
+- Phase 35 review IN-03, IN-04, IN-05 (Legacy deploy-key items the Milestone Notes assigned to Phase 45) go to the FIX-01 ledger here. — fixed in console `2105310` (IN-03, IN-04) and `bff9552` (IN-05) (48-04)
 
 **Closed in Phase 46** (record in the FIX-01 ledger):
 - Phase 35 review IN-02 (a transformer write whose list re-fetch failed was reported as a failed create): fixed in console `ed429ec` (46-02), `saveTransformers` resolves `refreshed: false` and the page reloads once.
@@ -257,12 +257,15 @@ Plans:
 - Phase 35 review IN-07 (BuildLogDialog `loading` not reset on close, `build.id` fallback): fixed in console `002e051` (47-01), `open()` uses only `build_id` and the `@hidden` handler resets `loading`.
 
 **Carried from Phase 44** (Vue, small; record in the FIX-01 ledger or fix):
-- Theme-wide `.alert-danger` text contrast 3.96:1 (below 4.5:1); fix in `_overrides.scss` (45-UI-SPEC deferral).
-- List/grid view toggles have no `aria-label` (pre-existing; 44-UI-REVIEW #5).
-- API-key and status warning markers cannot take keyboard focus, so keyboard users cannot read their tips (accepted in 44-UI-SPEC; 44-UI-REVIEW #6).
-- Platform sort orders by internal key while the pills order by label; table checkbox ids use the row index (44-UI-REVIEW #7, #8).
-- View log reads only the owner's newest 100 builds and does not refresh after Build; the build spinner ends when `POST /build` returns (44-REVIEW-FIX WR-02 limits, IN-02).
-- `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07).
+- Theme-wide `.alert-danger` text contrast 3.96:1 (below 4.5:1); fix in `_overrides.scss` (45-UI-SPEC deferral). — fixed in console `2c75b9e` (48-03)
+- List/grid view toggles have no `aria-label` (pre-existing; 44-UI-REVIEW #5). — fixed in console `e1197b3` (48-03)
+- API-key and status warning markers cannot take keyboard focus, so keyboard users cannot read their tips (accepted in 44-UI-SPEC; 44-UI-REVIEW #6). — fixed in console `e1197b3` (48-03)
+- Platform sort orders by internal key while the pills order by label; table checkbox ids use the row index (44-UI-REVIEW #7, #8). — fixed in console `e1197b3` (48-03)
+- View log reads only the owner's newest 100 builds and does not refresh after Build; the build spinner ends when `POST /build` returns (44-REVIEW-FIX WR-02 limits, IN-02). — deferred (D-15): needs a paging and live-refresh design; not a Phase 35 item
+- `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07). — fixed in console `4b867f6` (48-05)
+
+**Found in Phase 48** (deferred, not a Phase 35 item, so not in the FIX-01 ledger):
+- The Legacy build refusal toast `DevicesController.js:135` (`toastr.error( response.status, … )`) can still be empty, because the build reply has no status field (48-04 follow-up candidate) — deferred: outside the D-09 Legacy fix list; take it with the next Legacy console change
 
 **Plans:** 5/6 plans executed
 
