@@ -1,8 +1,8 @@
 ---
 phase: 47-build-log-search-status-colours
-verified: 2026-10-15T10:05:00Z
-status: gaps_found
-score: 38/43 must-haves verified
+verified: 2026-10-15T11:21:57Z
+status: human_needed
+score: 59/64 must-haves verified
 covered_files:
   - ".planning/milestones/v1.16-phases/36-build-log-access/36-REVIEW-DISPOSITION.md"
   - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-01-PLAN.md"
@@ -11,6 +11,13 @@ covered_files:
   - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-02-SUMMARY.md"
   - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-03-PLAN.md"
   - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-03-SUMMARY.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-04-PLAN.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-04-SUMMARY.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-05-PLAN.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-05-SUMMARY.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-REVIEW-DISPOSITION.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-REVIEW.md"
+  - ".planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-UI-SPEC.md"
   - "services/console/vue/cypress/integration/device-detail.spec.js"
   - "services/console/vue/package.json"
   - "services/console/vue/src/components/BuildLogDialog/BuildLogDialog.vue"
@@ -25,23 +32,17 @@ covered_files:
   - "services/console/vue/src/utils/buildLog.js"
   - "services/console/vue/tests/unit/build-log-search.cjs"
   - "services/console/vue/tests/unit/milestone-v116.cjs"
-covered_digest: "v3:sha256:f8e616c0585b4185e2adf43af78211d59aa441388f7cc5c01b55526d641985b5"
+  - "services/console/vue/tests/unit/transformers-enviros.cjs"
+covered_digest: "v3:sha256:83d5ff0cde6e2c0fe63c41d5275107385b9e3945505b826a6875ce464933dda6"
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "UI E6 View (Open build log) controls (covered): ... long-text — the visible label is the fixed word `View` and the long build id is only in the aria-label, which starts with the visible text (WCAG 2.5.3)"
-    status: partial
-    reason: "The aria-label is `Open build log {build_id}` on all three tables. It does not start with, or contain, the visible word `View`, so the WCAG 2.5.3 (Label in Name) clause of this must-have is false. The loading and error clauses of E6 hold. The plan contradicts itself: 47-02 truth 1 and UI-SPEC UI-B11 / line 217 lock the aria-label to `Open build log {build_id}`, and E6 says that label starts with `View`. Both cannot hold while the visible text stays `View`. 47-02-SUMMARY records this gap but sends it to Phase 48 only as a 'candidate'. The Phase 48 ROADMAP section does not list it, so it is not deferred."
-    artifacts:
-      - path: "services/console/vue/src/pages/Visits/Visits.vue"
-        issue: ":aria-label=\"'Open build log ' + item.build_id\" with visible text `View` (line 88)"
-      - path: "services/console/vue/src/pages/History/History.vue"
-        issue: ":aria-label=\"'Open build log ' + (item.build_id || item.name || '')\" with visible text `View` (line 130)"
-      - path: "services/console/vue/src/pages/Devices/DeviceDetail.vue"
-        issue: ":aria-label=\"'Open build log ' + build.build_id\" with visible text `View` (line 159)"
-    missing:
-      - "Either change the three aria-labels to a form that starts with the visible text (for example `View build log {build_id}`) and update UI-SPEC UI-B11/line 217, 47-02 truth 1 and the V2/H1 unit assertions to match"
-      - "Or accept the deviation with an `overrides:` entry, since the copy was locked deliberately (UI-SPEC line 217), and add the WCAG 2.5.3 item to the Phase 48 accessibility carry-overs so it is not lost"
+re_verification:
+  previous_status: gaps_found
+  previous_score: 38/43
+  gaps_closed:
+    - "UI E6 View (Open build log) controls (covered): long-text — the visible label is the fixed word `View` and the long build id is only in the aria-label, which starts with the visible text (WCAG 2.5.3)"
+  gaps_remaining: []
+  regressions: []
 human_verification:
   - test: "Backstop (insufficient_spec, 47-01/47-03): open a build log of about 5 MB and type a term with more than 1000 hits"
     expected: "At most 1000 mark elements; the count reads 1 / 1000+; Next match on 1000 wraps to 1; each step scrolls only the log box, so the current match is visible and neither the modal nor the page scrolls"
@@ -50,223 +51,229 @@ human_verification:
     expected: "The long line wraps inside the log box with no horizontal scrollbar. The match is highlighted with no column shift. The <img> line shows as visible text, and the DOM has no image element"
     why_human: "Line wrapping and layout shift only show in a real layout engine. D4 proves text-only vnodes; the browser DOM still needs a look"
   - test: "Backstop (insufficient_spec): the search bar at 375px and at 1280px viewport width"
-    expected: "At 375px the bar wraps to two rows 8px apart, the field is full width, the count and both chevrons stay on one row, and the bar stays at the top while the log box scrolls. At 1280px all four blocks sit on one row. (47-UI-REVIEW Pillar 5 notes the IconButtons may drop to a second row at 375px.)"
+    expected: "At 375px the bar wraps to two rows 8px apart, the field is full width, the count and both chevrons stay on one row, and the bar stays at the top while the log box scrolls. At 1280px all four blocks sit on one row"
     why_human: "Responsive layout; C2 only checks the compiled CSS rules"
-  - test: "End-of-phase operator UAT (47-03 <human-check>, 11 items): log in to https://console.thinx.cloud after a hard reload and run items 1-11 from 47-03-SUMMARY 'Pending end-of-phase UAT'"
-    expected: "Rollout times after the push; dashboard View before Download opens the log; search, wrap, centred scroll, Esc and reset on reopen; inert HTML when searching for `<`; error state with Try again; TIMEOUT amber / FAILED red / OK green / RUNNING blue on all four lists; Device Build History cells inert; navbar static rows; layout backstops; Phase 36/35 records; Legacy console-retest"
+  - test: "47-05 gap UAT: log in to https://console.thinx.cloud after a hard reload. On the dashboard Recent Builds card, History (Build Log tab) and a device's Build History, inspect each View button in Chrome DevTools > Elements > Accessibility; in History, hover and click a row with a build id and (if listed) a row without one"
+    expected: "Each View button shows the word View with the eye glyph, and its computed accessible name is `View build log <build id>` (optional: macOS Voice Control 'Click View' activates it). A History row with a build id has the pointer cursor and a click on a plain cell opens its log (not a click on Expand or a text selection). A row without one shows `—` in the Log column, the default cursor, and a click does nothing. Dashboard View + Download, navbar rows and Device Build History behave as before"
+    why_human: "The computed accessible name, the cursor and click behaviour need a real browser and a logged-in operator; the unit tests prove only the vnode attributes"
+  - test: "End-of-phase operator UAT (47-03 <human-check>, 11 items, carried in 47-05-SUMMARY 'Carried from 47-03-SUMMARY'): run items 1-11 in the same session"
+    expected: "Rollout times after the push (11:00:18Z; bundle fc0fa01 live 11:06:51Z); dashboard View before Download opens the log; search, wrap, centred scroll, Esc and reset on reopen; inert HTML when searching for `<`; error state with Try again; TIMEOUT amber / FAILED red / OK green / RUNNING blue on all four lists; Device Build History cells inert; navbar static rows; layout backstops; Phase 36/35 records; Legacy console-retest on https://rtm.thinx.cloud/"
     why_human: "Needs a logged-in operator, real build logs and visual judgement. The verifier must not log in"
-  - test: "Flagged judgment-tier prohibitions (11, all `verification: judgment`, `flagged: true`): review the non-authoritative LLM-judge verdicts in the Prohibitions table"
-    expected: "Operator confirms or rejects each verdict. Process prohibitions (no ssh/docker, no production login, no lint/npm install, no env reads) can only be confirmed from the executor's session, not the repository"
+  - test: "Flagged judgment-tier prohibitions (20 in total: 11 from 47-01..47-03, 3 from 47-04, 6 from 47-05; all `verification: judgment`, `flagged: true`): review the non-authoritative LLM-judge verdicts in the Prohibitions table"
+    expected: "Operator confirms or rejects each verdict. Process prohibitions (no ssh/docker/swarm edits, no production login or credentials, no lint/npm install, no env reads or env dumps) can only be confirmed from the executor's session, not the repository"
     why_human: "Judgment-tier prohibitions are never silently passed (ADR-550 D4)"
 ---
 
 # Phase 47: Build Log Search & Status Colours Verification Report
 
 **Phase Goal:** A user can find text inside a full build log, sees the same status colours on every build list, and can open the log from every build list, including the dashboard.
-**Verified:** 2026-10-15T10:05:00Z
-**Status:** gaps_found (one narrow plan-level gap: a WCAG 2.5.3 aria-label clause; all four roadmap success criteria are met in code, tests and the live bundle)
-**Re-verification:** No (initial verification)
+**Verified:** 2026-10-15T11:21:57Z
+**Status:** human_needed (no gaps; the one prior gap, UI E6 / WCAG 2.5.3, is closed in code, tests, records and production)
+**Re-verification:** Yes. The prior report was gaps_found at 38/43. Gap closure plans 47-04 (code) and 47-05 (records and ship) have since run.
 
-Evidence base: console submodule HEAD = console origin/thinx-staging = parent gitlink = `591033e` (12 signed commits `31bce2b..591033e`, exactly the 14 Phase 47 Vue paths). Parent origin/thinx-staging = `ab378790` (signed bump, changes only `services/console`). Origin main = `14c08c1f`, unchanged. The verifier ran its own checks; none of the evidence below comes from SUMMARY claims:
-- `LC_ALL=C npm run test:unit`: rc 0, 368 `ok`, no `FAIL`/`not ok`.
-- `node tests/unit/build-log-search.cjs` in the default locale: rc 0, 44 `ok`.
-- `test:csp:dist` and `perf:spotter` on the existing dist (which carries `build-log-search-bar`): both pass.
-- `check-ci-gates.js pipeline --revision ab378790 --expect legacy-off`: `CI-GATES PIPELINE OK 5673`.
-- The live `console.thinx.cloud/js/app.js` (3234229 bytes) carries id `ab37879` and every marker, with 0 replaced strings.
-- Unauthenticated `/api/v2/logs/build[/x]` answers 401 on rtm and console.
-- The 7 live Legacy files hash identically to the 47-03 baseline.
+Evidence base. The verifier ran every check below itself; none of it comes from SUMMARY claims.
+- **Refs:** console HEAD = console origin/thinx-staging = parent gitlink (HEAD and origin/thinx-staging) = `54734af`. Parent origin/thinx-staging = `fc0fa013`. origin/main = `14c08c1f`, unchanged. The parent HEAD `35712e91` is 4 signed docs-only commits ahead of origin (2ff1a2d2, 51fdf2cf, 37fb1933, 35712e91), all under `.planning/`; they stay local by design (47-05 decision).
+- **Console range** `591033e..54734af`: 6 commits, all `G`, 10 files (exactly the 47-04 `files_modified`). `vue/src` diff read in full. No Legacy `src/` change.
+- **Unit tests:** `LC_ALL=C npm run test:unit` exits 0 with 375 `ok` and 0 failing checks. In the default locale, `node tests/unit/build-log-search.cjs` exits 0 with 51 `ok`, and `milestone-v116.cjs` exits 0.
+- **Build gates:** `test:csp:dist` passes (3 PASS) and `perf:spotter` reports "All performance budgets passed". Both ran on the existing dist built 12:56-12:57 on 2026-10-15, whose modern and legacy bundles have `View build log` x3 and `Open build log` x0.
+- **Pipeline:** `node scripts/check-ci-gates.js pipeline --revision fc0fa013 --expect legacy-off` prints `CI-GATES PIPELINE OK 5674` (vue-console-registry, test and api-registry all success).
+- **Live bundle:** `console.thinx.cloud/js/app.js` is 3235515 bytes, with id `fc0fa01` x2 and `ab37879` x0. Markers: `View build log` 3, `build-no-log` 3, `hasBuildLog` 21, and every 47-03 marker present. At 0: `Open build log`, the searchInput ref, the static `build-row` class, `build.build_id || build.id`, `isSuccess` and `m-0 mb-1 text-ellipsis`.
+- **Live API:** unauthenticated GETs return 401 for rtm and console `/api/v2/logs/build/x`, rtm `/api/v2/logs/build` and rtm `/api/user/profile`.
+- **Legacy console:** the 7 files fetched from rtm.thinx.cloud match the 47-05 / 47-03 sha256 baseline (`shasum -c`: 7 OK).
 
 ## Goal Achievement
 
 ### Observable Truths
 
-Roadmap success criteria (the contract):
+Roadmap success criteria (the contract). This round is a regression check, and all four still hold.
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| SC1 | Typing a term highlights every match and shows the count; `<`/`>` step and scroll into view; HTML in the log stays inert while highlighted | ✓ VERIFIED | `buildLogSearch` (buildLog.js:39-60) is a literal `gi` RegExp on the original text. The dialog renders `mark`/`span` segments by `{{ }}` only, with no `v-html`/`innerHTML`/`domProps` (grep). `step()` wraps, and `scrollToCurrent()` sets only `log.scrollTop`. `.build-log-text` has `position: relative`, so it is the marks' offsetParent. Tests S1-S6, D1-D7, T1-T8 pass. Real-browser scale and layout go to human backstops |
-| SC2 | TIMEOUT warning, FAILED danger on navbar, dashboard, History and device Build History, from one mapping | ✓ VERIFIED | `buildStatusVariant` (buildLog.js:27-33) is the only mapping. It is used by Notifications.vue:109/113/116, Visits.vue:231, History.vue:113, DeviceDetail.vue:156. `isSuccess` is removed. N4/N5 lock the four statuses on all four lists and forbid OK comparisons and literal variants |
-| SC3 | Dashboard card opens the full log; a row without a build id shows no Open-build-log button and never requests `/logs/build/<index>` | ✓ VERIFIED | Visits.vue:86-96 has View + Download inside `.build-actions` with `v-if="item.build_id"` and a `build-no-log` placeholder otherwise. There is one `<BuildLogDialog ref="buildLogDialog">` outside the loading `v-if` (:106). `BuildLogDialog.open()` refuses any build_id that is not a non-empty string (:100-102). The only `fetchBuildDetail` dispatch is after that guard (:128). The `build.build_id \|\| build.id` fallback is gone from source and from the live bundle. V1-V6, L1 and N1 pass |
-| SC4 | Phase 36 WR-01, IN-01..IN-03 fixed or deferred with a reason; the inert-row test fails if a click/keydown handler is added to any Build History cell | ✓ VERIFIED | `buildHistoryViolations()` (milestone-v116.cjs:169-181) walks the whole card (`on` and `nativeOn`, tabindex and role). Four mutation checks (td click, `<code>` keydown, badge `@click.native`, td tabindex) each assert at least 1 violation and pass in the run. IN-01 warnHandler spans construction to `_render()` with `finally`; the collision check collects the `buildHistory` warning. The Cypress spec clicks every non-last cell and checks a length of 0 before View. 36-REVIEW-DISPOSITION.md shows 4 fixed with console SHAs and `open: 0` (38eb95b, 3bc6a4d, 002e051 and 591033e all exist) |
+| SC1 | Typing a term highlights every match and shows the count; `<`/`>` step and scroll into view; HTML in the log stays inert while highlighted | ✓ VERIFIED | `buildLogSearch` is unchanged; the only 47-04 change to `buildLog.js` is the added `hasBuildLog` export. The dialog diff only removes `ref="searchInput"` and routes `open()` through `hasBuildLog`. There is no `v-html`/`innerHTML`/`domProps` in the dialog (0 by grep). S1-S6, D1-D7, T1-T8 and L1-L5 pass. Real-browser scale is covered by the human backstops |
+| SC2 | TIMEOUT warning, FAILED danger on navbar, dashboard, History and device Build History, from one mapping | ✓ VERIFIED | `buildStatusVariant` is still the only mapping (Notifications.vue:109/113/116, Visits.vue:231, History.vue:114, DeviceDetail.vue:156), and `isSuccess` is gone. N4 and N5 pass |
+| SC3 | Dashboard card opens the full log; a row without a build id shows no Open-build-log button and never requests `/logs/build/<index>` | ✓ VERIFIED (strengthened) | Visits.vue:87 gates `.build-actions` on `hasBuildLog(item)`, and there is one `<BuildLogDialog ref="buildLogDialog" />` at :106. `BuildLogDialog.open()` returns before any state change or dispatch when `!hasBuildLog(build)`. `hasBuildLog` (buildLog.js:29-31) is true only for a non-empty string `build_id`. V8, H4, N7 and P2 render 9 candidate ids (string, `''`, missing, null, 0, 42, true, object, array) and assert that the control and request appear exactly when the predicate holds |
+| SC4 | Phase 36 WR-01, IN-01..IN-03 fixed or deferred with a reason; the inert-row test fails if a click/keydown handler is added to any Build History cell | ✓ VERIFIED | The 36 ledger reads `open: 0` (WR-01 3bc6a4d/591033e, IN-01 3bc6a4d, IN-02 38eb95b/002e051, IN-03 591033e). The verifier's own run reports mutation checks (a)-(d) with 2 violations each, and the IN-01 collision check collected 1 warning |
 
-Plan 47-01 must-haves:
-
-| # | Truth | Status | Evidence |
-|---|-------|--------|----------|
-| 1 | 3+ chars highlight up to 1000 `mark.build-log-match`, count `{n} / {total}`, case-insensitive literal, 200 ms debounce | ✓ VERIFIED | S1, S2, S3, D5, D6 |
-| 2 | Highlighted log text stays inert (`<b>x</b> abc <script>`) | ✓ VERIFIED | D4; no raw-HTML binding in the SFC (grep) |
-| 3 | Prev/Next IconButtons, wrap, Enter/Shift+Enter, Esc to modal, centring by log-box scrollTop only | ✓ VERIFIED | T1, T2, T4, T6, T8; no `scrollIntoView` |
-| 4 | Current match class + aria-current, amber colours as six `!default` tokens | ✓ VERIFIED | T3, C1, C3; _variables.scss:57-62 |
-| 5 | Count text / live speech forms | ✓ VERIFIED | D5; BuildLogDialog.vue:37-46 |
-| 6 | Boundary: 2 chars and 3 spaces search nothing, 1000 versus 1001 cap, wrap | ✓ VERIFIED | S3, S4, T2 |
-| 7 | Precision: segments rebuild the text (U+0130), non-overlapping, no empty-match loop | ✓ VERIFIED | S1, S5, S6; buildLog.js:51 guard |
-| 8 | Sticky `role=search` bar only while text shows; term resets on open and is kept by Try again | ✓ VERIFIED | D1, D2, L2, L3, C2 |
-| 9 | `open()` id-only; close resets loading and debounce | ✓ VERIFIED | L1, L4; BuildLogDialog.vue:100-118 |
-| 10 | Error, empty and loading states copy; exactly one state | ✓ VERIFIED | L5; template lines 12-16 |
-| 11 | UI E1 search field states | ✓ VERIFIED | D2, D5, T5, S2/S3; placeholder present |
-| 12 | UI E2 step buttons states | ✓ VERIFIED | T1; IconButton `title` on wrapper span, `d-none d-lg-inline` label |
-| 13 | UI E3 log box states | ✓ VERIFIED | D2-D5, L1-L5, S4 |
-| 14 | Backstop: 5 MB log with more than 1000 matches | ⚠️ insufficient_spec, human | See Human Verification 1 |
-| 15 | Backstop: 20,000-character line, inert `<img onerror>` | ⚠️ insufficient_spec, human | See Human Verification 2 |
-| 16 | Backstop: 375px and 1280px layout | ⚠️ insufficient_spec, human | See Human Verification 3 |
-| 17 | test:unit in both locales; build, csp and perf pass | ✓ VERIFIED | Verifier run: LC_ALL=C full suite rc 0; build-log-search.cjs default locale rc 0; csp and perf pass on dist; CI vue-console-registry built the shipped image |
-
-Plan 47-02 must-haves:
+Plan 47-01 must-haves: unchanged by 47-04 except IN-03 (the ref removal) and the `open()` guard. Regression check:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Dashboard columns Time/Device/Status/Actions; View (p-0, eye, aria-label) before Download in `.build-actions`; opens the dialog | ✓ VERIFIED | Visits.vue:78-94, 235; V1, V2, V5, V7 |
-| 2 | Rows without a build id show the `build-no-log` placeholder only (dashboard, Device Build History) | ✓ VERIFIED | Visits.vue:95, DeviceDetail.vue:160; V3, H2 |
-| 3 | Navbar: buttons only with a build id, static rows otherwise, span markup, `—` fallback | ✓ VERIFIED | Notifications.vue:11-31, 78-81; Notifications.scss; N1-N3, N6 |
-| 4 | TIMEOUT warning / FAILED danger on all four lists via `buildStatusVariant`; unit lock | ✓ VERIFIED | N4, N5 |
-| 5 | History View `p-0`, date cell `text-nowrap` | ✓ VERIFIED | History.vue:110, 130; H1 |
-| 6 | The inert-row test catches handler, keydown, `@click.native` and tabindex mutations | ✓ VERIFIED | Mutation output lines (a)-(d), each reporting 2 violations; asserted at milestone-v116.cjs:426 |
-| 7 | `renderDeviceDetail` collects warnings from construction, restores in `finally` | ✓ VERIFIED | milestone-v116.cjs:137-149, 430-434 |
-| 8 | Cypress G-36-3 clicks every cell, length 0 then 1, comment corrected | ✓ VERIFIED | device-detail.spec.js:107-115 (not executed until Phase 48 CI-07, as planned) |
-| 9 | 36 disposition `open: 0` with SHAs; ROADMAP Phase 48 'Closed in Phase 47' lists 35 IN-06/IN-07 | ✓ VERIFIED | 36-REVIEW-DISPOSITION.md; ROADMAP.md:247-249 |
-| 10 | UI E4 dashboard table states | ✓ VERIFIED | V3-V6; Visits.vue:5, 76 |
-| 11 | UI E5 navbar states | ✓ VERIFIED | N1-N3, N6 |
-| 12 | UI E6 View controls: loading, error, long-text including 'aria-label starts with the visible text (WCAG 2.5.3)' | ✗ FAILED (partial) | Loading and error clauses hold (L1, V6). The aria-label `Open build log {id}` does not start with `View`, so the 2.5.3 clause is false. See Gaps |
-| 13 | test:unit in both locales; build, csp and perf | ✓ VERIFIED | As 47-01 #17 |
+| 1-13 | Search, inert text, stepping/scroll, current-match tokens, count/speech, boundaries, precision, sticky bar, open/close lifecycle, states, E1-E3 | ✓ VERIFIED (13) | Same checks as before, all `ok` in the verifier run. L1 now reads "open() without a non-empty string build_id resolves without showing, loading or changing state". C3 now also forbids `ref="searchInput"` |
+| 14 | Backstop: 5 MB log with more than 1000 matches | ⚠️ insufficient_spec, human | Human Verification 1 |
+| 15 | Backstop: 20,000-character line, inert `<img onerror>` | ⚠️ insufficient_spec, human | Human Verification 2 |
+| 16 | Backstop: 375px and 1280px layout | ⚠️ insufficient_spec, human | Human Verification 3 |
+| 17 | test:unit in both locales; build, csp and perf pass | ✓ VERIFIED | Verifier: full suite under LC_ALL=C exits 0; build-log-search and milestone-v116 in the default locale exit 0; csp and perf pass on dist; pipeline 5674 built the shipped image |
 
-Plan 47-03 must-haves (deduplicated; the backstops are counted once under 47-01):
+Plan 47-02 must-haves (truths 1 and 5 amended by 47-05):
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Preflight passed before the push | ✓ VERIFIED | Re-ran test:unit, csp and perf myself; compile gate from the SUMMARY plus a green pipeline 5673 |
-| 2 | Console push carries only signed Phase 47 commits within the 14 paths, no Legacy `src/` | ✓ VERIFIED | `git log 31bce2b..591033e` shows 12 commits, all G; diff stat has 14 files; `src/`, IconButton and store have no diff |
-| 3 | Parent push only Phase 47 work and docs, signed, merges ok | ✓ VERIFIED | `6d47a5fb..ab378790`: 19 commits, all G, 0 merges; outside `.planning/` only `services/console` |
-| 4 | Signed gitlink bump changes only `services/console`; refs agree; main unchanged | ✓ VERIFIED | ab378790 is G and touches only `services/console`; console HEAD = origin = gitlink = 591033e; origin/thinx-staging = ab378790; origin/main = 14c08c1f |
-| 5 | Pipeline legacy-off proof | ✓ VERIFIED | Verifier re-ran it: `CI-GATES PIPELINE OK 5673` (test, api-registry, vue-console-registry success) |
-| 6 | Live unauthenticated API checks | ✓ VERIFIED | Verifier probes: 401 for rtm and console `/api/v2/logs/build/x` and for rtm `/api/v2/logs/build`. Port 7442 and the WS probe come from the SUMMARY only (not re-run) |
-| 7 | Live bundle carries the id and markers, none of the replaced strings | ✓ VERIFIED | Verifier fetch: `ab37879` x2, all markers ≥1, replaced strings 0 |
-| 8 | Legacy byte-identical | ✓ VERIFIED | Verifier fetched the 7 files from rtm.thinx.cloud; every sha256 prefix matches the baseline in 47-03-SUMMARY |
-| 9 | Human check: end-of-phase operator UAT | ? human | See Human Verification 4 |
+| 1 | Dashboard columns; View (p-0, eye, aria-label `View build log {build_id}`) before Download in `.build-actions`; opens the dialog | ✓ VERIFIED | Visits.vue:87-88; V2 asserts `aria-label === 'View build log b1'` |
+| 2-4 | Placeholder rows; navbar static rows; one status mapping on all four lists | ✓ VERIFIED | V3, H2, N1-N6, N4/N5 |
+| 5 | History View `p-0`, date `text-nowrap`; since 47-04 only rows with a build log keep the row click and pointer, others show the placeholder | ✓ VERIFIED | History.vue:110 (`:class="{ 'build-row': hasBuildLog(item) }" v-on="rowListeners(item)"`), :131-132, :296-299; H1, H3, H4 |
+| 6-11 | Inert-row mutations, renderDeviceDetail warnings, Cypress G-36-3, 36 ledger and ROADMAP records, E4, E5 | ✓ VERIFIED | Unchanged; mutation output and IN-01 check reproduced |
+| 12 | **UI E6** View controls: loading, error, and long-text, where the aria-label starts with the visible text (WCAG 2.5.3) | ✓ VERIFIED (previously FAILED) | All three tables bind `:aria-label="'View build log ' + <row>.build_id"` with visible text `View` (Visits.vue:88, History.vue:131, DeviceDetail.vue:159). Rendered-vnode tests assert `aria-label.startsWith(textOf(button))`: build-log-search.cjs:1001 (dashboard) and :1392 (History), milestone-v116.cjs:379 (Device Build History). P3 asserts that no `vue/src` file contains `Open build log`, and the verifier's grep agrees (0). The live bundle has 3 `View build log` and 0 `Open build log`. Loading and error clauses: L1, V6 |
+| 13 | test:unit both locales; build, csp, perf | ✓ VERIFIED | As 47-01 #17 |
 
-**Score:** 38/43 truths verified (0 present-but-behavior-unverified; 4 routed to a human: 3 backstops and the UAT; 1 failed)
+Plan 47-03 must-haves (shipping of 591033e), regression check:
+
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1-8 | Preflight, console and parent push scope, gitlink and refs, pipeline 5673, live API, live bundle, Legacy identity | ✓ VERIFIED (8) | Superseded by the 47-05 ship, which the verifier re-checked: pipeline 5674 OK, the live bundle carries every 47-03 marker and none of the removed strings, Legacy is byte-identical |
+| 9 | Human check: end-of-phase operator UAT | ? human | Human Verification 5 |
+
+Plan 47-04 must-haves (gap closure code). The E6 restatement is deduplicated into 47-02 #12.
+
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | `hasBuildLog(build)` is the one rule: true only for an object with a non-empty string `build_id`, false for missing/empty/null/number/boolean/object/array, list-index `id`, non-object | ✓ VERIFIED | buildLog.js:29-31 `!!build && typeof build.build_id === 'string' && build.build_id !== ''`. P1 runs the `idRows()` truth table plus `null`, `undefined` and `{ id: '0' }`, and asserts a boolean result |
+| 2 | `open()` shows the modal and dispatches `fetchBuildDetail` exactly when `hasBuildLog(row)` | ✓ VERIFIED | BuildLogDialog.vue `open()` begins `if (!hasBuildLog(build)) return Promise.resolve();`. P2 and L1 pass |
+| 3 | View renders exactly when `hasBuildLog` on the dashboard, History and Device Build History; navbar button/static on `hasBuildLog`; a truthy non-string id never yields a focusable control | ✓ VERIFIED | Visits.vue:87, History.vue:131, DeviceDetail.vue:159, Notifications.vue:15-16/79. V8, H4, N7, H2 and the milestone-v116 `oddPage` check pass. The navbar `!!build.build_id` is gone |
+| 4 | aria-label `View build log {build_id}` on all three tables; visible text `View`; no file under `vue/src` contains `Open build log` | ✓ VERIFIED | Verifier grep: 3 bindings, 0 old label. Live bundle: 3 and 0 |
+| 5 | History rows without a build log have no `build-row` class and no click listener; rows with one keep pointer and row-click, which still ignores inner controls and selection; no role/tabindex/keydown | ✓ VERIFIED | History.vue:110 and `rowListeners` at :296-299 return `{}` without a build log and `{ click }` with one. `onBuildRowClick` is unchanged. H3 and H4 pass, and the 35 WR-01 block in milestone-v116 is byte-unchanged and passes. See the IN-10 warning below on that guard's reach |
+| 6 | History's Log cell shows the `build-no-log` placeholder as the View `v-else` | ✓ VERIFIED | History.vue:132; H3 and H4 `expectNoLogPlaceholder` |
+| 7 | Search field has no unused ref; S/D/T/L checks unchanged and passing | ✓ VERIFIED | Diff removes only `ref="searchInput"`; C3 guards it; all S/D/T/L checks are `ok` |
+| 8 | Existing guards still hold, unweakened (36 WR-01 walk and mutations, IN-01, 35 WR-01 row semantics, one request per View, N4/N5, N1-N6) | ✓ VERIFIED | Every named guard passes in the verifier's run. The 35 WR-01 source block in milestone-v116.cjs:76-81 is byte-identical to 591033e. The row semantics hold in the code: no role or tabindex, and `rowListeners` returns only `click`. Caveat (⚠️ warning, 47-REVIEW IN-10): that source guard now reads a `<tr>` whose listeners come from `v-on="rowListeners(item)"`. A keydown added inside `rowListeners` would pass it, and H4's `hasListener` checks only that some listener exists. The guard code is unweakened, but it no longer covers that path |
+| 9 | test:unit both locales; build, csp, perf; bundle carries `View build log`, not the old wording | ✓ VERIFIED | Verifier runs above; dist and live bundle markers |
+
+Plan 47-05 must-haves (records and ship):
+
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | Local preflight passed before the push | ✓ VERIFIED | Re-run by the verifier now (test:unit, csp, perf) on the same tree (`54734af`, clean `vue/src`); the compile gate is from the SUMMARY, and green pipeline 5674 corroborates it |
+| 2 | UI-SPEC matches the code: no aria-label line carries `Open build log`; Copywriting, UI-B11 and Verification Hooks name `View build log {build_id}`; UI-B11..B13 on `hasBuildLog`; UI-B14/B15 History placeholder; UI-B01 no ref; dated revision note; E6 and UI-B11 consistent | ✓ VERIFIED | 47-UI-SPEC.md:27 (revision note), :167, :184, :190-191, :197, :219, :289-290, :314. The only remaining `Open build log` is the E6 element *name* at :250 (`View (Open build log) controls`), a description and not an aria-label, as 47-05 states |
+| 3 | 47-02 truths 1 and 5 amended | ✓ VERIFIED | 47-02-PLAN.md:31 and :35. Task-body text at :216/:241 still shows the old label; that is intentional, since 47-05 forbids edits beyond truths 1 and 5 |
+| 4 | Disposition: WR-01, WR-02, IN-03 `fixed (console <sha>)` with 47-04 GREEN commits; the other five stay open; `open: 5` | ✓ VERIFIED | Rows: WR-01 `83cc7cc, 9daa778, 54734af`; WR-02 `9daa778`; IN-03 `83cc7cc`. All are signed console commits after 591033e. IN-01, IN-02 and IN-04..IN-06 are still `open`. The frontmatter now reads `open: 9`, because the later re-review (35712e91) added IN-07..IN-10, not because a disposition was undone |
+| 5 | Console push carries only 47-04 commits within the ten paths, signed, no Legacy `src/` | ✓ VERIFIED | `591033e..54734af`: 6 `G`, 10 paths, `src/` empty |
+| 6 | Parent push: signed, no merge, only `services/console` outside `.planning/` | ✓ VERIFIED | `ab378790..fc0fa013`: 13 commits, all `G`, single-parent; outside `.planning/` only `services/console` |
+| 7 | Signed gitlink bump touches only `services/console`; refs agree; main unchanged | ✓ VERIFIED | fc0fa013 `G`, `--name-only` = `services/console`; gitlink 54734af on HEAD and origin/thinx-staging; origin/main 14c08c1f |
+| 8 | Pipeline legacy-off OK | ✓ VERIFIED | Verifier: `CI-GATES PIPELINE OK 5674` |
+| 9 | Live bundle id, ≥3 `View build log`, ≥3 `build-no-log`, 47-03 markers, none of the forbidden strings | ✓ VERIFIED | Verifier fetch (see evidence base) |
+| 10 | Live API 401s after rollout; port 7442 unchanged; WS multi-tab 2/2 | ✓ VERIFIED (API part re-run) | The verifier's API probes return 401 x4. Port 7442 and the WS probe come from the SUMMARY only (not re-run; outside the verifier's permitted probe hosts/schemes). Phase 47 changes only the Vue console, so they are no-regression context |
+| 11 | Legacy byte-identical before and after | ✓ VERIFIED | Verifier `shasum -c` 7 OK against the recorded baseline |
+| 12 | Human check: View announced as `View build log <id>`; History row cursor and click; plus the 11 pending 47-03 items | ? human | Human Verification 4 and 5 |
+
+**Score:** 59/64 truths verified (0 present-but-behavior-unverified; 5 routed to a human: 3 backstops, the 47-05 gap UAT, the 47-03 UAT; 0 failed)
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `vue/src/utils/buildLog.js` | `export function buildLogSearch` | ✓ VERIFIED | Exists, substantive, imported by BuildLogDialog.vue:21 and used at :36 |
-| `vue/src/components/BuildLogDialog/BuildLogDialog.vue` | `build-log-search-bar` | ✓ VERIFIED | Used by Visits, Notifications, History, DeviceDetail and Devices |
-| `vue/src/styles/_build-log.scss` | `.build-log-match--current`, `.build-actions` | ✓ VERIFIED | Imported by theme.scss:28; live CSS markers |
-| `vue/src/styles/_variables.scss` | `$build-log-current-bg` | ✓ VERIFIED | Six `!default` tokens, used in _build-log.scss |
-| `vue/tests/unit/build-log-search.cjs` | `buildLogSearch` | ✓ VERIFIED | Chained last in `test:unit`; 44 ok |
-| `vue/src/pages/Visits/Visits.vue` | `buildLogDialog` | ✓ VERIFIED | Ref, component and `openBuildLog` are wired |
-| `vue/src/components/Notifications/Notifications.vue` | `listGroupItem--static` | ✓ VERIFIED | `rowListeners` bound via `v-on` |
-| `vue/src/components/Notifications/Notifications.scss` | `.notification-title` | ✓ VERIFIED | N6 compiles it |
-| `vue/tests/unit/milestone-v116.cjs` | `nativeOn` | ✓ VERIFIED | Line 173 |
-| `36-REVIEW-DISPOSITION.md` | `open: 0` | ✓ VERIFIED | 4 fixed with SHAs |
-| `services/console` (gitlink) | bumped to 591033e | ✓ VERIFIED | `git ls-tree` shows 591033e on HEAD and origin/thinx-staging. The gsd `verify.artifacts` tool reports "Not a file" because it cannot handle a gitlink; checked by hand |
+| `vue/src/utils/buildLog.js` | `export function hasBuildLog(` | ✓ VERIFIED | :29; imported by the dialog and four lists, registered in methods, called in templates and scripts |
+| `vue/src/components/BuildLogDialog/BuildLogDialog.vue` | `hasBuildLog(build)` | ✓ VERIFIED | `open()` guard; no search ref |
+| `vue/src/pages/Visits/Visits.vue` | `View build log` | ✓ VERIFIED | :87-88, :233 method |
+| `vue/src/pages/History/History.vue` | `rowListeners(item)` | ✓ VERIFIED | :110, :131-132, :294-299 |
+| `vue/src/components/Notifications/Notifications.vue` | `hasBuildLog(build)` | ✓ VERIFIED | :15-16, :76, :79 |
+| `vue/src/pages/Devices/DeviceDetail.vue` | `hasBuildLog(build)` | ✓ VERIFIED | :159, :311 |
+| `vue/tests/unit/build-log-search.cjs` | `hasBuildLog` | ✓ VERIFIED | P1-P3, V8, H3, H4, N7 present and passing |
+| `vue/tests/unit/milestone-v116.cjs` | `View build log` | ✓ VERIFIED | :377-381 label pin and starts-with |
+| `47-UI-SPEC.md` | `View build log {build_id}` | ✓ VERIFIED | :27, :219, :290 |
+| `47-REVIEW-DISPOSITION.md` | `open: 5` | ✓ VERIFIED (evolved) | Fixed rows as required; frontmatter `open: 9` after the re-review added 4 new info items |
+| `services/console` gitlink | bumped to 54734af | ✓ VERIFIED | `git ls-tree` HEAD and origin/thinx-staging |
+| Prior artifacts (47-01..47-03: styles, variables, Notifications.scss, 36 ledger) | as before | ✓ VERIFIED | Unchanged since 591033e; C1-C3, N6 pass |
 
 ### Key Link Verification
 
-The gsd `verify.key-links` tool could not resolve the descriptive `from:` fields (0/10, "Source file not found"), so every link below was checked by hand.
+Checked by hand. In the prior round, the gsd key-link tool could not resolve the descriptive `from:` fields.
 
 | From | To | Via | Status | Details |
 |------|----|-----|--------|---------|
-| BuildLogDialog computed `result` | `buildLogSearch(text, term)` | import from `@/utils/buildLog` | WIRED | :21, :36 |
-| BuildLogDialog `open()` | `buildlog/fetchBuildDetail` → `GET /logs/build/<build_id>` | dispatch after a non-empty string guard | WIRED | :102, :128; store buildlog.js:59-61 |
-| BuildLogDialog bar | IconButton | two `<IconButton data-cy=build-log-prev/next>` | WIRED | :9-10, component registered :30 |
-| theme.scss | _build-log.scss | `@import 'build-log'` after settings-pages | WIRED | theme.scss:27-28 |
-| Visits View | `BuildLogDialog.open(item)` | `openBuildLog` → `$refs.buildLogDialog.open` | WIRED | :88, :106, :235 |
-| Notifications rows | `openBuildLog` only with a build id | `v-on="rowListeners(build)"` | WIRED | :18, :78-81 |
-| Four lists | `buildStatusVariant` | import from `@/utils/buildLog` | WIRED | All four import and use it |
-| Parent HEAD | console HEAD | `chore(47): bump console …` | WIRED | ab378790 |
-| CircleCI pipeline | console.thinx.cloud bundle | vue-console-registry, then Swarmpit | WIRED | Pipeline 5673 OK; live bundle id ab37879 |
+| Visits, History, DeviceDetail, Notifications templates | `hasBuildLog` | import from `@/utils/buildLog`, registered in `methods` | WIRED | All four import it and register it as a method, and each template calls `hasBuildLog(` |
+| `BuildLogDialog.open(build)` | `buildlog/fetchBuildDetail` → `GET /logs/build/<id>` | `if (!hasBuildLog(build)) return Promise.resolve();` before dispatch | WIRED | P2 counts exactly one dispatch per passing row |
+| History `<tr data-cy="build-row">` | `onBuildRowClick` → `openBuildLog` | `v-on="rowListeners(item)"` | WIRED | H3: one open for a row with a log; none without |
+| Parent HEAD | console HEAD | `chore(47): bump console to the build log label …` | WIRED | fc0fa013 |
+| CircleCI pipeline 5674 | console.thinx.cloud bundle | vue-console-registry, then Swarmpit | WIRED | Live id fc0fa01 |
+| Disposition fixed rows | 47-04 GREEN console commits | 7-char ids | WIRED | All resolve, `G` |
+| Prior links (search util, IconButton, theme import, status mapping) | — | — | WIRED | Unchanged; regression checks pass |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 |----------|---------------|--------|--------------------|--------|
-| BuildLogDialog `<pre>` | `text` / `result.segments` | `buildlog/fetchBuildDetail` → `$api.$get('/logs/build/'+id)` → `buildLogText` | Yes (V6: one GET `/logs/build/b1`; D7 end to end) | ✓ FLOWING |
-| Visits Recent Builds | `buildItems` | `buildlog` store getter, filled by `loadData` | Yes | ✓ FLOWING |
+| BuildLogDialog `<pre>` | `result.segments` | `fetchBuildDetail` → `$api.$get('/logs/build/'+id)` → `buildLogText` | Yes (V6, D7) | ✓ FLOWING |
+| Visits Recent Builds | `buildItems` | `buildlog` store getter | Yes | ✓ FLOWING |
+| History builds table | `filteredBuilds` | `buildlog` store via real `normPaging` (H3/H4 render with it) | Yes | ✓ FLOWING |
 | Notifications rows | `recentBuilds` | `buildlog/fetchBuildLog` + `getItems` | Yes | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |----------|---------|--------|--------|
-| Full console unit suite | `LC_ALL=C npm run test:unit` (run once) | rc 0, 368 ok, 0 fail | ✓ PASS |
-| Search suite in the default locale | `node tests/unit/build-log-search.cjs` | rc 0, 44 ok | ✓ PASS |
-| CSP of the built dist | `node tests/security/csp.cjs --dist` | 3 PASS | ✓ PASS |
-| Perf budgets | `node scripts/perf-regression-spotter.js` | All performance budgets passed | ✓ PASS |
-| Pipeline legacy-off | `node scripts/check-ci-gates.js pipeline --revision ab378790 --expect legacy-off` | CI-GATES PIPELINE OK 5673 | ✓ PASS |
-| Live bundle markers | `curl https://console.thinx.cloud/js/app.js` and count markers | id ab37879; all markers present; 3 replaced strings at 0 | ✓ PASS |
-| Live unauthenticated API | `curl` of three build-log URLs | 401 / 401 / 401 | ✓ PASS |
-| Legacy byte identity | `curl` of 7 files, then `shasum -a 256` | All 7 match the baseline | ✓ PASS |
+| Full console unit suite (run once) | `LC_ALL=C npm run test:unit` | rc 0, 375 ok, 0 failing (the one `FAIL` substring is N4's title word "FAILED") | ✓ PASS |
+| Default-locale suites | `node tests/unit/build-log-search.cjs`; `node tests/unit/milestone-v116.cjs` | rc 0 (51 ok); rc 0 | ✓ PASS |
+| CSP of dist | `npm run test:csp:dist` | 3 PASS | ✓ PASS |
+| Perf budgets | `npm run perf:spotter` | All performance budgets passed | ✓ PASS |
+| Pipeline legacy-off | `node scripts/check-ci-gates.js pipeline --revision fc0fa013 --expect legacy-off` | CI-GATES PIPELINE OK 5674 | ✓ PASS |
+| Live bundle markers | `curl https://console.thinx.cloud/js/app.js`, then `grep -o -F` counts | fc0fa01 x2; View build log 3; Open build log 0; forbidden strings 0 | ✓ PASS |
+| Live unauthenticated API | `curl` x4 | 401 / 401 / 401 / 401 | ✓ PASS |
+| Legacy byte identity | `curl` x7, then `shasum -a 256 -c` | 7 OK | ✓ PASS |
 
 ### Probe Execution
 
-Step 7c: no probe scripts are declared or conventional for this phase (no `scripts/*/tests/probe-*.sh` named in the plans). The plan's `check-ci-gates.js` gate was re-run above.
+Step 7c: no probe scripts are declared or conventional for this phase. The plans' `check-ci-gates.js` gate was re-run above.
 
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|----------|
-| BUILD-03 | 47-01, 47-03 | Search the full build log: highlight, count, `<`/`>` step with auto-scroll | ✓ SATISFIED | SC1; live bundle markers; real-browser scale goes to human backstops |
-| POL-02 | 47-01, 47-02, 47-03 | One shared status mapping (TIMEOUT warning, FAILED danger); dashboard opens the log; no button without a build id | ✓ SATISFIED | SC2, SC3 |
-| FIX-02 | 47-01, 47-02, 47-03 | Phase 36 WR-01, IN-01..IN-03 fixed or deferred with a reason | ✓ SATISFIED | SC4; 36 ledger `open: 0` |
+| BUILD-03 | 47-01, 47-03, 47-04, 47-05 | Search the full build log: highlight, count, `<`/`>` step with auto-scroll | ✓ SATISFIED | SC1; live markers; human backstops for real-browser scale |
+| POL-02 | 47-01..47-05 | One shared status mapping; dashboard opens the log; no button without a build id | ✓ SATISFIED | SC2, SC3 (now through one predicate on every surface) |
+| FIX-02 | 47-01..47-05 | Phase 36 WR-01, IN-01..IN-03 fixed or deferred with a reason | ✓ SATISFIED | SC4; 36 ledger `open: 0` |
 
-All three IDs from the plan frontmatter appear in REQUIREMENTS.md (lines 41, 59, 66; traceability rows 126-128 map them to Phase 47). No requirement mapped to Phase 47 is orphaned.
+All three IDs appear in REQUIREMENTS.md (lines 41, 59, 66, all `[x]`; traceability rows 126-128 map them to Phase 47, Complete). No requirement mapped to Phase 47 is orphaned.
 
 ### Prohibitions (judgment-tier, flagged; non-authoritative LLM-judge verdicts)
 
+The 11 verdicts from 47-01..47-03 in the prior report still stand; nothing in the 47-04/47-05 range contradicts them. New ones:
+
 | Plan | Prohibition (short) | LLM-judge verdict | Basis |
 |------|---------------------|-------------------|-------|
-| 47-01 | Search term and log text not sent, persisted or logged | holds | Term lives only in component data. The only dispatch is `fetchBuildDetail(buildId)`. The SFC has no `console.`, storage or router/query |
-| 47-01 | Request only by the row's own build_id | holds | open() guard; fallback removed (source and live bundle) |
-| 47-01 | No Legacy, IconButton or store change, no npm dependency, signed commits, no lint/install/env | holds for repo-checkable parts | Empty diff on `src/`, IconButton and store; package.json changes only the test chain; 12 G. Process parts cannot be checked from the repository |
-| 47-02 | No non-OK status in the success colour/glyph | holds | `buildStatusVariant` gives success only for OK; missing gives danger with `fa-times`; N3, N4 |
-| 47-02 | Ledger names commits; no guard weakened | holds | SHAs present and resolvable. Removed milestone-v116 lines were refactored into `renderDeviceDetail` (`expectClean` defaults true). The guard was widened from the row to the whole card |
-| 47-02 | No BuildLogDialog, IconButton or store change in 47-02, no dependency, signed | holds | `002e051..591033e` has no BuildLogDialog diff; commits G |
-| 47-03 | No main or force push, no PR, no rerun | holds (refs) | origin/main 14c08c1f; fast-forward ranges |
-| 47-03 | No other workstream's source shipped | holds | Parent range outside `.planning/` is only `services/console` |
-| 47-03 | No ssh, docker or swarm edits; 7442 untouched | not checkable from the repository | Only the SUMMARY narrative |
-| 47-03 | No production login or credentials, no env dumps | not checkable from the repository | Only the SUMMARY narrative (probes described as unauthenticated) |
-| 47-03 | No unsigned commit or hook bypass | holds | 19 + 12 commits all G |
+| 47-04 | No focusable or clickable build-log control for a row failing `hasBuildLog`; no other "has a build log" decision in the five components | holds, with caveat | V8, H4, N7 and P2 pass; P3 passes. Caveat (47-REVIEW IN-07): `Visits.downloadArtifact` keeps a truthy `item.build_id` guard (unreachable, because Download renders only inside the `hasBuildLog` span), and `Devices.vue` (not one of the five) has its own stricter rule that rejects whitespace-only ids |
+| 47-04 | Visible `View` text unchanged; no guard removed or weakened; Device Build History date, Build ID and status cells unchanged | holds, with caveat | The visible text is `View` everywhere. The mutation anchors are unchanged, and (a)-(d) report violations. The 35 WR-01 source block is byte-identical, but see IN-10 on its reduced reach |
+| 47-04 | No Legacy, store, IconButton, Devices.vue, style or parent code change; no dependency; signed; no push in 47-04; no lint, install or env reads | holds for repo-checkable parts | The 10-path diff excludes all of these, and all 6 commits are `G`. Process parts cannot be checked from the repository |
+| 47-05 | No push to main or force push, no PR, no pipeline rerun | holds (refs) | origin/main 14c08c1f; ranges fast-forward |
+| 47-05 | No other workstream's source shipped | holds | Console range = ten 47-04 paths; parent range outside `.planning/` = `services/console` |
+| 47-05 | Findings marked fixed name their commits; IN-01/02/04/05/06 untouched; 47-02 edited only in truths 1 and 5 | holds | Ledger rows; 47-02 task-body lines still carry the old copy |
+| 47-05 | No ssh, docker, swarm, Traefik or Swarmpit edits; 7442 untouched | not checkable from the repository | Only the SUMMARY narrative |
+| 47-05 | No production login or credentials, no env reads or dumps | not checkable from the repository | Only the SUMMARY narrative (probes are described as unauthenticated) |
+| 47-05 | No unsigned commit or hook bypass | holds | Every commit in both ranges is `G` |
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |------|------|---------|----------|--------|
-| (14 phase files) | — | TBD/FIXME/XXX/TODO/HACK | none | No debt markers |
-| Visits.vue / History.vue / DeviceDetail.vue | 88 / 130 / 159 | aria-label does not contain the visible label `View` (WCAG 2.5.3) | ⚠️ Warning (backs the E6 gap) | Voice-control users saying "click View" may not reach the button |
-| Notifications.vue | 15-16 vs 79 | "has a build log" is truthy in the template but a non-empty string in `rowListeners`/`open()` (47-REVIEW WR-01) | ℹ️ Info (latent) | A truthy non-string id would give a focusable button that does nothing. Current ids are strings |
-| History.vue | 109 | Rows without a build_id keep `build-row` pointer and click, which now no-ops (47-REVIEW WR-02) | ℹ️ Info | Dead affordance only. SC3 still holds: no View button, no request |
-| BuildLogDialog.vue | 6 | Unused `ref="searchInput"` shadows the data name (47-REVIEW IN-03) | ℹ️ Info | None |
+| (10 files touched by 47-04) | — | TBD/FIXME/XXX/TODO/HACK | none | No debt markers |
+| `tests/unit/milestone-v116.cjs` / `History.vue` | 76-81 / 110, 296-299 | 35 WR-01 source guard reads `<tr>` attributes, but listeners now come from `v-on="rowListeners(item)"`; H4 checks only that some listener exists (47-REVIEW IN-10) | ⚠️ Warning | Test coverage only: the invariant holds in today's code, but a future keydown added to `rowListeners` would go undetected. Fix: assert `Object.keys(row.data.on)` equals `['click']` in H4 |
+| `utils/buildLog.js` / `Devices.vue` / `Visits.vue` | 29-31 / 475 / 253 | Build-id rules outside `hasBuildLog`; whitespace-only id accepted by `hasBuildLog` but rejected by Devices (47-REVIEW IN-07) | ℹ️ Info | A `' '` id would show a View control that opens the dialog and lands on its error state, so this is not a dead control |
+| `History.vue` | 116-133 | Inline excerpt and "No build log" can share a cell for a non-string id with log lines (47-REVIEW IN-08) | ℹ️ Info | Edge case; `normalizeBuildItems` falls back to the CouchDB `_id` |
+| tests / Cypress | various | Test titles still say "Open build log" (47-REVIEW IN-09) | ℹ️ Info | Messages only |
 
-47-REVIEW-DISPOSITION.md still lists all 8 review findings as `open` (not triaged). None is a goal blocker.
+IN-01, IN-02 and IN-04..IN-06 are carried forward unchanged as info, and are open in the ledger.
 
 ### Human Verification Required
 
-1. **5 MB log with more than 1000 matches (backstop):** type a common term. Expected: at most 1000 marks, `1 / 1000+`, Next on 1000 wraps to 1, and only the log box scrolls. Why human: real DOM scale and scroll geometry.
-2. **20,000-character unbroken line and `<img src=x onerror=alert(1)>` (backstop):** Expected: the line wraps with no horizontal scrollbar; the highlight causes no shift; the `<img>` line shows as text and no image element exists. Why human: real layout engine.
-3. **375px / 1280px bar layout (backstop):** Expected: two rows at 375px with the count and chevrons together and the bar sticky; one row at 1280px. Why human: responsive layout (the UI review flags a possible chevron wrap at 375px).
-4. **Operator UAT, 11 items:** listed verbatim in 47-03-SUMMARY under "Pending end-of-phase UAT" (rollout, dashboard View, search, inert HTML, error/Try again, status colours on 4 lists, Device Build History inertness, navbar static rows, layout, records, Legacy console-retest).
-5. **Flagged prohibitions:** confirm the LLM-judge verdicts above, in particular the three process-only items for 47-03.
+1. **5 MB log with more than 1000 matches (backstop):** at most 1000 marks, `1 / 1000+`, Next on 1000 wraps to 1, and only the log box scrolls.
+2. **20,000-character unbroken line and `<img src=x onerror=alert(1)>` (backstop):** the line wraps with no horizontal scrollbar, the highlight causes no shift, and the `<img>` line is text with no image element.
+3. **375px / 1280px bar layout (backstop):** two rows at 375px with the count and chevrons together and the bar sticky; one row at 1280px.
+4. **47-05 gap UAT:** the computed accessible name is `View build log <id>` while the button shows `View` on the dashboard, History and Device Build History. History rows: pointer and click only with a build id; otherwise `—`, the default cursor and no action. Other lists unchanged.
+5. **47-03 operator UAT, 11 items** (listed in 47-05-SUMMARY "Carried from 47-03-SUMMARY"), including Legacy console-retest.
+6. **Flagged prohibitions:** confirm the LLM-judge verdicts, especially the process-only items for 47-03, 47-04 and 47-05.
 
 ### Gaps Summary
 
-The phase goal holds in the shipped code. Build-log search with highlight, count, stepping, scroll and inert text works. One status mapping drives all four lists. The dashboard and every other list open the log, and no list can request `/logs/build/<index>`. All four roadmap success criteria are verified by the verifier's own test run, by source inspection and by the live bundle.
+There are no gaps. The single prior gap (47-02 truth "UI E6": the aria-label must start with the visible text, WCAG 2.5.3) is closed at every level:
+- **Code:** `View build log {build_id}` on all three tables, with visible text `View`.
+- **Tests:** rendered-vnode `startsWith(textOf(button))` assertions for each table, plus the P3 source lock with zero old wording under `vue/src`.
+- **Records:** UI-SPEC and the 47-02 truths no longer contradict each other.
+- **Production:** live bundle fc0fa01 has `View build log` x3 and `Open build log` x0.
 
-One plan-level must-have is false. 47-02 truth "UI E6" says the View button's aria-label "starts with the visible text (WCAG 2.5.3)". The shipped aria-label is `Open build log {id}`, and the visible text is `View`. The spec is internally inconsistent: UI-SPEC UI-B11/line 217 and 47-02 truth 1 lock exactly this label. The executor noticed (47-02-SUMMARY) but did not record it anywhere a later phase picks it up. No later roadmap phase covers it, so it is a real gap and not a deferred one.
+The 47-04 work also closed review findings WR-01, WR-02 and IN-03. A single `hasBuildLog` predicate now decides every build-log control and `open()`, and History rows without a log lose the pointer and the row click.
 
-**This looks intentional.** The label copy was locked on purpose, and the button predates Phase 47 on History and Device Detail. To accept the deviation instead of changing the copy, add to this file's frontmatter:
+The re-check found no regressions. All four roadmap success criteria still hold, the pipeline is green, the Legacy console is byte-identical, and the unauthenticated API surface is unchanged.
 
-```yaml
-overrides:
-  - must_have: "UI E6 View (Open build log) controls (covered): long-text — the visible label is the fixed word View and the long build id is only in the aria-label, which starts with the visible text (WCAG 2.5.3)"
-    reason: "aria-label copy `Open build log {build_id}` is locked by UI-SPEC UI-B11/line 217 and 47-02 truth 1; the E6 WCAG claim was a spec error. WCAG 2.5.3 label-in-name moved to the Phase 48 accessibility carry-overs."
-    accepted_by: "{operator}"
-    accepted_at: "{ISO timestamp}"
-```
-
-If you accept it, also add the 2.5.3 item to the ROADMAP Phase 48 "Carried from Phase 44"-style accessibility list, so the issue stays on record. The alternative fix is about 3 lines plus test and spec text: `View build log {build_id}` on Visits, History and DeviceDetail, with matching updates to V2/H1 and UI-SPEC.
+The status is `human_needed` because three layout and scale backstops and the operator UAT need a real browser, and 20 judgment-tier prohibitions need operator confirmation. One coverage warning (IN-10) is worth fixing in Phase 48 alongside the other open info items. It does not affect the phase goal.
 
 ---
 
-_Verified: 2026-10-15T10:05:00Z_
+_Verified: 2026-10-15T11:21:57Z_
 _Verifier: Claude (gsd-verifier)_
