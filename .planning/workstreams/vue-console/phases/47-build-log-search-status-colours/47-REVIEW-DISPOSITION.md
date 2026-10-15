@@ -5,11 +5,11 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The \"has a build log\" predicate is inconsistent: truthy in templates, non-empty string in the dialog"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "History rows without a `build_id` still look clickable, but the click now does nothing"
   - id: IN-01
     severity: info
@@ -21,7 +21,7 @@ findings:
     title: "The 3-character threshold and the error message are each defined in more than one place; `error` text is never shown"
   - id: IN-03
     severity: info
-    disposition: open
+    disposition: fixed
     title: "`ref=\"searchInput\"` is never used and has the same name as a data property"
   - id: IN-04
     severity: info
@@ -35,7 +35,7 @@ findings:
     severity: info
     disposition: open
     title: "The 1273-line unit test copies the SFC harness, and the new UI has no e2e coverage"
-open: 8
+open: 5
 total: 8
 recorded: 2026-10-15T09:47:36.000Z
 ---
@@ -44,11 +44,11 @@ recorded: 2026-10-15T09:47:36.000Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
+| WR-01 | warning | fixed (console 83cc7cc, 9daa778, 54734af) | - |
+| WR-02 | warning | fixed (console 9daa778) | - |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
-| IN-03 | info | open | - |
+| IN-03 | info | fixed (console 83cc7cc) | - |
 | IN-04 | info | open | - |
 | IN-05 | info | open | - |
 | IN-06 | info | open | - |
