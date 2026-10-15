@@ -4,12 +4,12 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 47
 current_phase_name: Build Log Search & Status Colours
-status: executing
-stopped_at: Completed 47-02-PLAN.md
-last_updated: "2026-10-15T09:22:03.623Z"
+status: verifying
+stopped_at: Completed 47-03-PLAN.md
+last_updated: "2026-10-15T09:37:58.530Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 47 execution started
-state_head: 60f2b6bd0dd8e93a7943210b1e9d9ed3f8386f5e
+state_head: 11896b10217793f71fe3e179c54fc72ef450bcde
 progress:
   total_phases: 7
   completed_phases: 5
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 Phase: 47 (Build Log Search & Status Colours) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-15 — Phase 47 execution started
 
 Progress: [███████░░░] 71%
@@ -75,6 +75,7 @@ Progress: [███████░░░] 71%
 | Phase 46 P06 | 25 min | 3 tasks | 5 files |
 | Phase 47 P01 | 12 min | 3 tasks | 8 files |
 | Phase 47 P02 | 10min | 3 tasks | 11 files |
+| Phase 47 P03 | 13 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,7 @@ Progress: [███████░░░] 71%
 - [Phase 47]: 47-01: build log search is a literal gi RegExp on the original text, capped at 1000 text-only mark segments; Phase 47 styles live in _build-log.scss with six !default tokens
 - [Phase 47]: 47-02: navbar rows get a click listener only for a non-empty string build_id (rowListeners), matching BuildLogDialog.open()
 - [Phase 47]: 47-02: View aria-label 'Open build log <id>' lacks the visible word View (WCAG 2.5.3); copy locked by D-13, flagged for Phase 48
+- [Phase 47]: 47-03: shipped without a rebase (origin/thinx-staging still 6d47a5fb); pipeline 5673 legacy-off OK; bundle ab37879 live, API restart 502 for ~34 s; SUMMARY and close-out docs ride the next thinx-staging push
 
 ### Pending Todos
 
@@ -154,6 +156,6 @@ Progress: [███████░░░] 71%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T09:22:03.471Z
-**Stopped At:** Completed 47-02-PLAN.md
+**Last session:** 2026-10-15T09:37:58.290Z
+**Stopped At:** Completed 47-03-PLAN.md
 **Resume File:** None

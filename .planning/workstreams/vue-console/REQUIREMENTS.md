@@ -38,7 +38,7 @@ upgrades.
 
 ### Build Log
 
-- [ ] **BUILD-03**: A user can search the displayed full build log: matches are highlighted and counted, and `<` / `>` buttons step between matches with auto-scroll.
+- [x] **BUILD-03**: A user can search the displayed full build log: matches are highlighted and counted, and `<` / `>` buttons step between matches with auto-scroll.
 
 ### Transformers
 
@@ -56,14 +56,14 @@ upgrades.
 ### Review Leftovers (v1.16)
 
 - [ ] **FIX-01**: Every open Phase 35 review item (IN-01..IN-08) is fixed or explicitly deferred with a recorded reason.
-- [ ] **FIX-02**: Phase 36 WR-01 and IN-01..IN-03 are fixed or explicitly deferred with a recorded reason.
+- [x] **FIX-02**: Phase 36 WR-01 and IN-01..IN-03 are fixed or explicitly deferred with a recorded reason.
 - [x] **FIX-03**: Phase 37 IN-02 and IN-03 are fixed or explicitly deferred with a recorded reason.
 - [x] **FIX-04**: Phase 38 IN-01..IN-04, IN-06 and IN-07 (newest-first sort changes which key GitHub linking pushes) are fixed or explicitly deferred with a recorded reason.
 
 ### UI-Review Polish (v1.16)
 
 - [ ] **POL-01**: (35-UI-REVIEW) Build Firmware shows an in-flight state and cannot be double-submitted; the account menu has an accessible name; the Device Detail content column is width-constrained.
-- [ ] **POL-02**: (36-UI-REVIEW) One shared status→variant mapping distinguishes TIMEOUT (warning) from FAILED (danger); the dashboard Recent Builds card can open the build log; rows without a build id show no "Open build log" button.
+- [x] **POL-02**: (36-UI-REVIEW) One shared status→variant mapping distinguishes TIMEOUT (warning) from FAILED (danger); the dashboard Recent Builds card can open the build log; rows without a build id show no "Open build log" button.
 - [x] **POL-03**: (37-UI-REVIEW) Save Transformers has pending and dirty states; the field is called "Name" on every surface; deleting a transformer warns that devices using it will stop applying it.
 - [x] **POL-04**: (38-UI-REVIEW) Deploy-key Delete is out of the generate form, has a pending state and cannot be double-submitted; a failed reload clears stale rows and shows a single error message.
 
@@ -123,9 +123,9 @@ upgrades.
 | ENV-01 | Phase 46 | Complete |
 | POL-03 | Phase 46 | Complete |
 | FIX-03 | Phase 46 | Complete |
-| BUILD-03 | Phase 47 | Pending |
-| POL-02 | Phase 47 | Pending |
-| FIX-02 | Phase 47 | Pending |
+| BUILD-03 | Phase 47 | Complete |
+| POL-02 | Phase 47 | Complete |
+| FIX-02 | Phase 47 | Complete |
 | NOTIF-04 | Phase 48 | Pending |
 | POL-01 | Phase 48 | Pending |
 | FIX-01 | Phase 48 | Pending |
