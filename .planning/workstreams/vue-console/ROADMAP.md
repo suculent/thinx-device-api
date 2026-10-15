@@ -264,7 +264,7 @@ Plans:
 - View log reads only the owner's newest 100 builds and does not refresh after Build; the build spinner ends when `POST /build` returns (44-REVIEW-FIX WR-02 limits, IN-02).
 - `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07).
 
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 **Wave 1**
@@ -275,7 +275,7 @@ Plans:
 - [x] 48-03-PLAN.md — Vue POL-01 and carried Phase 44 items: Build Firmware in-flight state and 1140px Device Detail column, Account menu name and icon, `.alert-danger` contrast, labelled view toggles, focusable warning markers with tips, label platform sort (`comparePlatformKeys`), udid checkbox ids (POL-01, FIX-01) (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 48-04-PLAN.md — Legacy D-09 fixes: deploy-key create errors and reset (35 IN-03, IN-04), build toast copy, `deviceBuilds` initialisation, `{init}` on first socket open, `goals.length > 0` (35 IN-05); `deploykey.cjs` and new `legacy-close-out.cjs` (FIX-01, CI-06) (wave 3)
+- [x] 48-04-PLAN.md — Legacy D-09 fixes: deploy-key create errors and reset (35 IN-03, IN-04), build toast copy, `deviceBuilds` initialisation, `{init}` on first socket open, `goals.length > 0` (35 IN-05); `deploykey.cjs` and new `legacy-close-out.cjs` (FIX-01, CI-06) (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 48-05-PLAN.md — Vue Cypress green: same-origin `test`/`test:ci` with JUnit results, console `test_vue` stores them, stubbed CI login and `CYPRESS_LIVE_LOGIN` opt-in without the leaked fixture, devices/device-detail spec rewrite and double-click check, `src/cypress/.env.test` untracked (CI-07, POL-01, FIX-01) (wave 4)
@@ -344,7 +344,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
-| 48. Deep Links & Close-out | v1.18 | 3/6 | In Progress | - |
+| 48. Deep Links & Close-out | v1.18 | 4/6 | In Progress | - |
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*

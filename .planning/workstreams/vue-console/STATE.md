@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-03-PLAN.md
-last_updated: "2026-10-15T15:39:47.006Z"
+stopped_at: Completed 48-04-PLAN.md
+last_updated: "2026-10-15T15:48:40.929Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: f966c52c011fb3cca236c1cc1ec14abcae40d3ca
+state_head: 646ea2d36ef0645174c16d51d6f3b18e94d1a602
 progress:
   total_phases: 7
   completed_phases: 6
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48 (Deep Links & Close-out) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-10-15 — Phase 48 execution started
 
@@ -82,6 +82,7 @@ Progress: [█████████░] 86%
 | Phase 48 P01 | 16 min | 3 tasks | 12 files |
 | Phase 48 P02 | 4 min | 2 tasks | 4 files |
 | Phase 48 P03 | 17min | 3 tasks | 11 files |
+| Phase 48 P04 | 6 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,9 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-02: check-ci-gates.js pipeline defaults to --expect legacy-on, matching the new pipeline default
 - [Phase 48]: 48-03: DeviceDetail Build Firmware guarded by one buildPending flag (early return, reset in finally, focus restored only if the button had focus); buildFailure copied from Devices.vue
 - [Phase 48]: 48-03: comparePlatformKeys in utils/platforms.js (basePlatform on both args, unknown last, lower-cased label) is the single ordering for the platform pills and the Platform sort
+- [Phase 48]: 48-04: Legacy deploy-key create mirrors vue keyNames.js sentences (deploykey.cjs D10 compares them); client check only C0/DEL/120 units, server invalid_key_name reasons map to the same sentences; reset in finally + .always (console 2105310)
+- [Phase 48]: 48-04: Legacy wss.onopen always sends {init} then the logtail; wsstailLog sends only on readyState 1; deviceBuilds map and per-udid array initialised before push; updateDeploykeys uses goals.length > 0 (console bff9552)
+- [Phase 48]: 48-04: DevicesController.js:135 build refusal toast still reads response.status; left unchanged as flagged, follow-up candidate for the 48-06 ledger
 
 ### Pending Todos
 
@@ -174,6 +178,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T15:39:46.732Z
-**Stopped At:** Completed 48-03-PLAN.md
+**Last session:** 2026-10-15T15:48:40.686Z
+**Stopped At:** Completed 48-04-PLAN.md
 **Resume File:** None
