@@ -3,13 +3,13 @@ gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 48
-current_phase_name: deep-links-close-out
+current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Phase 48 UI-SPEC approved
-last_updated: "2026-10-15T14:47:31.671Z"
+stopped_at: Completed 48-01-PLAN.md
+last_updated: "2026-10-15T15:12:50.995Z"
 last_activity: 2026-10-15
-last_activity_desc: Phase 47 complete, transitioned to Phase 48
-state_head: c8cee702fc495302f632a440a278c8a288f80635
+last_activity_desc: Phase 48 execution started
+state_head: 7e5d002c5ccb8bdaf4d14aa8f16953ae2d9a4096
 progress:
   total_phases: 7
   completed_phases: 6
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 48 (deep-links-close-out) — READY TO EXECUTE
-Plan: Not started
+Phase: 48 (Deep Links & Close-out) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-10-15 — Phase 47 complete, transitioned to Phase 48
+Last activity: 2026-10-15 — Phase 48 execution started
 
 Progress: [█████████░] 86%
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 86%
 | Phase 47 P03 | 13 min | 2 tasks | 1 files |
 | Phase 47 P04 | 10 min | 3 tasks | 10 files |
 | Phase 47 P05 | 13 min | 2 tasks | 4 files |
+| Phase 48 P01 | 16 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Progress: [█████████░] 86%
 - [Phase 47]: 47-04: History rows without a build log have no build-row class or row click and show the No build log placeholder (WR-02, UI-REVIEW fix 1)
 - [Phase 47]: 47-05: shipped without a rebase (origin/thinx-staging still ab378790); pipeline 5674 legacy-off OK; bundle fc0fa01 live 11:06:51Z, API restart 502 for ~32 s; UI-SPEC, 47-02 truths and 47-REVIEW ledger (WR-01, WR-02, IN-03 fixed, open: 5) match the 47-04 code
 - [Phase 47]: 47-05: ship-plan path gate grep -vxE '|services/console' is vacuous on macOS BSD grep (empty subexpression); use grep -vx -e '' -e 'services/console' in future ship plans
+- [Phase 48]: 48-01: App.vue waits for router.onReady (success and error) and reads router.currentRoute before the default-route decision (NOTIF-04)
+- [Phase 48]: 48-01: IN-01 guards live in the stores (profile keeps its initial object, list stores commit an empty list), so pages keep their empty-state copy
 
 ### Pending Todos
 
@@ -164,6 +167,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T13:38:39.657Z
-**Stopped At:** Phase 48 UI-SPEC approved
-**Resume File:** .planning/workstreams/vue-console/phases/48-deep-links-close-out/48-UI-SPEC.md
+**Last session:** 2026-10-15T15:12:43.418Z
+**Stopped At:** Completed 48-01-PLAN.md
+**Resume File:** None

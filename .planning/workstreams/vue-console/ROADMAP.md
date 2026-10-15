@@ -264,11 +264,11 @@ Plans:
 - View log reads only the owner's newest 100 builds and does not refresh after Build; the build spinner ends when `POST /build` returns (44-REVIEW-FIX WR-02 limits, IN-02).
 - `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07).
 
-**Plans:** 6 plans
+**Plans:** 1/6 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 48-01-PLAN.md — Vue deep-link reload: App.vue waits for the resolved initial route (`waitForInitialRoute`), `cy.visitAppRoute` becomes a plain hard load, new `deep-link.spec.js` and `close-out-v118.cjs`; 35 IN-01 `parseResult` with caller audit; 35 IN-08 Vue behavioural cases (NOTIF-04, FIX-01, CI-07) (wave 1)
+- [x] 48-01-PLAN.md — Vue deep-link reload: App.vue waits for the resolved initial route (`waitForInitialRoute`), `cy.visitAppRoute` becomes a plain hard load, new `deep-link.spec.js` and `close-out-v118.cjs`; 35 IN-01 `parseResult` with caller audit; 35 IN-08 Vue behavioural cases (NOTIF-04, FIX-01, CI-07) (wave 1)
 - [ ] 48-02-PLAN.md — Parent CI: `test-vue-console` job gating `vue-console-registry`/`-hub` with JUnit results (D-01), `build_legacy_console` default `true` as a kill switch (D-08), CiPipelineGates spec, `check-ci-gates.js` and the kill-switch runbook (CI-06, CI-07) (wave 1, parent repo only)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -282,6 +282,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 48-06-PLAN.md — Records and ship: 35-REVIEW-DISPOSITION IN-01..IN-08 fixed, carried items recorded (D-15 deferred), console then parent `thinx-staging` push, `check-ci-gates.js pipeline --expect legacy-on`, JUnit proof, live Vue and Legacy markers, unchanged API and port 7442, operator UAT (FIX-01, CI-06, CI-07, NOTIF-04, POL-01) (wave 5)
+
 **UI hint**: yes
 
 ## Milestone Notes
@@ -343,7 +344,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
-| 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
+| 48. Deep Links & Close-out | v1.18 | 1/6 | In Progress | - |
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*
