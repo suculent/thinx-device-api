@@ -4,12 +4,12 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: 47
 current_phase_name: Build Log Search & Status Colours
-status: executing
-stopped_at: Completed 47-04-PLAN.md
-last_updated: "2026-10-15T10:53:32.464Z"
+status: verifying
+stopped_at: Completed 47-05-PLAN.md
+last_updated: "2026-10-15T11:10:21.318Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 47 execution started
-state_head: 9b609183f72c5d721aa123324bed9d475b1f9da9
+state_head: 2ff1a2d203056f9677a82a27b5ca26d6e213066c
 progress:
   total_phases: 7
   completed_phases: 5
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 47 (Build Log Search & Status Colours) — EXECUTING
-Plan: 5 of 5 (47-04 gap closure complete; 47-05 ship next)
-Status: Ready to execute
-Last activity: 2026-10-15 — 47-04 complete: hasBuildLog predicate, View build log label (console 591033e..54734af, not pushed)
+Phase: 47 (Build Log Search & Status Colours) — VERIFYING
+Plan: 5 of 5 (gap closure 47-04 and 47-05 complete and shipped)
+Status: Phase complete — ready for verification (re-verify gap UI E6, then end-of-phase UAT: 6 gap items + 11 from 47-03)
+Last activity: 2026-10-15 — 47-05 shipped: console 54734af, parent fc0fa013 on thinx-staging, pipeline 5674 legacy-off OK, bundle fc0fa01 live; docs commits after fc0fa013 are local
 
 Progress: [███████░░░] 71%
 
@@ -77,6 +77,7 @@ Progress: [███████░░░] 71%
 | Phase 47 P02 | 10min | 3 tasks | 11 files |
 | Phase 47 P03 | 13 min | 2 tasks | 1 files |
 | Phase 47 P04 | 10 min | 3 tasks | 10 files |
+| Phase 47 P05 | 13 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,8 @@ Progress: [███████░░░] 71%
 - [Phase 47]: 47-03: shipped without a rebase (origin/thinx-staging still 6d47a5fb); pipeline 5673 legacy-off OK; bundle ab37879 live, API restart 502 for ~34 s; SUMMARY and close-out docs ride the next thinx-staging push
 - [Phase 47]: 47-04: hasBuildLog(build) in utils/buildLog.js (non-empty string build_id only) is the single gate for every build-log control and BuildLogDialog.open(); View aria-label is 'View build log <id>' (WCAG 2.5.3)
 - [Phase 47]: 47-04: History rows without a build log have no build-row class or row click and show the No build log placeholder (WR-02, UI-REVIEW fix 1)
+- [Phase 47]: 47-05: shipped without a rebase (origin/thinx-staging still ab378790); pipeline 5674 legacy-off OK; bundle fc0fa01 live 11:06:51Z, API restart 502 for ~32 s; UI-SPEC, 47-02 truths and 47-REVIEW ledger (WR-01, WR-02, IN-03 fixed, open: 5) match the 47-04 code
+- [Phase 47]: 47-05: ship-plan path gate grep -vxE '|services/console' is vacuous on macOS BSD grep (empty subexpression); use grep -vx -e '' -e 'services/console' in future ship plans
 
 ### Pending Todos
 
@@ -159,6 +162,6 @@ Progress: [███████░░░] 71%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T10:53:32.050Z
-**Stopped At:** Completed 47-04-PLAN.md
+**Last session:** 2026-10-15T11:10:21.183Z
+**Stopped At:** Completed 47-05-PLAN.md
 **Resume File:** None
