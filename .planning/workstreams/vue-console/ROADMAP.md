@@ -244,6 +244,10 @@ Plans:
 **Closed in Phase 46** (record in the FIX-01 ledger):
 - Phase 35 review IN-02 (a transformer write whose list re-fetch failed was reported as a failed create): fixed in console `ed429ec` (46-02), `saveTransformers` resolves `refreshed: false` and the page reloads once.
 
+**Closed in Phase 47** (record in the FIX-01 ledger):
+- Phase 35 review IN-06 (navbar Recent Builds markup and RUNNING colour): the RUNNING colour was fixed in console `38eb95b` through the shared `buildStatusVariant`; the `h6` and `p` inside the row button were replaced by `span.notification-title` / `span.notification-meta` in console `f64a153` (47-02).
+- Phase 35 review IN-07 (BuildLogDialog `loading` not reset on close, `build.id` fallback): fixed in console `002e051` (47-01), `open()` uses only `build_id` and the `@hidden` handler resets `loading`.
+
 **Carried from Phase 44** (Vue, small; record in the FIX-01 ledger or fix):
 - Theme-wide `.alert-danger` text contrast 3.96:1 (below 4.5:1); fix in `_overrides.scss` (45-UI-SPEC deferral).
 - List/grid view toggles have no `aria-label` (pre-existing; 44-UI-REVIEW #5).
