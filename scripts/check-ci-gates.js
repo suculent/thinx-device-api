@@ -12,6 +12,8 @@
  *   CI-04  no snyk-* job outside main and base. main needs test, api-hub, vue-console-hub,
  *          snyk-code-monitor, snyk-oss-monitor, snyk-monitor-api and snyk-monitor-console-vue,
  *          plus console-classic-hub and snyk-monitor-console-classic with the gate open.
+ *   CI-07  thinx-staging and main also need test-vue-console, the Vue/Legacy unit, build and
+ *          Cypress suite that vue-console-registry and vue-console-hub require (Phase 48, D-01).
  *
  * Usage:
  *   node scripts/check-ci-gates.js compile
@@ -63,10 +65,11 @@ const COMPILE_URL = "https://circleci.com/api/v2/compile-config-with-defaults";
 const PARAM = "build_legacy_console";
 const LEGACY_WORKFLOW = "legacy-console";
 const LEGACY_JOBS = ["console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
-const STAGING_REQUIRED = ["test", "api-registry", "vue-console-registry"];
+const VUE_GATE_JOB = "test-vue-console";
+const STAGING_REQUIRED = ["test", "test-vue-console", "api-registry", "vue-console-registry"];
 const COMPILE_BRANCHES = ["thinx-staging", "main"];
 const SNYK_BRANCHES = ["main", "base"];
-const MAIN_REQUIRED = ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
+const MAIN_REQUIRED = ["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
 const MAIN_LEGACY_REQUIRED = ["console-classic-hub", "snyk-monitor-console-classic"];
 
 // Verified 2026-10-12: GET /api/v2/project/gh/suculent/thinx-device-api returns this slug.
@@ -168,13 +171,14 @@ function selectJobs(config, branch, params) {
 // The jobs a pipeline on `branch` must run, each with the requirement that demands it.
 function requiredJobs(branch, legacy) {
     const required = [];
-    // CI-05: trimming CI must never stop production deploys.
+    // CI-05: trimming CI must never stop production deploys. CI-07: the Vue image jobs require
+    // test-vue-console, so it must run wherever they do.
     if (branch === "thinx-staging") {
-        for (const job of STAGING_REQUIRED) required.push({ job, req: "CI-05" });
+        for (const job of STAGING_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-05" });
         if (legacy) required.push({ job: "console-classic-registry", req: "CI-05" });
     }
     if (branch === "main") {
-        for (const job of MAIN_REQUIRED) required.push({ job, req: "CI-04" });
+        for (const job of MAIN_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-04" });
         if (legacy) for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
     }
     return required;

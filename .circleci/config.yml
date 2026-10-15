@@ -256,6 +256,43 @@ jobs:
           command: circleci run release update thinx-console-vue --status=FAILED
           when: on_fail
 
+  # v1.18 CI-07 (D-01): gates the Vue image on the Vue unit suites, the Legacy
+  # unit tests, the build and the Cypress suite of the checked-out
+  # services/console submodule. vue-console-registry and vue-console-hub
+  # require it, so no Vue image is built in a pipeline whose suite is red.
+  # It needs no context: yarn installs unpinned dependencies with lifecycle
+  # scripts here, so no registry, Hub, Snyk or Slack credential may be in its
+  # environment. The image is public and pulled anonymously. Cypress writes
+  # JUnit files to vue/cypress/results (cy:test:ci), stored as test results.
+  test-vue-console:
+    docker:
+      - image: thinxcloud/console-build-env:vue
+    steps:
+      - checkout
+      - run:
+          name: Fetch the console submodule
+          command: |
+            git submodule sync -- services/console && git submodule update --init -- services/console
+      - run:
+          name: Vue unit tests, Legacy unit tests, build and Cypress (CI-07)
+          command: |
+            export NODE_OPTIONS=--openssl-legacy-provider
+            cd services/console/vue
+            yarn
+            LC_ALL=C yarn test:unit
+            LC_ALL=C node ../src/test/deploykey.cjs
+            LC_ALL=C node ../src/test/legacy-close-out.cjs
+            yarn build:perf
+            yarn test:ci
+      - store_test_results:
+          path: services/console/vue/cypress/results
+      - store_artifacts:
+          path: services/console/vue/cypress/screenshots
+          destination: cypress-screenshots
+      - store_artifacts:
+          path: services/console/vue/cypress/videos
+          destination: cypress-videos
+
   build-console-classic:
     executor: docker/docker
     parameters:
@@ -688,13 +725,14 @@ jobs:
         command: node scripts/check-console-headers.js && node --test spec/node/ConsoleHeaderParity.test.js
 
     - run:
-        # v1.18 CI-04/CI-05: the Snyk main-only filters and the legacy-console
-        # gate are asserted offline (no CircleCI API, no token).
+        # v1.18 CI-04 to CI-07: the Snyk main-only filters, the legacy-console
+        # kill switch and the test-vue-console gate are asserted offline (no
+        # CircleCI API, no token).
         # The job has no node_modules on the host (tests run in the api
         # container), so the spec's only dependency, the pinned yaml package,
         # goes into a prefix outside the checkout: a ./node_modules here would
         # end up in the docker build context of the later steps.
-        name: CI pipeline gates (CI-04, CI-05)
+        name: CI pipeline gates (CI-04 to CI-07)
         command: |
           npm install --prefix /tmp/ci-gates --no-save --ignore-scripts --no-audit --no-fund yaml@2.8.3
           NODE_PATH=/tmp/ci-gates/node_modules node --test spec/node/CiPipelineGates.test.js
@@ -910,6 +948,17 @@ workflows:
       #
       # The legacy console builds (console-classic-registry / -hub) follow the
       # same rule but live in the gated `legacy-console` workflow below.
+      # v1.18 CI-07: both Vue image jobs require the green test-vue-console
+      # suite, which carries the union of their branch filters (CircleCI 2.1
+      # skips a job whose required job is filtered out of the branch).
+
+      - test-vue-console:
+          filters:
+            branches:
+              only:
+                - thinx-console
+                - thinx-staging
+                - main
 
       - build-vue-console:
           name: vue-console-registry
@@ -918,6 +967,8 @@ workflows:
             - dockerhub
             - thinx-docker-repo
             - console
+          requires:
+            - test-vue-console
           filters:
             branches:
               only:
@@ -931,6 +982,8 @@ workflows:
             - dockerhub
             - thinx-docker-repo
             - console
+          requires:
+            - test-vue-console
           filters:
             branches:
               only:
