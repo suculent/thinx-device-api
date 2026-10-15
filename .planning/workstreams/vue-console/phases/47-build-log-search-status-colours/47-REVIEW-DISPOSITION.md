@@ -35,9 +35,25 @@ findings:
     severity: info
     disposition: open
     title: "The 1273-line unit test copies the SFC harness, and the new UI has no e2e coverage"
-open: 5
-total: 8
-recorded: 2026-10-15T09:47:36.000Z
+  - id: IN-07
+    severity: info
+    disposition: open
+    title: "Build-id rules still exist outside `hasBuildLog`, and the P3 guard cannot see them"
+  - id: IN-08
+    severity: info
+    disposition: open
+    title: "A History row can show an inline log excerpt and \"No build log\" in the same cell"
+  - id: IN-09
+    severity: info
+    disposition: open
+    title: "Test names and messages still say \"Open build log\""
+  - id: IN-10
+    severity: info
+    disposition: open
+    title: "The WR-01 source guard on the History row can no longer see added listeners"
+open: 9
+total: 12
+recorded: 2026-10-15T11:20:00.000Z
 ---
 
 # Phase 47: Code Review Disposition
@@ -52,5 +68,9 @@ recorded: 2026-10-15T09:47:36.000Z
 | IN-04 | info | open | - |
 | IN-05 | info | open | - |
 | IN-06 | info | open | - |
+| IN-07 | info | open | 47-REVIEW 2026-10-15T11:16Z (gap re-review) |
+| IN-08 | info | open | 47-REVIEW 2026-10-15T11:16Z (gap re-review) |
+| IN-09 | info | open | 47-REVIEW 2026-10-15T11:16Z (gap re-review) |
+| IN-10 | info | open | 47-REVIEW 2026-10-15T11:16Z (gap re-review) |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
