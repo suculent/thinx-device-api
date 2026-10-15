@@ -206,7 +206,7 @@ Plans:
   3. The dashboard Recent Builds card opens the full build log. A row without a build id shows no "Open build log" button and never requests `/logs/build/<index>`.
   4. Phase 36 WR-01 and IN-01..IN-03 are fixed or deferred with a recorded reason. In particular, the inert-row test fails if a click or keydown handler is added to any Build History cell.
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/5 plans executed (2 gap-closure plans pending)
 
 Plans:
 **Wave 1**
@@ -217,6 +217,14 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 47-03-PLAN.md — Ship: console then parent `thinx-staging` push with range checks, `check-ci-gates.js pipeline --expect legacy-off`, live bundle markers, unchanged unauthenticated build-log API, port 7442, WS and byte-identical Legacy proofs, operator UAT (BUILD-03, POL-02, FIX-02) (wave 3)
+
+**Gap closure** (from 47-VERIFICATION gaps_found, 2026-10-15)
+
+**Wave 1 (gaps)**
+- [ ] 47-04-PLAN.md — Vue gap fix: shared `hasBuildLog()` predicate for templates, navbar and `open()` (47-REVIEW WR-01); View aria-label `View build log {build_id}` on Visits/History/DeviceDetail (WCAG 2.5.3, 47-02 truth E6); History rows without a build id inert with the `build-no-log` placeholder (WR-02, UI-REVIEW fix 1); unused search ref removed (IN-03); tests updated (BUILD-03, POL-02, FIX-02) (wave 1)
+
+**Wave 2 (gaps)** *(blocked on 47-04 completion)*
+- [ ] 47-05-PLAN.md — Records and ship: UI-SPEC made self-consistent, 47-02 truths amended, 47-REVIEW-DISPOSITION WR-01/WR-02/IN-03 fixed; console then parent `thinx-staging` push, pipeline proof, live markers, 7442/WS/Legacy proofs, UAT list (BUILD-03, POL-02, FIX-02) (wave 2)
 
 **UI hint**: yes
 
