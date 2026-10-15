@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 47
 current_phase_name: Build Log Search & Status Colours
 status: executing
-stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-10-14T00:12:36.271Z"
-last_activity: 2026-10-14
-last_activity_desc: Phase 46 complete, transitioned to Phase 47
-state_head: 188bbd6f4e645ce2316cb5ef97259502d7f24b3e
+stopped_at: Completed 47-01-PLAN.md
+last_updated: "2026-10-15T09:08:49.821Z"
+last_activity: 2026-10-15
+last_activity_desc: Phase 47 execution started
+state_head: e0a9529b042e101a4c70e6d0e7a885fc943aac78
 progress:
   total_phases: 7
   completed_phases: 5
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-12) and `.planning/workstreams/vue-co
 
 ## Current Position
 
-Phase: 47 (Build Log Search & Status Colours) — READY TO EXECUTE
-Plan: Not started
+Phase: 47 (Build Log Search & Status Colours) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-10-14 — Phase 46 complete, transitioned to Phase 47
+Last activity: 2026-10-15 — Phase 47 execution started
 
 Progress: [███████░░░] 71%
 
@@ -73,6 +73,7 @@ Progress: [███████░░░] 71%
 | Phase 46 P04 | 17min | 3 tasks | 9 files |
 | Phase 46 P05 | 12 min | 2 tasks | 1 files |
 | Phase 46 P06 | 25 min | 3 tasks | 5 files |
+| Phase 47 P01 | 12 min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Progress: [███████░░░] 71%
 - [Phase 46]: 46-05: shipped without a rebase (origin/thinx-staging still 17d63319); pipeline 5671 legacy-off OK; bundle 656bb9e live; SUMMARY and close-out docs ride the next thinx-staging push
 - [Phase 46]: 46-06: Device Detail loadDevice keeps every draft that differs from the device on screen; each save first applies what it wrote to a copy of the device (CR-01)
 - [Phase 46]: 46-06: Device Detail reads the device list through the throwing devices/loadDevices; a failed re-read keeps the written values on screen (WR-05)
+- [Phase 47]: 47-01: BuildLogDialog.open() accepts only a non-empty string build_id; console 002e051 fixes 35 IN-07 and 36 IN-02 at the dialog
+- [Phase 47]: 47-01: build log search is a literal gi RegExp on the original text, capped at 1000 text-only mark segments; Phase 47 styles live in _build-log.scss with six !default tokens
 
 ### Pending Todos
 
@@ -148,6 +151,6 @@ Progress: [███████░░░] 71%
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T23:38:56.771Z
-**Stopped At:** Phase 47 UI-SPEC approved
-**Resume File:** .planning/workstreams/vue-console/phases/47-build-log-search-status-colours/47-UI-SPEC.md
+**Last session:** 2026-10-15T09:08:49.669Z
+**Stopped At:** Completed 47-01-PLAN.md
+**Resume File:** None

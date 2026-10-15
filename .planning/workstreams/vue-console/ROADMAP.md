@@ -206,11 +206,11 @@ Plans:
   3. The dashboard Recent Builds card opens the full build log. A row without a build id shows no "Open build log" button and never requests `/logs/build/<index>`.
   4. Phase 36 WR-01 and IN-01..IN-03 are fixed or deferred with a recorded reason. In particular, the inert-row test fails if a click or keydown handler is added to any Build History cell.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 47-01-PLAN.md — Vue BuildLogDialog: `buildLogSearch` helper, sticky search bar with live debounced case-insensitive matching from 3 characters, amber text-only highlights capped at 1000, Previous/Next match IconButtons with Enter/Shift+Enter, wrap and centred scroll; id-only `open()` and loading reset on close (35 IN-07, 36 IN-02); Try again and empty states; `_build-log.scss` and six colour tokens; new `build-log-search.cjs` (BUILD-03, POL-02, FIX-02) (wave 1)
+- [x] 47-01-PLAN.md — Vue BuildLogDialog: `buildLogSearch` helper, sticky search bar with live debounced case-insensitive matching from 3 characters, amber text-only highlights capped at 1000, Previous/Next match IconButtons with Enter/Shift+Enter, wrap and centred scroll; id-only `open()` and loading reset on close (35 IN-07, 36 IN-02); Try again and empty states; `_build-log.scss` and six colour tokens; new `build-log-search.cjs` (BUILD-03, POL-02, FIX-02) (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 47-02-PLAN.md — Vue build lists: dashboard Recent Builds View + Download with a no-log placeholder and its own BuildLogDialog, static navbar rows without a build id and span markup (35 IN-06), History/Device Detail consistency, status-mapping lock on all four lists; Phase 36 WR-01/IN-01/IN-03 test fixes, 36 disposition ledger and the Phase 48 "Closed in Phase 47" record (POL-02, FIX-02) (wave 2)
@@ -313,7 +313,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 44. Device List Parity | v1.18 | 3/3 | Complete    | 2026-10-13 |
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
-| 47. Build Log Search & Status Colours | v1.18 | 0/3 | Planned | - |
+| 47. Build Log Search & Status Colours | v1.18 | 1/3 | In Progress | - |
 | 48. Deep Links & Close-out | v1.18 | 0/? | Not started | - |
 
 ---
