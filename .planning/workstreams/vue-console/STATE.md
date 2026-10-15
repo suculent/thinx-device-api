@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-02-PLAN.md
-last_updated: "2026-10-15T15:18:41.976Z"
+stopped_at: Completed 48-03-PLAN.md
+last_updated: "2026-10-15T15:39:47.006Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: e06b70bf5323ea378611b4b1b3a449d72541b9fe
+state_head: f966c52c011fb3cca236c1cc1ec14abcae40d3ca
 progress:
   total_phases: 7
   completed_phases: 6
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48 (Deep Links & Close-out) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-10-15 — Phase 48 execution started
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 86%
 | Phase 47 P05 | 13 min | 2 tasks | 4 files |
 | Phase 48 P01 | 16 min | 3 tasks | 12 files |
 | Phase 48 P02 | 4 min | 2 tasks | 4 files |
+| Phase 48 P03 | 17min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,8 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-02: test-vue-console (no context, anonymous public image) gates vue-console-registry and vue-console-hub; it carries the union of their branch filters (CI-07, D-01)
 - [Phase 48]: 48-02: build_legacy_console default true restores the legacy builds; parameter and legacy-console workflow stay as the kill switch (CI-06, D-08)
 - [Phase 48]: 48-02: check-ci-gates.js pipeline defaults to --expect legacy-on, matching the new pipeline default
+- [Phase 48]: 48-03: DeviceDetail Build Firmware guarded by one buildPending flag (early return, reset in finally, focus restored only if the button had focus); buildFailure copied from Devices.vue
+- [Phase 48]: 48-03: comparePlatformKeys in utils/platforms.js (basePlatform on both args, unknown last, lower-cased label) is the single ordering for the platform pills and the Platform sort
 
 ### Pending Todos
 
@@ -171,6 +174,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T15:18:41.788Z
-**Stopped At:** Completed 48-02-PLAN.md
+**Last session:** 2026-10-15T15:39:46.732Z
+**Stopped At:** Completed 48-03-PLAN.md
 **Resume File:** None
