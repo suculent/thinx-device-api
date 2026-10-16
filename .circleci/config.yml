@@ -9,9 +9,10 @@ orbs:
 # snyk-monitor-console-classic) while v1.18 was open; Phase 48 (CI-06, D-08)
 # restored them by making this default true, so a normal push builds them
 # again. They live in the `legacy-console` workflow, which runs only when this
-# parameter is true. The parameter stays as a kill switch: set the default to
+# parameter is true, behind its own Legacy unit test job (test-console-classic,
+# 48-REVIEW WR-02). The parameter stays as a kill switch: set the default to
 # false, or trigger one pipeline with build_legacy_console false, to pause the
-# three jobs again. Runbook: .planning/runbooks/legacy-console-build-gate.md
+# workflow's jobs again. Runbook: .planning/runbooks/legacy-console-build-gate.md
 parameters:
   build_legacy_console:
     type: boolean
@@ -293,6 +294,26 @@ jobs:
       - store_artifacts:
           path: services/console/vue/cypress/videos
           destination: cypress-videos
+
+  # 48-REVIEW WR-02: gates the Legacy image on the Legacy unit tests. requires
+  # cannot cross workflows, so test-vue-console (workflow main) cannot gate the
+  # builds in legacy-console; this job runs inside that workflow and both
+  # console-classic builds require it. Plain node, no install and no context.
+  test-console-classic:
+    docker:
+      - image: thinxcloud/console-build-env:vue
+    steps:
+      - checkout
+      - run:
+          name: Fetch the console submodule
+          command: |
+            git submodule sync -- services/console && git submodule update --init -- services/console
+      - run:
+          name: Legacy unit tests (WR-02)
+          command: |
+            cd services/console
+            LC_ALL=C node src/test/deploykey.cjs
+            LC_ALL=C node src/test/legacy-close-out.cjs
 
   build-console-classic:
     executor: docker/docker
@@ -1113,10 +1134,12 @@ workflows:
   #
   # Legacy console image builds behind the build_legacy_console kill switch
   # (v1.18 CI-05 pause; default true since Phase 48, CI-06, D-08, so a normal
-  # pipeline runs this workflow). Setting the parameter false pauses all three
+  # pipeline runs this workflow). Setting the parameter false pauses all of its
   # jobs. The switch is a workflow-level `when` because CircleCI 2.1 has no
   # per-job `when` inside a workflow and `requires` cannot cross workflows,
-  # which is why the classic Snyk monitor lives here with the build it requires.
+  # which is why the classic Snyk monitor lives here with the build it requires,
+  # and why the Legacy unit tests run here too (test-console-classic, 48-REVIEW
+  # WR-02): both builds require them, so a red Legacy test ships no Legacy image.
   # Runbook: .planning/runbooks/legacy-console-build-gate.md
   #
 
@@ -1125,12 +1148,24 @@ workflows:
 
     jobs:
 
+      # No context: it needs no credential. Its filters are the union of its
+      # dependants' filters (CircleCI 2.1 skips a job whose required job is
+      # filtered out of the branch).
+      - test-console-classic:
+          filters:
+            branches:
+              only:
+                - thinx-staging
+                - main
+
       - build-console-classic:
           name: console-classic-registry
           publish: registry
           context:
             - thinx-docker-repo
             - console
+          requires:
+            - test-console-classic
           filters:
             branches:
               only:
@@ -1142,6 +1177,8 @@ workflows:
           context:
             - thinx-docker-repo
             - console
+          requires:
+            - test-console-classic
           filters:
             branches:
               only:

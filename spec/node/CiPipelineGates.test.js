@@ -322,15 +322,59 @@ test("evaluateJobs requires test-vue-console on thinx-staging and main (CI-07)",
 });
 
 // ---------------------------------------------------------------------------
+// 48-REVIEW WR-02: the Legacy image jobs wait for the green Legacy unit tests
+// ---------------------------------------------------------------------------
+
+const { LEGACY_GATE_JOB } = gates;
+
+test("test-console-classic runs the Legacy unit tests with the console build image and no context (WR-02)", () => {
+    assert.equal(LEGACY_GATE_JOB, "test-console-classic");
+    const job = config.jobs && config.jobs[LEGACY_GATE_JOB];
+    assert.ok(job, "jobs." + LEGACY_GATE_JOB + " is defined");
+    assert.equal(job.docker[0].image, "thinxcloud/console-build-env:vue");
+    assert.ok(!Object.prototype.hasOwnProperty.call(job.docker[0], "auth"), "the public image is pulled anonymously");
+    const commands = runCommands(job).join("\n");
+    for (const needle of ["node src/test/deploykey.cjs", "node src/test/legacy-close-out.cjs"]) {
+        assert.ok(commands.includes(needle), LEGACY_GATE_JOB + " runs " + needle);
+    }
+    assert.ok(runCommands(job).some((command) => command.includes("git submodule") && command.includes("services/console")), "the submodule step names services/console");
+});
+
+test("both Legacy image builds require test-console-classic inside legacy-console, which runs wherever they do (WR-02)", () => {
+    const gate = findJob(LEGACY_GATE_JOB);
+    assert.equal(gate.workflow, LEGACY_WORKFLOW);
+    assert.ok(!Object.prototype.hasOwnProperty.call(gate.cfg, "context"), LEGACY_GATE_JOB + " has no context");
+    assert.deepEqual(gate.cfg.filters.branches.only.slice().sort(), ["main", "thinx-staging"]);
+    for (const dependant of ["console-classic-registry", "console-classic-hub"]) {
+        const job = findJob(dependant);
+        assert.equal(job.workflow, LEGACY_WORKFLOW);
+        assert.ok((job.cfg.requires || []).includes(LEGACY_GATE_JOB), dependant + " requires " + LEGACY_GATE_JOB);
+    }
+    for (const branch of ["thinx-staging", "main"]) {
+        assert.ok(names(branch, true).includes(LEGACY_GATE_JOB), LEGACY_GATE_JOB + " runs on " + branch + " with the switch on");
+        assert.ok(!names(branch, false).includes(LEGACY_GATE_JOB), LEGACY_GATE_JOB + " does not run on " + branch + " with the switch off");
+    }
+});
+
+test("evaluateJobs requires test-console-classic on main with the gate open (WR-02)", () => {
+    const main = ["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue", "console-classic-hub", "snyk-monitor-console-classic"];
+    const problems = evaluateJobs(main, { branch: "main", legacy: true });
+    assert.ok(problems.some((p) => p.includes(LEGACY_GATE_JOB) && p.includes("CI-07")), problems.join("\n"));
+    assert.deepEqual(evaluateJobs(main.concat(LEGACY_GATE_JOB), { branch: "main", legacy: true }), []);
+    assert.deepEqual(evaluateJobs(main.slice(0, 8), { branch: "main", legacy: false }), [], "no Legacy gate with the switch off");
+});
+
+// ---------------------------------------------------------------------------
 // Task 3: live pipeline checker arguments and the legacy-on rules (offline)
 // ---------------------------------------------------------------------------
 
 const { parseArgs, UsageError } = gates;
 
 test("evaluateJobs with the gate open accepts a thinx-staging legacy build and requires it", () => {
-    assert.deepEqual(evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry", "console-classic-registry"], { branch: "thinx-staging", legacy: true }), []);
+    assert.deepEqual(evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry", "test-console-classic", "console-classic-registry"], { branch: "thinx-staging", legacy: true }), []);
     const problems = evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry"], { branch: "thinx-staging", legacy: true });
     assert.ok(problems.some((p) => p.includes("console-classic-registry")), problems.join("\n"));
+    assert.ok(problems.some((p) => p.includes("test-console-classic")), problems.join("\n"));
 });
 
 test("parseArgs: pipeline needs exactly one of --revision or --pipeline-id", () => {

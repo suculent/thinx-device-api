@@ -7,7 +7,7 @@
  *
  * The rules live in evaluateJobs(): given the job names a pipeline runs on a branch, it lists
  * every job that must not run there and every job that must.
- *   CI-05  switch off: no console-classic-registry / console-classic-hub /
+ *   CI-05  switch off: no test-console-classic / console-classic-registry / console-classic-hub /
  *          snyk-monitor-console-classic on any branch. thinx-staging always needs test,
  *          api-registry and vue-console-registry, plus console-classic-registry with the switch on.
  *   CI-04  no snyk-* job outside main and base. main needs test, api-hub, vue-console-hub,
@@ -15,6 +15,8 @@
  *          plus console-classic-hub and snyk-monitor-console-classic with the switch on.
  *   CI-07  thinx-staging and main also need test-vue-console, the Vue/Legacy unit, build and
  *          Cypress suite that vue-console-registry and vue-console-hub require (Phase 48, D-01).
+ *          With the switch on they also need test-console-classic, the Legacy unit tests that
+ *          console-classic-registry and console-classic-hub require (48-REVIEW WR-02).
  *
  * Usage:
  *   node scripts/check-ci-gates.js compile
@@ -66,8 +68,10 @@ const COMPILE_URL = "https://circleci.com/api/v2/compile-config-with-defaults";
 
 const PARAM = "build_legacy_console";
 const LEGACY_WORKFLOW = "legacy-console";
-const LEGACY_JOBS = ["console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
+// Every job of the legacy-console workflow; none of them may run with the kill switch off.
+const LEGACY_JOBS = ["test-console-classic", "console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
 const VUE_GATE_JOB = "test-vue-console";
+const LEGACY_GATE_JOB = "test-console-classic";
 const STAGING_REQUIRED = ["test", "test-vue-console", "api-registry", "vue-console-registry"];
 const COMPILE_BRANCHES = ["thinx-staging", "main"];
 const SNYK_BRANCHES = ["main", "base"];
@@ -175,13 +179,17 @@ function requiredJobs(branch, legacy) {
     const required = [];
     // CI-05: trimming CI must never stop production deploys. CI-07: the Vue image jobs require
     // test-vue-console, so it must run wherever they do.
+    // 48-REVIEW WR-02: with the switch on, the Legacy builds require test-console-classic.
     if (branch === "thinx-staging") {
         for (const job of STAGING_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-05" });
-        if (legacy) required.push({ job: "console-classic-registry", req: "CI-05" });
+        if (legacy) required.push({ job: LEGACY_GATE_JOB, req: "CI-07" }, { job: "console-classic-registry", req: "CI-05" });
     }
     if (branch === "main") {
         for (const job of MAIN_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-04" });
-        if (legacy) for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
+        if (legacy) {
+            required.push({ job: LEGACY_GATE_JOB, req: "CI-07" });
+            for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
+        }
     }
     return required;
 }
@@ -550,7 +558,8 @@ module.exports = {
     CONFIG_PATH,
     PARAM,
     LEGACY_WORKFLOW,
-    LEGACY_JOBS
+    LEGACY_JOBS,
+    LEGACY_GATE_JOB
 };
 
 if (require.main === module) {
