@@ -6,10 +6,10 @@ current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
 stopped_at: Completed 48-05-PLAN.md
-last_updated: "2026-10-15T17:43:59.227Z"
+last_updated: "2026-10-16T07:25:51.399Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: 0271f3a742657f31c6bd4827e21d697082214d34
+state_head: c4702044fbee70386a8c1f1267b7e631d9deda20
 progress:
   total_phases: 7
   completed_phases: 6
@@ -166,6 +166,7 @@ Progress: [█████████░] 86%
 - [UAT] Hard-reload the console (bypass the cache) before production UAT. Phase 46 test 1 first failed on a stale cached bundle.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
+- 48-06 blocked at Task 1 step 8: CircleCI pipeline 5675 test-vue-console failed (device-detail.spec.js load timeouts in CI + Cypress 9.7.0 bundled mocha-junit-reporter crash 'toFixed is not a function' stopped specs 6-11). Legacy + API live; Vue console NOT deployed. Operator decision 2026-10-16: harden CI first (junit reporter crash, device-detail CI load sensitivity) via a fix plan, then re-push and resume 48-06 at step 8 (verify 4/5) and Task 2.
 
 ### Quick Tasks Completed
 
