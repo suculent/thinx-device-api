@@ -5,23 +5,23 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "A network failure now resolves as an empty success-less reply, so outages render as empty data with no error"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`response.text()` is still outside the new try, so the \"never rejects\" guarantee is partial"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The restored Legacy image is built and published without the Legacy unit tests gating it"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The console repo's `test_vue` job still runs unpinned lifecycle scripts with the `sonarcloud` credential context"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The Legacy failed-build toast still reads `response.status`, a field the build reply does not have"
   - id: IN-01
     severity: info
@@ -51,20 +51,20 @@ findings:
     severity: info
     disposition: open
     title: "Leftovers from the untracked env file and JUnit file-name collisions"
-open: 12
+open: 7
 total: 12
-recorded: 2026-10-16T15:11:54.090Z
+recorded: 2026-10-16T15:58:00.280Z
 ---
 
 # Phase 48: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
-| WR-03 | warning | open | - |
-| WR-04 | warning | open | - |
+| CR-01 | critical | fixed | 48-REVIEW-FIX.md |
+| WR-01 | warning | fixed | 48-REVIEW-FIX.md |
+| WR-02 | warning | fixed | 48-REVIEW-FIX.md |
+| WR-03 | warning | fixed | 48-REVIEW-FIX.md |
+| WR-04 | warning | fixed | 48-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
