@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-05-PLAN.md
-last_updated: "2026-10-16T07:25:51.399Z"
+stopped_at: "48-07 halted at Task 3 step 6 (pipeline 5676 test-vue-console red: deep-link.spec.js logged-out redirect)"
+last_updated: "2026-10-16T09:51:53.089Z"
 last_activity: 2026-10-15
 last_activity_desc: Phase 48 execution started
-state_head: c4702044fbee70386a8c1f1267b7e631d9deda20
+state_head: e13933a319d7e46ce30c9c7a196199b6a69a0d5b
 progress:
   total_phases: 7
   completed_phases: 6
@@ -148,6 +148,7 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-05: Vue Cypress runs same-origin (VUE_APP_API_HOSTNAME= empty) with cy:test:ci junit results in vue/cypress/results; CI logs in via cy.stubLogin(), the real-API login needs CYPRESS_LIVE_LOGIN=1 plus explicit credentials; full suite 11 specs 77 tests 0 failing (console a076889..1d68915)
 - [Phase 48]: 48-05: operator option A: bootstrap-vue 2.21.2 BButton renders aria-pressed only from a boolean pressed prop, so Devices.vue toggles and pills bind :pressed (console 1d68915); unit harness attrsOf mirrors BButton; .active darkens the pressed btn-light (visual UAT queued)
 - [Phase 48]: 48-05: the Legacy Cypress env file under console src/cypress is untracked and ignored without being read (console 44a9db6, D-05); operator name+length inspection and any rotation queued for the 48-06 UAT list
+- [Phase 48]: 48-07: Vue Cypress CI runs use the in-repo cypress/reporters/junit.js (one junit-<spec>.xml per spec, rewritten on every end, never throws, no npm dependency) instead of Cypress 9.7.0's bundled mocha-junit-reporter 2.0.0, which threw on a repeated end; CI runs are video-free with fonts.googleapis.com, fonts.gstatic.com and *.gvt1.com blocked; CircleCI now lists pending tests as skipped (77 results). On console/parent thinx-staging since 0692f0f / e13933a3.
 
 ### Pending Todos
 
@@ -167,6 +168,7 @@ Progress: [█████████░] 86%
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
 - 48-06 blocked at Task 1 step 8: CircleCI pipeline 5675 test-vue-console failed (device-detail.spec.js load timeouts in CI + Cypress 9.7.0 bundled mocha-junit-reporter crash 'toFixed is not a function' stopped specs 6-11). Legacy + API live; Vue console NOT deployed. Operator decision 2026-10-16: harden CI first (junit reporter crash, device-detail CI load sensitivity) via a fix plan, then re-push and resume 48-06 at step 8 (verify 4/5) and Task 2.
+- [Phase 48] 48-07 halted at Task 3 step 6 (2026-10-16): pipeline 5676 (parent e13933a3, console 0692f0f) test-vue-console job 16070 failed 1 of 77 JUnit results: deep-link.spec.js 'Should send a logged-out hard load of /#/app/history to the login page' (AssertionError: expected undefined to equal '#/login'); vue-console-registry not_run, so the Vue console is still not deployed; test, api-registry and console-classic-registry succeeded and rolled out. The reporter fix is proven in CI (11 specs ran, no browser relaunch, no reporter crash, 11 write lines). The same test failed in the local baseline mirror and passed in 5 other full runs: an intermittent logged-out redirect race, not load. Fixing it needs a spec or vue/src change, which 48-07 forbids: operator decision. 48-06 stays blocked at Task 1 step 8 (see 48-07-SUMMARY).
 
 ### Quick Tasks Completed
 
@@ -183,6 +185,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-15T17:43:58.783Z
-**Stopped At:** Completed 48-05-PLAN.md
-**Resume File:** None
+**Last session:** 2026-10-16T09:51:52.868Z
+**Stopped At:** 48-07 halted at Task 3 step 6 (pipeline 5676 test-vue-console red: deep-link.spec.js logged-out redirect)
+**Resume File:** .planning/workstreams/vue-console/phases/48-deep-links-close-out/48-07-SUMMARY.md
