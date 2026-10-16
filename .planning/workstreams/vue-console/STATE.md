@@ -5,7 +5,7 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: 48-06 halted at Task 2 verify 2 (flaticon-settings-10 false positive; all other gates green)
+stopped_at: Completed 48-06-PLAN.md (verify 2 amended to the markup form and rerun green; phase 48 awaits verification)
 last_updated: "2026-10-16T13:28:30.731Z"
 last_activity: 2026-10-16
 last_activity_desc: Phase 48 execution started
@@ -171,7 +171,7 @@ Progress: [█████████░] 86%
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
 - [Resolved by 48-08] The 48-06 Task 1 step 8 stop (pipeline 5675) and the 48-07 halt (pipeline 5676, the logged-out deep-link redirect) are fixed: VERDICT A+B, test 3's dashboard reads were still in flight when Cypress reset the intercepts for test 4, and Api.request() let the resulting 'Failed to fetch' escape as an unhandled rejection that stopped test 4's beforeEach; console fix commits 9a0e1cd, 09fbde1, 512ddb5; pipeline 5677 `CI-GATES PIPELINE OK 5677` (test-vue-console job 16075 green, 77 JUnit results, 0 failures; vue-console-registry success); pushed parent SHA 24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed. 48-06 resumes at Task 1 step 8 with H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed: run its verify 4 and 5 with that H instead of `git rev-parse HEAD` (the local docs commits above that SHA touch only `.planning/` and ride the next push), run verify 6 against the same SHA, then Task 2. 48-06's pre-push baselines stay in `${TMPDIR}/p48-*`.
-- [Phase 48] 48-06 halted at Task 2 verify 2: 'still served: flaticon-settings-10' is a false positive (the only hit is the untouched icon-font CSS rule from vue/src/styles/_icons.scss; the Header cog markup 'fi flaticon-settings-10' went 1 -> 0). All other gates pass (CI-GATES PIPELINE OK 5677; JUNIT job 16075 77/0; Vue id 24d2b7c + 7 markers; Legacy D-09 markers; API 401s; port 7442 200; WS-MULTITAB OK 2/2). Operator: accept the false positive (then mark 48-06 complete and run the ten-item UAT) or amend the check to the markup form and rerun verify 2 only.
+- [Resolved 2026-10-16] [Phase 48] 48-06 halted at Task 2 verify 2: 'still served: flaticon-settings-10' is a false positive (the only hit is the untouched icon-font CSS rule from vue/src/styles/_icons.scss; the Header cog markup 'fi flaticon-settings-10' went 1 -> 0). All other gates pass (CI-GATES PIPELINE OK 5677; JUNIT job 16075 77/0; Vue id 24d2b7c + 7 markers; Legacy D-09 markers; API 401s; port 7442 200; WS-MULTITAB OK 2/2). Operator chose to amend the check to the markup form `fi flaticon-settings-10`; rerun against H=24d2b7cd rc 0; 48-06 complete.
 
 ### Quick Tasks Completed
 
@@ -189,5 +189,5 @@ Progress: [█████████░] 86%
 ## Session Continuity
 
 **Last session:** 2026-10-16T13:28:25.649Z
-**Stopped At:** 48-06 halted at Task 2 verify 2 (flaticon-settings-10 false positive; all other gates green)
-**Resume File:** .planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-SUMMARY.md
+**Stopped At:** Completed 48-06-PLAN.md (verify 2 amended to the markup form and rerun green; phase 48 awaits verification)
+**Resume File:** None

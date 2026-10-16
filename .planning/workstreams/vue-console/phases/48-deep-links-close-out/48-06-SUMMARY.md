@@ -2,8 +2,8 @@
 phase: 48-deep-links-close-out
 plan: 06
 subsystem: deploy
-tags: [deploy, console, legacy, vue, ci, records, verification, uat, circleci, halted]
-status: halted
+tags: [deploy, console, legacy, vue, ci, records, verification, uat, circleci]
+status: complete
 
 requires:
   - phase: 48-deep-links-close-out
@@ -18,7 +18,7 @@ affects: [48-verify, CI-06, CI-07, NOTIF-04, POL-01, FIX-01, v1.18 close]
 
 actuals:
   tokens: 9500       # chars/4: the two record files' diff in c1ac35aa (~6 KB) plus this SUMMARY (~32 KB)
-  tasks: 2           # Task 1 done; Task 2 run, halted on verify 2 (over-broad marker)
+  tasks: 2           # Task 1 done; Task 2 done (verify 2 amended to the markup form and rerun, rc 0)
   commits: 13        # MEASURED: git rev-list --count 7994236b..HEAD after the SUMMARY commit; includes 48-07/48-08 commits (see Task Commits)
 plan_head_before: 7994236b4ea336ae81faa4ff886c6cafb1a98c9d
 plan_head_after: (the SUMMARY docs commit; see Task Commits)
@@ -38,9 +38,9 @@ key-files:
 
 key-decisions:
   - "Resumed at Task 1 step 8 with H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed (pipeline 5677) per 48-08; steps 1-7 were not redone (their commits c1ac35aa, c4702044 and the 2026-10-15 push are verified present)"
-  - "Task 2 verify 2 fails as written: 'still served: flaticon-settings-10'. The only hit is the pre-existing icon-font CSS rule `.flaticon-settings-10 { background-image: ... }` from vue/src/styles/_icons.scss (unchanged since 597fe51), compiled into the JS bundle; the Header cog markup `fi flaticon-settings-10` went from 1 (before) to 0 (after). Halted per the stop rule; operator/verifier to accept the false positive or amend the check"
+  - "Task 2 verify 2 fails as written: 'still served: flaticon-settings-10'. The only hit is the pre-existing icon-font CSS rule `.flaticon-settings-10 { background-image: ... }` from vue/src/styles/_icons.scss (unchanged since 597fe51), compiled into the JS bundle; the Header cog markup `fi flaticon-settings-10` went from 1 (before) to 0 (after). Halted per the stop rule; the operator chose to amend the check to the markup form `fi flaticon-settings-10`, and the rerun against H passed (rc 0)"
 
-requirements-completed: []   # halted: FIX-01, CI-06, CI-07, NOTIF-04, POL-01 not marked complete by this plan
+requirements-completed: [FIX-01, CI-06, CI-07, NOTIF-04, POL-01]
 
 coverage:
   - id: D1
@@ -72,10 +72,9 @@ coverage:
     requirement: POL-01
     verification:
       - kind: other
-        ref: "48-06 Task 2 verify 2 (FAIL as written: flaticon-settings-10 CSS rule; cog markup 0, markers all present)"
-        status: fail
-    human_judgment: true
-    rationale: "The automated check's string also matches the icon-font CSS rule; a human/verifier must accept the scoped evidence (markup count 0) or amend the check"
+        ref: "48-06 Task 2 verify 2, amended to the markup form `fi flaticon-settings-10` (operator decision 2026-10-16) and rerun against H=24d2b7cd: rc 0, id 24d2b7c + 7 markers, no cog markup, no old glyph"
+        status: pass
+    human_judgment: false
   - id: D5
     description: "rtm.thinx.cloud serves the Legacy D-09 fixes (absent in the baseline)"
     requirement: CI-06
@@ -103,13 +102,13 @@ duration: "Task 1 steps 1-7 on 2026-10-15 (~17:2x-17:53Z); resume 2026-10-16 ~13
 completed: 2026-10-16
 ---
 
-# Phase 48 Plan 06: Records and Ship Summary (HALTED at Task 2 verify 2)
+# Phase 48 Plan 06: Records and Ship Summary
 
-**Phase 48 is shipped and live. Pipeline 5677 (`CI-GATES PIPELINE OK 5677`, 77 JUnit results, 0 failures) built the Vue image only after a green Cypress gate, and it built the Legacy image too. console.thinx.cloud serves bundle `24d2b7c` with all seven Phase 48 markers, and rtm.thinx.cloud serves every Legacy D-09 fix. The API surface, port 7442 (200) and the WebSocket probe (2/2) are unchanged. The plan is halted on Task 2 verify 2 alone. Its `flaticon-settings-10` string also matches the untouched icon-font CSS rule compiled into the bundle, while the actual cog markup in the header went from 1 to 0.**
+**Phase 48 is shipped and live. Pipeline 5677 (`CI-GATES PIPELINE OK 5677`, 77 JUnit results, 0 failures) built the Vue image only after a green Cypress gate, and it built the Legacy image too. console.thinx.cloud serves bundle `24d2b7c` with all seven Phase 48 markers, and rtm.thinx.cloud serves every Legacy D-09 fix. The API surface, port 7442 (200) and the WebSocket probe (2/2) are unchanged. Task 2 verify 2 first failed on an over-broad marker: `flaticon-settings-10` also matches the untouched icon-font CSS rule in the bundle. The operator had the check narrowed to the markup form `fi flaticon-settings-10`, and the rerun passed. The header cog markup went from 1 to 0.**
 
 ## Status
 
-**halted**: Task 2 verify 2 exits 1 with `still served: flaticon-settings-10`. Per the stop rule nothing was edited, rerun or re-triggered. Every other automated gate of the plan passes. The scoped evidence below shows that the settings cog is gone from the served header markup. Decision needed: accept the false positive (Task 2 then counts as passed and 48-06 closes), or amend the check to look for the markup form `fi flaticon-settings-10` and rerun Task 2 verify 2.
+**complete**: the first run of Task 2 verify 2 exited 1 with `still served: flaticon-settings-10`. That was a false positive: the only hit was the icon-font CSS rule from `vue/src/styles/_icons.scss:198`. On 2026-10-16 the operator chose to narrow the check in 48-06-PLAN.md to the markup form `fi flaticon-settings-10`. The orchestrator reran it against H=24d2b7cd: `VERIFY2 rc=0` (live `/js/app.js` 3,242,160 B, id `24d2b7c`, all 7 markers, 0 cog markup, 0 `fa fa-cogs mr-1`). All automated gates of the plan pass. The ten-item operator UAT (D7) remains.
 
 ## Performance
 
@@ -223,6 +222,8 @@ GET rtm /api/user/profile 401
 
 ### Verify 2: Vue bundle, 13:25:41Z, rc 1 (HALT)
 
+**Rerun (amended check, 2026-10-16):** operator decision: the second loop now reads `for s in 'fi flaticon-settings-10' 'fa fa-cogs mr-1'`. Rerun against H=24d2b7cd printed `VERIFY2 rc=0 app=/js/app.js`.
+
 Output: `still served: flaticon-settings-10`.
 
 | Item | Before (`fc0fa01`) | After |
@@ -304,7 +305,7 @@ The resume has no code or record changes: Task 1 steps 8-9 and Task 2 are read-o
 
 1. **[Resume instruction] H pinned to the pushed SHA.** Verify 4, 5 and 6 used `H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed` instead of `git rev-parse HEAD`, and Task 2 verify 2 matched its id (`24d2b7c`). The commits above H are `.planning/` only.
 2. **[Resume instruction] Steps 1-7 not redone.** Their commits and push were verified present.
-3. **[Plan check defect, halted] Task 2 verify 2 `flaticon-settings-10`.** The plan's check also matches the untouched icon-font CSS rule. I left the check as written and recorded the failure. A scoped count shows the cog markup is gone.
+3. **[Plan check defect, amended] Task 2 verify 2 `flaticon-settings-10`.** The plan's check also matched the untouched icon-font CSS rule, so the run halted. The operator chose to amend the check to `fi flaticon-settings-10` (the markup form), and the rerun against H passed (rc 0).
 4. **[Evidence] `p48-pipeline.txt` overwritten by verify 4** (5677), as the plan intends. The 5675 output was copied to `p48-pipeline-5675.txt` first. `p48-app.js` and `p48-legacy-after-*` were rewritten by Task 2. The "before" baselines were not touched.
 5. **[Evidence gap] The 2026-10-15 preflight logs** were not persisted by the earlier session (see Step 1).
 
@@ -314,15 +315,14 @@ None. No new surface. All probes were unauthenticated GETs and the credential-fr
 
 ## Next
 
-- If the operator accepts the verify 2 false positive, mark 48-06 complete and mark FIX-01, CI-06, CI-07, NOTIF-04 and POL-01 complete, then run the end-of-phase UAT.
-- Otherwise amend 48-06 Task 2 verify 2 to look for `fi flaticon-settings-10` (the markup) instead of the bare class, and rerun that check only.
+- Phase verification, then the ten-item operator UAT (D7).
 
 ---
 *Phase: 48-deep-links-close-out*
-*Resumed and halted: 2026-10-16*
+*Resumed and completed: 2026-10-16*
 
 ## Self-Check: PASSED
 
-Files: 48-06-SUMMARY.md, 35-REVIEW-DISPOSITION.md present. Commits c1ac35aa, c4702044, ac2c707c, 24d2b7cd are ancestors of HEAD; console 512ddb5 is an ancestor of the console HEAD. (Self-check covers the claims in this file; the plan status itself is halted.)
+Files: 48-06-SUMMARY.md, 35-REVIEW-DISPOSITION.md present. Commits c1ac35aa, c4702044, ac2c707c, 24d2b7cd are ancestors of HEAD; console 512ddb5 is an ancestor of the console HEAD.
 
 Note: `roadmap.update-plan-progress` counts SUMMARY files and ticked 48-06 `[x]` (8/8), as it did for halted 48-07. The phase row stays "In Progress".

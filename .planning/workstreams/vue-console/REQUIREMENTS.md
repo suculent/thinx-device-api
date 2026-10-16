@@ -55,14 +55,14 @@ upgrades.
 
 ### Review Leftovers (v1.16)
 
-- [ ] **FIX-01**: Every open Phase 35 review item (IN-01..IN-08) is fixed or explicitly deferred with a recorded reason.
+- [x] **FIX-01**: Every open Phase 35 review item (IN-01..IN-08) is fixed or explicitly deferred with a recorded reason.
 - [x] **FIX-02**: Phase 36 WR-01 and IN-01..IN-03 are fixed or explicitly deferred with a recorded reason.
 - [x] **FIX-03**: Phase 37 IN-02 and IN-03 are fixed or explicitly deferred with a recorded reason.
 - [x] **FIX-04**: Phase 38 IN-01..IN-04, IN-06 and IN-07 (newest-first sort changes which key GitHub linking pushes) are fixed or explicitly deferred with a recorded reason.
 
 ### UI-Review Polish (v1.16)
 
-- [ ] **POL-01**: (35-UI-REVIEW) Build Firmware shows an in-flight state and cannot be double-submitted; the account menu has an accessible name; the Device Detail content column is width-constrained.
+- [x] **POL-01**: (35-UI-REVIEW) Build Firmware shows an in-flight state and cannot be double-submitted; the account menu has an accessible name; the Device Detail content column is width-constrained.
 - [x] **POL-02**: (36-UI-REVIEW) One shared status→variant mapping distinguishes TIMEOUT (warning) from FAILED (danger); the dashboard Recent Builds card can open the build log; rows without a build id show no "Open build log" button.
 - [x] **POL-03**: (37-UI-REVIEW) Save Transformers has pending and dirty states; the field is called "Name" on every surface; deleting a transformer warns that devices using it will stop applying it.
 - [x] **POL-04**: (38-UI-REVIEW) Deploy-key Delete is out of the generate form, has a pending state and cannot be double-submitted; a failed reload clears stale rows and shows a single error message.
@@ -72,14 +72,14 @@ upgrades.
 - [x] **NOTIF-01**: The actionable console toast HTML-escapes the device-supplied `notification.body`, so no markup injection is possible; the fix is deployed to production via a one-off legacy console build while CI-05 is in effect, not deferred to CI-06.
 - [x] **NOTIF-02**: A second Legacy console tab on the same `/<owner>` socket path is accepted and both tabs receive frames.
 - [x] **NOTIF-03**: Build status frames reach the owner's console sockets.
-- [ ] **NOTIF-04**: Reloading a Vue deep link such as `/#/app/history` stays on that page instead of redirecting to the dashboard.
+- [x] **NOTIF-04**: Reloading a Vue deep link such as `/#/app/history` stays on that page instead of redirecting to the dashboard.
 
 ### CI / Delivery
 
 - [x] **CI-04**: Snyk monitor jobs (snyk-code-monitor, snyk-oss-monitor, snyk-container-monitor incl. snyk-monitor-console-classic / snyk-monitor-console-vue in the parent .circleci/config.yml `main` workflow) run only on branch `main`, never on `thinx-staging`.
 - [x] **CI-05**: For the duration of v1.18 the legacy console image build (build-console-classic: console-classic-registry / console-classic-hub, plus jobs that require it) is temporarily disabled in CI, so thinx-staging pipelines skip it; production keeps serving the existing thinx/console:swarm image. The change is a single, clearly marked, revertible edit.
-- [ ] **CI-06**: Before the milestone closes, the legacy console build is re-enabled, and the Legacy console changes made during v1.18 that are not yet live (e.g. FIX-04 / Phase 35 legacy deploy-key items; NOTIF-01 already ships earlier through its one-off build) are built and deployed.
-- [ ] **CI-07**: The Vue console Cypress suite runs green in CI and gates the Vue console deploy: `devices.spec.js` and `profile.spec.js` reach their pages via `cy.visitAppRoute` (or pass natively once NOTIF-04 fixes deep links), `oauth-return.spec.js` runs with a same-origin API (or `ensureCsrfToken` prefers a forced prime over a stale cookie), the live `login.spec.js` test is stubbed or explicit opt-in and no longer falls back to the leaked `test` fixture username, CircleCI stores JUnit results, and the parent `vue-console-registry` job requires the green suite. Legacy console Cypress stays off (deprecating; its specs need a real API and send real e-mail).
+- [x] **CI-06**: Before the milestone closes, the legacy console build is re-enabled, and the Legacy console changes made during v1.18 that are not yet live (e.g. FIX-04 / Phase 35 legacy deploy-key items; NOTIF-01 already ships earlier through its one-off build) are built and deployed.
+- [x] **CI-07**: The Vue console Cypress suite runs green in CI and gates the Vue console deploy: `devices.spec.js` and `profile.spec.js` reach their pages via `cy.visitAppRoute` (or pass natively once NOTIF-04 fixes deep links), `oauth-return.spec.js` runs with a same-origin API (or `ensureCsrfToken` prefers a forced prime over a stale cookie), the live `login.spec.js` test is stubbed or explicit opt-in and no longer falls back to the leaked `test` fixture username, CircleCI stores JUnit results, and the parent `vue-console-registry` job requires the green suite. Legacy console Cypress stays off (deprecating; its specs need a real API and send real e-mail).
 
 ## Future Requirements
 
@@ -126,11 +126,11 @@ upgrades.
 | BUILD-03 | Phase 47 | Complete |
 | POL-02 | Phase 47 | Complete |
 | FIX-02 | Phase 47 | Complete |
-| NOTIF-04 | Phase 48 | Pending |
-| POL-01 | Phase 48 | Pending |
-| FIX-01 | Phase 48 | Pending |
-| CI-06 | Phase 48 | Pending |
-| CI-07 | Phase 48 | Pending |
+| NOTIF-04 | Phase 48 | Complete |
+| POL-01 | Phase 48 | Complete |
+| FIX-01 | Phase 48 | Complete |
+| CI-06 | Phase 48 | Complete |
+| CI-07 | Phase 48 | Complete |
 
 **Coverage:**
 - v1.18 requirements: 32 total
