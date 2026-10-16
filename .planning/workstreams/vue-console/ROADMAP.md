@@ -267,7 +267,7 @@ Plans:
 **Found in Phase 48** (deferred, not a Phase 35 item, so not in the FIX-01 ledger):
 - The Legacy build refusal toast `DevicesController.js:135` (`toastr.error( response.status, … )`) can still be empty, because the build reply has no status field (48-04 follow-up candidate) — deferred: outside the D-09 Legacy fix list; take it with the next Legacy console change
 
-**Plans:** 5/8 plans executed
+**Plans:** 7/8 plans executed
 
 Plans:
 **Wave 1**
@@ -284,11 +284,11 @@ Plans:
 - [x] 48-05-PLAN.md — Vue Cypress green: same-origin `test`/`test:ci` with JUnit results, console `test_vue` stores them, stubbed CI login and `CYPRESS_LIVE_LOGIN` opt-in without the leaked fixture, devices/device-detail spec rewrite and double-click check, `src/cypress/.env.test` untracked (CI-07, POL-01, FIX-01) (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion; 48-07 runs alone first, then 48-06 resumes at Task 1 step 8)*
-- [ ] 48-07-PLAN.md — CI hardening (operator decision 2026-10-16): in-repo dependency-free JUnit reporter replacing Cypress 9.7.0's bundled mocha-junit-reporter (double-`end` crash aborted specs 6-11 in pipeline 5675), CI `video=false` and `blockHosts` for Google Fonts and `*.gvt1.com` against the device-detail load timeouts (no timeout raises or retries), CI-mirror proof, console then parent `thinx-staging` push and a green `test-vue-console` (CI-07) (wave 5, before 48-06)
+- [x] 48-07-PLAN.md — CI hardening (operator decision 2026-10-16): in-repo dependency-free JUnit reporter replacing Cypress 9.7.0's bundled mocha-junit-reporter (double-`end` crash aborted specs 6-11 in pipeline 5675), CI `video=false` and `blockHosts` for Google Fonts and `*.gvt1.com` against the device-detail load timeouts (no timeout raises or retries), CI-mirror proof, console then parent `thinx-staging` push and a green `test-vue-console` (CI-07) (wave 5, before 48-06)
 - [ ] 48-06-PLAN.md — Records and ship: 35-REVIEW-DISPOSITION IN-01..IN-08 fixed, carried items recorded (D-15 deferred), console then parent `thinx-staging` push, `check-ci-gates.js pipeline --expect legacy-on`, JUnit proof, live Vue and Legacy markers, unchanged API and port 7442, operator UAT (FIX-01, CI-06, CI-07, NOTIF-04, POL-01) (wave 5)
 
 **Wave 6** *(gap closure for the 48-07 halt, pipeline 5676; runs alone, then 48-06 resumes at Task 1 step 8)*
-- [ ] 48-08-PLAN.md — Root-cause the intermittent logged-out deep-link redirect failure (`deep-link.spec.js`, `#/login`) with traced CI-mirror runs and a RED reproduction, fix it at the cause (`vue/src` and/or Cypress spec or support, assertion unchanged, no retries or timeouts), prove it with arms 3x40, 55 consecutive spec runs and a full-suite mirror run, then console and parent `thinx-staging` push with `test-vue-console` and `vue-console-registry` green and the STATE resume pointer for 48-06 (CI-07, NOTIF-04) (wave 6, gap closure)
+- [x] 48-08-PLAN.md — Root-cause the intermittent logged-out deep-link redirect failure (`deep-link.spec.js`, `#/login`) with traced CI-mirror runs and a RED reproduction, fix it at the cause (`vue/src` and/or Cypress spec or support, assertion unchanged, no retries or timeouts), prove it with arms 3x40, 55 consecutive spec runs and a full-suite mirror run, then console and parent `thinx-staging` push with `test-vue-console` and `vue-console-registry` green and the STATE resume pointer for 48-06 (CI-07, NOTIF-04) (wave 6, gap closure)
 
 **UI hint**: yes
 
@@ -351,7 +351,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
-| 48. Deep Links & Close-out | v1.18 | 5/6 | In Progress | - |
+| 48. Deep Links & Close-out | v1.18 | 7/8 | In Progress | - |
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*
