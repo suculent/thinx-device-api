@@ -265,7 +265,7 @@ Plans:
 - `vue/cypress/integration/devices.spec.js` still asserts `category-pill-*` and the text `Detail` (rewrite with CI-07). — fixed in console `4b867f6` (48-05)
 
 **Found in Phase 48** (deferred, not a Phase 35 item, so not in the FIX-01 ledger):
-- The Legacy build refusal toast `DevicesController.js:135` (`toastr.error( response.status, … )`) can still be empty, because the build reply has no status field (48-04 follow-up candidate) — deferred: outside the D-09 Legacy fix list; take it with the next Legacy console change
+- The Legacy build refusal toast `DevicesController.js:135` (`toastr.error( response.status, … )`) can still be empty, because the build reply has no status field (48-04 follow-up candidate) — fixed in console `355e868` (48-REVIEW WR-04): a refused build now shows a fixed "Build failed." toast
 
 **Plans:** 8/8 plans executed
 

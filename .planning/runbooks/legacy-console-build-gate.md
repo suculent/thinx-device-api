@@ -26,7 +26,9 @@ Tools, both in this repository:
 - Pipeline parameter **`build_legacy_console`** (boolean, top-level `parameters:`), **default
   `true` since Phase 48** (CI-06, D-08). The comment block above `parameters:` describes it.
 - Workflow **`legacy-console`**, `when: << pipeline.parameters.build_legacy_console >>`. It holds
-  exactly three jobs, which the switch controls together:
+  exactly four jobs, which the switch controls together:
+  - `test-console-classic` (thinx-staging and main, runs the Legacy unit tests `src/test/deploykey.cjs`
+    and `src/test/legacy-close-out.cjs`; both image builds require it, 48-REVIEW WR-02)
   - `console-classic-registry` (thinx-staging, pushes `registry.thinx.cloud:5000/thinx/console:swarm`)
   - `console-classic-hub` (main, pushes `thinxcloud/console:latest`)
   - `snyk-monitor-console-classic` (main, scans `thinxcloud/console:latest` after `console-classic-hub`)
