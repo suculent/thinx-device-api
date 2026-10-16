@@ -6,10 +6,10 @@ current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
 stopped_at: "48-07 halted at Task 3 step 6 (pipeline 5676 test-vue-console red: deep-link.spec.js logged-out redirect)"
-last_updated: "2026-10-16T09:51:53.089Z"
-last_activity: 2026-10-15
+last_updated: "2026-10-16T10:36:53.016Z"
+last_activity: 2026-10-16
 last_activity_desc: Phase 48 execution started
-state_head: e13933a319d7e46ce30c9c7a196199b6a69a0d5b
+state_head: a672a28721419b13538659a5ebca3f561f38526a
 progress:
   total_phases: 7
   completed_phases: 6
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48 (Deep Links & Close-out) — EXECUTING
-Plan: 6 of 6
-Status: Ready to execute
-Last activity: 2026-10-15 — Phase 48 execution started
+Plan: 1 of 8
+Status: Executing Phase 48
+Last activity: 2026-10-16 — Phase 48 execution started
 
 Progress: [█████████░] 86%
 
@@ -149,6 +149,7 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-05: operator option A: bootstrap-vue 2.21.2 BButton renders aria-pressed only from a boolean pressed prop, so Devices.vue toggles and pills bind :pressed (console 1d68915); unit harness attrsOf mirrors BButton; .active darkens the pressed btn-light (visual UAT queued)
 - [Phase 48]: 48-05: the Legacy Cypress env file under console src/cypress is untracked and ignored without being read (console 44a9db6, D-05); operator name+length inspection and any rotation queued for the 48-06 UAT list
 - [Phase 48]: 48-07: Vue Cypress CI runs use the in-repo cypress/reporters/junit.js (one junit-<spec>.xml per spec, rewritten on every end, never throws, no npm dependency) instead of Cypress 9.7.0's bundled mocha-junit-reporter 2.0.0, which threw on a repeated end; CI runs are video-free with fonts.googleapis.com, fonts.gstatic.com and *.gvt1.com blocked; CircleCI now lists pending tests as skipped (77 results). On console/parent thinx-staging since 0692f0f / e13933a3.
+- [Phase 48]: 48-08: VERDICT A+B for the logged-out deep-link flake. Cause: deep-link test 3 ended with its eight dashboard reads in flight, Cypress failed them when test 4 reset the intercepts, Api.request() let TypeError 'Failed to fetch' escape, Header.vue's uncaught fetchProfile chain made it an unhandled rejection, and Cypress's fail() stopped test 4's beforeEach queue (no viewport, no cy.stubThinxApi) and left the error state that made the #/login assertion give up with an undefined subject. Fix: Api.request() resolves a rejected fetch/fetchWithCsrf to { success: false, status: 0, response: null } (unit I9, console 9a0e1cd RED then 09fbde1) and test 3 waits by alias for its eight reads (512ddb5, additions only). Proof: RED arm W 20/20 failed before, 0/20 after; arms S, F, W 3x40 green; deep-link 55/55 consecutive in the CI mirror; full suite 11/11 (77 results); pipeline 5677 green.
 
 ### Pending Todos
 
@@ -167,8 +168,7 @@ Progress: [█████████░] 86%
 - [UAT] Hard-reload the console (bypass the cache) before production UAT. Phase 46 test 1 first failed on a stale cached bundle.
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
-- 48-06 blocked at Task 1 step 8: CircleCI pipeline 5675 test-vue-console failed (device-detail.spec.js load timeouts in CI + Cypress 9.7.0 bundled mocha-junit-reporter crash 'toFixed is not a function' stopped specs 6-11). Legacy + API live; Vue console NOT deployed. Operator decision 2026-10-16: harden CI first (junit reporter crash, device-detail CI load sensitivity) via a fix plan, then re-push and resume 48-06 at step 8 (verify 4/5) and Task 2.
-- [Phase 48] 48-07 halted at Task 3 step 6 (2026-10-16): pipeline 5676 (parent e13933a3, console 0692f0f) test-vue-console job 16070 failed 1 of 77 JUnit results: deep-link.spec.js 'Should send a logged-out hard load of /#/app/history to the login page' (AssertionError: expected undefined to equal '#/login'); vue-console-registry not_run, so the Vue console is still not deployed; test, api-registry and console-classic-registry succeeded and rolled out. The reporter fix is proven in CI (11 specs ran, no browser relaunch, no reporter crash, 11 write lines). The same test failed in the local baseline mirror and passed in 5 other full runs: an intermittent logged-out redirect race, not load. Fixing it needs a spec or vue/src change, which 48-07 forbids: operator decision. 48-06 stays blocked at Task 1 step 8 (see 48-07-SUMMARY).
+- [Resolved by 48-08] The 48-06 Task 1 step 8 stop (pipeline 5675) and the 48-07 halt (pipeline 5676, the logged-out deep-link redirect) are fixed: VERDICT A+B, test 3's dashboard reads were still in flight when Cypress reset the intercepts for test 4, and Api.request() let the resulting 'Failed to fetch' escape as an unhandled rejection that stopped test 4's beforeEach; console fix commits 9a0e1cd, 09fbde1, 512ddb5; pipeline 5677 `CI-GATES PIPELINE OK 5677` (test-vue-console job 16075 green, 77 JUnit results, 0 failures; vue-console-registry success); pushed parent SHA 24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed. 48-06 resumes at Task 1 step 8 with H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed: run its verify 4 and 5 with that H instead of `git rev-parse HEAD` (the local docs commits above that SHA touch only `.planning/` and ride the next push), run verify 6 against the same SHA, then Task 2. 48-06's pre-push baselines stay in `${TMPDIR}/p48-*`.
 
 ### Quick Tasks Completed
 
