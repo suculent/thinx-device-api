@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: 48
 current_phase_name: Deep Links & Close-out
 status: executing
-stopped_at: Completed 48-08-PLAN.md (pipeline 5677 green; 48-06 resumes at Task 1 step 8)
-last_updated: "2026-10-16T12:44:34.837Z"
+stopped_at: 48-06 halted at Task 2 verify 2 (flaticon-settings-10 false positive; all other gates green)
+last_updated: "2026-10-16T13:28:30.731Z"
 last_activity: 2026-10-16
 last_activity_desc: Phase 48 execution started
-state_head: 40866388ea18efc9dc16ae7fc1cd8081663117ab
+state_head: 573d415dac3f57d7a4256bd365b5030a03ac4901
 progress:
   total_phases: 7
   completed_phases: 6
@@ -151,6 +151,7 @@ Progress: [█████████░] 86%
 - [Phase 48]: 48-05: the Legacy Cypress env file under console src/cypress is untracked and ignored without being read (console 44a9db6, D-05); operator name+length inspection and any rotation queued for the 48-06 UAT list
 - [Phase 48]: 48-07: Vue Cypress CI runs use the in-repo cypress/reporters/junit.js (one junit-<spec>.xml per spec, rewritten on every end, never throws, no npm dependency) instead of Cypress 9.7.0's bundled mocha-junit-reporter 2.0.0, which threw on a repeated end; CI runs are video-free with fonts.googleapis.com, fonts.gstatic.com and *.gvt1.com blocked; CircleCI now lists pending tests as skipped (77 results). On console/parent thinx-staging since 0692f0f / e13933a3.
 - [Phase 48]: 48-08: VERDICT A+B for the logged-out deep-link flake. Cause: deep-link test 3 ended with its eight dashboard reads in flight, Cypress failed them when test 4 reset the intercepts, Api.request() let TypeError 'Failed to fetch' escape, Header.vue's uncaught fetchProfile chain made it an unhandled rejection, and Cypress's fail() stopped test 4's beforeEach queue (no viewport, no cy.stubThinxApi) and left the error state that made the #/login assertion give up with an undefined subject. Fix: Api.request() resolves a rejected fetch/fetchWithCsrf to { success: false, status: 0, response: null } (unit I9, console 9a0e1cd RED then 09fbde1) and test 3 waits by alias for its eight reads (512ddb5, additions only). Proof: RED arm W 20/20 failed before, 0/20 after; arms S, F, W 3x40 green; deep-link 55/55 consecutive in the CI mirror; full suite 11/11 (77 results); pipeline 5677 green.
+- [Phase 48]: 48-06: resumed at Task 1 step 8 against H=24d2b7cd (pipeline 5677) without redoing steps 1-7; Task 2 halted on an over-broad plan marker (flaticon-settings-10 also matches the icon-font CSS rule), recorded as halted rather than reinterpreted
 
 ### Pending Todos
 
@@ -170,6 +171,7 @@ Progress: [█████████░] 86%
 - [All] Console `test:unit` is not run in CI; run it locally before every push. Parent pushes go to `thinx-staging` only.
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
 - [Resolved by 48-08] The 48-06 Task 1 step 8 stop (pipeline 5675) and the 48-07 halt (pipeline 5676, the logged-out deep-link redirect) are fixed: VERDICT A+B, test 3's dashboard reads were still in flight when Cypress reset the intercepts for test 4, and Api.request() let the resulting 'Failed to fetch' escape as an unhandled rejection that stopped test 4's beforeEach; console fix commits 9a0e1cd, 09fbde1, 512ddb5; pipeline 5677 `CI-GATES PIPELINE OK 5677` (test-vue-console job 16075 green, 77 JUnit results, 0 failures; vue-console-registry success); pushed parent SHA 24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed. 48-06 resumes at Task 1 step 8 with H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed: run its verify 4 and 5 with that H instead of `git rev-parse HEAD` (the local docs commits above that SHA touch only `.planning/` and ride the next push), run verify 6 against the same SHA, then Task 2. 48-06's pre-push baselines stay in `${TMPDIR}/p48-*`.
+- [Phase 48] 48-06 halted at Task 2 verify 2: 'still served: flaticon-settings-10' is a false positive (the only hit is the untouched icon-font CSS rule from vue/src/styles/_icons.scss; the Header cog markup 'fi flaticon-settings-10' went 1 -> 0). All other gates pass (CI-GATES PIPELINE OK 5677; JUNIT job 16075 77/0; Vue id 24d2b7c + 7 markers; Legacy D-09 markers; API 401s; port 7442 200; WS-MULTITAB OK 2/2). Operator: accept the false positive (then mark 48-06 complete and run the ten-item UAT) or amend the check to the markup form and rerun verify 2 only.
 
 ### Quick Tasks Completed
 
@@ -186,6 +188,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-**Last session:** 2026-10-16T12:44:32.768Z
-**Stopped At:** Completed 48-08-PLAN.md (pipeline 5677 green; 48-06 resumes at Task 1 step 8)
-**Resume File:** None
+**Last session:** 2026-10-16T13:28:25.649Z
+**Stopped At:** 48-06 halted at Task 2 verify 2 (flaticon-settings-10 false positive; all other gates green)
+**Resume File:** .planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-SUMMARY.md
