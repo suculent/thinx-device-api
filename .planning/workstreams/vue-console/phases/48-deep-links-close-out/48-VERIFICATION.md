@@ -1,53 +1,39 @@
 ---
 phase: 48-deep-links-close-out
-verified: 2026-10-16T15:20:00Z
-status: human_needed
-score: 96/100 must-haves verified (5/5 roadmap success criteria; 91/95 plan truths, 3 backstop truths abstained as insufficient_spec, 1 operator UAT pending)
-covered_files: [".circleci/config.yml",".planning/milestones/v1.16-phases/35-console-usability/35-REVIEW-DISPOSITION.md",".planning/runbooks/legacy-console-build-gate.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-01-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-01-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-02-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-02-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-03-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-03-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-04-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-04-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-05-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-05-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-07-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-07-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-08-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-08-SUMMARY.md","scripts/check-ci-gates.js","services/console/.circleci/config.yml","services/console/.gitignore","services/console/src/app/js/controllers/DeploykeyController.js","services/console/src/app/js/controllers/DevicesController.js","services/console/src/app/js/controllers/LogviewController.js","services/console/src/app/js/thinx-api.js","services/console/src/test/deploykey.cjs","services/console/src/test/legacy-close-out.cjs","services/console/vue/.gitignore","services/console/vue/cypress.json","services/console/vue/cypress/fixtures/thinx.json","services/console/vue/cypress/integration/deep-link.spec.js","services/console/vue/cypress/integration/device-detail.spec.js","services/console/vue/cypress/integration/devices.spec.js","services/console/vue/cypress/integration/history.spec.js","services/console/vue/cypress/integration/login.spec.js","services/console/vue/cypress/integration/oauth-return.spec.js","services/console/vue/cypress/reporters/junit.js","services/console/vue/cypress/support/api-stubs.js","services/console/vue/cypress/support/credentials.js","services/console/vue/cypress/support/session.js","services/console/vue/package.json","services/console/vue/src/App.vue","services/console/vue/src/components/Header/Header.scss","services/console/vue/src/components/Header/Header.vue","services/console/vue/src/core/api.js","services/console/vue/src/pages/Devices/DeviceDetail.vue","services/console/vue/src/pages/Devices/Devices.vue","services/console/vue/src/store/apikeys.js","services/console/vue/src/store/channels.js","services/console/vue/src/store/devices.js","services/console/vue/src/store/enviros.js","services/console/vue/src/store/profile.js","services/console/vue/src/store/repositories.js","services/console/vue/src/styles/_device-detail.scss","services/console/vue/src/styles/_overrides.scss","services/console/vue/src/styles/_platforms.scss","services/console/vue/src/styles/theme.scss","services/console/vue/src/utils/platforms.js","services/console/vue/tests/unit/close-out-v118.cjs","services/console/vue/tests/unit/cypress-junit-reporter.cjs","services/console/vue/tests/unit/device-list-parity.cjs","spec/node/CiPipelineGates.test.js"]
-covered_digest: "v3:sha256:ff4aebd3f2235501f56354f4acc3fe8d514018f429a4678a5e9515c7c04ac74e"
+verified: 2026-10-17T12:30:00Z
+status: passed
+score: 100/100 must-haves verified (5/5 roadmap success criteria; 95/95 plan truths, including the 3 backstop truths and the operator UAT truth, now backed by 48-UAT.md)
+covered_files: [".circleci/config.yml",".planning/milestones/v1.16-phases/35-console-usability/35-REVIEW-DISPOSITION.md",".planning/runbooks/legacy-console-build-gate.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-01-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-01-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-02-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-02-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-03-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-03-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-04-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-04-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-05-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-05-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-06-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-07-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-07-SUMMARY.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-08-PLAN.md",".planning/workstreams/vue-console/phases/48-deep-links-close-out/48-08-SUMMARY.md","scripts/check-ci-gates.js","services/console/.circleci/config.yml","services/console/.gitignore","services/console/src/app/js/controllers/DeploykeyController.js","services/console/src/app/js/controllers/DevicesController.js","services/console/src/app/js/controllers/LogviewController.js","services/console/src/app/js/thinx-api.js","services/console/src/test/deploykey.cjs","services/console/src/test/legacy-close-out.cjs","services/console/vue/.gitignore","services/console/vue/cypress.json","services/console/vue/cypress/fixtures/thinx.json","services/console/vue/cypress/integration/deep-link.spec.js","services/console/vue/cypress/integration/device-detail.spec.js","services/console/vue/cypress/integration/devices.spec.js","services/console/vue/cypress/integration/history.spec.js","services/console/vue/cypress/integration/login.spec.js","services/console/vue/cypress/integration/oauth-return.spec.js","services/console/vue/cypress/reporters/junit.js","services/console/vue/cypress/support/api-stubs.js","services/console/vue/cypress/support/credentials.js","services/console/vue/cypress/support/session.js","services/console/vue/package.json","services/console/vue/src/App.vue","services/console/vue/src/components/Header/Header.scss","services/console/vue/src/components/Header/Header.vue","services/console/vue/src/core/api.js","services/console/vue/src/pages/Devices/DeviceDetail.vue","services/console/vue/src/pages/Devices/Devices.vue","services/console/vue/src/pages/PasswordReset/PasswordReset.vue","services/console/vue/src/store/admin.js","services/console/vue/src/store/apikeys.js","services/console/vue/src/store/channels.js","services/console/vue/src/store/devices.js","services/console/vue/src/store/enviros.js","services/console/vue/src/store/profile.js","services/console/vue/src/store/repositories.js","services/console/vue/src/styles/_device-detail.scss","services/console/vue/src/styles/_overrides.scss","services/console/vue/src/styles/_platforms.scss","services/console/vue/src/styles/theme.scss","services/console/vue/src/utils/platforms.js","services/console/vue/tests/unit/close-out-v118.cjs","services/console/vue/tests/unit/cypress-junit-reporter.cjs","services/console/vue/tests/unit/device-list-parity.cjs","spec/node/CiPipelineGates.test.js"]
+covered_digest: "v3:sha256:2cd167175c520d515f74dbda22b87d35c48d92e913f1752464660755fa3f5fa8"
 behavior_unverified: 0
 overrides_applied: 0
-human_verification:
-  - test: "Deep links on production (NOTIF-04): logged in on https://console.thinx.cloud, open /#/app/history and reload; reload /#/app/devices and a device page; log out and load /#/app/history"
-    expected: "History stays (URL /#/app/history/audit) with no dashboard flash; devices and device page stay; logged out lands on /#/login"
-    why_human: "CI proves it against stubbed session-token exchange only; the real httpOnly session cookie path on production needs a logged-in browser"
-  - test: "Build Firmware (POL-01): click Build Firmware on a device page, double-click quickly, and repeat with keyboard (Tab, Enter)"
-    expected: "Spinner and disabled button until the reply, then 'Build triggered.'; DevTools Network shows one POST /api/v2/build per click burst; keyboard focus returns to the button"
-    why_human: "Real API timing and focus behaviour in a real browser"
-  - test: "Account menu (POL-01): inspect the header toggle"
-    expected: "User-circle icon with hover tip 'Account'; DevTools Accessibility names the toggle 'Account menu'; My Profile and Log Out work"
-    why_human: "Accessible-name computation and visual check"
-  - test: "Device Detail content column on a wide window"
-    expected: "Column stops at about 1140px, left-aligned under the full-width title"
-    why_human: "Visual layout"
-  - test: "Device list (D-14): view toggles, keyboard focus on warning markers, Platform sort, row selection across re-sort"
-    expected: "'List view'/'Grid view' tips; Tab reaches markers and tips show on focus with a visible ring; Platform order matches pills with unknown last; selection stays on the same devices"
-    why_human: "Keyboard and tooltip behaviour in a real browser"
-  - test: "Danger alert (48-03 backstop truth): trigger a failed action on Device Detail, ideally with a long API reason"
-    expected: "White text on #C93C3C (computed rgb(255, 255, 255)); the long reason wraps inside the 1140px column; the white close button is visible and clickable"
-    why_human: "Non-inferable backstop truth: only the compiled-CSS unit check C1 exists, no held-out or observed rendering evidence (insufficient_spec)"
-  - test: "Legacy deploy keys (48-04 backstop truth) on https://rtm.thinx.cloud: create a key whose name contains a pasted tab, then one with a 121-character name pasted past maxlength, then a normal name"
-    expected: "Tab: 'The name contains a control character, such as a tab or a line break.'; 121 chars: 'The name is longer than 120 characters.'; no request sent for either, never [object Object]; Create works again; the normal name creates the key"
-    why_human: "Non-inferable backstop truth: only executor-written unit check D7 exists (insufficient_spec)"
-  - test: "Legacy build toast and first socket (48-04 backstop truth): build a device on rtm.thinx.cloud; use a device with no build history; in a fresh tab open a build log overlay first, then trigger a build elsewhere"
-    expected: "THiNX Builder toast reads 'Build started.' or 'Build queued.' then 'Click to show build log...', never 'undefined'; the no-history device shows its build toasts; the overlay-first tab receives notifications without a reload"
-    why_human: "Non-inferable backstop truth: only executor-written unit checks G1/G2 exist (insufficient_spec); live socket behaviour needs a browser"
-  - test: "Run the console-retest project skill against https://rtm.thinx.cloud/ and confirm Swarmpit shows Vue, Legacy and API tasks started after 2026-10-16T12:29:38Z"
-    expected: "Skill passes; tasks are the pipeline 5677 rollouts"
-    why_human: "D-10: the Legacy fixes get no other human UAT; Swarmpit needs the operator's session"
-  - test: "Legacy Cypress env file (48-05, D-05; review IN-07): the operator inspects the formerly tracked services/console/src/cypress env file that is still in the public console repo history"
-    expected: "A recorded result: 'no real credential' or 'rotated ...'"
-    why_human: "Agents are forbidden to read the file; only the operator can judge it"
+re_verification:
+  previous_status: human_needed
+  previous_score: "96/100 (5/5 roadmap success criteria; 91/95 plan truths)"
+  gaps_closed:
+    - "3 backstop truths (danger-alert rendering, Legacy deploy-key refusal UI, Legacy build toast and first socket) and the 48-06 operator UAT truth: 48-UAT.md items 6, 7, 8 and 1-10, all pass"
+    - "All 10 human_verification items of the previous report: 48-UAT.md status complete, 10/10 passed, 0 issues (2026-10-17)"
+    - "Review CR-01 (api client network failures hid load errors), WR-01, WR-02 (Legacy image not gated on Legacy tests), WR-03 (sonarcloud context on test_vue), WR-04 (Legacy failed-build toast): all fixed in 48-REVIEW-FIX.md, shipped in pipeline 5678, recorded as fixed in 48-REVIEW-DISPOSITION.md"
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 48: Deep Links & Close-out Verification Report
 
 **Phase Goal:** Vue deep links survive a reload, the remaining Phase 35 UI-review and review items are closed, and the legacy console build is back on so every Legacy change of the milestone is live before it closes.
-**Verified:** 2026-10-16T15:20:00Z
-**Status:** human_needed
-**Re-verification:** No, initial verification
+**Verified:** 2026-10-17T12:30:00Z
+**Status:** passed
+**Re-verification:** Yes. The previous report (2026-10-16T15:20:00Z, `human_needed`) went stale because covered files changed after it was written.
 
-Evidence base: the code at console `512ddb5` (equal to the parent gitlink at HEAD `896d67f9` and at the pushed `24d2b7cd`), tests I ran myself, the public CircleCI API for pipeline 5677, and unauthenticated production GETs made at 2026-10-16T15:16Z. SUMMARY claims were used only as pointers.
+## What changed since the previous report
+
+1. **Code-review fixes (48-REVIEW-FIX.md, all 5 in-scope findings fixed).** Console commits `bd1e0a1` (CR-01), `64f773e` (WR-01), `bb0e5ef` (WR-03), `355e868` (WR-04); parent `ca7975df` (WR-02) and `9523aa8c` (gitlink bump `512ddb5..355e868`). The previous report's CR-01 judgment ("follow-up, not a goal gap", recommending fix or defer before the milestone closes) is now resolved by a fix, not a deferral.
+2. **Legacy-console CI gate (WR-02).** New `test-console-classic` job in the `legacy-console` workflow; `console-classic-registry` and `console-classic-hub` require it. `check-ci-gates.js` and `CiPipelineGates.test.js` (now 30 tests, was 27) cover it. The runbook was updated to "exactly four jobs".
+3. **Pushed and shipped.** Parent `origin/thinx-staging` is `75bb6957` and console is `355e868` (confirmed by `git ls-remote`). The push started CircleCI pipeline 5678, which the previous report could not cover.
+4. **48-REVIEW-DISPOSITION.md is closed for the blocking tier.** CR-01, WR-01..WR-04 are `fixed`; IN-01..IN-07 stay `open` (7 of 12, all info).
+5. **Operator UAT complete.** 48-UAT.md: `status: complete`, 10 passed, 0 issues. It covers every human_verification item of the previous report.
+
+Evidence base this time: code at console `355e868` (equal to the parent gitlink at HEAD `47968cb2`; HEAD is 1 docs-only commit ahead of the pushed `75bb6957`), tests I ran myself, the public CircleCI API for pipeline 5678, and unauthenticated production GETs at 2026-10-17. SUMMARY claims were used only as pointers. No env-dumping command was run, no `.env` file read, no ssh to production.
 
 ## Goal Achievement
 
@@ -55,94 +41,90 @@ Evidence base: the code at console `512ddb5` (equal to the parent gitlink at HEA
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Reloading a Vue deep link such as `/#/app/history` while logged in stays on that page; a logged-out reload goes to login | VERIFIED | `vue/src/App.vue` `created()` awaits `waitForInitialRoute()` (`router.onReady(done, done)`, reads `$router.currentRoute.path`) before `hydrateSession`; only `/` and `/app` push to the dashboard; unauthenticated non-public paths push `/login`. `Routes.js`, `store/auth.js` and `utils/cookies.js` are untouched in `54734af..512ddb5`. Unit checks A1, A2, A3, A7 pass (my run). `deep-link.spec.js` asserts the logged-in load plus `cy.reload()` stay on `#/app/history/audit` with `@getStats.all` length 0, and the logged-out load ends on `#/login`. It ran green in CI job 16075. Live bundle `24d2b7c` contains `waitForInitialRoute`. Tokens stay in memory only (no storage writes in `vue/src`). |
-| 2 | Build Firmware shows an in-flight state and ignores a second click until settled; account menu has an accessible name; Device Detail column is width-constrained | VERIFIED | `DeviceDetail.vue:17-22,380-401`: `:disabled="buildPending"`, `b-spinner data-cy=action-build-spinner`, sr-only `role=status` `Requesting build…`, early return while pending, reset in `finally`, focus restore on `$nextTick`. `Header.vue:46-49`: `la la-user-circle` `title=Account aria-hidden` plus sr-only `Account menu`. `_device-detail.scss` `max-width: 1140px`, imported in `theme.scss:29`. `device-detail.spec.js` (double-click gives `@buildFirmware.all` length 1) passed in CI. The live bundle has all 7 markers, 0 `fi flaticon-settings-10`, 0 `fa fa-cogs mr-1`. |
-| 3 | Every Phase 35 review item IN-01..IN-08 is fixed or deferred with a recorded reason, including those closed in Phases 45-47 | VERIFIED | `35-REVIEW-DISPOSITION.md`: 16 rows, all `fixed`, `open: 0`, `total: 16`, each IN row cites console commits. All 11 cited SHAs are signed (`G`) and ancestors of `512ddb5`, and their subjects match the finding. Spot checks: IN-01 `parseResult` gives `undefined` for zero keys (unit I1-I6 pass); IN-02 `saveTransformers` `refreshed: false` still works after 48-08, because `transformers/fetchItems` throws on non-success. |
-| 4 | Legacy build re-enabled; a normal `thinx-staging` pipeline builds and publishes the Legacy image; every v1.18 Legacy change not shipped by Phase 43 is live | VERIFIED | `.circleci/config.yml:16-18` `build_legacy_console` default `true`; the `legacy-console` workflow is kept as a kill switch. Pipeline 5677 (revision `24d2b7cd`, thinx-staging) ran `console-classic-registry` successfully (job 16078). The live `rtm.thinx.cloud` DeploykeyController, DevicesController, LogviewController and thinx-api.js (last-modified 12:31Z) have **zero** non-`<ENV::>` line differences from console HEAD. So all v1.18 Legacy changes are live: NOTIF-01 escaping, 35 WR-04 (`e53f2e9`), and the D-09 fixes `2105310`/`bff9552`. |
-| 5 | Vue Cypress job green on thinx-staging (all specs pass or skip by design), CircleCI shows its JUnit results, `vue-console-registry` runs only after the suite passes | VERIFIED | Public API: job 16075 `test-vue-console` success; tests endpoint gives 77 results across 11 files (67 success, 10 skipped, 0 failure). The skips are `admin.spec.js` (no credentials) and `login.spec.js` (live and register/reset), as designed. Job 16076 `vue-console-registry` has `requires {16075: [success]}` and started at 12:35:56Z, after 16075 stopped at 12:35:08Z. Config: both `vue-console-registry` and `vue-console-hub` require `test-vue-console`. The job has no context. `CiPipelineGates.test.js` passes 27/27 (my run). (SC5 says "10 specs"; there are now 11 because `deep-link.spec.js` was added.) |
+| 1 | Reloading a Vue deep link such as `/#/app/history` while logged in stays on that page; a logged-out reload goes to login | VERIFIED | `App.vue` `created()` awaits `waitForInitialRoute()` before hydrating (lines 37, 50). Pipeline 5678 job 16080 JUnit: `deep-link.spec.js` has 4 tests, all `success` (logged-in hard load plus reload of `/#/app/history`, device detail route, `/#/` to dashboard, logged-out `/#/app/history` to login). This run is on the code that includes the CR-01/WR-01 change to `request()`, so the 48-08 race (which needs `request()` not to reject) is re-proven after the fix. Production: 48-UAT.md item 1 pass (real httpOnly cookie path, `console.thinx.cloud`). |
+| 2 | Build Firmware shows an in-flight state and ignores a second click; account menu has an accessible name; Device Detail column is width-constrained | VERIFIED | Code unchanged since the previous report (spinner, `buildPending` guard, `Account menu` sr-only name, 1140px column). `device-detail.spec.js` is in the green 5678 run. Operator-observed: 48-UAT.md items 2, 3, 4 pass (one POST per click burst, keyboard focus return, accessibility name, wide-window column). Item 6 (danger alert contrast, wrap, close button) pass. |
+| 3 | Every Phase 35 review item IN-01..IN-08 is fixed or deferred with a recorded reason, including those closed in Phases 45-47 | VERIFIED | `35-REVIEW-DISPOSITION.md` unchanged (16 rows, `open: 0`, all cited SHAs verified signed and ancestors in the previous report; the console history since only added the four review-fix commits on top). 48-UAT.md item 10: the operator inspected the formerly tracked Cypress env file (`.env.test`), no real credential, no rotation needed (closes review IN-07 / D-05). |
+| 4 | Legacy build re-enabled; a normal `thinx-staging` pipeline builds and publishes the Legacy image; every v1.18 Legacy change not shipped by Phase 43 is live | VERIFIED | Pipeline 5678 (revision `75bb6957`, thinx-staging): workflow `legacy-console` success; job 16083 `test-console-classic` success, then 16084 `console-classic-registry` success (started after the test job stopped, dependency edge recorded). `build_legacy_console` default is `true` (`.circleci/config.yml:16-18`) with the kill switch kept. Live `rtm.thinx.cloud/app/js/controllers/DevicesController.js` (last-modified 2026-10-17 09:20:14 GMT) contains `Build failed.` once and zero `toastr.error( response.status`, so the WR-04 Legacy fix is live along with the earlier D-09 deploy-key and build-toast fixes. Operator-observed: 48-UAT.md items 7, 8 (deploy-key refusals, build toasts, first socket) and 9 (console-retest, Swarmpit tasks) pass. |
+| 5 | Vue Cypress job green on thinx-staging (all specs pass or skip by design), CircleCI shows its JUnit results, `vue-console-registry` runs only after the suite passes | VERIFIED | Pipeline 5678 workflow `main` success. Job 16080 `test-vue-console` success; tests endpoint: 77 results across 11 files, 67 success, 10 skipped, 0 failure (same skips as before: `admin.spec.js` and live `login.spec.js` by design). Job 16081 `vue-console-registry` depends on 16080 (recorded edge), started 09:24:05Z after 16080 stopped 09:23:20Z. Live bundle `console.thinx.cloud/js/app.js` (last-modified 09:28:02 GMT) carries build id `75bb695` and the CR-01 `networkError` markers (8 occurrences) and `Network error. Please try again.`. |
 
-**Score:** 5/5 roadmap success criteria verified. Plan truths: 91/95 verified. The other four are three `verification: backstop` truths abstained as `insufficient_spec` (48-03 danger-alert rendering, 48-04 Legacy deploy-key refusal UI, 48-04 Legacy build toast UI) and the 48-06 operator UAT truth, which has not been run. 0 present-but-behavior-unverified.
+**Score:** 5/5 roadmap success criteria verified. Plan truths: 95/95 verified. In the previous report 4 were open (3 backstop truths abstained as `insufficient_spec`, 1 operator UAT truth). The three backstop truths now carry the explicit observed-behavior evidence the abstain rule requires (48-UAT.md items 6, 7, 8: the operator observed the rendering in a real browser), and the UAT truth is met by 10/10 passes. 0 present-but-behavior-unverified.
 
 ### Plan truth roll-up
 
 | Plan | Truths | Verified | Not verified | Notes |
 |------|--------|----------|--------------|-------|
-| 48-01 | 11 | 11 | 0 | Unit A1-A8 and I1-I6 pass; build/csp/perf not re-run by me (CI `yarn build:perf` passed in 16075) |
-| 48-02 | 9 | 9 | 0 | Config read directly; spec 27/27 |
-| 48-03 | 20 | 19 | 1 backstop | Danger alert 300-char rendering: only compiled-CSS check C1 |
-| 48-04 | 13 | 11 | 2 backstop | Unit D1-D10 and G1-G8 pass (my run); UI rendering not observed |
-| 48-05 | 10 | 10 | 0 | Fixture has no `username`/`password`; env file untracked and git-ignored; `liveLoginEnabled` gate present |
-| 48-06 | 16 | 15 | 1 human | Ledger, pipeline, JUnit, live bundles, probes all re-observed. Backstop rollout truth verified by direct observation: both bundles served, API 401 x4, port 7442 200 |
-| 48-07 | 9 | 9 | 0 | SUMMARY is `status: halted` (pipeline 5676). Its ship truths are met by pipeline 5677, which carries the 48-07 commits `4358845`, `16bb611`, `0692f0f`. Reporter uses only `fs`/`path`; `blockHosts` set; no timeout or retry changes |
-| 48-08 | 7 | 7 | 0 | I9 passes; `deep-link.spec.js` keeps 4 tests and the `#/login` assertion; `package.json`/`cypress.json` untouched by 48-08 |
+| 48-01 | 11 | 11 | 0 | Unit A1-A8, I1-I6 still pass |
+| 48-02 | 9 | 9 | 0 | Gate spec 30/30 |
+| 48-03 | 20 | 20 | 0 | Danger-alert backstop truth: UAT item 6 pass |
+| 48-04 | 13 | 13 | 0 | Both backstop truths: UAT items 7, 8 pass; Legacy unit D1-D10, G1-G9 pass (my run) |
+| 48-05 | 10 | 10 | 0 | Env file inspected by operator (UAT 10) |
+| 48-06 | 16 | 16 | 0 | Operator UAT truth now met (10/10) |
+| 48-07 | 9 | 9 | 0 | Halted-plan ship truths met by pipelines 5677 and 5678 |
+| 48-08 | 7 | 7 | 0 | I9 updated by CR-01 (still asserts no rejection, now also the marker); `deep-link.spec.js` green on 5678 |
+
+### Review-fix verification (read from the code, not from 48-REVIEW-FIX.md)
+
+| Finding | Code evidence | Test evidence |
+|---------|---------------|---------------|
+| CR-01 | `api.js` catch returns `{ success: false, status: ..., response: null, networkError: true }`; `devices/fetchItems`, `enviros/fetchItems`, `admin/fetchUsers` throw on `networkError` only (a refused or empty reply still resolves); `PasswordReset.vue` checks `result.networkError` before the generic branch in both flows; `Visits.vue` reads through `Promise.allSettled` | I9-I13 pass in my `test:unit` run |
+| WR-01 | `response.text()` is inside the same `try` as the fetch (`api.js`, "The body is read inside the same guard") | I9 covers a `text()` that rejects |
+| WR-02 | `.circleci/config.yml:302` `test-console-classic`, no context, runs `deploykey.cjs` and `legacy-close-out.cjs`; both `console-classic-*` jobs `requires` it; filters thinx-staging + main | `CiPipelineGates.test.js` 30/30; `check-ci-gates.js compile` printed `CI-GATES COMPILE OK`, and its main-branch job list includes `test-console-classic`; ran green as job 16083 |
+| WR-03 | `services/console/.circleci/config.yml`: `test_vue` has no context and carries the explanatory comment. The remaining `sonarcloud` context is on the separate `vue` publish job, which is unchanged and out of this finding's scope | n/a (config) |
+| WR-04 | `DevicesController.js` failure branch is a fixed `Build failed.` toast; live file confirms it | `legacy-close-out.cjs` G8/G9 pass |
+
+Documentation follow-ups named in 48-REVIEW-FIX.md are also done: the runbook now says "exactly four jobs" and lists `test-console-classic`, and ROADMAP line 268 records the WR-04 item as fixed in console `355e868`.
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `vue/src/App.vue` | waitForInitialRoute on onReady | VERIFIED | Wired in `created()`; in live bundle |
-| `vue/tests/unit/close-out-v118.cjs` | Phase 48 unit checks | VERIFIED | Chained in `test:unit`; passes |
-| `vue/cypress/integration/deep-link.spec.js` | Cold-load deep-link spec | VERIFIED | Ran in CI 16075 |
-| `vue/cypress/support/session.js` | `visitAppRoute` plain hard load | VERIFIED | `cy.visitApp('/#' + route, options)`; used by history and device-detail specs |
-| `vue/src/core/api.js` | `parseResult` undefined for empty envelope | VERIFIED | `keys.length === 0 ? undefined`; see CR-01 for the 48-08 change in `request()` |
-| `.circleci/config.yml` | test-vue-console gate, legacy default true | VERIFIED | |
-| `spec/node/CiPipelineGates.test.js` | D-01/D-08 assertions | VERIFIED | 27/27 |
-| `scripts/check-ci-gates.js` | test-vue-console required, legacy-on default | VERIFIED | Covered by spec |
-| `.planning/runbooks/legacy-console-build-gate.md` | Kill-switch runbook | VERIFIED | Present (in fingerprint) |
-| `vue/src/pages/Devices/DeviceDetail.vue` | buildPending, column wrapper | VERIFIED | |
-| `vue/src/styles/_device-detail.scss` | max-width 1140px | VERIFIED | |
-| `vue/src/components/Header/Header.vue` | Account menu name | VERIFIED | |
-| `vue/src/utils/platforms.js` | `comparePlatformKeys` | VERIFIED | Unit checks pass; devices.spec green |
-| `vue/src/pages/Devices/Devices.vue` | toggles, markers, sort, ids | VERIFIED | In live bundle (List view/Grid view) |
-| `src/app/js/controllers/DeploykeyController.js` | Client check, sentences, reset | VERIFIED | Live = source |
-| `src/test/deploykey.cjs`, `src/test/legacy-close-out.cjs` | Legacy unit cases | VERIFIED | Both rc 0 (my run) |
-| `vue/package.json` | same-origin test/test:ci, JUnit reporter | VERIFIED | No dependency or lockfile change in the range |
-| `vue/cypress/support/api-stubs.js`, `credentials.js` | stubLogin, no fixture fallback | VERIFIED | |
-| `services/console/.circleci/config.yml` | test_vue runs test:ci, stores cypress/results | VERIFIED | Still carries `context: sonarcloud` (review WR-03) |
-| `vue/cypress/reporters/junit.js`, `cypress-junit-reporter.cjs`, `cypress.json` | crash-proof reporter, blockHosts | VERIFIED | |
-| `35-REVIEW-DISPOSITION.md` | `open: 0` | VERIFIED | |
-| ROADMAP Phase 48 | `deferred (D-15)` | VERIFIED | |
-| `STATE.md` | `[Resolved by 48-08]` | VERIFIED | line 173 |
+All artifacts from the previous report remain VERIFIED; the files changed by the fixes were re-read.
+
+| Artifact | Status | Details |
+|----------|--------|---------|
+| `vue/src/App.vue` | VERIFIED | `waitForInitialRoute` wired in `created()`; in live bundle |
+| `vue/src/core/api.js` | VERIFIED | `networkError` marker, body read inside guard |
+| `vue/src/store/{devices,enviros,admin}.js`, `PasswordReset.vue` | VERIFIED | New in the covered set; wired as above |
+| `vue/tests/unit/close-out-v118.cjs` | VERIFIED | I1-I13 pass |
+| `vue/cypress/integration/deep-link.spec.js` | VERIFIED | 4 tests green in 5678 |
+| `.circleci/config.yml`, `scripts/check-ci-gates.js`, `spec/node/CiPipelineGates.test.js` | VERIFIED | WR-02 job, gate evaluation, 30/30 |
+| `.planning/runbooks/legacy-console-build-gate.md` | VERIFIED | Updated to four jobs |
+| `src/app/js/controllers/DevicesController.js`, `DeploykeyController.js`, `LogviewController.js`, `thinx-api.js` | VERIFIED | Live copies match source on the checked markers |
+| `src/test/deploykey.cjs`, `src/test/legacy-close-out.cjs` | VERIFIED | Both pass (my run) |
+| `35-REVIEW-DISPOSITION.md`, ROADMAP deferred note, STATE | VERIFIED | Unchanged / updated as above |
 
 ### Key Link Verification
 
-| From | To | Via | Status | Details |
-|------|----|----|--------|---------|
-| App.vue created() | router.onReady, then hydrateSession | `await this.waitForInitialRoute()` | WIRED | |
-| session.js visitAppRoute | `cy.visitApp('/#' + route)` | plain hard load | WIRED | |
-| vue test:unit | close-out-v118.cjs, cypress-junit-reporter.cjs | `&&` chain | WIRED | |
-| parseResult | BuildLogDialog empty state | undefined response | WIRED | |
-| vue-console-registry / -hub | test-vue-console | `requires` | WIRED | Proven at runtime by job 16076 `requires` |
-| test-vue-console | `cypress/results` | `store_test_results` | WIRED | 77 results visible |
-| DeviceDetail buildDevice | devices/buildFirmware, then POST /build | try/finally on buildPending | WIRED | |
-| theme.scss | _device-detail.scss | `@import 'device-detail'` | WIRED | |
-| Devices.vue | comparePlatformKeys | import | WIRED | |
-| DeploykeyController | /api/user/rsakey/create | `.done`/`.fail`/`.always` | WIRED | |
-| LogviewController wss.onopen | wssinit() then wsstailLog | | WIRED | |
-| parent HEAD gitlink | console thinx-staging | `512ddb5` | WIRED | Gitlink at HEAD equals the console checkout HEAD |
-| pipeline 5677 | console.thinx.cloud / rtm.thinx.cloud | Swarmpit autoredeploy | WIRED | Served Vue last-modified 12:40:26Z with id `24d2b7c`; Legacy 12:31:18Z |
+| From | To | Via | Status |
+|------|----|-----|--------|
+| App.vue created() | router.onReady, then hydrateSession | `await this.waitForInitialRoute()` | WIRED |
+| api.js request() | fetchItems stores | `networkError` -> throw | WIRED |
+| devices/enviros/admin stores | Devices.vue LOAD_ERROR, AdminUsers.vue, PasswordReset.vue | throw / `result.networkError` branch | WIRED (I12, I13) |
+| console-classic-registry / -hub | test-console-classic | `requires` | WIRED (runtime edge in 16084) |
+| vue-console-registry / -hub | test-vue-console | `requires` | WIRED (runtime edge in 16081) |
+| test-vue-console | `cypress/results` | `store_test_results` | WIRED (77 results) |
+| parent HEAD gitlink | console thinx-staging | `355e868` | WIRED (equals console `ls-remote`) |
+| pipeline 5678 | console.thinx.cloud / rtm.thinx.cloud | Swarmpit autoredeploy | WIRED (Vue 09:28:02Z id `75bb695`, Legacy 09:20:14Z; operator confirmed tasks in UAT 9) |
 
 ### Data-Flow Trace (Level 4)
 
-| Artifact | Data Variable | Source | Produces Real Data | Status |
-|----------|---------------|--------|--------------------|--------|
+| Artifact | Data Variable | Source | Real Data | Status |
+|----------|---------------|--------|-----------|--------|
 | App.vue | currentPath | `router.onReady` then `currentRoute.path` | Yes | FLOWING |
-| DeviceDetail.vue | error/message after build | `buildFirmware` reply via `buildFailure()` | Yes | FLOWING |
-| Devices.vue | items / LOAD_ERROR | `devices/fetchItems` (`GET /device`) | Yes for data; LOAD_ERROR unreachable on a transport failure since 48-08 | FLOWING, with the CR-01 caveat |
+| Devices.vue | items / LOAD_ERROR | `devices/fetchItems` (`GET /device`); throws on a transport failure again | Yes; the previous CR-01 caveat is closed | FLOWING |
+| DeviceDetail.vue | error/message after build | `buildFirmware` reply | Yes | FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |----------|---------|--------|--------|
-| CI gate wiring offline | `node --test spec/node/CiPipelineGates.test.js` | 27 pass, 0 fail | PASS |
-| Legacy deploy-key cases | `LC_ALL=C node services/console/src/test/deploykey.cjs` | rc 0, D1-D10 | PASS |
-| Legacy close-out cases | `LC_ALL=C node services/console/src/test/legacy-close-out.cjs` | rc 0, G1-G8 | PASS |
-| Vue unit chain (once) | `LC_ALL=C npm run test:unit` in vue | rc 0, 431 ok, 0 FAIL | PASS |
-| CI JUnit results | GET circleci v2 `.../16075/tests` | 77 items, 11 files, 0 failure | PASS |
-| Gate ordering | GET circleci v2 workflow jobs, pipeline 5677 | 16076 requires 16075 success | PASS |
-| Live Vue bundle | GET console.thinx.cloud/js/app.js | id `24d2b7c` x2, 7 markers, no cog/old glyph | PASS |
-| Live Legacy files | GET rtm.thinx.cloud/app/js/... (4 files) | identical to source except ENV | PASS |
-| API surface and port 7442 | unauthenticated GETs | 401 x4; 7442 200 (baseline 200) | PASS |
+| CI gate wiring | `node --test spec/node/CiPipelineGates.test.js` | 30 pass, 0 fail | PASS |
+| CircleCI compile, both parameter values | `node scripts/check-ci-gates.js compile` | `CI-GATES COMPILE OK` | PASS |
+| Legacy deploy-key cases | `LC_ALL=C node services/console/src/test/deploykey.cjs` | all checks passed | PASS |
+| Legacy close-out cases | `LC_ALL=C node services/console/src/test/legacy-close-out.cjs` | all checks passed (G1-G9) | PASS |
+| Vue unit chain (run once) | `LC_ALL=C npm run -s test:unit` in `services/console/vue` | rc 0, 435 `ok` lines, no failing line (the one `FAIL` grep hit is the word FAILED inside check N4's title) | PASS |
+| Root node suite | operator-run `npm run test:node` | 113/113 (not re-run by me) | PASS (operator evidence) |
+| CI JUnit results | GET circleci v2 `.../16080/tests` | 77 results, 11 files, 0 failure; deep-link.spec.js 4/4 | PASS |
+| Pipeline 5678 | GET circleci v2 workflows/jobs | both workflows success; all 6 jobs success; gate ordering as above | PASS |
+| Live bundles | GET console.thinx.cloud/js/app.js, rtm.thinx.cloud DevicesController.js | `75bb695` x2, `networkError` x8; `Build failed.` x1, old toast x0 | PASS |
 
 ### Probe Execution
 
@@ -150,67 +132,43 @@ Step 7c: no `scripts/*/tests/probe-*.sh` is declared or implied by the phase. No
 
 ### Requirements Coverage
 
-| Requirement | Source Plan | Description | Status | Evidence |
+Every ID in the phase requirement list was cross-referenced against `REQUIREMENTS.md` (descriptions and traceability rows, all `[x]` and `Complete`, all mapped to Phase 48) and against the PLAN frontmatter claims.
+
+| Requirement | Source Plans | Description | Status | Evidence |
 |-------------|-------------|-------------|--------|----------|
-| NOTIF-04 | 48-01, 48-06, 48-08 | Reloading a Vue deep link stays on that page | SATISFIED (production UAT pending) | SC1 |
-| POL-01 | 48-03, 48-05, 48-06 | Build Firmware in-flight, account menu name, width-constrained column | SATISFIED (visual UAT pending) | SC2 |
-| FIX-01 | 48-01, 48-03, 48-04, 48-05, 48-06 | Phase 35 IN-01..IN-08 fixed or deferred | SATISFIED | SC3 |
-| CI-06 | 48-02, 48-04, 48-06 | Legacy build re-enabled; pending Legacy changes deployed | SATISFIED | SC4 |
-| CI-07 | 48-01, 48-02, 48-05, 48-06, 48-07, 48-08 | Vue Cypress green in CI, JUnit stored, gates vue-console-registry, no leaked-fixture login | SATISFIED | SC5 and 48-05 checks |
+| NOTIF-04 | 48-01, 48-06, 48-08 | Reloading a Vue deep link stays on that page | SATISFIED | SC1; Cypress 4/4 on 5678; UAT 1 |
+| POL-01 | 48-03, 48-05, 48-06 | Build Firmware in-flight, account menu name, width-constrained column | SATISFIED | SC2; UAT 2, 3, 4, 6 |
+| FIX-01 | 48-01, 48-03, 48-04, 48-05, 48-06 | Phase 35 IN-01..IN-08 fixed or deferred | SATISFIED | SC3; ledger `open: 0`; UAT 10 |
+| CI-06 | 48-02, 48-04, 48-06 | Legacy build re-enabled; pending Legacy changes deployed | SATISFIED | SC4; 5678 `legacy-console`; UAT 7, 8, 9 |
+| CI-07 | 48-01, 48-02, 48-05, 48-06, 48-07, 48-08 | Vue Cypress green, JUnit stored, gates vue-console-registry, no leaked-fixture login | SATISFIED | SC5; 5678 jobs 16080/16081 |
 
-No orphaned requirements: REQUIREMENTS.md maps exactly these five IDs to Phase 48, and every one is claimed by a plan.
-
-### Decision Coverage
-
-All trackable CONTEXT.md decisions are honored by shipped artifacts: 19/19 (`check.decision-coverage-verify`, non-blocking).
+No orphaned requirements: `REQUIREMENTS.md` maps exactly NOTIF-04, POL-01, FIX-01, CI-06, CI-07 to Phase 48, and every one is claimed by at least one plan.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |------|------|---------|----------|--------|
-| (all phase files) | - | TBD/FIXME/XXX | none found | Debt-marker gate clean |
-| `vue/cypress/integration/login.spec.js` | re-indented skipped tests | `// TODO check ...` (5) | Info | Pre-existing lines moved by the rewrite, inside skip-by-design tests |
-| `vue/src/core/api.js` | 102-115 | catch resolves a transport failure as `{ success: false, status: 0 }` with no marker | Warning | Review CR-01, see below |
-| `vue/src/core/api.js` | 116 | `await response.text()` outside the guard | Warning | Review WR-01 |
-| `src/app/js/controllers/DevicesController.js` | 137 | `toastr.error( response.status, ...)` (live) | Warning | Review WR-04; already recorded in ROADMAP "Found in Phase 48 (deferred)" |
-| `.circleci/config.yml` | legacy-console workflow | Legacy image is not gated on the Legacy unit tests | Warning | Review WR-02 |
-| `services/console/.circleci/config.yml` | 185 | `context: sonarcloud` on `test_vue` | Warning | Review WR-03; not covered by the 48-02 prohibition (that one is about the parent job) |
+| all files touched by the review fixes | - | TBD/FIXME/XXX | none found | Debt-marker gate clean |
+| `services/console/.circleci/config.yml` | 200 | pre-existing `# TODO` inside a commented-out legacy job | Info | Not introduced by this phase |
+| `vue/cypress/integration/login.spec.js` | - | `// TODO check ...` (5) inside skip-by-design tests | Info | Pre-existing lines |
+| Legacy console (operator, UAT 9 note) | - | `+++ updateApikeys` / `+++ updateSources` debug console lines | Info | Cosmetic; not a roadmap criterion, requirement or plan must-have |
+| `services/console/.circleci/config.yml` | 218 | `sonarcloud` context on the `vue` publish job | Info | Not the `test_vue` job WR-03 is about; publish job, unchanged |
 
-### CR-01 judgment: follow-up, not a goal gap for Phase 48
+The previous Warning rows (CR-01 `status: 0` without a marker, WR-01, WR-02, WR-03, and the WR-04 toast) are all closed above.
 
-The finding is real. Since 48-08 (`09fbde1`), `Api.request()` resolves a transport-level failure (offline, DNS, connection refused, CORS failure, edge unreachable) as `{ success: false, status: 0, response: null }`. `devices/fetchItems` and `enviros/fetchItems` swallow non-success, so `Devices.vue` `LOAD_ERROR` is unreachable for those failures. `PasswordReset.vue`'s "Network error. Please try again." branch is dead, and a transport failure now reads "Could not initiate reset." / "Could not set password." `AdminUsers.vue` has the same loss.
+### Remaining non-blocking review items
 
-Why it is not a Phase 48 gap:
-- No roadmap success criterion or REQUIREMENTS entry for NOTIF-04, POL-01, FIX-01, CI-06 or CI-07 covers network-error surfacing. All five criteria hold with CR-01 present.
-- No plan must-have is falsified. The 48-03 E8 truth requires the error copy to be unchanged, and the string is unchanged. The 48-01 E4 truth ("a failed hydration (API down) is treated as logged out") still holds: hydrate gets `success: false` and redirects. The 48-08 prohibition on "user-visible copy" holds literally, because no string changed. CR-01 changes which branch runs, not the copy.
-- The severity is overstated for production. Before Phase 48, HTTP-level failures already resolved as `{ success: false }`, through the `!response.ok` and JSON-parse branches. That includes Traefik's 502/503 during every API rollout, the common outage on this stack. So Devices already showed an empty fleet for those. CR-01 widens that to pure transport failures. It is a real regression, but a narrow one.
-
-Recommendation (WARNING, operator decision): before the milestone closes, either fix it or set CR-01 to `deferred` with a reason in `48-REVIEW-DISPOSITION.md`. Any open review row will show up in `/gsd-audit-milestone`. The fix is small and keeps 48-08's no-unhandled-rejection property: add `networkError: true` to the catch result, move `response.text()` inside the guard (this also closes WR-01), throw on `networkError` in `devices/fetchItems` and `enviros/fetchItems`, and check it in PasswordReset/AdminUsers. Add a unit check, and rerun `deep-link.spec.js` in the CI mirror, because the 48-08 race depends on `request()` not rejecting.
+`48-REVIEW-DISPOSITION.md` still has 7 info findings `open` (IN-01..IN-07: deep-link spec coupled to the count of dashboard reads, dev-server proxy sends unstubbed calls to production, gated suite and shipped image resolve dependencies independently, video artifacts stored although disabled, two token exchanges on a logged-out cold load, `outline: none` without `:focus-visible`, env-file and JUnit-name leftovers). They are info-level, are not covered by any roadmap criterion, requirement or plan must-have, and do not change this verdict. `/gsd-audit-milestone` will list them; the operator should mark each `fixed` or `deferred` with a reason in the disposition file before the milestone closes if the audit should come out clean.
 
 ### Human Verification Required
 
-This is a user-facing phase, and the planned operator UAT (48-06 D7) has not been run. The three abstained backstop truths overlap with UAT items 7 and 8 and are folded into them.
-
-1. **Deep links on production (NOTIF-04).** Test: on https://console.thinx.cloud, logged in, open /#/app/history and reload; reload /#/app/devices and a device page; log out, then load /#/app/history. Expected: you stay on History (/#/app/history/audit) with no dashboard flash, the other pages stay, and the logged-out load lands on /#/login. Why human: CI exercises a stubbed session-token exchange, not the real httpOnly cookie.
-2. **Build Firmware (POL-01).** Expected: spinner and disabled button, then "Build triggered."; a double click sends one POST /api/v2/build; keyboard focus returns to the button.
-3. **Account menu (POL-01).** Expected: user-circle icon with tip "Account"; the accessibility tree names the toggle "Account menu"; both items work.
-4. **Device Detail column.** Expected: about 1140px, left-aligned.
-5. **Device list (D-14).** Expected: toggle tips, focus tips on markers with a visible ring, sort matches the pills, selection survives a re-sort.
-6. **Danger alert (48-03 backstop).** Expected: white text, a long reason wraps in the column, and the close button is visible and clickable.
-7. **Legacy deploy keys (48-04 backstop).** Expected: the tab and 121-character names are refused with the fixed sentences and no request; Create works again afterwards.
-8. **Legacy build toast and first socket (48-04 backstop).** Expected: "Build started." / "Build queued." with no `undefined`; a no-history device shows its toasts; an overlay-first tab receives frames.
-9. **console-retest skill on rtm.thinx.cloud, plus Swarmpit task start times after 2026-10-16T12:29:38Z.**
-10. **Legacy Cypress env file (D-05, review IN-07).** The operator records "no real credential" or "rotated ...".
+None outstanding. All ten previous items are recorded as passed in `48-UAT.md` (2026-10-17, complete, 10/10, 0 issues), including the three backstop truths and the console-retest on `rtm.thinx.cloud`.
 
 ### Gaps Summary
 
-There are no blocking gaps. All five roadmap success criteria are met in code, in CI (pipeline 5677) and on production as observed today. Every requirement ID is accounted for, and none is orphaned. Phase 48 is the last phase in the milestone, so nothing can be deferred to a later phase.
-
-The phase is `human_needed` because the ten-item operator UAT is still outstanding, and three non-inferable backstop truths need observed browser evidence.
-
-Separately, all 12 findings in `48-REVIEW-DISPOSITION.md` are still `open`. CR-01 is a narrow production regression in error surfacing introduced by 48-08. It is a follow-up and does not block this phase's goal, but it should be fixed or explicitly deferred before the milestone closes. WR-02 (the Legacy image is not gated on the Legacy tests) and WR-03 (the `sonarcloud` context on a job that runs unpinned installs) are CI hardening follow-ups of the same kind. WR-04 is the already recorded "Found in Phase 48 (deferred)" item.
+There are no gaps. All five roadmap success criteria are met in code, in CI (pipeline 5678, all jobs green, including the new Legacy test gate and the Cypress deep-link spec on the post-review-fix code), on production as observed today, and by operator UAT. All five requirement IDs are accounted for and none is orphaned. The CR-01 regression identified in the previous report is fixed with unit coverage (I9-I13) and live in the served bundle. Phase 48 is the last phase of the milestone, so nothing needs deferring to a later phase.
 
 ---
 
-_Verified: 2026-10-16T15:20:00Z_
+_Verified: 2026-10-17T12:30:00Z_
 _Verifier: Claude (gsd-verifier)_
