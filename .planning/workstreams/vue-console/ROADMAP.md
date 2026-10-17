@@ -372,7 +372,19 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
   2. When the network fails, the API keys, channels, repositories and profile pages show a single error message and no stale rows, as the deploy-key and transformer pages already do.
   3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
   4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
-**Plans:** 0 plans
+**Plans:** 4 plans (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 48.1 to break down)
+**Wave 1**
+- [ ] 48.1-01-PLAN.md — W1: Routes.js guard loads the profile before the admin check (admin paths only, fail-closed to the dashboard); admin, non-admin and logged-out reload cases added to `deep-link.spec.js` (additions only); `admin-users.json` fixture and `getAdminUsers` stub; new `tests/unit/audit-gaps-v118.cjs` chained into `test:unit` (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 48.1-02-PLAN.md — W2: `apikeys`, `channels`, `repositories` and `profile` fetchers throw on `networkError`; one `*-load-error` alert and no stale rows on their pages; Header, Login and OAuthReturn absorb a rejecting `fetchProfile`; S/P/K unit checks (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 48.1-03-PLAN.md — W3: stubbed Cypress specs for rsakeys, transformers, enviros, repositories (incl. the W2 network-failure error in a browser) and build-log search, with fixtures and additive stubs in `api-stubs.js` (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 48.1-04-PLAN.md — CI-mirror verification of the full 16-spec suite on the committed console HEAD, local parent submodule-pointer bump, operator ship checklist as a human check (no auto push) (wave 4)
+
+Plan-checker advisories (0 blockers, 2 size warnings, accepted by the operator 2026-10-17): plans 02 (12 files) and 03 (14 files) exceed the 10-file guideline; PD-04 throws on `networkError` only (a 5xx reply still leaves stale state — record as a residual in the SUMMARY); PD-09 re-syncs list rows after a successful delete (adjacent fix, outside W2); 48.1-04 Task 1 should run the Cypress suite detached if it exceeds the 10-minute tool timeout.
