@@ -372,11 +372,12 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
   2. When the network fails, the API keys, channels, repositories and profile pages show a single error message and no stale rows, as the deploy-key and transformer pages already do.
   3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
   4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
-**Plans:** 4 plans (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
+
+**Plans:** 1/4 plans executed (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
 
 Plans:
 **Wave 1**
-- [ ] 48.1-01-PLAN.md — W1: Routes.js guard loads the profile before the admin check (admin paths only, fail-closed to the dashboard); admin, non-admin and logged-out reload cases added to `deep-link.spec.js` (additions only); `admin-users.json` fixture and `getAdminUsers` stub; new `tests/unit/audit-gaps-v118.cjs` chained into `test:unit` (wave 1)
+- [x] 48.1-01-PLAN.md — W1: Routes.js guard loads the profile before the admin check (admin paths only, fail-closed to the dashboard); admin, non-admin and logged-out reload cases added to `deep-link.spec.js` (additions only); `admin-users.json` fixture and `getAdminUsers` stub; new `tests/unit/audit-gaps-v118.cjs` chained into `test:unit` (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 48.1-02-PLAN.md — W2: `apikeys`, `channels`, `repositories` and `profile` fetchers throw on `networkError`; one `*-load-error` alert and no stale rows on their pages; Header, Login and OAuthReturn absorb a rejecting `fetchProfile`; S/P/K unit checks (wave 2)

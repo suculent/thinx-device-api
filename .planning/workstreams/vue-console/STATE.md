@@ -3,13 +3,13 @@ gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
 current_phase: "48.1"
-current_phase_name: Close v1.18 audit gaps
-status: completed
-stopped_at: Phase 48 complete — all phases complete
-last_updated: "2026-10-17T20:29:19.994Z"
+current_phase_name: "Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)"
+status: executing
+stopped_at: Completed 48.1-01-PLAN.md
+last_updated: "2026-10-17T21:32:20.582Z"
 last_activity: 2026-10-17
-last_activity_desc: Phase 48 complete
-state_head: 7b07bc3350e1ec3de5a4675bd9359d2af1fba2b0
+last_activity_desc: Phase 48.1 execution started
+state_head: 7ae5ca006fbc16df2ba47fc3f624cf3d63e63c97
 progress:
   total_phases: 7
   completed_phases: 7
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
 
 **Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 48 — Deep Links & Close-out
+**Current focus:** Phase 48.1 — Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)
 
 ## Current Position
 
-Phase: 48.1 (Close v1.18 audit gaps) — READY TO EXECUTE
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-10-17 — Phase 48 complete
+Phase: 48.1 (Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-10-17 — Phase 48.1 execution started
 
 Progress: [██████████] 100%
 
@@ -86,6 +86,7 @@ Progress: [██████████] 100%
 | Phase 48 P04 | 6 min | 2 tasks | 6 files |
 | Phase 48 P05 | 2h 0m | 3 tasks | 16 files |
 | Phase 48 P08 | 2h 4m | 3 tasks | 5 files |
+| Phase 48.1 P01 | 21 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -153,6 +154,9 @@ Progress: [██████████] 100%
 - [Phase 48]: 48-07: Vue Cypress CI runs use the in-repo cypress/reporters/junit.js (one junit-<spec>.xml per spec, rewritten on every end, never throws, no npm dependency) instead of Cypress 9.7.0's bundled mocha-junit-reporter 2.0.0, which threw on a repeated end; CI runs are video-free with fonts.googleapis.com, fonts.gstatic.com and *.gvt1.com blocked; CircleCI now lists pending tests as skipped (77 results). On console/parent thinx-staging since 0692f0f / e13933a3.
 - [Phase 48]: 48-08: VERDICT A+B for the logged-out deep-link flake. Cause: deep-link test 3 ended with its eight dashboard reads in flight, Cypress failed them when test 4 reset the intercepts, Api.request() let TypeError 'Failed to fetch' escape, Header.vue's uncaught fetchProfile chain made it an unhandled rejection, and Cypress's fail() stopped test 4's beforeEach queue (no viewport, no cy.stubThinxApi) and left the error state that made the #/login assertion give up with an undefined subject. Fix: Api.request() resolves a rejected fetch/fetchWithCsrf to { success: false, status: 0, response: null } (unit I9, console 9a0e1cd RED then 09fbde1) and test 3 waits by alias for its eight reads (512ddb5, additions only). Proof: RED arm W 20/20 failed before, 0/20 after; arms S, F, W 3x40 green; deep-link 55/55 consecutive in the CI mirror; full suite 11/11 (77 results); pipeline 5677 green.
 - [Phase 48]: 48-06: resumed at Task 1 step 8 against H=24d2b7cd (pipeline 5677) without redoing steps 1-7; Task 2 halted on an over-broad plan marker (flaticon-settings-10 also matches the icon-font CSS rule), recorded as halted rather than reinterpreted
+- [Phase 48.1]: 48.1-01: the admin guard loads the profile in Routes.js (isAdminSession), only for /app/admin paths and only while the profile store holds its initial empty object; a profile that cannot be loaded fails closed to /app/dashboard (PD-01..PD-03)
+- [Phase 48.1]: 48.1-01: a logged-out cold load posts /session/token twice (guard, then App.vue after onReady); logged-out deep-link tests settle both with cy.wait(['@unstubbed', '@unstubbed']) so the next test's catch-all records nothing (48-08 method, additions only)
+- [Phase 48.1]: 48.1-01: audit-gaps-v118.cjs is standalone (harness copied from close-out-v118.cjs); Y1 spec hygiene is specHygiene(file, { tests }) with the forbidden markers as data for 48.1-03
 
 ### Pending Todos
 
@@ -193,6 +197,6 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-**Last session:** 2026-10-16T13:28:25.649Z
-**Stopped At:** Phase 48 complete — all phases complete
+**Last session:** 2026-10-17T21:32:18.382Z
+**Stopped At:** Completed 48.1-01-PLAN.md
 **Resume File:** None
