@@ -39,7 +39,7 @@ no dependency or infrastructure upgrades.
 - [x] **Phase 45: Deploy Key Rename & Row Actions** - rename without touching key material, icon row actions with confirmed single-shot delete, non-wrapping table, Phase 38 review items (API + console) (completed 2026-10-13)
 - [x] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure (completed 2026-10-14)
 - [x] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items (completed 2026-10-15)
-- [ ] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI)
+- [x] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI) (completed 2026-10-17)
 
 ## Phase Details
 
@@ -267,7 +267,7 @@ Plans:
 **Found in Phase 48** (deferred, not a Phase 35 item, so not in the FIX-01 ledger):
 - The Legacy build refusal toast `DevicesController.js:135` (`toastr.error( response.status, … )`) can still be empty, because the build reply has no status field (48-04 follow-up candidate) — fixed in console `355e868` (48-REVIEW WR-04): a refused build now shows a fixed "Build failed." toast
 
-**Plans:** 8/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 **Wave 1**
@@ -351,7 +351,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 45. Deploy Key Rename & Row Actions | v1.18 | 5/5 | Complete    | 2026-10-13 |
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
-| 48. Deep Links & Close-out | v1.18 | 8/8 | In Progress | - |
+| 48. Deep Links & Close-out | v1.18 | 8/8 | Complete    | 2026-10-17 |
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*
