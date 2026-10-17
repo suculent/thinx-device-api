@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: "48.1"
 current_phase_name: "Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)"
 status: executing
-stopped_at: Completed 48.1-02-PLAN.md
-last_updated: "2026-10-17T21:56:50.867Z"
+stopped_at: Completed 48.1-03-PLAN.md
+last_updated: "2026-10-17T22:26:07.102Z"
 last_activity: 2026-10-17
 last_activity_desc: Phase 48.1 execution started
-state_head: f34c2abd80b1e124061ab18a7b39a21d2db98d18
+state_head: 9eca45440660be54c43475bd8a1e61204bffb434
 progress:
   total_phases: 7
   completed_phases: 7
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48.1 (Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-10-17 — Phase 48.1 execution started
 
@@ -88,6 +88,7 @@ Progress: [██████████] 100%
 | Phase 48 P08 | 2h 4m | 3 tasks | 5 files |
 | Phase 48.1 P01 | 21 min | 2 tasks | 6 files |
 | Phase 48.1 P02 | 19 min | 3 tasks | 12 files |
+| Phase 48.1 P03 | 23 min | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,9 @@ Progress: [██████████] 100%
 - [Phase 48.1]: 48.1-02: the four fetchers throw only on result.networkError (PD-04) and keep their state (PD-05); the pages clear their own rows, selection and action error and show one fixed-copy load error; a stored write with a failed follow-up read resolves refreshed: false and the page reloads (PD-09 re-sync on success)
 - [Phase 48.1]: 48.1-02: a failed profile read never blocks sign-in (PD-06): Header catches, Login and OAuthReturn wrap only the fetchProfile await, Routes.js already fails closed, DeviceDetail reads repositories through allSettled
 - [Phase 48.1]: 48.1-02: audit-gaps-v118.cjs gained a --tap reporter mode (test-only commit b1ef8be) so the TDD red-evidence classifier reads the harness own report; the default ok/FAIL output that test:unit and the plan verifies grep is unchanged
+- [Phase 48.1]: 48.1-03: every new spec is stub-only and settles its reads by alias; the catch-all must stay empty in every test (Y1 unstubbed option), so a request that would reach the dev-server proxy fails the gate (PD-08, T-48.1-10)
+- [Phase 48.1]: 48.1-03: GET /source stays opt-in (cy.stubSources) because DeviceDetail reads it and the device specs rely on the catch-all; /rsakey reads and writes and PUT /env became default stubs since no existing spec reaches them (PD-07)
+- [Phase 48.1]: 48.1-03: the build-log scroll-to-match assertion is withheld, not weakened: BuildLogDialog.scrollToCurrent measures the modal body one tick before the b-modal transporter re-renders it, a pre-existing vue/src defect the test-only plan may not fix; recorded in deferred-items.md and the WINDOWS ledger
 
 ### Pending Todos
 
@@ -181,6 +185,7 @@ Progress: [██████████] 100%
 - [Milestone close] Do not close v1.18 with the CI-05 block still in place (CI-06).
 - [Resolved by 48-08] The 48-06 Task 1 step 8 stop (pipeline 5675) and the 48-07 halt (pipeline 5676, the logged-out deep-link redirect) are fixed: VERDICT A+B, test 3's dashboard reads were still in flight when Cypress reset the intercepts for test 4, and Api.request() let the resulting 'Failed to fetch' escape as an unhandled rejection that stopped test 4's beforeEach; console fix commits 9a0e1cd, 09fbde1, 512ddb5; pipeline 5677 `CI-GATES PIPELINE OK 5677` (test-vue-console job 16075 green, 77 JUnit results, 0 failures; vue-console-registry success); pushed parent SHA 24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed. 48-06 resumes at Task 1 step 8 with H=24d2b7cd8b1b5b315247ab47e9eb3ade38de73ed: run its verify 4 and 5 with that H instead of `git rev-parse HEAD` (the local docs commits above that SHA touch only `.planning/` and ride the next push), run verify 6 against the same SHA, then Task 2. 48-06's pre-push baselines stay in `${TMPDIR}/p48-*`.
 - [Resolved 2026-10-16] [Phase 48] 48-06 halted at Task 2 verify 2: 'still served: flaticon-settings-10' is a false positive (the only hit is the untouched icon-font CSS rule from vue/src/styles/_icons.scss; the Header cog markup 'fi flaticon-settings-10' went 1 -> 0). All other gates pass (CI-GATES PIPELINE OK 5677; JUNIT job 16075 77/0; Vue id 24d2b7c + 7 markers; Legacy D-09 markers; API 401s; port 7442 200; WS-MULTITAB OK 2/2). Operator chose to amend the check to the markup form `fi flaticon-settings-10`; rerun against H=24d2b7cd rc 0; 48-06 complete.
+- [Phase 48.1] BUILD-03 defect found by 48.1-03: stepping through build-log matches never scrolls the modal log box (BuildLogDialog.scrollToCurrent runs one tick before the b-modal transporter re-renders; scrollTop stays 0). Owner decision: fix BuildLogDialog.vue (candidate in the phase deferred-items.md), then add the scrollTop assertion to build-log-search.spec.js test 1.
 
 ### Quick Tasks Completed
 
@@ -201,6 +206,6 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-**Last session:** 2026-10-17T21:56:48.669Z
-**Stopped At:** Completed 48.1-02-PLAN.md
+**Last session:** 2026-10-17T22:26:04.342Z
+**Stopped At:** Completed 48.1-03-PLAN.md
 **Resume File:** None
