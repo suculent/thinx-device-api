@@ -5,11 +5,11 @@ milestone_name: Console Improvements
 current_phase: "48.1"
 current_phase_name: "Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)"
 status: executing
-stopped_at: Completed 48.1-01-PLAN.md
-last_updated: "2026-10-17T21:32:20.582Z"
+stopped_at: Completed 48.1-02-PLAN.md
+last_updated: "2026-10-17T21:56:50.867Z"
 last_activity: 2026-10-17
 last_activity_desc: Phase 48.1 execution started
-state_head: 7ae5ca006fbc16df2ba47fc3f624cf3d63e63c97
+state_head: f34c2abd80b1e124061ab18a7b39a21d2db98d18
 progress:
   total_phases: 7
   completed_phases: 7
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 ## Current Position
 
 Phase: 48.1 (Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-10-17 — Phase 48.1 execution started
 
@@ -87,6 +87,7 @@ Progress: [██████████] 100%
 | Phase 48 P05 | 2h 0m | 3 tasks | 16 files |
 | Phase 48 P08 | 2h 4m | 3 tasks | 5 files |
 | Phase 48.1 P01 | 21 min | 2 tasks | 6 files |
+| Phase 48.1 P02 | 19 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,9 @@ Progress: [██████████] 100%
 - [Phase 48.1]: 48.1-01: the admin guard loads the profile in Routes.js (isAdminSession), only for /app/admin paths and only while the profile store holds its initial empty object; a profile that cannot be loaded fails closed to /app/dashboard (PD-01..PD-03)
 - [Phase 48.1]: 48.1-01: a logged-out cold load posts /session/token twice (guard, then App.vue after onReady); logged-out deep-link tests settle both with cy.wait(['@unstubbed', '@unstubbed']) so the next test's catch-all records nothing (48-08 method, additions only)
 - [Phase 48.1]: 48.1-01: audit-gaps-v118.cjs is standalone (harness copied from close-out-v118.cjs); Y1 spec hygiene is specHygiene(file, { tests }) with the forbidden markers as data for 48.1-03
+- [Phase 48.1]: 48.1-02: the four fetchers throw only on result.networkError (PD-04) and keep their state (PD-05); the pages clear their own rows, selection and action error and show one fixed-copy load error; a stored write with a failed follow-up read resolves refreshed: false and the page reloads (PD-09 re-sync on success)
+- [Phase 48.1]: 48.1-02: a failed profile read never blocks sign-in (PD-06): Header catches, Login and OAuthReturn wrap only the fetchProfile await, Routes.js already fails closed, DeviceDetail reads repositories through allSettled
+- [Phase 48.1]: 48.1-02: audit-gaps-v118.cjs gained a --tap reporter mode (test-only commit b1ef8be) so the TDD red-evidence classifier reads the harness own report; the default ok/FAIL output that test:unit and the plan verifies grep is unchanged
 
 ### Pending Todos
 
@@ -197,6 +201,6 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-**Last session:** 2026-10-17T21:32:18.382Z
-**Stopped At:** Completed 48.1-01-PLAN.md
+**Last session:** 2026-10-17T21:56:48.669Z
+**Stopped At:** Completed 48.1-02-PLAN.md
 **Resume File:** None
