@@ -355,3 +355,24 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*
+
+### Phase 48.1: Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)
+
+**Goal:** The three real gaps found by the v1.18 milestone audit (`v1.18-MILESTONE-AUDIT.md`) are closed before the milestone completes: an admin who reloads `/#/app/admin/users` stays on it, stores that fail on the network show an error and not stale or empty data, and the Cypress suite that gates the Vue deploy covers the pages added in Phases 44-47.
+**Requirements**: NOTIF-04 (regression: admin deep link), CI-07 (gate coverage). No new requirement IDs.
+**Depends on:** Phase 48
+**Repos**: `services/console` (Vue) and, for any new CI behaviour, the parent `.circleci/config.yml`.
+- W1 (warning-high): `Routes.js` guard reads `profile.admin` from a store that starts empty and nothing loads the profile before it runs, so a reloaded admin is sent to the dashboard. Fix: dispatch `profile/fetchProfile` in the guard before the admin check (or hydrate the profile in `hydrateSession`), with an admin reload case in `deep-link.spec.js`.
+- W2 (warning): `apikeys`, `channels`, `repositories` and `profile` stores ignore `networkError` and keep stale or empty state with no error banner; `rsakeys` and `transformers` already throw and are the pattern to copy.
+- W3 (warning): the gating Cypress suite has no spec for rsakeys, transformers, enviros, repositories or build-log search; Phases 45-47 rely on jsdom unit tests only.
+- Out of scope: W4-W6 and the open review items (info), which stay as recorded tech debt.
+
+**Success Criteria** (what must be TRUE):
+  1. A logged-in admin who reloads `/#/app/admin/users` stays on that page; a non-admin on the same URL still lands on the dashboard, and a logged-out reload goes to `/login`.
+  2. When the network fails, the API keys, channels, repositories and profile pages show a single error message and no stale rows, as the deploy-key and transformer pages already do.
+  3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
+  4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 48.1 to break down)

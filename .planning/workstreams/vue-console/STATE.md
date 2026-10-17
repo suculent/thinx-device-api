@@ -5,16 +5,15 @@ milestone_name: Console Improvements
 current_phase: 48
 status: completed
 stopped_at: Phase 48 complete — all phases complete
-last_updated: "2026-10-17T19:36:45.560Z"
+last_updated: "2026-10-17T19:47:40.701Z"
 last_activity: 2026-10-17
 last_activity_desc: Phase 48 complete
-state_head: 2c9d37f0f576f8946d4e08c97643f0f74319dc8a
+state_head: 3b09fbb6dae696c949ef03a469e0e1af7831ed05
 progress:
   total_phases: 7
   completed_phases: 7
   total_plans: 6
   completed_plans: 7
-  percent: 100
 ---
 
 # Project State
@@ -180,6 +179,10 @@ Progress: [██████████] 100%
 |---|-------------|------|--------|-----------|
 | 261012-r9z | Fix Codacy findings on PR 573 (no-control-regex x2, unsafe-regex); CodeQL clean | 2026-10-12 | 174cf071 | [261012-r9z-fix-codacy-findings-on-pr-573-no-control](./quick/261012-r9z-fix-codacy-findings-on-pr-573-no-control/) |
 | 261013-kvm | Optional New Relic APM for the API: loader on thinx.js line 1, newrelic 14.5.1 pinned, NEW_RELIC_LICENSE_KEY external secret on api (unpushed) | 2026-10-13 | 33cb0ed1 | [261013-kvm-add-optional-new-relic-apm](./quick/261013-kvm-add-optional-new-relic-apm/) |
+
+### Roadmap Evolution
+
+- Phase 48.1 inserted after Phase 48: Close v1.18 audit gaps: admin deep link (W1), store error states (W2), Cypress coverage (W3) (URGENT)
 
 ## Deferred Items
 
