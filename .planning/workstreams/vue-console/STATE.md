@@ -4,12 +4,12 @@ milestone: v1.18
 milestone_name: Console Improvements
 current_phase: "48.1"
 current_phase_name: "Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)"
-status: executing
-stopped_at: Completed 48.1-03-PLAN.md
-last_updated: "2026-10-17T22:26:07.102Z"
+status: verifying
+stopped_at: Completed 48.1-04-PLAN.md (phase 48.1 executed; operator push pending)
+last_updated: "2026-10-17T23:54:56.521Z"
 last_activity: 2026-10-17
 last_activity_desc: Phase 48.1 execution started
-state_head: 9eca45440660be54c43475bd8a1e61204bffb434
+state_head: b99eb66d0330b32803b9681feb75b7b93de4d8a8
 progress:
   total_phases: 7
   completed_phases: 7
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-co
 
 Phase: 48.1 (Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-17 — Phase 48.1 execution started
 
 Progress: [██████████] 100%
@@ -89,6 +89,7 @@ Progress: [██████████] 100%
 | Phase 48.1 P01 | 21 min | 2 tasks | 6 files |
 | Phase 48.1 P02 | 19 min | 3 tasks | 12 files |
 | Phase 48.1 P03 | 23 min | 3 tasks | 14 files |
+| Phase 48.1 P04 | 10 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -165,6 +166,8 @@ Progress: [██████████] 100%
 - [Phase 48.1]: 48.1-03: every new spec is stub-only and settles its reads by alias; the catch-all must stay empty in every test (Y1 unstubbed option), so a request that would reach the dev-server proxy fails the gate (PD-08, T-48.1-10)
 - [Phase 48.1]: 48.1-03: GET /source stays opt-in (cy.stubSources) because DeviceDetail reads it and the device specs rely on the catch-all; /rsakey reads and writes and PUT /env became default stubs since no existing spec reaches them (PD-07)
 - [Phase 48.1]: 48.1-03: the build-log scroll-to-match assertion is withheld, not weakened: BuildLogDialog.scrollToCurrent measures the modal body one tick before the b-modal transporter re-renders it, a pre-existing vue/src defect the test-only plan may not fix; recorded in deferred-items.md and the WINDOWS ledger
+- [Phase 48.1]: 48.1-04: the ship step stays with the operator (PD-10): nothing pushed; parent b99eb66d bumps the console gitlink cd016ec -> 4fef60d locally; push order, pipeline gate and post-deploy checks are in the 48.1-04 SUMMARY operator checklist
+- [Phase 48.1]: 48.1-04: console 4fef60d passes the test-vue-console job commands locally twice (unit 464 ok, build and perf OK, 16 specs 93 results / 83 passing / 10 pending / 0 failing, 16 JUnit files, 0 failures); scope diffs against cd016ec clean
 
 ### Pending Todos
 
@@ -206,6 +209,6 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-**Last session:** 2026-10-17T22:26:04.342Z
-**Stopped At:** Completed 48.1-03-PLAN.md
+**Last session:** 2026-10-17T23:54:54.154Z
+**Stopped At:** Completed 48.1-04-PLAN.md (phase 48.1 executed; operator push pending)
 **Resume File:** None

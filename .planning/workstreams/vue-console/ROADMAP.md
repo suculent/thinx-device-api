@@ -373,7 +373,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
   3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
   4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
 
-**Plans:** 3/4 plans executed (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
+**Plans:** 4/4 plans executed (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
 
 Plans:
 **Wave 1**
@@ -386,6 +386,6 @@ Plans:
 - [x] 48.1-03-PLAN.md — W3: stubbed Cypress specs for rsakeys, transformers, enviros, repositories (incl. the W2 network-failure error in a browser) and build-log search, with fixtures and additive stubs in `api-stubs.js` (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 48.1-04-PLAN.md — CI-mirror verification of the full 16-spec suite on the committed console HEAD, local parent submodule-pointer bump, operator ship checklist as a human check (no auto push) (wave 4)
+- [x] 48.1-04-PLAN.md — CI-mirror verification of the full 16-spec suite on the committed console HEAD, local parent submodule-pointer bump, operator ship checklist as a human check (no auto push) (wave 4)
 
 Plan-checker advisories (0 blockers, 2 size warnings, accepted by the operator 2026-10-17): plans 02 (12 files) and 03 (14 files) exceed the 10-file guideline; PD-04 throws on `networkError` only (a 5xx reply still leaves stale state — record as a residual in the SUMMARY); PD-09 re-syncs list rows after a successful delete (adjacent fix, outside W2); 48.1-04 Task 1 should run the Cypress suite detached if it exceeds the 10-minute tool timeout.
