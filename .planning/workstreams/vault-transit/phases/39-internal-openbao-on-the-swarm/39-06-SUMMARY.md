@@ -34,7 +34,7 @@ key-files:
 key-decisions:
   - "CA config mode left at the Docker default (0444) instead of `mode: 0444` in YAML: yq/YAML 1.2 reads 0444 as decimal 444"
   - "Source YAMLs pin the config the consumer deployed (openbao-ca-a2b56707515146d7a580); the live test fails SOURCE_CONFIG_DRIFT until the source follows a future swap"
-  - "The authenticated owner-path WebSocket gate is an operator row: any x-thx-core value gets 101, so only a socket held open proves a session"
+  - "The authenticated owner-path WebSocket gate is an operator row (passed 20:02Z): any x-thx-core value gets 101, so only a socket held open proves a session"
   - "Parent repo not pushed (orchestrator constraint); the API image is unchanged, so no CI build was needed before the live update"
 
 requirements-completed: [VAULT-01, VAULT-02, VAULT-03, VAULT-04, VAULT-05, VAULT-06, VAULT-07, VAULT-08]
@@ -70,7 +70,7 @@ parent commits measured from the ledger; the two thinx-swarm commits are listed 
 |---|---|---|
 | 1. API deployment contract | `--source` API-WIRING-OK (25 rows), `--self-test` 14/14 mutations refused; verify.sh fixture suites 2/5/14 pass | swarm `f179df3`; parent `6f94f286` |
 | 2. Targeted thinx_api update + live proof + trust consumer | update 19:38:56Z -> 19:39:17Z; `--live` OK; armed; `--exercise-expired-predecessor` OK; `--verify-api-trust-consumer` OK | swarm `5897b8b`; parent `a6df0574` |
-| 3. Final regression, scope and evidence gate | verifiers, edge gate, scope and gitleaks green; three operator rows open | parent `302a69da` |
+| 3. Final regression, scope and evidence gate | verifiers, edge gate, scope and gitleaks green; three operator rows passed (operator-confirmed 20:00-20:03Z) | parent `302a69da` |
 
 ## Live end state (2026-10-18 ~19:56Z)
 
@@ -128,9 +128,10 @@ parent commits measured from the ledger; the two thinx-swarm commits are listed 
   parent repo. The API image did not change (spec-only update), so no CI build was needed before the live mutation.
   The parent commits stay local.
 - **WS gate with real owner and session.** The plan's 401/101 gate needs the operator's owner id and a valid
-  `x-thx-core` cookie. This executor has neither. It ran the established credential-free pair instead (cookie-less
-  101, `foo=bar` 401 + `X-Forwarded-Proto`), plus the multitab check. Code reading shows that any `x-thx-core` value
-  gets 101, so the plan's row only proves a session if the socket stays open. The operator script checks that.
+  `x-thx-core` cookie, which this executor does not have. It ran the established credential-free pair (cookie-less
+  101, `foo=bar` 401 + `X-Forwarded-Proto`) and the multitab check itself. The operator then ran the plan's command
+  verbatim, plus a held-open check, and both passed (Operator gates, row 2). Any `x-thx-core` value gets 101, so only
+  the held-open check proves a session.
 
 ### Incidents during execution (no change)
 
@@ -144,19 +145,23 @@ parent commits measured from the ledger; the two thinx-swarm commits are listed 
 
 ## Auth gates
 
-None during execution. The operator rows below are planned human verification, not auth failures.
+None during execution. The operator rows were planned human verification, not auth failures; all three passed.
 
-## Open items (operator)
+## Operator gates (passed, operator-confirmed 2026-10-18)
 
-Script: `/private/tmp/claude-502/-Users-sychram-Repositories-thinx-api-thinx-device-api/efb05f47-583d-4a57-ab53-901e306acc40/scratchpad/p06-operator-final-gates.sh`
-(set -euo pipefail, `== N/3` steps, literal ssh, hidden prompts, temp files 0600 and removed on exit, re-runnable).
+The operator ran `/private/tmp/claude-502/-Users-sychram-Repositories-thinx-api-thinx-device-api/efb05f47-583d-4a57-ab53-901e306acc40/scratchpad/p06-operator-final-gates.sh`
+at about 20:00-20:03Z and reported no FAIL line (relayed by the coordinator). The executor cross-checked rows 1 and 2
+on micro afterwards, printing timestamps and booleans only.
 
-1. Privileged `verify --full ... --api-service thinx_api` with the operator password. It was last green at 18:41:17Z,
-   before the g1 retirement. Expect `OPERATOR_TOKEN ok`, `KEY_FLAGS ok`, `POLICY_EXACT ok` x3,
-   `APPROLE_THINX_API ok`, `RAFT_ONE_VOTER ok`, then `OPENBAO-VERIFY-OK mode=full+api`.
-2. WebSocket on the real owner path. Expect `WS PLAN_GATE ok ...` (the plan's command verbatim) and
-   `WS SESSION_HELD ok`.
-3. Slack receipts of the three Plan 05 test incidents. Expect `SLACK RECEIPTS ok`.
+1. **Privileged verify:** `OPENBAO-VERIFY-OK mode=full+api` on seal-g2 alone. Audit log:
+   - operator userpass login 20:00:20.16Z, no error, policy `operator`;
+   - key read 20:00:21.76Z and raft configuration 20:00:23.89Z, no error;
+   - revoke-self 20:00:24.28Z.
+2. **WebSocket on the real owner path:** `WS PLAN_GATE ok` (the plan's command verbatim: unauthenticated 401,
+   authenticated 101) and `WS SESSION_HELD ok` (socket held open 15 s). API log: a non-session-cookie 401 and an owner
+   socket admitted at 20:02:00Z, another owner socket at 20:02:15Z, and no 1008 rejection since 19:55Z.
+3. **Slack receipts:** `SLACK RECEIPTS ok`. All six Plan 05 test-incident messages arrived once each; the operator also
+   shared a screenshot.
 
 Other follow-ups (not blocking):
 - The archived `ca-cert` in the offline recovery image is stale after the issuer renewal. The CA key is unchanged, so
@@ -182,4 +187,4 @@ and two secret files plus a public CA bundle are mounted in the API task.
   GPG-signed (G). The swarm commits are on origin/master and micro.
 - Plan verify commands: Task 1 `bash -n` + `--source` OK. Task 2 `--live` OK, and the micro 0700/0600 + one-task +
   `--verify-api-trust-consumer` OK. Task 3 `--full --maintenance --api-service` + `--live` OK. The scope, whitespace
-  and gitleaks chain OK. The WS chain is run by the operator script (open item 2).
+  and gitleaks chain OK. The WS chain was run by the operator (passed, Operator gates row 2).
