@@ -4,12 +4,12 @@ milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
-status: executing
-stopped_at: Completed 39-05-PLAN.md
-last_updated: "2026-10-18T19:19:23.037Z"
+status: verifying
+stopped_at: Completed 39-06-PLAN.md
+last_updated: "2026-10-18T19:57:34.404Z"
 last_activity: 2026-10-18
 last_activity_desc: Phase 39 execution started
-state_head: 3190a1be25b61195869d618b88b1a9529e0f1f47
+state_head: 302a69da33af11cb9c20b9f9ee1929e3e4b2502c
 progress:
   total_phases: 3
   completed_phases: 0
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 
 Phase: 39 (Internal OpenBao on the Swarm) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-18 — Phase 39 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 39 P02 | 43 min | 3 tasks | 6 files |
 | Phase 39 P03 | 130 min | 3 tasks | 13 files |
 | Phase 39 P05 | 5h03m | 3 tasks | 7 files |
+| Phase 39 P06 | 33min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,10 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 39]: Fixture suites install a first-deploy (g1-only) vault.conf; exact-image suite stages every generation the committed config names
 - [Phase 39]: seal-g1 stays in the offline archive until every snapshot naming it ages out (not before 2027-01-16)
 - [Phase 39]: After any thinx-swarm push to origin master, wait for the CI errorpage/downtime redeploy before running the edge gate
+- [Phase 39]: 39-06: thinx_api attached to OpenBao by one targeted service update (overlay, BAO_ROLE_ID/BAO_SECRET_ID, openbao-ca config, BAO_ADDR/BAO_CACERT) from a 0600 node-local spec backup
+- [Phase 39]: 39-06: source YAMLs pin the CA config the trust consumer reports (openbao-ca-a2b56707515146d7a580); re-pin after every issuer swap
+- [Phase 39]: 39-06: CA config mode left at the Docker default 0444 (YAML 1.2 reads 0444 as decimal)
+- [Phase 39]: 39-06: authenticated owner-path WS gate is operator-only; any x-thx-core value gets 101, only a socket held open proves a session
 
 ### Pending Todos
 
@@ -113,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-18T19:19:22.989Z
-**Stopped At:** Completed 39-05-PLAN.md
+**Last session:** 2026-10-18T19:57:34.352Z
+**Stopped At:** Completed 39-06-PLAN.md
 **Resume File:** None

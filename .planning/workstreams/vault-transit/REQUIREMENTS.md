@@ -18,12 +18,12 @@
 
 ### OpenBao service (thinx-swarm)
 
-- [ ] **VAULT-01**: OpenBao runs on the swarm as `openbao/openbao:<x.y.z>` pinned by exact tag, never a digest (2.7.1 at planning time; ≥ 2.4.0 required for the static seal), one replica constrained to a manager node, attached only to a dedicated internal overlay shared with `thinx_api`; no Traefik routers and no published ports.
+- [x] **VAULT-01**: OpenBao runs on the swarm as `openbao/openbao:<x.y.z>` pinned by exact tag, never a digest (2.7.1 at planning time; ≥ 2.4.0 required for the static seal), one replica constrained to a manager node, attached only to a dedicated internal overlay shared with `thinx_api`; no Traefik routers and no published ports.
 - [x] **VAULT-02**: OpenBao storage (integrated Raft) lives on a node-local volume, not GlusterFS; Raft snapshots are written to a location separate from `ssh_keys` and from Gluster backups.
-- [ ] **VAULT-03**: The OpenBao listener serves TLS from an internal CA and the API verifies it (`BAO_CACERT`); the dormant `vault.conf` (`tls_disable`) is replaced by an OpenBao HCL config without `tls_disable`.
+- [x] **VAULT-03**: The OpenBao listener serves TLS from an internal CA and the API verifies it (`BAO_CACERT`); the dormant `vault.conf` (`tls_disable`) is replaced by an OpenBao HCL config without `tls_disable`.
 - [x] **VAULT-04**: OpenBao unseals automatically after a restart or reschedule through `seal "static"` reading a root-only 32-byte key file on the manager node's local disk (not GlusterFS); recovery keys and an offline, off-swarm copy of the seal key are documented, as is seal-key rotation via `previous_key`/`previous_key_id`.
 - [x] **VAULT-05**: Transit key `thinx-deploy-keys` exists as aes256-gcm96, `exportable=false`, `allow_plaintext_backup=false`, `deletion_allowed=false`.
-- [ ] **VAULT-06**: AppRole `thinx-api` holds a policy limited to `encrypt`, `decrypt` and `rewrap` on `thinx-deploy-keys`; its role_id/secret_id reach the API as swarm secrets read through `readSecret`; no root token persists after bootstrap.
+- [x] **VAULT-06**: AppRole `thinx-api` holds a policy limited to `encrypt`, `decrypt` and `rewrap` on `thinx-deploy-keys`; its role_id/secret_id reach the API as swarm secrets read through `readSecret`; no root token persists after bootstrap.
 - [x] **VAULT-07**: A file audit device is enabled, writing to node-local storage.
 - [x] **VAULT-08**: Operators reach OpenBao only via ssh + `docker exec`; a runbook covers bootstrap, static-seal key handling and rotation, recovery keys, Raft snapshot and restore.
 
@@ -65,12 +65,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VAULT-01 | Phase 39 | Pending |
+| VAULT-01 | Phase 39 | Complete |
 | VAULT-02 | Phase 39 | Complete |
-| VAULT-03 | Phase 39 | Pending |
+| VAULT-03 | Phase 39 | Complete |
 | VAULT-04 | Phase 39 | Complete |
 | VAULT-05 | Phase 39 | Complete |
-| VAULT-06 | Phase 39 | Pending |
+| VAULT-06 | Phase 39 | Complete |
 | VAULT-07 | Phase 39 | Complete |
 | VAULT-08 | Phase 39 | Complete |
 | KEYENC-01 | Phase 40 | Pending |
