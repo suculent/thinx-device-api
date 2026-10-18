@@ -691,3 +691,45 @@ without secret material (timestamps and booleans only).
 **Rollback set (none used):** section 10 for the API; `docker stack rm vault` keeps every node-local path (section 4);
 older Docker configs `openbao-ca-46fa30be48446ff5a980` and `openbao-ca-a113267bb8b8671b8d44` are kept for the trust
 consumer's rollback.
+
+### 2026-10-18 Review-fix redeploy (39-REVIEW-FIX, thinx-swarm `471a95f`)
+
+Run 21:57-22:10Z by hand, one step at a time, outside the 03:17 / 04:47 UTC cron windows. No service was restarted or
+updated by this redeploy; the only service changes were the CI error/downtime-page redeploy after the push.
+
+- Pre-check 21:57Z: Traefik 29 http routers, none disabled; rtm 200; 7442/1883/8883 open from the laptop;
+  `openbao-verify.sh --health` -> `OPENBAO-VERIFY-OK mode=health`; no `openbao-(backup|cert-renew)` process on micro
+  or core. Spec sha256/16: thinx_api `005ba713d94e3540` (UpdatedAt 19:41:49Z), traefik_traefik `efeabd4953d5ca2c`,
+  vault_openbao `b536ee24baa1d152`.
+- `git push origin master` (5897b8b..471a95f); CI redeployed `errorpage_errorpage` 21:59:59Z and `downtime_downtime`
+  22:00:05Z; routers back to 29 enabled at 22:00:15Z before any further step. micro ff to `471a95f` through
+  `p39-fix-incoming` (deleted); laptop = origin = micro, no tracked change.
+- `openbao-install.sh` -> `OPENBAO-INSTALL-OK mode=install` (`PREFLIGHT_SOURCE ok 45 checks`; updated operator.hcl,
+  openbao-common/install/bootstrap/verify.sh; openbao.hcl unchanged, so no `vault_openbao` restart).
+- `openbao-maintenance-install.sh --full` (no test alert) -> `OPENBAO-MAINTENANCE-INSTALL-OK mode=full role=sender`:
+  `/etc/tmpfiles.d/openbao-maintenance.conf` 0644 installed, `TMPFILES_APPLIED ok`; `/run/openbao-maintenance` and
+  `/run/lock/openbao` 0700 root; `systemd-tmpfiles --cat-config` lists both `d` entries (this systemd has no
+  `--dry-run`); cron/logrotate/Slack config unchanged; API trust consumer armed.
+- core: `--backup-prereqs-only --role receiver --sender-from 10.133.0.2 --sender-key-fd 0` (micro's .pub piped) ->
+  `OPENBAO-MAINTENANCE-INSTALL-OK mode=prereqs role=receiver` (openbao-common.sh updated, receiver and
+  authorized_keys line unchanged); `--check --role receiver` OK. Transfer re-proven against the updated receiver by a
+  second sender `--full`: `TRANSFER_PROBE` / `TRANSFER_RESTRICTED` / `TRANSFER_VERIFIED ok`.
+- Post-checks: `openbao-verify.sh --full --maintenance --api-service thinx_api` -> `OPENBAO-VERIFY-OK
+  mode=full+maintenance+api` (58 ok rows; privileged part not run, so the expected WR-14 operator POLICY_DRIFT is not
+  visible unattended: the policy comparison is privileged); `--check --expect-full` OK; `openbao-cert-renew.sh
+  --verify-current` -> `r20261018T194151Z`; `openbao-backup.sh --incident-status` backup healthy, and `--check`
+  (inside verify --maintenance) requires all incidents healthy; `--verify-both-nodes` -> 12 identical pairs.
+- Edge after: 29 routers none disabled; `EDGE-EXPOSURE-OK`; rtm 200; 7442/1883/8883 open; thinx_api 1/1 with spec
+  `005ba713d94e3540`, traefik `efeabd4953d5ca2c`, vault_openbao `b536ee24baa1d152` (all unchanged).
+- Leftover: ten pre-WR-06 lock files `/run/lock/openbao-*.lock` remain (all unheld); nothing uses them now, and they
+  disappear at the next reboot (/run is tmpfs).
+- **Open (operator):** WR-14's narrower `operator.hcl` is installed on micro but not live. Operator session on micro:
+
+  ```bash
+  ssh -t micro
+  C=$(docker ps -q -f label=com.docker.swarm.service.name=vault_openbao -f status=running)
+  docker exec -it "$C" bao login -method=userpass username=operator          # hidden prompt
+  docker exec -i "$C" bao policy write operator - < /etc/openbao/policies/operator.hcl
+  docker exec "$C" sh -c 'bao token revoke -self; rm -f ~/.vault-token'
+  /usr/local/sbin/openbao-verify.sh --full --api-service thinx_api          # terminal: privileged part, expect POLICY_EXACT operator
+  ```
