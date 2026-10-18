@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
 status: executing
-stopped_at: Completed 39-04-PLAN.md (custody ceremony); next Plan 39-05 live deploy
-last_updated: "2026-10-18T13:43:39.500Z"
+stopped_at: Completed 39-05-PLAN.md
+last_updated: "2026-10-18T19:19:23.037Z"
 last_activity: 2026-10-18
 last_activity_desc: Phase 39 execution started
-state_head: 86335a552353e2c0fce32c97cb21b94fa37604b8
+state_head: 3190a1be25b61195869d618b88b1a9529e0f1f47
 progress:
   total_phases: 3
   completed_phases: 0
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 39 (Internal OpenBao on the Swarm) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-10-18 — Phase 39 execution started
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 39 P01 | 55 min | 3 tasks | 11 files |
 | Phase 39 P02 | 43 min | 3 tasks | 6 files |
 | Phase 39 P03 | 130 min | 3 tasks | 13 files |
+| Phase 39 P05 | 5h03m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,11 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 39]: deploy_api_trust: immutable openbao-ca-<sha20> Docker config, 0600 spec backup, one targeted thinx_api update, in-task Node probe (pinned one-shot job when the task is on core), rollback of server dir AND API config
 - [Phase 39]: Incident alerts: durable flock'd per-job state (healthy/failure-pending/failure-sent/recovery-pending); ambiguous acknowledgement retried once then assumed delivered
 - [Phase 39]: Restore rehearsal refuses image/generation/path/staleness mismatches before reading key bytes; --verify-recorded-matrix defaults to config generations plus every generation a retained snapshot needs
+- [Phase 39]: Seal rotation retires the old generation in two restarts: new-only config with the old key file still on disk (cheap rollback), then shred and restart again
+- [Phase 39]: Restore rehearsals of an overlap snapshot take the current seal from the offline archive and the previous seal from the runtime file (separate fd)
+- [Phase 39]: Fixture suites install a first-deploy (g1-only) vault.conf; exact-image suite stages every generation the committed config names
+- [Phase 39]: seal-g1 stays in the offline archive until every snapshot naming it ages out (not before 2027-01-16)
+- [Phase 39]: After any thinx-swarm push to origin master, wait for the CI errorpage/downtime redeploy before running the edge gate
 
 ### Pending Todos
 
@@ -107,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-18T13:43:39.457Z
-**Stopped At:** Completed 39-04-PLAN.md (custody ceremony); next Plan 39-05 live deploy
+**Last session:** 2026-10-18T19:19:22.989Z
+**Stopped At:** Completed 39-05-PLAN.md
 **Resume File:** None
