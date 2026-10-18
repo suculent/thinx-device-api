@@ -2,38 +2,37 @@
 gsd_state_version: "1.0"
 milestone: v1.18
 milestone_name: Console Improvements
+status: Awaiting next milestone
+stopped_at: Completed 48.1-04-PLAN.md (phase 48.1 executed; operator push pending)
+last_updated: "2026-10-18T08:19:02.828Z"
+last_activity: 2026-10-18
+last_activity_desc: Milestone v1.18 completed and archived
+state_head: 2eace903a3fc6006e7d903531b54bbbb4288534c
+progress:
+  total_phases: 8
+  completed_phases: 8
+  total_plans: 37
+  completed_plans: 37
+  percent: 100
 current_phase: "48.1"
 current_phase_name: "Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)"
-status: verifying
-stopped_at: Completed 48.1-04-PLAN.md (phase 48.1 executed; operator push pending)
-last_updated: "2026-10-17T23:54:56.521Z"
-last_activity: 2026-10-17
-last_activity_desc: Phase 48.1 execution started
-state_head: b99eb66d0330b32803b9681feb75b7b93de4d8a8
-progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 4
-  completed_plans: 7
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-15) and `.planning/workstreams/vue-console/REQUIREMENTS.md`
+See: .planning/PROJECT.md (updated 2026-10-18 after v1.18) and `milestones/v1.18-REQUIREMENTS.md` (archived; no active REQUIREMENTS.md until the next milestone)
 
-**Core value:** Bring the Vue console to Legacy-console parity and polish (login, devices, deploy keys, transformers, environment globals, repositories, build-log search) and close the console leftovers of v1.16, without breaking any Legacy route or API envelope.
-**Current focus:** Phase 48.1 — Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)
+**Core value:** The Vue console stays at Legacy-console parity without breaking any Legacy route or API envelope.
+**Current focus:** Planning next milestone (v1.18 shipped 2026-10-18; operator checks from the 48.1 UAT still pending)
 
 ## Current Position
 
-Phase: 48.1 (Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-10-17 — Phase 48.1 execution started
-
-Progress: [██████████] 100%
+Phase: Milestone v1.18 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-18 — Milestone v1.18 completed and archived
 
 ## Performance Metrics
 
@@ -219,6 +218,11 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-**Last session:** 2026-10-17T23:54:54.154Z
-**Stopped At:** Completed 48.1-04-PLAN.md (phase 48.1 executed; operator push pending)
+**Last session:** 2026-10-18T08:30:00Z
+**Stopped At:** Milestone v1.18 complete and archived (override_closeout); console ec63c74 and parent 95ea22f6 pushed to thinx-staging
 **Resume File:** None
+
+## Operator Next Steps
+
+- Finish the 48.1 UAT (`milestones/v1.18-phases/48.1-close-v1-18-audit-gaps-admin-deep-link-store-error-states-cy/48.1-UAT.md`): confirm the CircleCI pipeline for `95ea22f` is green (`node scripts/check-ci-gates.js pipeline --revision 95ea22f --expect legacy-on --wait`), run the served-console reload and offline checks, spot-check impersonation → Header → exit, decide on the build-log scroll defect
+- Start the next console milestone with `/gsd-new-milestone --ws vue-console` (Phase 49+), or the root track with `/gsd-new-milestone`

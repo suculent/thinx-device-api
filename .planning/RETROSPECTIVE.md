@@ -358,6 +358,54 @@
 
 ---
 
+## Milestone: v1.18 — Console Improvements
+
+**Shipped:** 2026-10-18
+**Phases:** 8 (42–48, 48.1 inserted) | **Plans:** 37 | **Tasks:** 82
+
+### What Was Built
+
+- CI trim for the milestone (Snyk on `main` only, legacy console build behind a pipeline parameter), branded login and build footer (42); the legacy build re-enabled and a context-free `test-vue-console` Cypress gate for both Vue image jobs at close (48).
+- Notification delivery: several Legacy tabs per owner, one terminal build-status frame per build, escaped toast live (43).
+- Device list, deploy keys, transformers and environment globals at Legacy parity: icon actions, rename, confirmed and typed-`confirm` deletes, atomic environment edit, unsaved-change guards (44–46).
+- Build-log search with highlight, count and stepping; one `hasBuildLog` predicate and status-colour scheme; WCAG 2.5.3 View label (47).
+- Deep links survive a reload; four stores surface a network failure as one error; five stub-backed Cypress specs for the Phase 44–47 pages; stale-profile class closed across sign-out, sign-in, impersonation and the Header (48, 48.1).
+
+### What Worked
+
+- The milestone audit found three real user-facing gaps (W1–W3) that per-phase verification had missed, and an inserted Phase 48.1 closed all three in one day with RED→GREEN unit checks and stub-backed Cypress specs.
+- Strictly sequential waves for plans sharing one unit harness and one stub file avoided every merge conflict in the console submodule.
+- The `--auto` code-review loop earned its cost: each re-review found the next in-tab identity switch leaving a stale admin profile, and the third round caught the Header's one-time profile copy.
+- A plan-04 CI mirror (the job's commands in the job's order, full 16-spec suite under the CI reporter) gave a reliable ship signal before the push.
+
+### What Was Inefficient
+
+- The workstream ROADMAP used `## Phase Details` instead of a versioned milestone heading, so `milestone complete` found no phases until the roadmap was restructured at close; the inserted 48.1 section also sat after `## Progress`, outside any window.
+- Phases 42 and 44–48 reached the close with stale verification digests because later phases changed files they cover; re-verifying six phases was traded for an override closeout.
+- The RED-evidence classifier could not read the unit harness's plain `ok`/`FAIL` output, costing an extra test-only commit for a TAP mode.
+- Three fix rounds for one review class: the first review named one site; the remaining switches were only found by re-reviewing the fix.
+
+### Patterns Established
+
+- Stores throw one `Could not reach the server.` on `result.networkError`; pages show exactly one `*-load-error` alert and clear stale rows; stored writes stay successes with `refreshed: false`.
+- Spec hygiene rows (Y checks) pin every Cypress spec and fixture: no skip/only/retries, no numeric waits, no credentials, no absolute URLs, `@unstubbed.all` empty.
+- Any in-tab identity switch resets `profile/saveProfile {}` before the next read; UI reads the profile through the store getter, never a local copy.
+- Workstream roadmaps carry a versioned `## vX.Y — Name` H2 above their phase headings so the archival tool can scope them.
+
+### Key Lessons
+
+- Run the milestone audit before the last phase closes; the gaps it finds are cheap to insert as a decimal phase and expensive after the push.
+- When a review fixes one instance of a state-handling class, ask the reviewer to enumerate every site of that class before the fix round, not after.
+- Re-run earlier verifiers as part of the last phase when it touches shared console files, or accept the override knowingly.
+- Keep TDD harness output machine-readable (TAP) from the first plan.
+
+### Cost Observations
+
+- Sessions: Phase 48.1 executed and the milestone closed in one session (2026-10-17/18): 4 executors, 3 review and 3 fix rounds, 1 verifier.
+- Notable: most of the milestone lives in the console submodule (163 signed console commits vs. a small parent diff plus gitlink bumps); the full Cypress suite runs in ~2 minutes locally.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -372,6 +420,7 @@
 | v1.14 | 7 | 47 | Milestone re-audit with an integration regression check standing in for stale phase verifications; gated push-to-redeploy measurement for ops phases; three-mode security rollout switch |
 | v1.15 | 6 | 19 | Infrastructure-only milestone on an external source repo: generated mirror + CI gate, repo-first one-update live changes with auto-revert gates, external scan as the phase gate |
 | v1.16 | 4 | 7 | Feature milestone across parent + console submodule, closed on live UAT with same-day gap-closure plans; no milestone audit |
+| v1.18 | 8 | 37 | First workstream milestone; audit-driven inserted gap-closure phase (48.1); Cypress gate on the Vue image build; `--auto` review loop ran to its 3-iteration cap on one defect class |
 
 ### Cumulative Quality
 
@@ -384,6 +433,7 @@
 | v1.14 | CsrfRouteInventory/SessionFlow, Git/BuilderPath/SafePath, SecretsSweep, LogPaging/BuildLogOwner, Influx* (CI 1756 specs, 0 failures) | api, worker, transformer, both consoles; InfluxDB 2.9.1; Swarmpit 1.10 | tech_debt (24/24; override_closeout) |
 | v1.15 | mirror check + `traefik-edge-scan.sh` (EDGE-SCAN OK, 16 hosts) | ~15 live `traefik_traefik` service updates; socket-proxy; tls-config-3 | tech_debt (14/14; override_closeout) |
 | v1.16 | deploy-key Node tests, BuildlogPagingSpec, Vue `milestone-v116` unit suite, whole-page render tests + Cypress specs | api + both consoles via thinx-staging (PR #572, console PR #32 and follow-ups) | no audit (11/11 live UAT; override_closeout) |
+| v1.18 | `audit-gaps-v118.cjs` (32 checks), `close-out-v118.cjs`, 5 new Cypress specs (16 total, 93 tests), `CiPipelineGates` spec | console + API via thinx-staging pipelines 5655–5677 and the 48.1 push (`95ea22f`) | tech_debt (33/33; W1–W3 closed by 48.1; override_closeout) |
 
 ### Recurring Backlog Themes
 
@@ -396,6 +446,7 @@
 - **v1.13 → carried forward:** SEC-CSP-02 (`unsafe-eval`, blocked on AngularJS), WR-06 (session-bound CSRF), WR-04 (`POST /api/v2/user`), console CSP source-of-truth retirement, SEC-CFG-02. TEST-CHAI-01 / OPS-02 / OPS-03 have now been carried through **six** milestones without a keep/drop call. Make that call in v1.14 or move them to Out of Scope.
 - **v1.15 → carried forward:** real client IPs → `ipAllowList`/`rateLimit`, `sniStrict`, socket-proxy repin, edge doc drift. v1.14 carry-overs untouched (v1.15 was edge-only).
 - **v1.16 → carried forward:** AR-36-01 full-log payload size, open review items 35–38, UI-review polish. v1.14/v1.15 carry-overs untouched (v1.16 was console-only).
+- **v1.18 → carried forward:** 48.1 operator checks (CI run, served console, impersonation spot-check), build-log scroll defect, review Info items IN-01..IN-06, `auth/setUser` for impersonation, stale digests on 42/44–48, CI-04 first `main` run. v1.16 carry-overs (AR-36-01, review items 35–38) untouched.
 - **v1.14 → carried forward:** OPS-SWARM-03, SEC-CSP-02, worker lifecycle / build-queue cron, API-key storage hardening, Rollbar token split, legacy worker `cmd` removal, CI exit on spec failure. TEST-CHAI-01, OPS-02/03, `uuid #194` survive again.
 
 ---
@@ -406,3 +457,4 @@
 *v1.14 milestone section appended: 2026-10-05*
 *v1.15 milestone section appended: 2026-10-12*
 *v1.16 milestone section appended: 2026-10-12*
+*v1.18 milestone section appended: 2026-10-18*
