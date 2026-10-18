@@ -325,3 +325,34 @@ step below is run by hand, one at a time.
 - Mismatch matrix (no operator material needed): the g1 snapshot offered as g2 -> `GENERATION_MISMATCH REFUSED` (no key
   byte read, exit 3); the g1 snapshot with g2's bytes under the g1 name -> `SEAL_MISMATCH FAIL` (the restored state did
   not unseal), exit 1. No rehearsal container or network left behind.
+- Operator checkpoint 1 (script run by the operator in their own terminal; the agent re-checked micro afterwards):
+  18:07:37Z `custody.seal-g2` recorded in the bootstrap ledger (emit | archive add-generation g2 --receipt |
+  confirm-custody); archive read-only verify complete with g1 and g2; 18:08:07Z privileged `verify --full` on g1 with
+  `--expect-root-revoked` (operator token explicit_max_ttl 14400 s, not periodic, default+operator); 18:09:31Z g1
+  rehearsal of `openbao-20261018T174406Z-pre-change` with seal-g1 recovered from the offline archive -> `result=ok`
+  (both limitations in the record); `--verify-recorded-matrix --expect-generations g1` -> OK with 2 mismatch records.
+  No rehearsal container left.
+- Source: thinx-swarm `46d15ca` (fixture suites decoupled from the live generation: bootstrap/maintenance install the
+  first-deploy g1 form, exact-image stages every generation the committed config names; 60/32/136 pass against the
+  overlap config) and `5d4f532` (vault.conf: `seal-g2` current, `seal-g1` previous). Laptop, origin and micro all at
+  `5d4f532` before the install.
+- 18:34:22Z `openbao-backup.sh --pre-change` -> `openbao-20261018T183422Z-pre-change` (g1) on both nodes; live config
+  backed up to `/root/openbao.hcl.bak-20261018T1835Z-seal-g1` (0600); `openbao-install.sh` -> `OPENBAO-INSTALL-OK`
+  (both seal files 32 bytes 0600; config dir holds only openbao.hcl).
+- 18:34:55Z `docker service update --force vault_openbao` (the only service touched): 18:35:02Z "Auto Seal: static
+  (current_key_id seal-g2, previous_key_id seal-g1)", unsealed with the stored key, `core.autoseal: upgrading recovery
+  key` / `upgrading stored keys` (rewrapped under g2), one extra teardown/setup cycle, active node at Raft index 186.
+  `--health` OK, container healthy; `--full --expect-seal-generation g2` (unprivileged part) OK; `--edge-exposure` ->
+  `EDGE-EXPOSURE-OK`; thinx_api and traefik_traefik specs unchanged (e3d388a3c43f0342 / efeabd4953d5ca2c); 23
+  services; ports 7442/1883/8883/443 open from the laptop; rtm 200.
+- **Edge blip, not caused by OpenBao:** the first router check after the restart showed `thinx-db-https` and
+  `thinx-influx-https` disabled (`the service "errorpage@swarm" does not exist`). The `git push origin master` of
+  thinx-swarm minutes earlier had triggered its CircleCI error/downtime-page build, and Swarmpit autoredeployed
+  `errorpage_errorpage` and `downtime_downtime` (task restart ~18:35:55Z). This is the documented transient. Within a
+  minute: 29 routers, 0 errors, 0 warnings, inventory hash back to `fa0afd608550e585`. Lesson for the remaining pushes:
+  push thinx-swarm to origin, wait for the errorpage task to restart, then run the edge gate.
+- 18:37:09Z `--post-change` -> `openbao-20261018T183709Z-post-change`; 18:37:18Z `prepare` -> overlap snapshot S2
+  `openbao-20261018T183718Z-pre-change` (manifest seal_generation g2, seal_previous_generation g1, Raft index 211);
+  `--verify-both-nodes` -> 5 identical pairs on micro and core.
+- Mismatch for S2 (no key byte read): offered as g2 with no previous generation -> `PREVIOUS_GENERATION_MISMATCH`
+  refused, exit 3, recorded. The S2 rehearsal with the operator password is operator checkpoint 2.
