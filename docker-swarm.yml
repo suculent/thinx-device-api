@@ -120,7 +120,9 @@ secrets:
 # Phase 39 (VAULT-03, D-19): public trust bundle for openbao.internal (certificates of the OpenBao internal CA only,
 # never a key). Immutable and versioned: the name is openbao-ca-<sha256(bundle)[0:20]>. The recurring trust consumer
 # (`openbao-cert-renew.sh`, deploy_api_trust) creates the next one on an issuer renewal and swaps it on thinx_api with
-# one targeted `docker service update`; keep `name:` equal to the config `--verify-api-trust-consumer` reports.
+# one targeted `docker service update` and prints REPIN_REQUIRED: then set `name:` here and in thinx-swarm thinx.yml
+# to that config. thinx-swarm restart.sh, `openbao-maintenance-install.sh --check` and `openbao-verify.sh
+# --api-service` refuse while the thinx.yml pin differs from the live config (39-REVIEW WR-12).
 configs:
   openbao-ca:
     external: true
