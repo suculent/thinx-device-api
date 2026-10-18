@@ -72,10 +72,12 @@ ssh micro '<same sender command>'      # must end TRANSFER_VERIFIED + OPENBAO-MA
 **fail2ban on core.** core's `sshd` jail bans after 5 pre-auth failures in 10 min (1 h), and its `recidive` jail
 bans for a week after 5 bans in a day. Every `ssh-keyscan` (installer prereqs mode, `openbao-preflight.sh --live`)
 and every connection with an unauthorized key counts as a failure. On 2026-10-18 the first install's keyscans plus one
-probe before the receiver existed banned micro's private address for an hour (see the evidence log). Routine
-backups authenticate successfully and do not count. Before re-running prereqs mode or the live preflight more than
-twice in ten minutes, check `ssh core 'fail2ban-client status sshd'`. A ban on micro's private address blocks
-replication (backups then fail and alert) until it expires.
+probe before the receiver existed banned micro's private address for an hour (see the evidence log). Since
+2026-10-18T17:41:20Z micro's private address `10.133.0.2` is in core's `[DEFAULT] ignoreip`
+(`/etc/fail2ban/jail.local`), which both the `sshd` and `recidive` jails inherit, so OpenBao transfers can no
+longer ban it. If that entry is ever removed, the old behaviour returns: check `ssh core 'fail2ban-client status
+sshd'` before re-running prereqs mode or the live preflight more than twice in ten minutes. A ban on micro's private
+address blocks replication (backups then fail and alert) until it expires.
 
 ## 4. Install, deploy and roll back the service
 
@@ -249,9 +251,12 @@ Transfer plane (14:15-15:47Z):
   micro's private address at 14:17:33Z after 5 pre-auth failures in 6 min (live-preflight keyscan 14:11, installer
   keyscans 14:15/14:17, one capacity probe before the receiver existed). Ban 1 h, port 2020 only; `recidive` counted
   it once (5 bans/day -> 7-day ban). No fail2ban change was made (an unban was not authorized from this session); the
-  rollout waited for the ban to expire (15:17:33Z). Recommendation for the operator: decide whether to add micro's
-  private address to core's fail2ban `ignoreip`. The `[DEFAULT]` list already trusts both nodes' public addresses,
-  but the `sshd` jail overrides it.
+  rollout waited for the ban to expire (15:17:33Z).
+  **Follow-up (operator decision, done by the orchestrator, not by this executor):** at 2026-10-18T17:41:20Z
+  `10.133.0.2` was appended to the `[DEFAULT] ignoreip` line (line 6) of core's `/etc/fail2ban/jail.local`. The
+  `[sshd]` jail has no `ignoreip` of its own and inherits `[DEFAULT]`, so this covers `sshd` and `recidive`; both live
+  jails now list `10.133.0.2`. Backup `/etc/fail2ban/jail.local.bak-20261018T174120Z` (0600); `fail2ban-client -t`
+  passed; fail2ban reloaded (not restarted). Revert: restore that backup, `fail2ban-client -t`, `fail2ban-client reload`.
 - 15:46:09Z: `TRANSFER_PROBE ok` (synthetic pair checksum-verified, atomically finalized on core),
   `TRANSFER_RESTRICTED ok` (arbitrary command and a path refused), `TRANSFER_VERIFIED ok` (>= 1 GiB free on both),
   `OPENBAO-MAINTENANCE-INSTALL-OK mode=prereqs role=sender`. core `--check --role receiver` OK. No cron, logrotate,
