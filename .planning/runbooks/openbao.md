@@ -309,7 +309,7 @@ Post-bootstrap gates (17:40-17:41Z, unattended):
 Rollback for Task 1 (not needed): `docker stack rm vault` keeps every node-local path; redeploying restores the same
 identity. The secrets can be removed with `docker secret rm BAO_ROLE_ID BAO_SECRET_ID` while unattached.
 
-### 2026-10-18 Plan 39-05 Task 2: static-seal rotation g1 -> g2 (in progress)
+### 2026-10-18 Plan 39-05 Task 2: static-seal rotation g1 -> g2 (complete)
 
 Rotation hold: no recurring OpenBao job exists yet (cron/logrotate come in Task 3), so nothing can interleave; every
 step below is run by hand, one at a time.
@@ -356,3 +356,33 @@ step below is run by hand, one at a time.
   `--verify-both-nodes` -> 5 identical pairs on micro and core.
 - Mismatch for S2 (no key byte read): offered as g2 with no previous generation -> `PREVIOUS_GENERATION_MISMATCH`
   refused, exit 3, recorded. The S2 rehearsal with the operator password is operator checkpoint 2.
+- Operator checkpoint 2 (re-checked on micro): 18:41:17Z privileged `verify --full --expect-seal-generation g2
+  --expect-root-revoked` OK; 18:42:26Z S2 rehearsal with seal-g2 recovered from the offline archive plus seal-g1
+  (previous) from micro's runtime file -> `result=ok` (both limitations in the record);
+  `--verify-recorded-matrix --expect-generations g1,g2` -> OK, 3 mismatch records.
+- Retirement source: thinx-swarm `4793e2e` (vault.conf `seal-g2` current only; suites 60/32/136 pass). Pushed to
+  origin first; waited for the CI errorpage/downtime redeploy (19:02:51Z / 19:02:57Z) and a clean router overview
+  (29, 0 errors) before any OpenBao step; micro ff to `4793e2e`.
+- 19:03:47Z `--pre-change` -> `openbao-20261018T190347Z-pre-change` (g2, previous g1); overlap config backed up to
+  `/root/openbao.hcl.bak-20261018T1905Z-seal-g2-g1` (0600); `openbao-install.sh` OK.
+- 19:03:59Z `docker service update --force vault_openbao` with seal-g1.key still on disk but unreferenced (cheap
+  rollback): "Auto Seal: static (current_key_id seal-g2)" with no previous, unsealed with the stored key, healthy.
+- Retirement of g1 from runtime: custody.seal-g1 in the ledger (17:38:47Z) and recovered from the archive in checkpoint
+  1; core has no seal directory and no `seal-g*.key` anywhere on its root filesystem; on micro the only g1 bytes were
+  `/var/lib/openbao/seal/seal-g1.key` (the two /root config backups hold `file://` references only; nothing on
+  tmpfs) -> `shred -u -n 1 -z`. Seal dir now holds only `seal-g2.key`. **g1 stays in the encrypted offline archive
+  until every snapshot that names it (seal_generation or seal_previous_generation g1, newest
+  `openbao-20261018T190347Z-pre-change`) has aged out of the 90-day retention, i.e. not before 2027-01-16.**
+- 19:09:03Z second forced update with g1 absent from the mount: unsealed with the stored key on seal-g2 alone,
+  healthy; container sees only `seal-g2.key`.
+- Task 2 gate: `verify --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> OK
+  (`SEAL_GENERATION ok current g2`, `RETIRED_GENERATION_ABSENT ok`); privileged part last run in checkpoint 2.
+  `--verify-recorded-matrix` (default generations g1,g2) -> OK.
+- 19:10:08Z final snapshot `openbao-20261018T191008Z-post-change` (g2, no previous, Raft index 303, both restore
+  limitations in the manifest); `--verify-both-nodes` -> 7 identical pairs on micro and core.
+- Edge after the retirement: `EDGE-EXPOSURE-OK`; router inventory `fa0afd608550e585`, 29 routers, 0 errors; thinx_api
+  and traefik_traefik specs unchanged; 23 services; 7442/1883/8883/443 open; rtm 200.
+- Restore limitations, which apply to every snapshot above: (1) restoring rewinds authentication state, so
+  credentials, tokens and roots revoked after the snapshot become valid again: restore production only from a
+  snapshot taken after the last revocation; (2) ciphertext from Transit key versions created after the snapshot cannot
+  be decrypted from it. Transit key rotation and deploy-key rewrap are Phase 41, not done here.
