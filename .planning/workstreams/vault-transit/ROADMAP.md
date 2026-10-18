@@ -22,7 +22,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
 - Integer phases (39, 40, 41): Planned milestone work
 - Decimal phases (39.1, 40.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 39: Internal OpenBao on the Swarm** - OpenBao runs internal-only with verified TLS, node-local Raft, auto-unseal, audit, a locked-down Transit key and the `thinx-api` AppRole (PRODUCTION)
+- [x] **Phase 39: Internal OpenBao on the Swarm** - OpenBao runs internal-only with verified TLS, node-local Raft, auto-unseal, audit, a locked-down Transit key and the `thinx-api` AppRole (PRODUCTION) (completed 2026-10-19)
 - [ ] **Phase 40: Transit-Encrypted Deploy Keys in the API** - new keys stored as `vault:vN:` ciphertext and decrypted in memory for builds, legacy keys still read; CI against an OpenBao dev server, then production cut-over (PRODUCTION at cut-over)
 - [ ] **Phase 41: Key Migration, Passphrase Retirement & Rotation** - every legacy key migrated, `GIT_KEY_PASSPHRASE` removed everywhere, Transit key rotated and rewrapped (PRODUCTION)
 
@@ -41,7 +41,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   4. Logged in as the `thinx-api` AppRole (role_id/secret_id mounted on `thinx_api` as swarm secrets), a test payload round-trips through `transit/encrypt` and `transit/decrypt` on `thinx-deploy-keys`. Export, backup, delete, rotate and every other path are denied. The key reads back as `aes256-gcm96`, `exportable=false`, `allow_plaintext_backup=false`, `deletion_allowed=false`, and the bootstrap root token no longer exists.
   5. Those requests appear in the node-local file audit log. A Raft snapshot is written outside `ssh_keys` and the Gluster backups, and it restores into a throwaway OpenBao. The runbook (ssh + `docker exec` only) covers bootstrap, static-seal key custody and rotation, recovery keys, snapshot, restore, and how an operator gets a short-lived privileged token when no root token persists.
 
-**Plans**: 6/6 plans executed across 5 waves
+**Plans**: 6/6 plans complete across 5 waves
 
 **Wave 1**
 - [x] 39-01-PLAN.md
@@ -114,7 +114,7 @@ Phases execute in numeric order: 39 → 40 → 41. Phase 40 code and CI work may
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 39. Internal OpenBao on the Swarm | v1.17 | 6/6 | In Progress | - |
+| 39. Internal OpenBao on the Swarm | v1.17 | 6/6 | Complete    | 2026-10-19 |
 | 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 0/? | Not started | - |
 | 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 0/? | Not started | - |
 
