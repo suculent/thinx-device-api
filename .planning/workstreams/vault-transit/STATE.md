@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
 status: executing
-stopped_at: Completed 39-02-PLAN.md
-last_updated: "2026-10-18T11:17:57.607Z"
+stopped_at: Completed 39-03-PLAN.md
+last_updated: "2026-10-18T13:36:26.531Z"
 last_activity: 2026-10-18
 last_activity_desc: Phase 39 execution started
-state_head: 64a8bd3cc2759b29d352e4152e8762fe2ef52780
+state_head: 4b919c97e29a5ca17307a2f619423ca23a54b4f0
 progress:
   total_phases: 3
   completed_phases: 0
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 39 (Internal OpenBao on the Swarm) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-10-18 — Phase 39 execution started
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 39 P01 | 55 min | 3 tasks | 11 files |
 | Phase 39 P02 | 43 min | 3 tasks | 6 files |
+| Phase 39 P03 | 130 min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,12 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 39]: Root revocation gated on 4 custody receipts (share, config-named seal generations, CA key, CA cert) and 5 fresh proofs (operator login, API canary, backup snapshot, audit canary, recorded A1 exact-image run)
 - [Phase 39]: Installer makes openbao.hcl the only file in /etc/openbao/config; emergency-unix.hcl staged at /etc/openbao/emergency-unix.hcl; --init-tls does first issuance into tls/r<UTC> + current symlink
 - [Phase 39]: Recovery archive: fixed 64 MB AES-256 UDIF/APFS image, Keychain never used by verify, custody proven by sha256 receipts compared in memory on micro
+- [Phase 39]: Raft snapshots stream via bao snapshot save /dev/stdout and are inspected on the host (2.7.1 has no snapshot inspect); a pair is a <stem>/ dir finalized by one atomic rename on micro and core
+- [Phase 39]: core receives snapshots only through a restrict,from=micro,command= forced receiver: fixed verbs/stems, size+sha256 before rename, no overwrite, prune never empties a node; local-only success is a failure
+- [Phase 39]: Issuer renewal at 120 days remaining (30 d + 90 d leaf lifetime); it fails closed until Plan 06 runs openbao-cert-renew.sh --arm-api-trust; leaf renewal at 30 days works unarmed
+- [Phase 39]: deploy_api_trust: immutable openbao-ca-<sha20> Docker config, 0600 spec backup, one targeted thinx_api update, in-task Node probe (pinned one-shot job when the task is on core), rollback of server dir AND API config
+- [Phase 39]: Incident alerts: durable flock'd per-job state (healthy/failure-pending/failure-sent/recovery-pending); ambiguous acknowledgement retried once then assumed delivered
+- [Phase 39]: Restore rehearsal refuses image/generation/path/staleness mismatches before reading key bytes; --verify-recorded-matrix defaults to config generations plus every generation a retained snapshot needs
 
 ### Pending Todos
 
@@ -100,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-18T11:17:57.569Z
-**Stopped At:** Completed 39-02-PLAN.md
+**Last session:** 2026-10-18T13:36:26.486Z
+**Stopped At:** Completed 39-03-PLAN.md
 **Resume File:** None
