@@ -275,3 +275,31 @@ Bootstrap, unattended part (15:48-15:50Z):
   (custody of seal-g1, recovery-share, ca-key, ca-cert).
 - A1 rehearsal: fresh `tests/openbao-exact-image.test.sh` on the exact image (laptop throwaway, no production access)
   piped into `record-emergency-proof` -> `PROOF_EMERGENCY_RECORDED ok ... 136 checks` at 15:50:19Z (newer than init).
+
+Bootstrap, operator part (operator's own terminal, ~17:3xZ; outputs reported without values):
+
+- Custody: `seal-g1.key` (32 B), `recovery-share-1.b64` (44 B; `SHARE_REMOVED_FROM_TMPFS ok`), `ca/ca.key` (306 B),
+  `ca/ca.pem` (774 B), each `ARCHIVE_ARTIFACT_ARCHIVED ok` then `BOOTSTRAP CUSTODY_CONFIRMED ok`.
+  `verify --require-complete --expect-generations g1` -> `VERIFIED ok` read-only, Keychain not used, entries=4
+  (1 seal generation, 1 recovery share, 1 CA key, 1 CA cert).
+- `ssh -t micro '/usr/local/sbin/openbao-bootstrap.sh run'` (operator password at the hidden prompt):
+  `INIT_ALREADY ok`, `CREDENTIALS_ISSUED ok` thinx-api + backup (0600), `CONFIGURED ok` 17:39:12Z,
+  `OPERATOR_CREATED ok` 17:39:17Z (4h hard cap), the four live proofs ok, `ROOT_REVOKED ok` 17:39:26Z (403 on reuse,
+  removed from tmpfs), `POST_REVOCATION_SNAPSHOT ok`, `BOOTSTRAP-COMPLETE` 17:39:36Z.
+
+Post-bootstrap gates (17:40-17:41Z, unattended):
+
+- `openbao-verify.sh --full --expect-seal-generation g1 --expect-root-revoked` -> `OPENBAO-VERIFY-OK mode=full`
+  (spec/tag/pin/no port/no Gluster/no label, TLS negatives, layout, seal g1, API round-trip + 13/13 denials, backup
+  snapshot/restore-denied/decrypt-denied/revoke-self, audit 0600 HMAC-redacted, root revoked and rejected, no root
+  token / share / token helper). Privileged operator checks not run unattended (need the operator password).
+- `--edge-exposure` -> exactly one `EDGE-EXPOSURE-OK`; Traefik router inventory hash unchanged
+  (`fa0afd608550…`); 7442/1883/8883 open; rtm 200.
+- `openbao-backup.sh --verify-both-nodes` -> `openbao-20261018T173932Z-post-change` identical on micro and core.
+- Swarm secrets `BAO_ROLE_ID` and `BAO_SECRET_ID` created from the root-only thinx-api credential files via stdin
+  (`docker secret create … -`), label `com.thinx.openbao=phase39`, attached to no service (Plan 06 attaches them).
+- `thinx_api` spec hash `e3d388a3c43f0342` and `traefik_traefik` `efeabd4953d5ca2c` unchanged (UpdatedAt as in the
+  pre-state); legacy Vault tree metadata digests unchanged (`cbdb06347adf3996`).
+
+Rollback for Task 1 (not needed): `docker stack rm vault` keeps every node-local path; redeploying restores the same
+identity. The secrets can be removed with `docker secret rm BAO_ROLE_ID BAO_SECRET_ID` while unattached.
