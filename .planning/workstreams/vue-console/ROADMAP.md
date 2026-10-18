@@ -40,8 +40,9 @@ no dependency or infrastructure upgrades.
 - [x] **Phase 46: Transformers & Environment Globals** - transformer icon actions, bulk delete behind a typed `confirm`, save/dirty states, editable environment globals with restore on failure (completed 2026-10-14)
 - [x] **Phase 47: Build Log Search & Status Colours** - search with highlight, count and stepping inside the full build log; one status colour mapping; dashboard log access; Phase 36 review items (completed 2026-10-15)
 - [x] **Phase 48: Deep Links & Close-out** - deep-link reload, Phase 35 UI-review items and review ledger, legacy console build re-enabled and the remaining Legacy changes deployed, Vue Cypress suite green and gating (console + CI) (completed 2026-10-17)
+- [x] **Phase 48.1: Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage** (INSERTED) - admin deep link stays on reload, four stores show a network error instead of stale data, five stubbed Cypress specs gate the Vue deploy; verification human_needed (operator checks after the push)
 
-## Phase Details
+## v1.18 — Console Improvements
 
 ### Phase 42: CI Trim, Login Page & Build Footer
 
@@ -292,6 +293,41 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 48.1: Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)
+
+**Goal:** The three real gaps found by the v1.18 milestone audit (`v1.18-MILESTONE-AUDIT.md`) are closed before the milestone completes: an admin who reloads `/#/app/admin/users` stays on it, stores that fail on the network show an error and not stale or empty data, and the Cypress suite that gates the Vue deploy covers the pages added in Phases 44-47.
+**Requirements**: NOTIF-04 (regression: admin deep link), CI-07 (gate coverage). No new requirement IDs.
+**Depends on:** Phase 48
+**Repos**: `services/console` (Vue) and, for any new CI behaviour, the parent `.circleci/config.yml`.
+- W1 (warning-high): `Routes.js` guard reads `profile.admin` from a store that starts empty and nothing loads the profile before it runs, so a reloaded admin is sent to the dashboard. Fix: dispatch `profile/fetchProfile` in the guard before the admin check (or hydrate the profile in `hydrateSession`), with an admin reload case in `deep-link.spec.js`.
+- W2 (warning): `apikeys`, `channels`, `repositories` and `profile` stores ignore `networkError` and keep stale or empty state with no error banner; `rsakeys` and `transformers` already throw and are the pattern to copy.
+- W3 (warning): the gating Cypress suite has no spec for rsakeys, transformers, enviros, repositories or build-log search; Phases 45-47 rely on jsdom unit tests only.
+- Out of scope: W4-W6 and the open review items (info), which stay as recorded tech debt.
+
+**Success Criteria** (what must be TRUE):
+  1. A logged-in admin who reloads `/#/app/admin/users` stays on that page; a non-admin on the same URL still lands on the dashboard, and a logged-out reload goes to `/login`.
+  2. When the network fails, the API keys, channels, repositories and profile pages show a single error message and no stale rows, as the deploy-key and transformer pages already do.
+  3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
+  4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
+
+**Plans:** 4/4 plans executed (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
+
+Plans:
+**Wave 1**
+- [x] 48.1-01-PLAN.md — W1: Routes.js guard loads the profile before the admin check (admin paths only, fail-closed to the dashboard); admin, non-admin and logged-out reload cases added to `deep-link.spec.js` (additions only); `admin-users.json` fixture and `getAdminUsers` stub; new `tests/unit/audit-gaps-v118.cjs` chained into `test:unit` (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 48.1-02-PLAN.md — W2: `apikeys`, `channels`, `repositories` and `profile` fetchers throw on `networkError`; one `*-load-error` alert and no stale rows on their pages; Header, Login and OAuthReturn absorb a rejecting `fetchProfile`; S/P/K unit checks (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 48.1-03-PLAN.md — W3: stubbed Cypress specs for rsakeys, transformers, enviros, repositories (incl. the W2 network-failure error in a browser) and build-log search, with fixtures and additive stubs in `api-stubs.js` (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [x] 48.1-04-PLAN.md — CI-mirror verification of the full 16-spec suite on the committed console HEAD, local parent submodule-pointer bump, operator ship checklist as a human check (no auto push) (wave 4)
+
+Plan-checker advisories (0 blockers, 2 size warnings, accepted by the operator 2026-10-17): plans 02 (12 files) and 03 (14 files) exceed the 10-file guideline; PD-04 throws on `networkError` only (a 5xx reply still leaves stale state — record as a residual in the SUMMARY); PD-09 re-syncs list rows after a successful delete (adjacent fix, outside W2); 48.1-04 Task 1 should run the Cypress suite detached if it exceeds the 10-minute tool timeout.
+
+
 ## Milestone Notes
 
 **Legacy console build paused (CI-05), one exception (NOTIF-01), restored at close (CI-06).** From Phase 42 until
@@ -352,40 +388,7 @@ Phase 48 runs last, because its FIX-01 ledger closes over Phases 45–47 and CI-
 | 46. Transformers & Environment Globals | v1.18 | 6/6 | Complete    | 2026-10-14 |
 | 47. Build Log Search & Status Colours | v1.18 | 5/5 | Complete    | 2026-10-15 |
 | 48. Deep Links & Close-out | v1.18 | 8/8 | Complete    | 2026-10-17 |
+| 48.1. Close v1.18 audit gaps (INSERTED) | v1.18 | 4/4 | Complete    | 2026-10-18 |
 
 ---
 *v1.18 Console Improvements roadmap created 2026-10-12: 32 requirements across 7 phases (42–48). Next: `/gsd-discuss-phase 42`.*
-
-### Phase 48.1: Close v1.18 audit gaps: admin deep link, store error states, Cypress coverage (INSERTED)
-
-**Goal:** The three real gaps found by the v1.18 milestone audit (`v1.18-MILESTONE-AUDIT.md`) are closed before the milestone completes: an admin who reloads `/#/app/admin/users` stays on it, stores that fail on the network show an error and not stale or empty data, and the Cypress suite that gates the Vue deploy covers the pages added in Phases 44-47.
-**Requirements**: NOTIF-04 (regression: admin deep link), CI-07 (gate coverage). No new requirement IDs.
-**Depends on:** Phase 48
-**Repos**: `services/console` (Vue) and, for any new CI behaviour, the parent `.circleci/config.yml`.
-- W1 (warning-high): `Routes.js` guard reads `profile.admin` from a store that starts empty and nothing loads the profile before it runs, so a reloaded admin is sent to the dashboard. Fix: dispatch `profile/fetchProfile` in the guard before the admin check (or hydrate the profile in `hydrateSession`), with an admin reload case in `deep-link.spec.js`.
-- W2 (warning): `apikeys`, `channels`, `repositories` and `profile` stores ignore `networkError` and keep stale or empty state with no error banner; `rsakeys` and `transformers` already throw and are the pattern to copy.
-- W3 (warning): the gating Cypress suite has no spec for rsakeys, transformers, enviros, repositories or build-log search; Phases 45-47 rely on jsdom unit tests only.
-- Out of scope: W4-W6 and the open review items (info), which stay as recorded tech debt.
-
-**Success Criteria** (what must be TRUE):
-  1. A logged-in admin who reloads `/#/app/admin/users` stays on that page; a non-admin on the same URL still lands on the dashboard, and a logged-out reload goes to `/login`.
-  2. When the network fails, the API keys, channels, repositories and profile pages show a single error message and no stale rows, as the deploy-key and transformer pages already do.
-  3. The Cypress suite that gates `vue-console-registry` has at least one stubbed spec each for deploy-key rename and delete, transformers (bulk delete behind `confirm`), environment-globals edit, the repositories platform bullet and build-log search, and it runs green in CI.
-  4. No existing Phase 48 behaviour regresses: `deep-link.spec.js` still passes with its assertions unchanged apart from the added admin case.
-
-**Plans:** 4/4 plans executed (strictly sequential waves; plans share `audit-gaps-v118.cjs`, `api-stubs.js` and the console repo, so run one executor at a time with isolation off)
-
-Plans:
-**Wave 1**
-- [x] 48.1-01-PLAN.md — W1: Routes.js guard loads the profile before the admin check (admin paths only, fail-closed to the dashboard); admin, non-admin and logged-out reload cases added to `deep-link.spec.js` (additions only); `admin-users.json` fixture and `getAdminUsers` stub; new `tests/unit/audit-gaps-v118.cjs` chained into `test:unit` (wave 1)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-- [x] 48.1-02-PLAN.md — W2: `apikeys`, `channels`, `repositories` and `profile` fetchers throw on `networkError`; one `*-load-error` alert and no stale rows on their pages; Header, Login and OAuthReturn absorb a rejecting `fetchProfile`; S/P/K unit checks (wave 2)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-- [x] 48.1-03-PLAN.md — W3: stubbed Cypress specs for rsakeys, transformers, enviros, repositories (incl. the W2 network-failure error in a browser) and build-log search, with fixtures and additive stubs in `api-stubs.js` (wave 3)
-
-**Wave 4** *(blocked on Wave 3 completion)*
-- [x] 48.1-04-PLAN.md — CI-mirror verification of the full 16-spec suite on the committed console HEAD, local parent submodule-pointer bump, operator ship checklist as a human check (no auto push) (wave 4)
-
-Plan-checker advisories (0 blockers, 2 size warnings, accepted by the operator 2026-10-17): plans 02 (12 files) and 03 (14 files) exceed the 10-file guideline; PD-04 throws on `networkError` only (a 5xx reply still leaves stale state — record as a residual in the SUMMARY); PD-09 re-syncs list rows after a successful delete (adjacent fix, outside W2); 48.1-04 Task 1 should run the Cypress suite detached if it exceeds the 10-minute tool timeout.
