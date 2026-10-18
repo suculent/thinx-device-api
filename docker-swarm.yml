@@ -124,7 +124,7 @@ secrets:
 configs:
   openbao-ca:
     external: true
-    name: openbao-ca-46fa30be48446ff5a980
+    name: openbao-ca-a2b56707515146d7a580
 
 services:
 

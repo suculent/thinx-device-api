@@ -212,6 +212,71 @@ A production restore uses the same snapshot/generation pairing: stop-first `vaul
 (`bao operator raft snapshot restore -force`) and re-verify with `openbao-verify.sh --full`. Rehearse first; repeat a
 rehearsal before every OpenBao upgrade (D-17). No restore is ever scheduled.
 
+## 10. The API side: attachment, trust consumer and rollback (Plan 06)
+
+What `thinx_api` carries (source: `thinx-swarm/thinx.yml`, mirrored in the parent `docker-swarm.yml`; both checked by
+`tests/openbao-api-wiring.test.sh --source thinx.yml <parent>/docker-swarm.yml`):
+
+| Addition | Value | Read by |
+|---|---|---|
+| network | `openbao-internal` (Internal=true, not attachable) | resolves `openbao.internal` |
+| secret | `BAO_ROLE_ID` -> `/run/secrets/BAO_ROLE_ID` | `lib/thinx/secrets.js` `readSecret()` (file first) |
+| secret | `BAO_SECRET_ID` -> `/run/secrets/BAO_SECRET_ID` | same |
+| config | `openbao-ca-<sha256(bundle)[0:20]>` -> `/run/openbao/ca.pem` (0444, public certificates only) | `BAO_CACERT` |
+| env | `BAO_ADDR=https://openbao.internal:8200`, `BAO_CACERT=/run/openbao/ca.pem` | the Phase 40 client |
+
+Nothing else of the API changes in Phase 39: no client module, no `rsakey.js`/`git.js` change, `GIT_KEY_PASSPHRASE`
+stays mounted and set (its removal is Phase 41). `readSecret()` caches per process, so a new secret value reaches the
+API only through a deliberate task restart.
+
+**Attach (done once, 2026-10-18; evidence log below).** Repo first, then on micro: a root-only node-local rollback
+directory `/var/lib/openbao-maintenance/rollback/api-service` (0700) with a 0600 `docker service inspect thinx_api`
+backup `thinx-api-pre-openbao-<UTC>.json`; the CA config created from `/etc/openbao/ca/ca.pem` (equal to the server's
+`current/ca.pem`); then exactly one update, never a stack deploy:
+
+```bash
+docker service update --detach=false --no-resolve-image --network-add openbao-internal \
+  --secret-add source=BAO_ROLE_ID,target=BAO_ROLE_ID --secret-add source=BAO_SECRET_ID,target=BAO_SECRET_ID \
+  --config-add source=openbao-ca-<sha20>,target=/run/openbao/ca.pem,mode=0444 \
+  --env-add BAO_ADDR=https://openbao.internal:8200 --env-add BAO_CACERT=/run/openbao/ca.pem thinx_api
+```
+
+Then (laptop) `tests/openbao-api-wiring.test.sh --live` and the edge gate; on micro
+`openbao-cert-renew.sh --arm-api-trust --api-service thinx_api`. Every check prints booleans, names and status codes
+only.
+
+**Recurring trust consumer.** From the arm onwards an issuer renewal (`--daily` when the CA certificate has under 120
+days left, or `--renew-issuer-now`) changes API trust itself: overlap bundle (old + renewed anchor) as a new immutable
+config, one targeted `docker service update` of `thinx_api` (`--config-rm` old, `--config-add` new), Node probe inside
+the new task, server leaf re-issued under the renewed anchor, the old anchor retired from the API and then the server.
+Any failure restores the previous config and server directory and proves both (exit 4 if it cannot). Each swap
+restarts the API task once. After a swap update `name:` of `configs.openbao-ca` in both deployment files to the
+config `--verify-api-trust-consumer` reports (`OPENBAO-CERT-API-TRUST-OK ... config=<name>`); the live wiring test
+fails with `SOURCE_CONFIG_DRIFT` until then. The CA key never changes in an issuer renewal; the archived `ca-cert` is
+stale afterwards, which is harmless (the archived key re-creates any CA certificate).
+
+**Checks.**
+
+```bash
+ssh micro '/usr/local/sbin/openbao-verify.sh --full --maintenance --api-service thinx_api'
+ssh micro '/usr/local/sbin/openbao-cert-renew.sh --verify-api-trust-consumer --api-service thinx_api'
+tests/openbao-api-wiring.test.sh --live      # laptop; probes inside the task on whichever node it runs
+```
+
+**Rollback (removes exactly the five additions; one update).**
+
+```bash
+ssh micro 'CFG=$(docker service inspect thinx_api | jq -r '"'"'[.[0].Spec.TaskTemplate.ContainerSpec.Configs[]? | select(.File.Name == "/run/openbao/ca.pem") | .ConfigName] | join(" ")'"'"');
+  docker service update --detach=false --no-resolve-image --network-rm openbao-internal --secret-rm BAO_ROLE_ID \
+    --secret-rm BAO_SECRET_ID --env-rm BAO_ADDR --env-rm BAO_CACERT --config-rm "$CFG" thinx_api'
+```
+
+Prove it by comparing the normalized spec (Env/Secrets/Configs/Networks sorted, ForceUpdate dropped) with the newest
+backup in `rollback/api-service` on micro, then run the edge gate. Right after the first update `docker service
+update --rollback thinx_api` is equivalent (PreviousSpec = the backup); after a trust-consumer swap it is not. Disarm
+the consumer with it (`obc_state_set` key `armed` in `state/api-trust`) only if the API is detached for good: an
+armed consumer with no CA config refuses issuer renewals (`API_TRUST_NOT_ATTACHED`, nothing changed) and alerts.
+
 ---
 
 ## Evidence log (sanitized: timestamps, SHAs, counts, verdicts; never values)
@@ -444,3 +509,75 @@ traefik, the thinx stacks or thinx_api (thinx_api's SLACK_WEBHOOK secret file wa
   `openbao-verify.sh --maintenance` -> OK; `--check --expect-full` OK; incidents backup/cert-renew/audit all
   healthy. Edge: `EDGE-EXPOSURE-OK`, router inventory `fa0afd608550e585` (29, 0 errors), thinx_api/traefik specs
   unchanged, 23 services; 7442/1883/8883 open; rtm 200.
+
+### 2026-10-18 Plan 39-06 Task 1: API deployment contract
+
+- thinx-swarm `f179df3`: `thinx.yml` declares the external `openbao-internal` network, `BAO_ROLE_ID` / `BAO_SECRET_ID`
+  secrets and the versioned external config `openbao-ca` (`name: openbao-ca-<sha20>`); only `api` uses them (overlay,
+  two secret mounts, `/run/openbao/ca.pem`, `BAO_ADDR` / `BAO_CACERT`). Parent mirror `docker-swarm.yml` `6f94f286`.
+  `tests/openbao-api-wiring.test.sh --source` -> `API-WIRING-OK` (both files equal their Phase 39 baselines once the
+  five additions are removed; OpenBao subsets identical; `GIT_KEY_PASSPHRASE` kept; rsakey.js / git.js / package*.json
+  unchanged since `PARENT_BASE`, no client module); `--self-test` -> 14/14 mutations refused.
+- `openbao-verify.sh` gained `--api-service NAME`; `--full --maintenance --api-service` now combine. The bootstrap
+  fixture suites that drive verify (`edge-exposure-fail-closed` 2, `protected-input-contract` 5,
+  `bootstrap-state-machine` 14 against the exact image) pass. Installed on micro by `openbao-install.sh`
+  (`OPENBAO-INSTALL-OK`, config byte-identical, verify.sh 0700 root).
+
+### 2026-10-18 Plan 39-06 Task 2: thinx_api attached, trust consumer armed and exercised
+
+Source: thinx-swarm `f179df3` on laptop, origin and micro (micro's checkout has only six untracked 2026-10-07
+`*.bak.*-pre-v3-labels` files, no tracked change). The push to origin triggered the CI error/downtime rebuild; Swarmpit
+redeployed `errorpage_errorpage` / `downtime_downtime` at 19:38:00Z / 19:38:06Z, and every gate below ran after it.
+
+- Precondition (19:37Z): `openbao-verify.sh --full --maintenance --expect-seal-generation g2
+  --expect-no-runtime-generation g1 --expect-root-revoked` -> `OPENBAO-VERIFY-OK mode=full+maintenance` (privileged
+  part not run: needs the operator password); `openbao-internal` Internal=true; both secrets present and unattached.
+- Rollback state (19:37:26Z): `/var/lib/openbao-maintenance/rollback/api-service` created 0700 root on micro's ext4
+  (parent `rollback/` was already 0700; nothing broadened, nothing under `/mnt/data`);
+  `thinx-api-pre-openbao-20261018T193726Z.json` 0600 root: one service, 2 networks, 11 secrets incl.
+  `GIT_KEY_PASSPHRASE`, 27 env entries, 0 configs, no `BAO_*`; Version.Index 38382563; spec sha256/16 `d4fe340a8f8c4b02`.
+- CA config `openbao-ca-46fa30be48446ff5a980` created from `/etc/openbao/ca/ca.pem` (equal to the server's
+  `current/ca.pem`, one CA:TRUE certificate of the CA key, trusts the served leaf, no private key); content hash
+  verified after creation.
+- Pre-update edge gate (19:38Z, after the CI redeploy): `EDGE-GATE-OK` (table in Task 3).
+- **The one targeted update** 19:38:56Z -> 19:39:17Z (`--network-add openbao-internal`, `--secret-add` x2,
+  `--config-add .../run/openbao/ca.pem,mode=0444`, `--env-add` x2, `--no-resolve-image`; no other service, no stack):
+  UpdateStatus `completed`, new task `bzatptgx3r05` on micro Running. Startup log: the same 5 New Relic vendor /
+  DEP0169 lines as the previous task, nothing new.
+- `tests/openbao-api-wiring.test.sh --live` -> `API-WIRING-OK` (22 rows): spec = backup + exactly the five additions;
+  inside the task `readSecret()` (the image's own `lib/thinx/secrets.js`) returns both values from `/run/secrets`, not
+  from env; `BAO_ADDR`/`BAO_CACERT` exact; bundle 1 certificate, no key; verified TLS to `openbao.internal` 200; no
+  CA -> `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, same-subject foreign CA -> same, bare task IP -> `ERR_TLS_CERT_ALTNAME_INVALID`;
+  a login against a foreign CA fails in the handshake (no HTTP exchange); AppRole login 200, policies `["thinx-api"]`,
+  TTL <= 20 min; random 32-byte canary encrypt / decrypt / rewrap / decrypt-rewrapped all 200 and matched; 13/13
+  non-granted operations 403; unauthenticated encrypt 403; no token/ciphertext/UUID shape in the output. The transient
+  token is left to expire (the policy cannot look up, renew or revoke it).
+- Post-update edge gate 19:39:31Z: `EDGE-GATE-OK`.
+- 19:40Z `openbao-cert-renew.sh --arm-api-trust --api-service thinx_api` -> `API_TRUST_ARMED` (mounted ok,
+  no-CA and foreign CA refused inside the task).
+- 19:40:42Z `openbao-backup.sh --pre-change` -> `openbao-20261018T194042Z-pre-change`.
+- **Second issuer renewal after rollout** 19:40:54Z -> 19:41:54Z `--exercise-expired-predecessor --api-service
+  thinx_api` -> `OPENBAO-CERT-OK mode=exercise`:
+  1. spec saved 0600 (`rollback/api-trust/thinx_api-20261018T194057Z-*.json`); overlap config
+     `openbao-ca-a113267bb8b8671b8d44` (expired predecessor + renewed anchor) deployed by one targeted update; in the
+     new task: the bundle trusted, predecessor alone `CERT_HAS_EXPIRED`, renewed alone 200, no-CA and foreign refused.
+  2. server `current -> r20261018T194119Z` (leaf under the renewed anchor, chain = overlap), served and trusted; the
+     API task trusts it through the renewed anchor alone.
+  3. spec saved again (`...194128Z...`); `openbao-ca-a2b56707515146d7a580` (renewed anchor only) deployed; server
+     `current -> r20261018T194151Z` (same leaf, ca.pem = renewed only).
+  4. `/etc/openbao/ca/ca.pem` replaced by the renewed certificate (same key and subject; fp `DF76A2BC95EA8D89`,
+     notAfter 2031-10-17 19:40:54Z); the previous one kept as `ca.pem.retired-20261018T194154Z`.
+- `--verify-api-trust-consumer --api-service thinx_api` (with the plan's 0700/0600 and one-task assertions) ->
+  `OPENBAO-CERT-API-TRUST-OK service=thinx_api config=openbao-ca-a2b56707515146d7a580`; `--verify-current` ->
+  `r20261018T194151Z`; 19:42:10Z `--post-change` -> `openbao-20261018T194210Z-post-change`.
+- Source re-pinned to `openbao-ca-a2b56707515146d7a580` in both deployment files; `--source` and `--live` (now
+  `SOURCE_CONFIG_MATCH`, spec delta still exactly the five additions) -> OK. Edge gate after the exercise: `EDGE-GATE-OK`.
+- API restarts in this task: three (the attach and the two trust swaps), each stop-first on micro; final task
+  `v91bcumsz5bx`, Version.Index 38382842 (UpdatedAt 19:41:49Z). Docker configs kept for rollback:
+  `openbao-ca-46fa30be48446ff5a980` (original anchor), `openbao-ca-a113267bb8b8671b8d44` (overlap); the consumer never
+  removes a previous config.
+- The archived `ca-cert` in the offline recovery image is now stale (the archived CA key is unchanged and re-creates
+  any CA certificate); refreshing it is optional (39-03 note).
+- Cosmetic: run over ssh from the laptop, `perl` (the atomic symlink rename) prints locale warnings for the forwarded
+  `LANG=cs_CZ.UTF-8`; cron has no such variable. Prefix `LC_ALL=C` when running the script by hand.
+- Rollback (not needed): section 10.
