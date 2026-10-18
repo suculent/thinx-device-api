@@ -581,3 +581,97 @@ redeployed `errorpage_errorpage` / `downtime_downtime` at 19:38:00Z / 19:38:06Z,
 - Cosmetic: run over ssh from the laptop, `perl` (the atomic symlink rename) prints locale warnings for the forwarded
   `LANG=cs_CZ.UTF-8`; cron has no such variable. Prefix `LC_ALL=C` when running the script by hand.
 - Rollback (not needed): section 10.
+
+### 2026-10-18 Plan 39-06 Task 3: Phase 39 final gate
+
+All rows below were run after the last thinx-swarm push (`5897b8b`; CI error/downtime redeploy at 19:47Z) unless a
+row names an earlier record. "Operator" rows need the operator's password, session or eyes and are run with the
+scratchpad script named in the 39-06 SUMMARY; until then they are open, not green.
+
+**Verifiers**
+
+- 19:48Z `openbao-verify.sh --full --maintenance --api-service thinx_api` -> `OPENBAO-VERIFY-OK
+  mode=full+maintenance+api` (55 ok rows; privileged part not run).
+- 19:48:29Z -> 19:48:45Z `docker service update --force vault_openbao` (the only service touched): "Auto Seal: static
+  (current_key_id seal-g2)", "unsealed with stored key", `--health` OK with no operator input. Then
+  `--full --expect-seal-generation g2 --expect-no-runtime-generation g1 --expect-root-revoked` -> OK (TLS no-CA and
+  bare-IP rejected, seal g2, g1 absent, backup AppRole snapshot / restore denied / decrypt denied / revoke-self,
+  audit 0600 HMAC with the request logged and this run's values absent, root revoked 17:39:26Z with rejection proof).
+- `tests/openbao-api-wiring.test.sh --live` after that restart -> `API-WIRING-OK` (18 ok rows, same matrix as Task 2).
+- `openbao-cert-renew.sh --verify-current` -> `r20261018T194151Z`; `--verify-api-trust-consumer` -> OK
+  (`openbao-ca-a2b56707515146d7a580`).
+- `openbao-backup.sh --verify-both-nodes` -> 12 identical pairs on micro and core (newest
+  `openbao-20261018T194210Z-post-change`); `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> g1,g2 OK, 3
+  mismatch records; cron `openbao-backup.sh --daily` 03:17 and `openbao-cert-renew.sh --daily` 04:47 (node-local
+  paths), no restore schedule; incidents backup / cert-renew / audit `healthy`.
+- Legacy `/mnt/glusterfs/vault` and `/mnt/gluster/vault`: 47 entries each, metadata digest `cbdb06347adf3996` on both
+  (unchanged since the Plan 05 pre-state; never read, migrated or deleted).
+
+**Edge (laptop + micro loopback; scratchpad `p06-edge-gate.sh`)**
+
+| Row | Baseline | Final |
+|---|---|---|
+| Traefik http routers, sorted `name status`, byte-for-byte | 29, sha256/16 `fa0afd608550e585` | identical (cmp) |
+| tcp routers / disabled / naming vault or openbao | 0 / 0 / 0 | 0 / 0 / 0 (`vault.thinx.cloud` unrouted) |
+| `openbao-verify.sh --edge-exposure` | `EDGE-EXPOSURE-OK` | `EDGE-EXPOSURE-OK` |
+| traefik_traefik / traefik_socket-proxy UpdatedAt | 06:47:26Z | 06:47:26Z (untouched) |
+| thinx_api | 1/1 on micro | 1/1 on micro (task `v91bcumsz5bx`) |
+| rtm `/`, rtm `/api/v2/csrf-token`, app `/` | 200 / 200 / 200 | 200 / 200 / 200 |
+| 7442, 1883, 8883 from the laptop to the public IP; HTTP on :7442 | open; 200 | open; 200 |
+| `scripts/probe-rtm-handshake.sh` summary (exit is always 0) | `0/4` | `Bare-nginx-404 rows (4-7) detected: 0/4` |
+| WS cookie-less upgrade `/` | 101 | 101 |
+| WS `Cookie: foo=bar` `/p33probe` | 401 + `X-Forwarded-Proto: https` | same |
+| `scripts/check-ws-multitab.js wss://rtm.thinx.cloud` | 2/2 opened | 2/2 opened |
+| bare IP http / https | 301 / 200 | 301 / 200 |
+
+One gate run at about 19:50-19:51Z had empty answers on the last two WS rows only (no API restart, no Traefik 5xx in
+that window); the direct re-probe at 19:52:04Z and two full gate runs after it were all green. Recorded as a transient.
+
+**Operator rows (open until the 39-06 operator script runs)**
+
+- Privileged `verify --full` (operator login 4 h hard cap, userpass metadata, key flags, three policies byte-identical,
+  thinx-api role settings, one Raft voter): last green 18:41:17Z (Plan 05 checkpoint 2, g2 with g1 previous); not
+  re-run after the g1 retirement or in this plan.
+- WebSocket on the operator's real owner path: `Cookie: foo=bar` -> 401 and a valid `x-thx-core` session -> 101 held
+  open. Code reading (`lib/thinx/socket_upgrade.js`): a cookie-less upgrade on an owner path gets 101 and is closed
+  1008, and any `x-thx-core` value gets 101, so only "held open" proves a session.
+- Slack begin/recovery receipts of the three Plan 05 test incidents.
+
+**Phase 39 matrix**
+
+| Item | Evidence | State |
+|---|---|---|
+| D-01 OpenBao, exact tag | `openbao/openbao:2.7.1` in the spec, no digest (`IMAGE_EXACT_TAG`); research + exact-image suite | green |
+| D-02 one replica, micro pin, internal overlay, no port/route, node-local data | `ONE_TASK_ON_MICRO`, `PINNED_MICRO_MANAGER`, `NO_PUBLISHED_PORT`, `NO_GLUSTER_MOUNT`, `EDGE-EXPOSURE-OK`, router inventory = baseline | green |
+| D-03 auto-unseal, API-verified TLS, non-exportable key, AppRole e/d/r only | 19:48:45Z unseal; live TLS positive + 3 negatives in the task; 13/13 + unauthenticated 403; key flags last read 18:41:17Z | green (key-flag re-read = operator row) |
+| D-04 ssh + exec only, root revoked, rotation and restore exercised | root revoked 17:39:26Z, rejection proof; g1 -> g2 rotation; g1/g2 rehearsals `result=ok`, S3 `partial` | green |
+| D-05 dormant vault.yml replaced | thinx-swarm `vault.yml` / `vault.conf` (Plan 01), no Vault pin, no public router | green |
+| D-06..D-09 encrypted sole-operator custody, guided setup | Plans 04/05: archive verify with g1, g2, share, CA key/cert; ledger custody records | green (archived ca-cert stale after the issuer renewal; optional refresh) |
+| D-10..D-13 operator userpass, 4 h hard cap, full admin, own password | Plan 05 checkpoints (explicit_max_ttl 14400 s, not periodic) | green 18:41:17Z; re-run = operator row |
+| D-14 daily + pre/post-change snapshots | cron 03:17; `194042Z-pre-change`, `194210Z-post-change` around the issuer renewal | green |
+| D-15 copy to core, root-only, not Gluster | 12 identical pairs micro/core; forced-command receiver | green |
+| D-16 90 days on both | Plan 05 live boundary test (90 d + 7 h pruned on both, 89 d + 19 h kept) | green |
+| D-17 initial rehearsal, then before upgrades | g1/g2 `ok`, S3 `partial`; no restore cron | green |
+| D-18 normal operation, brief API restart, verify, roll back | one attach update + two consumer swaps, live test + edge gate after each, rollback recipe section 10 | green |
+| D-19 TLS renewal automated and verified | leaf renewed live (Plan 05); issuer renewed through the armed consumer with an expired predecessor (this plan) | green |
+| D-20 existing ops Slack channel | test message receipt confirmed (Plan 05) | green; incident receipts = operator row |
+| D-21 one begin, one recovery | Plan 05 begin -> suppressed -> recovery for backup, cert-renew, audit | green (state machine); receipts = operator row |
+| D-22 repo-first, own stack, targeted API update with root-only backup, no thinx/traefik redeploy, 7442 + plain MQTT | thinx-swarm commits on micro by ff-merge; `vault` stack; 0600 backup in a 0700 node-local dir; traefik UpdatedAt unchanged; ports open | green |
+| VAULT-01 | D-01/D-02 rows | green |
+| VAULT-02 | node-local Raft, snapshots outside ssh_keys and Gluster backups, both nodes | green |
+| VAULT-03 | internal CA, `vault.conf` without `tls_disable`, API verifies `BAO_CACERT` in the task | green |
+| VAULT-04 | static seal file 32 B 0600 on micro, offline copy, rotation via previous key exercised | green |
+| VAULT-05 | aes256-gcm96, exportable / plaintext backup / deletion false | green 18:41:17Z (re-read = operator row) |
+| VAULT-06 | thinx-api policy 3 paths update-only; BAO_ROLE_ID/BAO_SECRET_ID swarm secrets read by `readSecret()` in the task; no root token | green |
+| VAULT-07 | file audit 0600 node-local, HMAC, API request logged | green |
+| VAULT-08 | sections 4-10 of this runbook, ssh + exec only | green |
+| SC1 one tagged task on the Raft manager, overlay only, no port/router, no Gluster | D-02 row | green |
+| SC2 TLS from inside thinx_api verifies with `BAO_CACERT`, fails without | `TLS_VERIFIED` / `TLS_NO_CA_REFUSED` (+ foreign CA, bare IP) | green |
+| SC3 auto-unseal after `--force`, static seal file, recovery keys, rotation once | 19:48:45Z; g1 -> g2 | green |
+| SC4 AppRole round-trip, every other path denied, key flags, no root token | live canary + 13/13 + unauthenticated 403; flags 18:41:17Z; root revoked | green |
+| SC5 audit, snapshot outside ssh_keys/Gluster, throwaway restore, runbook | rows D-14..D-17, VAULT-07/08 | green |
+| Deferred stays absent | no change to `lib/thinx/rsakey.js`, `lib/thinx/git.js`, `package*.json` since `PARENT_BASE`; no OpenBao client under `lib/`; `GIT_KEY_PASSPHRASE` still mounted and set; no deploy key encrypted or migrated; Transit key never rotated; no HA, public route, cloud KMS or PwnDoc retest | green |
+
+**Rollback set (none used):** section 10 for the API; `docker stack rm vault` keeps every node-local path (section 4);
+older Docker configs `openbao-ca-46fa30be48446ff5a980` and `openbao-ca-a113267bb8b8671b8d44` are kept for the trust
+consumer's rollback.
