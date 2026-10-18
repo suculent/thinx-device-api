@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
 status: executing
-stopped_at: "Phase 39 planned: research complete; 6 plans in 5 waves; independent checker passed; next execute-phase 39 --ws vault-transit"
-last_updated: "2026-10-13T09:11:06.400Z"
-last_activity: 2026-10-13
-last_activity_desc: Phase 39 research and six plans complete; independent review passed
-state_head: 4fcacecef5a55419cbbc42d8ef1d2d3e175e23eb
+stopped_at: Completed 39-01-PLAN.md
+last_updated: "2026-10-18T10:26:33.032Z"
+last_activity: 2026-10-18
+last_activity_desc: Phase 39 execution started
+state_head: 8f0e512e87252ffdf80c518868634009f6928647
 progress:
   total_phases: 3
   completed_phases: 0
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-transit/REQUIREMENTS.md`
 
 **Core value:** Possession of the deploy-key files (GlusterFS volume, backup, snapshot, file-read bug) must not be sufficient to decrypt any owner's git deploy private key, while THiNX still clones and builds autonomously with the owner logged out.
-**Current focus:** Phase 39, Internal OpenBao on the Swarm
+**Current focus:** Phase 39 — Internal OpenBao on the Swarm
 
 ## Current Position
 
-Phase: 39 (Internal OpenBao on the Swarm) — READY TO EXECUTE
-Plan: 0 of 6 complete; 39-01 next
+Phase: 39 (Internal OpenBao on the Swarm) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-10-13 — Phase 39 research and six plans complete; independent review passed
+Last activity: 2026-10-18 — Phase 39 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -49,6 +49,11 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 39 P01 | 55 min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -63,6 +68,11 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - D-05: v1.15 Phase 34 D-20 (vault.yml re-pin to `hashicorp/vault`) is superseded by VAULT-01 (`openbao/openbao`); if 34 lands first, Phase 39 replaces its pin.
 - D-06 (2026-10-09): OpenBao instead of HashiCorp Vault — Vault CE has no auto-unseal from a local key file; OpenBao `seal "static"` (≥ 2.4.0) does, with the same Transit/AppRole API.
 - Roadmap: 3 phases (coarse). OpenBao first (39), API dual-read (40; code/CI may overlap 39, cut-over may not), then migration + removal + rotation (41).
+- [Phase 39]: OpenBao runs as uid 0 (BAO_SKIP_DROP_ROOT=1, SKIP_CHOWN=1), read-only rootfs, cap_drop ALL; server config is the directory /openbao/config so the emergency listener drops in as zz-emergency-unix.hcl
+- [Phase 39]: No-valid-login recovery on 2.7.1 is proven: server-generated OTP via legacy sys/generate-root/attempt plus unauthenticated sys/decode-token over a 0600 container-local Unix socket (bao CLI OTP/decode helpers need an authenticated token)
+- [Phase 39]: TLS under /openbao/tls/current (relative symlink to a versioned dir), leaf SANs openbao.internal, localhost, 127.0.0.1; healthcheck treats sealed as healthy
+- [Phase 39]: thinx-api AppRole token 20m/1h with reusable SecretIDs and no default policy; backup AppRole 5m/15m; operator userpass 4h ttl=max=explicit_max, period 0, no Transit encrypt/decrypt
+- [Phase 39]: Live preflight (scripts/openbao-preflight.sh --live) deferred to Plan 05; micro/core/path/overlay/edge facts stay blocking until it runs
 
 ### Pending Todos
 
@@ -85,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-13T09:11:06.367Z
-**Stopped At:** Phase 39 planned: research complete; 6 plans in 5 waves; independent checker passed; next execute-phase 39 --ws vault-transit
+**Last session:** 2026-10-18T10:26:02.015Z
+**Stopped At:** Completed 39-01-PLAN.md
 **Resume File:** None
