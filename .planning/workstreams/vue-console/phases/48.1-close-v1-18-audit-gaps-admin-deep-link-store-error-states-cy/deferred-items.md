@@ -6,7 +6,7 @@ fix lands and the entry is marked `status: resolved`.
 ## Deferred Items
 
 - Build-log search: stepping to a match does not scroll the log box (BUILD-03, UI-B06)
-  status: open
+  status: acknowledged
   **Found during:** 48.1-03 Task 3 (`build-log-search.spec.js`, 2026-10-18), with a throwaway
   probe spec (deleted, never committed) that wrapped `Element.prototype.scrollTop`.
   **What:** `BuildLogDialog.vue` `step()` sets `current` and queues `scrollToCurrent()` with

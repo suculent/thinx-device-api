@@ -8,6 +8,9 @@ files:
   - thinx-swarm/renew_registry_cert.sh
   - .planning/runbooks/traefik-edge-hardening.md:2246
   - .planning/runbooks/traefik-edge-hardening.md:2351
+audit_acknowledged:
+  milestone: v1.18
+  at: 2026-10-18
 ---
 
 ## Problem

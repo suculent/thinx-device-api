@@ -9,6 +9,9 @@ files:
   - thinx-swarm/thinx.yml:422
   - thinx-swarm/traefik.yml:67
   - thinx-swarm/errorpage.yml:27
+audit_acknowledged:
+  milestone: v1.18
+  at: 2026-10-18
 ---
 
 ## Problem

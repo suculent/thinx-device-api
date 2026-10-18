@@ -7,6 +7,9 @@ files:
   - micro:/etc/cron.d/clean_docker
   - .planning/runbooks/traefik-edge-hardening.md:2352
   - .planning/runbooks/log-paging-retention.md:348
+audit_acknowledged:
+  milestone: v1.18
+  at: 2026-10-18
 ---
 
 ## Problem

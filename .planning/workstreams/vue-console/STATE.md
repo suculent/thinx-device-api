@@ -205,6 +205,16 @@ Progress: [██████████] 100%
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
+| debug_sessions | github-token-private-repo | investigating | 2026-10-18 | v1.18 |
+| todos | 2026-10-15-clean-docker-cron-broken-docker-service-restart.md | (presence-only) | 2026-10-18 | v1.18 |
+| todos | 2026-10-15-error-pages-middleware-rtm-console-routers.md | (presence-only) | 2026-10-18 | v1.18 |
+| todos | 2026-10-15-gluster-ssl-dir-world-writable-private-keys.md | (presence-only) | 2026-10-18 | v1.18 |
+| todos | 2026-10-15-mosquitto-conf-redis-password-world-readable.md | (presence-only) | 2026-10-18 | v1.18 |
+| todos | 2026-10-15-mosquitto-traefik-key-pem-mode-0754.md | (presence-only) | 2026-10-18 | v1.18 |
+| uat_gaps | 48.1/48.1-UAT.md | testing (5 pending operator checks: CI run, served console, impersonation spot-check, build-log scroll decision, judgment prohibitions) | 2026-10-18 | v1.18 |
+| verification_gaps | 48.1/48.1-VERIFICATION.md | human_needed (25/28 verified, 0 gaps) | 2026-10-18 | v1.18 |
+| deferred_items | 48/deferred-items.md: stale "enters through the dashboard" spec comments (already resolved in 48-05) | acknowledged | 2026-10-18 | v1.18 |
+| deferred_items | 48.1/deferred-items.md: build-log search stepping does not scroll the log box (BuildLogDialog.vue timing, WINDOWS entry 21) | acknowledged | 2026-10-18 | v1.18 |
 | requirement | AR-36-01 full-log payload size | Future | 2026-10-12 | v1.18 |
 
 ## Session Continuity

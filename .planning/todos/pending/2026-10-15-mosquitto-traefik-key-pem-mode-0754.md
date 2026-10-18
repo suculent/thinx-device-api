@@ -6,6 +6,9 @@ severity: minor
 files:
   - micro:/mnt/gluster/thinx/mosquitto/ssl/traefik_key.pem
   - .planning/runbooks/traefik-edge-hardening.md:2352
+audit_acknowledged:
+  milestone: v1.18
+  at: 2026-10-18
 ---
 
 ## Problem
