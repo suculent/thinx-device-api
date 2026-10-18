@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 39
 current_phase_name: Internal OpenBao on the Swarm
 status: executing
-stopped_at: Completed 39-01-PLAN.md
-last_updated: "2026-10-18T10:26:33.032Z"
+stopped_at: Completed 39-02-PLAN.md
+last_updated: "2026-10-18T11:17:57.607Z"
 last_activity: 2026-10-18
 last_activity_desc: Phase 39 execution started
-state_head: 8f0e512e87252ffdf80c518868634009f6928647
+state_head: 64a8bd3cc2759b29d352e4152e8762fe2ef52780
 progress:
   total_phases: 3
   completed_phases: 0
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 39 (Internal OpenBao on the Swarm) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-10-18 — Phase 39 execution started
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 39 P01 | 55 min | 3 tasks | 11 files |
+| Phase 39 P02 | 43 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,10 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 39]: TLS under /openbao/tls/current (relative symlink to a versioned dir), leaf SANs openbao.internal, localhost, 127.0.0.1; healthcheck treats sealed as healthy
 - [Phase 39]: thinx-api AppRole token 20m/1h with reusable SecretIDs and no default policy; backup AppRole 5m/15m; operator userpass 4h ttl=max=explicit_max, period 0, no Transit encrypt/decrypt
 - [Phase 39]: Live preflight (scripts/openbao-preflight.sh --live) deferred to Plan 05; micro/core/path/overlay/edge facts stay blocking until it runs
+- [Phase 39]: Recovery share and bootstrap root live only in 0600 tmpfs files between bootstrap invocations; share deleted on matching archive receipt, root on revocation
+- [Phase 39]: Root revocation gated on 4 custody receipts (share, config-named seal generations, CA key, CA cert) and 5 fresh proofs (operator login, API canary, backup snapshot, audit canary, recorded A1 exact-image run)
+- [Phase 39]: Installer makes openbao.hcl the only file in /etc/openbao/config; emergency-unix.hcl staged at /etc/openbao/emergency-unix.hcl; --init-tls does first issuance into tls/r<UTC> + current symlink
+- [Phase 39]: Recovery archive: fixed 64 MB AES-256 UDIF/APFS image, Keychain never used by verify, custody proven by sha256 receipts compared in memory on micro
 
 ### Pending Todos
 
@@ -95,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-18T10:26:02.015Z
-**Stopped At:** Completed 39-01-PLAN.md
+**Last session:** 2026-10-18T11:17:57.569Z
+**Stopped At:** Completed 39-02-PLAN.md
 **Resume File:** None
