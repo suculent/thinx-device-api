@@ -386,3 +386,61 @@ step below is run by hand, one at a time.
   credentials, tokens and roots revoked after the snapshot become valid again: restore production only from a
   snapshot taken after the last revocation; (2) ciphertext from Transit key versions created after the snapshot cannot
   be decrypted from it. Transit key rotation and deploy-key rewrap are Phase 41, not done here.
+
+### 2026-10-18 Plan 39-05 Task 3: maintenance plane (backup, TLS, audit, incidents)
+
+Source on micro: thinx-swarm `4793e2e` (clean checkout). Every step by hand, one at a time; nothing touched
+traefik, the thinx stacks or thinx_api (thinx_api's SLACK_WEBHOOK secret file was only read, on micro, by the installer).
+
+- Transfer plane re-checked read-only: `openbao-maintenance-install.sh --check` OK on micro (sender) and core
+  (receiver).
+- ~19:11Z `openbao-maintenance-install.sh --full --send-test-alert`: transfer plane re-proven (probe pair
+  finalized on core, arbitrary command and path refused, >= 1 GiB free on both), `openbao-cert-renew.sh` and
+  `openbao-audit-reopen.sh` installed 0700, `/etc/cron.d/openbao-backup` (03:17 UTC `--daily`) and
+  `/etc/cron.d/openbao-cert-renew` (04:47 UTC `--daily`) 0644 with node-local paths only, `/etc/logrotate.d/openbao`
+  0644, rollback dirs 0700, `credentials/slack-webhook.curl` 0600 copied on micro from the local thinx_api task's
+  SLACK_WEBHOOK secret (existing THiNX destination; value never shown), `SLACK_TEST_SENT ok`; API trust consumer
+  installed and disarmed until Plan 06. No restore-rehearsal schedule exists.
+- **Slack receipt, operator-observed (2026-10-18, reported to the agent ~19:12Z):** "THiNX OpenBao: maintenance
+  alerts configured on micro (test message; one alert per incident from now on)." This is the receipt of the
+  alert-configuration test; the incident begin/recovery messages below are for the operator to confirm at end of phase.
+- Retention boundary and backlog, live: two marked dummy pairs (`THINX-OPENBAO-RETENTION-DUMMY`, manifest
+  `dummy: retention-boundary-test`) made on micro only: `openbao-20260720T120000Z-daily` (90 d + ~7 h) and
+  `openbao-20260721T000000Z-daily` (89 d + ~19 h). `--verify-both-nodes` -> `VERIFY_BACKLOG FAIL
+  missing_or_different_on_core=2` (exit 1; verify mode opens no incident). 19:12:06Z real `--daily` -> pair
+  `openbao-20261018T191207Z-daily` (Raft index 311), both dummies replicated first (`BACKLOG_CLEARED 2`), then
+  `PRUNED_LOCAL pruned=1` / `PRUNED_CORE pruned=1`: the older dummy gone on both nodes, the 89-day one kept on both.
+  The kept dummy was then removed by hand on both nodes (marker checked first); `--verify-both-nodes` -> 8
+  identical pairs.
+- Audit rotation: `logrotate -f /etc/logrotate.d/openbao` -> new empty-then-canary `audit.log` 0600, rotated
+  `audit.log-20261018-1792350772` kept; postrotate SIGHUP + canary: `AUDIT_CANARY ok` (approle login entries,
+  HMAC-redacted, no raw role/secret id). Unwritable sink: 19:13:05Z audit.log replaced by a directory ->
+  `--postrotate` -> `AUDIT_REQUEST_BLOCKED` (OpenBao fails closed; server stayed unsealed and healthy); repaired
+  (directory removed, file moved back) -> `--postrotate` OK at 19:13:12Z. Requests were refused for ~7 s; nothing
+  consumes OpenBao yet. Incident: one begin (19:13:08Z), one recovery (19:13:13Z).
+- Backup incident: backup.role-id renamed inside its 0700 dir -> two `--daily` runs in separate processes ->
+  `BACKUP_CREDENTIALS_UNSAFE` both times: event `begin` (19:13:22Z), then `suppressed` (failed_runs=2); file
+  renamed back -> `--daily` OK (`openbao-20261018T191324Z-daily`) with one `recovery` (19:13:29Z).
+- Certificate incident: ca.key renamed inside its 0700 dir -> two `--daily` runs -> `CA_MATERIAL_MISSING`: `begin`
+  (19:13:40Z), then `suppressed`; key renamed back (mode/owner/size unchanged) -> `--daily` `NOTHING_DUE` with one
+  `recovery` (19:13:43Z).
+- TLS leaf renewal, live: 19:13:55Z `--renew-leaf-now`: leaf issued from the host-local CA, validated, exact-image
+  throwaway served the old leaf then the staged one after switch + SIGHUP, live `current` -> `r20261018T191355Z`
+  (fp f412526a359b03a6, notAfter 2027-01-16 19:13:55Z), served leaf pinned and trusted as openbao.internal, wrong
+  name refused; previous `r20261018T154740Z` kept; no throwaway left. `--verify-current` OK.
+- Issuer (A2): live issuer automation stays fail-closed until Plan 06 attaches the first CA config and runs
+  `--arm-api-trust` (`--verify-api-trust-consumer` -> `API_TRUST_NOT_ARMED`). The overlap bundle, both-side rollback
+  on every issuer failure, expired-predecessor clients (Node probe rejects the expired anchor alone, trusts the
+  overlap) and the other-node probe job pass in `tests/openbao-maintenance.test.sh all` (32 checks) against this
+  source, tests 19–23.
+- Initial rehearsal of the final g2-only state: `prepare` -> S3 `openbao-20261018T191442Z-pre-change` (g2, no
+  previous, Raft index 357); `run --seal-generation g2` from micro's runtime key, no password -> restored on an
+  internal network, unsealed with seal-g2 alone, throwaway root refused (restored state in force), restored
+  thinx-api AppRole decrypts the canary and is denied key reads, audit HMAC-redacted -> `result=partial`
+  (privileged checks need the operator password; the `result=ok` records for g1 and g2 are the checkpoint 1/2
+  rehearsals). **Next rehearsal: before the next OpenBao upgrade (`prepare --pre-upgrade`, a snapshot from the last
+  24 h), with the operator password.**
+- Task 3 gate: `--verify-both-nodes` (10 identical pairs) && `--verify-current` (`r20261018T191355Z`) &&
+  `openbao-verify.sh --maintenance` -> OK; `--check --expect-full` OK; incidents backup/cert-renew/audit all
+  healthy. Edge: `EDGE-EXPOSURE-OK`, router inventory `fa0afd608550e585` (29, 0 errors), thinx_api/traefik specs
+  unchanged, 23 services; 7442/1883/8883 open; rtm 200.
