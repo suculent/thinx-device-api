@@ -308,3 +308,20 @@ Post-bootstrap gates (17:40-17:41Z, unattended):
 
 Rollback for Task 1 (not needed): `docker stack rm vault` keeps every node-local path; redeploying restores the same
 identity. The secrets can be removed with `docker secret rm BAO_ROLE_ID BAO_SECRET_ID` while unattached.
+
+### 2026-10-18 Plan 39-05 Task 2: static-seal rotation g1 -> g2 (in progress)
+
+Rotation hold: no recurring OpenBao job exists yet (cron/logrotate come in Task 3), so nothing can interleave; every
+step below is run by hand, one at a time.
+
+- Exact-image probe first (laptop throwaway, internal network, throwaway keys): g1 -> g2 current + g1 previous restart
+  auto-unseals ("Auto Seal: static … current_key_id seal-g2, previous_key_id seal-g1"); a later restart with g2 alone
+  auto-unseals; pre-rotation ciphertext still decrypts; a g1 snapshot restores only with g1; the overlap snapshot and a
+  g2-only snapshot restore with g2; every mismatched case stays sealed.
+- 17:44:06Z `openbao-restore-rehearsal.sh prepare`: canary encrypted, then pre-change snapshot
+  `openbao-20261018T174406Z-pre-change` (seal g1, Raft index 111), identical on micro and core (2 pairs each).
+- `openbao-install.sh --init-seal g2` (source `d95e1c7`): `seal-g2.key` 32 bytes 0600, created exclusively on micro;
+  not named by the live config yet; never copied to core.
+- Mismatch matrix (no operator material needed): the g1 snapshot offered as g2 -> `GENERATION_MISMATCH REFUSED` (no key
+  byte read, exit 3); the g1 snapshot with g2's bytes under the g1 name -> `SEAL_MISMATCH FAIL` (the restored state did
+  not unseal), exit 1. No rehearsal container or network left behind.
