@@ -17,6 +17,10 @@ networks:
   internal:
     driver: overlay
     attachable: true
+  # Phase 39 (v1.17, D-02/D-03): the dedicated OpenBao overlay (Internal=true, not attachable), created once by
+  # `docker network create --driver overlay --internal openbao-internal` and shared only by vault_openbao and api.
+  openbao-internal:
+    external: true
 
 # SEC-CFG-01 (#418) / SEC-CFG-02 (phase 24): lib/thinx/secrets.js (and its
 # copies in the worker and transformer images) prefers /run/secrets/<NAME> over
@@ -106,6 +110,21 @@ secrets:
     external: true
   NEW_RELIC_LICENSE_KEY:
     external: true
+  # Phase 39 (VAULT-06, D-03): the thinx-api AppRole pair, created on micro from the root-only credential files via
+  # stdin (label com.thinx.openbao=phase39). The API reads them with readSecret(); the client is Phase 40.
+  BAO_ROLE_ID:
+    external: true
+  BAO_SECRET_ID:
+    external: true
+
+# Phase 39 (VAULT-03, D-19): public trust bundle for openbao.internal (certificates of the OpenBao internal CA only,
+# never a key). Immutable and versioned: the name is openbao-ca-<sha256(bundle)[0:20]>. The recurring trust consumer
+# (`openbao-cert-renew.sh`, deploy_api_trust) creates the next one on an issuer renewal and swaps it on thinx_api with
+# one targeted `docker service update`; keep `name:` equal to the config `--verify-api-trust-consumer` reports.
+configs:
+  openbao-ca:
+    external: true
+    name: openbao-ca-46fa30be48446ff5a980
 
 services:
 
@@ -286,7 +305,12 @@ services:
     networks:
       - internal
       - traefik-public
+      - openbao-internal
     image: ${REGISTRY}/thinx/api:swarm
+    # Phase 39: the OpenBao CA bundle; BAO_CACERT below points at it (Docker default config mode 0444, public data).
+    configs:
+      - source: openbao-ca
+        target: /run/openbao/ca.pem
     # Mounted at /run/secrets/<NAME>; read via lib/thinx/secrets.js. See the
     # top-level `secrets:` block for the creation step.
     secrets:
@@ -305,6 +329,8 @@ services:
       - CSRF_SECRET
       - INFLUXDB_TOKEN
       - NEW_RELIC_LICENSE_KEY
+      - BAO_ROLE_ID
+      - BAO_SECRET_ID
     environment:
       - "ENVIRONMENT=${ENVIRONMENT}"
       - "COUCHDB_USER=${COUCHDB_USER}"
@@ -334,6 +360,9 @@ services:
       - "CORS_ENFORCE=true"
       - "THINX_MQTT_DEVICE_WRITES=1"
       - "CSRF_MODE=signed"
+      # Phase 39: where the API reaches OpenBao (verified TLS against the mounted bundle). Not secrets.
+      - "BAO_ADDR=https://openbao.internal:8200"
+      - "BAO_CACERT=/run/openbao/ca.pem"
     ports:
       - 7442:7442
     volumes:
