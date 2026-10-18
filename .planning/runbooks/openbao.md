@@ -394,14 +394,14 @@ traefik, the thinx stacks or thinx_api (thinx_api's SLACK_WEBHOOK secret file wa
 
 - Transfer plane re-checked read-only: `openbao-maintenance-install.sh --check` OK on micro (sender) and core
   (receiver).
-- ~19:11Z `openbao-maintenance-install.sh --full --send-test-alert`: transfer plane re-proven (probe pair
+- 19:11:08Z `openbao-maintenance-install.sh --full --send-test-alert`: transfer plane re-proven (probe pair
   finalized on core, arbitrary command and path refused, >= 1 GiB free on both), `openbao-cert-renew.sh` and
   `openbao-audit-reopen.sh` installed 0700, `/etc/cron.d/openbao-backup` (03:17 UTC `--daily`) and
   `/etc/cron.d/openbao-cert-renew` (04:47 UTC `--daily`) 0644 with node-local paths only, `/etc/logrotate.d/openbao`
   0644, rollback dirs 0700, `credentials/slack-webhook.curl` 0600 copied on micro from the local thinx_api task's
   SLACK_WEBHOOK secret (existing THiNX destination; value never shown), `SLACK_TEST_SENT ok`; API trust consumer
   installed and disarmed until Plan 06. No restore-rehearsal schedule exists.
-- **Slack receipt, operator-observed (2026-10-18, reported to the agent ~19:12Z):** "THiNX OpenBao: maintenance
+- **Slack receipt, operator-observed (2026-10-18; test sent 19:11:08Z, receipt confirmed by the operator via the coordinator):** "THiNX OpenBao: maintenance
   alerts configured on micro (test message; one alert per incident from now on)." This is the receipt of the
   alert-configuration test; the incident begin/recovery messages below are for the operator to confirm at end of phase.
 - Retention boundary and backlog, live: two marked dummy pairs (`THINX-OPENBAO-RETENTION-DUMMY`, manifest
