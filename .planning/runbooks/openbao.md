@@ -905,3 +905,72 @@ console submodule and the non-deploying `thinx-unit` branch. Parent `thinx-stagi
     bad_ciphertext log lines appear in the job output. No key, ciphertext or secret shape appears in the output.
 - Plan verify blocks: console (Vue + legacy + console HEAD on origin thinx-staging) exit 0; CI (thinx-unit SHA
   green, no transit.js on origin thinx-staging) exit 0.
+
+### 2026-10-19 Plan 40-05: Phase 40 cut-over
+
+Operator go (Task 2) was given before Task 1 ran, on condition that Task 1 was fully green; it was. Run 09:09-09:33Z.
+Live mutations: the thinx-swarm push to origin and to the micro checkout (ff-merge), and the parent
+`thinx-staging` push. CI and Swarmpit did the rest. No `docker stack deploy`, no `restart.sh`, and no `docker service update` by hand.
+swarm-autopull-recovery was not needed.
+
+- SHAs:
+  - parent `8b6879e0` pushed to `thinx-staging` (`ab3ae8ba..8b6879e0`). It differs from the thinx-unit-green
+    `2b1eecdb` only under `.planning/` (the Task 1 evidence) and descends from it.
+  - console `7e3d1fe` (gitlink = origin `thinx-staging` of the console).
+  - thinx-swarm `8cfa7dd`, on the laptop, origin `master` and the micro checkout alike.
+- Pre-state 09:09-09:10Z:
+  - thinx_api task `wir7204blx1ikd9mr99ok1e7m` on micro, image digest `fb2fc070d6835236`, spec UpdatedAt
+    2026-10-18 22:27:17Z.
+  - Traefik http routers: 29, sorted `name status` sha256/16 `fa0afd608550e585` (= the Phase 39 baseline), none
+    disabled.
+  - 7442, 1883 and 8883 were open from the laptop to the public IP, HTTP on :7442 answered 200, and rtm `/` and
+    `/api/v2/csrf-token` answered 200 / 200.
+- thinx-swarm:
+  - `git push origin master` `471a95f..8cfa7dd` at 09:10:49Z. CircleCI `docker-build-error-page` #167 and
+    `docker-build-downtime-page` #168 succeeded at 09:12:34Z.
+  - `errorpage_errorpage` redeployed 09:12:58Z and `downtime_downtime` 09:13:02Z. The router hash was unchanged at
+    09:13:04Z.
+  - The micro checkout had no tracked change; six untracked `*.yml.bak.20261007222957.pre-v3-labels` files are
+    pre-existing and were left alone. Pushed as `p40-ff` plus `refs/remotes/origin/master`, then
+    `git merge --ff-only p40-ff` and `git branch -d p40-ff`. micro HEAD is `8cfa7dd`.
+- Parent CI for `8b6879e0` (all success):
+  - `test-console-classic` #16126 09:13:51Z, `console-classic-registry` #16127 09:16:02Z;
+  - `test` #16124 09:16:57Z, `api-registry` #16125 09:18:56Z;
+  - `test-vue-console` #16122 09:19:59Z, `vue-console-registry` #16123 09:25:15Z.
+- Rollout:
+  - The new thinx_api task `tk89thgjiptv1d1z4e9l1kepw` runs on micro. The container started 09:20:22Z with 0
+    restarts. The image digest is `e9e99385d27056e2`, and the spec UpdatedAt is 09:20:28Z, about 90 s after
+    api-registry.
+  - `thinx_console` rolled 09:16:55Z and `thinx_vue` 09:26:03Z, both on core.
+- Live checks (09:25-09:32Z):
+  1. Transit log since 09:19Z: one `[transit] probe ok`, zero `probe failed`.
+     - PID 1 is `docker-entrypoi` (`/docker-entrypoint.sh`, `/bin/sh`), not node. Node (`node-MainThread`, PID 26)
+       is its direct child and the script's last foreground command, so a node exit still ends the container.
+     - The 40-02 crash-case assumption therefore holds in effect, though not literally.
+     - `thinx-agent-*` directories in the task tmpdir: 0.
+  2. `tests/openbao-api-wiring.test.sh --live` -> `API-WIRING-OK mode=live`, every row ok. `SPEC_DELTA ok`: the live
+     spec equals the Phase 39 baseline plus the five OpenBao additions, with only the image ignored, so Swarmpit
+     changed nothing else (RESEARCH A1 held). `TRANSIT_CANARY ok`, `FORBIDDEN_DENIED` 13/13, `OUTPUT_CLEAN ok`.
+  3. `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` ->
+     `OPENBAO-VERIFY-OK mode=full` (`SEAL_GENERATION ok current g2`, `RETIRED_GENERATION_ABSENT ok`).
+     `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> `OPENBAO-REHEARSAL-MATRIX-OK generations=g1,g2`, with
+     3 mismatch records.
+  4. Ports 7442, 1883 and 8883 open; HTTP on :7442 answers 200.
+  5. rtm `/` and `/api/v2/csrf-token` answer 200 / 200. The routers are byte-identical to the pre-state (29,
+     `fa0afd608550e585`, none disabled). traefik_traefik and traefik_socket-proxy UpdatedAt are still
+     2026-10-18 06:47:26Z.
+  6. Public HTTPS in the new task: `PUBLIC_HTTPS_FETCH clone=ok keyless=ok`. Both `p40-pub-` directories are
+     removed (0 left).
+  7. `THINX_DEPLOY_KEYGEN` was not exercised live; the live spec has no entry (unset = enabled).
+- Served consoles: the D-03 sentence is present in the legacy `DeploykeyController.js` on rtm and in the Vue bundle
+  on console.thinx.cloud. That proves only the new images; the 503 path itself was not triggered live.
+- Not pushed: `main` (still `14c08c1f`) and no tag. This entry is a local docs commit, which the next deliberate
+  `thinx-staging` push carries.
+- **Pending (operator, end-of-phase UAT):**
+  - a public HTTPS repo build;
+  - a new deploy key that is one `vault:vN:` line at mode 600 with no PEM;
+  - a private-repo build with that key, and 0 `thinx-agent-*` directories afterwards;
+  - a legacy-key private build;
+  - the console-retest checklist;
+  - the 503 `key_service_unavailable` sentence seen in the Vue console (needs the kill switch or an OpenBao outage,
+    so it is UAT-only).
