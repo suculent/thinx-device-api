@@ -30,7 +30,13 @@ function makeDeps(overrides) {
       },
       rsakey: {
         list: (owner, cb) => cb(true, overrides.existingKeys || []),
-        create: (owner, cb) => { calls.created = true; cb(overrides.createOk !== false, overrides.createOk === false ? null : { pubkey: "ssh-rsa NEWKEY" }); }
+        create: (owner, cb) => {
+          calls.created = true;
+          // Phase 40 D-03: the refusal rsakey.create() gives when OpenBao is unavailable
+          // or THINX_DEPLOY_KEYGEN is off.
+          if (overrides.createUnavailable) return cb(false, "key_service_unavailable");
+          cb(overrides.createOk !== false, overrides.createOk === false ? null : { pubkey: "ssh-rsa NEWKEY" });
+        }
       },
       user: {
         addGitHubAccessToken: (owner, token, cb) => { calls.stored = token; cb(overrides.storeOk !== false); }
@@ -40,6 +46,39 @@ function makeDeps(overrides) {
 }
 
 describe("GitHubLink.link", function () {
+
+  // Phase 40 D-03 / KEYENC-03: the key service refusal is a 503 with the fixed code, not a 500.
+  it("answers 503 key_service_unavailable when the key create is refused and pushes nothing (D-03)", function (done) {
+    const { calls, deps } = makeDeps({ createUnavailable: true });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r).to.deep.equal({ status: 503, success: false, response: "key_service_unavailable" });
+      expect(calls.created).to.equal(true);
+      expect(calls.pushed).to.equal(null);
+      done();
+    });
+  });
+
+  it("keeps 500 rsa_key_creation_failed for any other create failure and pushes nothing", function (done) {
+    const { calls, deps } = makeDeps({ createOk: false });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r).to.deep.equal({ status: 500, success: false, response: "rsa_key_creation_failed" });
+      expect(calls.pushed).to.equal(null);
+      done();
+    });
+  });
+
+  it("answers 503 key_service_unavailable when every existing key is in use elsewhere and the create is refused", function (done) {
+    const { calls, deps } = makeDeps({
+      createUnavailable: true,
+      existingKeys: [{ pubkey: "ssh-rsa TAKEN", fingerprint: "SHA256:t" }],
+      pushByKey: () => ({ status: 422, result: "already_in_use" })
+    });
+    GitHubLink.link(deps, OWNER, TOKEN, (r) => {
+      expect(r).to.deep.equal({ status: 503, success: false, response: "key_service_unavailable" });
+      expect(calls.pushes).to.deep.equal(["ssh-rsa TAKEN"], "only the existing key was pushed");
+      done();
+    });
+  });
 
   it("answers 403 github_token_missing_scope when GitHub refuses the key list (403) and stores nothing", function (done) {
     const { calls, deps } = makeDeps({ tokenValid: false, accountKeys: { status: 403 } });
