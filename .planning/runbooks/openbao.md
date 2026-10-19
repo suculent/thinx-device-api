@@ -867,3 +867,41 @@ updated by this redeploy; the only service changes were the CI error/downtime-pa
   docker exec "$C" sh -c 'bao token revoke -self; rm -f ~/.vault-token'
   /usr/local/sbin/openbao-verify.sh --full --api-service thinx_api          # terminal: privileged part, expect POLICY_EXACT operator
   ```
+
+### 2026-10-19 Plan 40-05 Task 1: pre-cut-over gate
+
+Run about 08:50-09:05Z from the laptop. Nothing on micro, core or any live service was touched. The only pushes were the
+console submodule and the non-deploying `thinx-unit` branch. Parent `thinx-staging` was not pushed.
+
+- SHAs: parent release candidate `2b1eecdb` (`2b1eecdbaedf38c251ea25bdaa912c9b07a0157a`); console `7e3d1fe`
+  (gitlink = submodule HEAD, clean tree); thinx-swarm laptop HEAD `8cfa7dd` (40-04, one commit ahead of
+  origin/master `471a95f`, not pushed in this task).
+- Precondition: `gh auth status` ok; 40-01..40-04 SUMMARYs present; origin `thinx-staging` has no
+  `lib/thinx/transit.js`.
+- Local regression (all exit 0):
+  - Vue `test:unit`: no `not ok` line. Legacy `deploykey.cjs`: "all checks passed", including D11.
+  - Jasmine: TransitSpec 27/0, KeyFormatSpec 29/0, GitSpec 49/0, SecretsSweepSpec 44/0, GitHubLinkSpec 23/0,
+    BuilderRemoteJobSpec 77/0, BuilderApiKeySpec 54/0, RedisHealthSpec 4/0. None pending.
+  - 03-RsakeySpec with the prior-phase filter `^RSA Key \((?!13\))`: 17 of 18 specs ran, 0 failures. (13) needs
+    CouchDB.
+  - `node --test`: DeployKeyNames 46/46, CiPipelineGates 30/30.
+  - TransitIntegrationSpec through `scripts/openbao-dev.sh run`: 8 specs, 0 failures. No pending spec, no
+    key/ciphertext/secret shape in the output, no `thinx-openbao-dev` container left.
+  - thinx-swarm wiring gate: `--source thinx.yml docker-swarm.yml` -> `API-WIRING-OK mode=source` with
+    `KEYGEN_SWITCH ok` x2; `--self-test` -> `SELF_TEST ok 17/17 mutations refused`, `API-WIRING-OK mode=self-test`.
+  - Section 11 strings present under `lib/`: `API Transit FAILING` and `[transit] probe ok` (transit.js);
+    `deploy key unavailable: ` (git.js, builder.js); `key_service_unavailable` (router.rsakey.js,
+    github_link.js, rsakey.js).
+- Console: `git -C services/console push origin thinx-staging` fast-forwarded `ec63c74..7e3d1fe` (the five 40-03
+  commits).
+- `git push origin HEAD:refs/heads/thinx-unit` created the branch (none existed before) at `2b1eecdb`. No force.
+- CircleCI: pipeline 5686, workflow `main` `dc7bdd9a-bb15-4d80-850d-f2b5cdcd3bd4`, job `test` #16121
+  (`8cc1c863-a5cf-4b6d-a541-073c74833ff0`). It ran 08:54:55-08:57:45Z and passed on the first run, with no fix
+  rounds. `ci/circleci: test` = success for `2b1eecdb`; the workflow ran only that job.
+  - Every step was green, including "Starting OpenBao" (`OPENBAO-SETUP-OK`), so the RESEARCH A2 compose concern
+    did not materialize.
+  - The suite reported 1958 specs, 0 failures, 1 pending, which is the long-standing `AppSpec /api/logout` xit.
+    TransitIntegrationSpec ran against the compose dev server: its denied, unreachable, not_configured and
+    bad_ciphertext log lines appear in the job output. No key, ciphertext or secret shape appears in the output.
+- Plan verify blocks: console (Vue + legacy + console HEAD on origin thinx-staging) exit 0; CI (thinx-unit SHA
+  green, no transit.js on origin thinx-staging) exit 0.
