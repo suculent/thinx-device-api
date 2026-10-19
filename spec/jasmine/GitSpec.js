@@ -623,6 +623,7 @@ describe("Git", function () {
             fs.mkdirSync(path.join(tkeys, "adir"));
             fs.writeFileSync(path.join(tkeys, "huge"), "x".repeat(70 * 1024), { mode: 0o600 });
             fs.symlinkSync(path.join(tkeys, "nowhere"), path.join(tkeys, "dangling"));
+            require("child_process").execFileSync("mkfifo", [path.join(tkeys, "afifo")]); // CR-01
             fs.writeFileSync(path.join(tkeys, "transit-undecryptable"), "vault:v1:QUJDRA==\n", { mode: 0o600 });
         });
 
@@ -687,15 +688,15 @@ describe("Git", function () {
             expect(attempts).to.deep.equal(["agent"]);
         }, 20000);
 
-        it("(T4) unknown, directory, oversized and dangling entries are skipped with their cause and never stop the loop", async function () {
-            const git = transitGit(new FakeTransit(), ["unknown", "adir", "huge", "dangling", "legacy"]);
+        it("(T4) unknown, directory, FIFO, oversized and dangling entries are skipped with their cause and never stop the loop", async function () {
+            const git = transitGit(new FakeTransit(), ["unknown", "adir", "afifo", "huge", "dangling", "legacy"]);
             const attempts = [];
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
             const lines = captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
             expect(attempts).to.deep.equal(["legacy:legacy"]);
-            for (const [name, cause] of [["unknown", "unknown_key_format"], ["adir", "not_regular"], ["huge", "too_large"], ["dangling", "read_error"]]) {
+            for (const [name, cause] of [["unknown", "unknown_key_format"], ["adir", "not_regular"], ["afifo", "not_regular"], ["huge", "too_large"], ["dangling", "read_error"]]) {
                 expect(lines).to.include(`[git] key ${name} skipped: ${cause}`);
             }
         });

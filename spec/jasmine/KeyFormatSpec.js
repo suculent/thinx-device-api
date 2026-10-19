@@ -93,6 +93,17 @@ describe("Deploy-key format (keyformat)", function () {
             expect(keyformat.readKey(dir)).to.deep.equal({ kind: "unreadable", text: null, cause: "not_regular" });
         });
 
+        // CR-01: a blocking open(2) of a FIFO never returns without a writer and
+        // would freeze the API event loop; it must be rejected at once instead.
+        it("reports not_regular for a FIFO, without blocking (CR-01)", function () {
+            if (process.platform === "win32") return;
+            const fifo = path.join(root, "fifo");
+            require("child_process").execFileSync("mkfifo", [fifo]);
+            const started = Date.now();
+            expect(keyformat.readKey(fifo)).to.deep.equal({ kind: "unreadable", text: null, cause: "not_regular" });
+            expect(Date.now() - started).to.be.below(1000);
+        });
+
         it("reports too_large past MAX_KEY_FILE_BYTES, and accepts exactly the limit", function () {
             expect(keyformat.MAX_KEY_FILE_BYTES).to.equal(65536);
             expect(keyformat.readKey(file("big", "x".repeat(70 * 1024))).cause).to.equal("too_large");
