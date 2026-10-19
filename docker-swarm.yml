@@ -361,6 +361,8 @@ services:
       - "CSRF_ENFORCE=true"
       - "CORS_ENFORCE=true"
       - "THINX_MQTT_DEVICE_WRITES=1"
+      # Phase 40 D-07: disabled stops new deploy keys (key_service_unavailable), builds unaffected; unset = enabled.
+      - "THINX_DEPLOY_KEYGEN=enabled"
       - "CSRF_MODE=signed"
       # Phase 39: where the API reaches OpenBao (verified TLS against the mounted bundle). Not secrets.
       - "BAO_ADDR=https://openbao.internal:8200"
