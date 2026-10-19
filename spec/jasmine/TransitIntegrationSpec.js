@@ -264,4 +264,74 @@ describe("Transit integration: deploy key end to end", function () {
 			expect(line.includes("PRIVATE KEY")).to.equal(false);
 		}
 	}, 60000);
+
+	// WR-02: a Git over `keysDir` whose transit is `t`, with the key order `names`.
+	function outageGit(keysDir, t, names) {
+		const seeded = path.join(root, "seeded_known_hosts");
+		fs.writeFileSync(seeded, "", { mode: 0o600 });
+		const git = new Git(null, {
+			sshKeysDir: keysDir,
+			seededKnownHosts: seeded,
+			learnedKnownHostsDir: path.join(fs.mkdtempSync(path.join(root, "learned-")), "ssh_known_hosts")
+		});
+		git.transit = t;
+		git.keyNamesForOwner = () => names;
+		return git;
+	}
+
+	function envLabel(env) {
+		if (env && env.THINX_GIT_KEY) return "legacy";
+		if (env && env.SSH_AUTH_SOCK) return "agent";
+		return "keyless";
+	}
+
+	it("(E2) an unreachable OpenBao costs one Transit key per fetch; the legacy key still builds (WR-02)", async function () {
+		if (!guard()) return;
+		const keysDir = fs.mkdtempSync(path.join(root, "keys-"));
+		// Real ciphertexts from the dev server, read back through a dead address.
+		const live = makeTransit();
+		for (const name of ["t1", "t2", "t3"]) {
+			const ct = await live.encryptKey(crypto.randomBytes(32));
+			fs.writeFileSync(path.join(keysDir, name), ct + "\n", { mode: 0o600 });
+		}
+		const armor = (label) => "-----" + label + " ENCRYPTED " + "PRIVATE KEY-----";
+		fs.writeFileSync(path.join(keysDir, "legacy"), armor("BEGIN") + "\nnot a real key\n" + armor("END") + "\n", { mode: 0o600 });
+
+		const dead = makeTransit({ addr: "https://127.0.0.1:1" });
+		spyOn(dead, "decryptKey").and.callThrough();
+		const git = outageGit(keysDir, dead, ["t1", "t2", "t3", "legacy"]);
+		const attempts = [];
+		spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(envLabel(env)); return { ok: true, repoPath: b, reason: null }; });
+
+		const r = await git.fetchDetailed(OWNER, "ssh://git@example.invalid/owner/repo.git", "main", fs.mkdtempSync(path.join(root, "build-")));
+		expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+		expect(dead.decryptKey.calls.count()).to.equal(1);
+		expect(attempts).to.deep.equal(["legacy"]);
+		for (const name of ["t2", "t3"]) {
+			expect(lines).to.include(`[git] key ${name} skipped: deploy key unavailable: unreachable`);
+		}
+	}, 60000);
+
+	it("(E3) a real bad_ciphertext key does not skip the next Transit key (WR-02)", async function () {
+		if (!guard()) return;
+		const keysDir = fs.mkdtempSync(path.join(root, "keys-"));
+		const t = makeTransit();
+		const rsakey = new RSAKey();
+		rsakey.ssh_keys = keysDir;
+		rsakey.transit = t;
+		const created = await new Promise((resolve) => rsakey.create(OWNER, (success, response) => resolve({ success, response }), "it-key-e3"));
+		expect(created.success).to.equal(true);
+		fs.writeFileSync(path.join(keysDir, "bad"), "vault:v1:AAAA\n", { mode: 0o600 });
+
+		spyOn(t, "decryptKey").and.callThrough();
+		const git = outageGit(keysDir, t, ["bad", created.response.filename]);
+		const attempts = [];
+		spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(envLabel(env)); return { ok: true, repoPath: b, reason: null }; });
+
+		const r = await git.fetchDetailed(OWNER, "ssh://git@example.invalid/owner/repo.git", "main", fs.mkdtempSync(path.join(root, "build-")));
+		expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+		expect(t.decryptKey.calls.count()).to.equal(2);
+		expect(attempts).to.deep.equal(["agent"]);
+		expect(lines).to.include("[git] key bad skipped: deploy key unavailable: bad_ciphertext");
+	}, 60000);
 });

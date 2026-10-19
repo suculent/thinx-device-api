@@ -625,6 +625,7 @@ describe("Git", function () {
             fs.symlinkSync(path.join(tkeys, "nowhere"), path.join(tkeys, "dangling"));
             require("child_process").execFileSync("mkfifo", [path.join(tkeys, "afifo")]); // CR-01
             fs.writeFileSync(path.join(tkeys, "transit-undecryptable"), "vault:v1:QUJDRA==\n", { mode: 0o600 });
+            fs.writeFileSync(path.join(tkeys, "transit-undecryptable2"), "vault:v1:RUZHSA==\n", { mode: 0o600 });
         });
 
         // A Git over `tkeys` whose transit is `transit`, with the key order `names`.
@@ -746,6 +747,59 @@ describe("Git", function () {
             expect(decrypted[0].length).to.be.above(0);
             expect(decrypted[0].every((byte) => byte === 0)).to.equal(true);
         }, 20000);
+
+        // WR-02: an outage-class failure is service-wide, so the next Transit
+        // keys of the same fetch are skipped without a request; legacy keys in
+        // the same fetch are still tried.
+        for (const reason of ["unreachable", "sealed", "tls", "not_configured", "denied"]) {
+            it(`(T8) after one '${reason}' the remaining Transit keys are skipped and the legacy key still builds (WR-02)`, async function () {
+                const transit = new FakeTransit({ failReason: reason, failOps: ["decrypt"] });
+                const git = transitGit(transit, ["transit-undecryptable", "transit-undecryptable2", "legacy"]);
+                const attempts = [];
+                spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
+                const lines = captureLog();
+                const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+                expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+                expect(transit.calls.decrypt).to.equal(1);
+                expect(attempts).to.deep.equal(["legacy:legacy"]);
+                for (const name of ["transit-undecryptable", "transit-undecryptable2"]) {
+                    expect(lines).to.include(`[git] key ${name} skipped: deploy key unavailable: ${reason}`);
+                }
+            });
+        }
+
+        it("(T9) with only Transit keys during an outage, one decrypt is made and its reason is reported (WR-02)", async function () {
+            const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
+            const git = transitGit(transit, ["transit-undecryptable", "transit-undecryptable2"]);
+            const clone = spyOn(git, "cloneHoldingLock").and.callFake(async () => ({ ok: true, repoPath: null, reason: null }));
+            captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: "unreachable" });
+            expect(transit.calls.decrypt).to.equal(1);
+            expect(clone.calls.count()).to.equal(0);
+        });
+
+        it("(T10) a bad_ciphertext key does not skip the next Transit key (WR-02)", async function () {
+            const transit = new FakeTransit(); // never issued these two: bad_ciphertext
+            await writeTransitKey(transit, "transit-after-bad");
+            const git = transitGit(transit, ["transit-undecryptable", "transit-undecryptable2", "transit-after-bad"]);
+            const attempts = [];
+            spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
+            captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+            expect(transit.calls.decrypt).to.equal(3);
+            expect(attempts).to.deep.equal(["agent"]);
+        }, 20000);
+
+        it("(T11) a server_error key does not skip the next Transit key (WR-02)", async function () {
+            const transit = new FakeTransit({ failReason: "server_error", failOps: ["decrypt"] });
+            const git = transitGit(transit, ["transit-undecryptable", "transit-undecryptable2"]);
+            captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: "server_error" });
+            expect(transit.calls.decrypt).to.equal(2);
+        });
 
         it("(T6) an inherited SSH_AUTH_SOCK / SSH_AGENT_PID reaches neither the keyless nor the legacy env (T-40-08)", function () {
             const saved = { sock: process.env.SSH_AUTH_SOCK, pid: process.env.SSH_AGENT_PID };
