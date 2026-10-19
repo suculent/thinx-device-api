@@ -29,12 +29,12 @@
 
 ### API key encryption
 
-- [ ] **KEYENC-01**: A newly generated deploy key is encrypted through Transit and only the `vault:vN:…` ciphertext (mode 0600) is written to `ssh_keys`; the plaintext private key never touches disk.
-- [ ] **KEYENC-02**: A keyed git fetch decrypts the key in memory and loads it with `ssh-add -` into a per-attempt `ssh-agent`; the git environment no longer carries `GIT_KEY_PASSPHRASE` or an `SSH_ASKPASS` helper for Transit keys.
-- [ ] **KEYENC-03**: When OpenBao is sealed, unreachable or denies the request, key generation is refused and a keyed build fails with an explicit, logged status — never a passphrase fallback for new keys. Public HTTPS builds, the plaintext device port 7442 and plain MQTT are unaffected.
-- [ ] **KEYENC-04**: The OpenBao client logs in with AppRole, renews or re-logs its token, applies timeouts, and never logs tokens, plaintext key material or ciphertext (asserted by the SecretsSweep spec).
-- [ ] **KEYENC-05**: Behaviour is covered by unit tests with a mocked OpenBao and by an integration test against an OpenBao dev server in `docker-compose.test.yml`; CI is green.
-- [ ] **KEYENC-06**: During the migration window the API reads both legacy passphrase-encrypted keys and Transit ciphertext, selected by file format, so no keyed build breaks during cut-over.
+- [x] **KEYENC-01**: A newly generated deploy key is encrypted through Transit and only the `vault:vN:…` ciphertext (mode 0600) is written to `ssh_keys`; the plaintext private key never touches disk.
+- [x] **KEYENC-02**: A keyed git fetch decrypts the key in memory and loads it with `ssh-add -` into a per-attempt `ssh-agent`; the git environment no longer carries `GIT_KEY_PASSPHRASE` or an `SSH_ASKPASS` helper for Transit keys.
+- [x] **KEYENC-03**: When OpenBao is sealed, unreachable or denies the request, key generation is refused and a keyed build fails with an explicit, logged status — never a passphrase fallback for new keys. Public HTTPS builds, the plaintext device port 7442 and plain MQTT are unaffected.
+- [x] **KEYENC-04**: The OpenBao client logs in with AppRole, renews or re-logs its token, applies timeouts, and never logs tokens, plaintext key material or ciphertext (asserted by the SecretsSweep spec).
+- [x] **KEYENC-05**: Behaviour is covered by unit tests with a mocked OpenBao and by an integration test against an OpenBao dev server in `docker-compose.test.yml`; CI is green.
+- [x] **KEYENC-06**: During the migration window the API reads both legacy passphrase-encrypted keys and Transit ciphertext, selected by file format, so no keyed build breaks during cut-over.
 
 ### Migration & rotation
 
@@ -73,12 +73,12 @@
 | VAULT-06 | Phase 39 | Complete |
 | VAULT-07 | Phase 39 | Complete |
 | VAULT-08 | Phase 39 | Complete |
-| KEYENC-01 | Phase 40 | Pending |
-| KEYENC-02 | Phase 40 | Pending |
-| KEYENC-03 | Phase 40 | Pending |
-| KEYENC-04 | Phase 40 | Pending |
-| KEYENC-05 | Phase 40 | Pending |
-| KEYENC-06 | Phase 40 | Pending |
+| KEYENC-01 | Phase 40 | Complete |
+| KEYENC-02 | Phase 40 | Complete |
+| KEYENC-03 | Phase 40 | Complete |
+| KEYENC-04 | Phase 40 | Complete |
+| KEYENC-05 | Phase 40 | Complete |
+| KEYENC-06 | Phase 40 | Complete |
 | KEYMIG-01 | Phase 41 | Pending |
 | KEYMIG-02 | Phase 41 | Pending |
 | KEYMIG-03 | Phase 41 | Pending |

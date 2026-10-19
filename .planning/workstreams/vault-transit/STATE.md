@@ -4,12 +4,12 @@ milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
 current_phase: 40
 current_phase_name: Transit-Encrypted Deploy Keys in the API
-status: executing
-stopped_at: Completed 40-04-PLAN.md
-last_updated: "2026-10-19T08:48:16.760Z"
+status: verifying
+stopped_at: Completed 40-05-PLAN.md
+last_updated: "2026-10-19T09:40:12.585Z"
 last_activity: 2026-10-19
 last_activity_desc: Phase 40 execution started
-state_head: 2b22f3053086192db0d70cdd55c9eb3d97a55236
+state_head: f1fdc9ca2307336e2f8b1d9f07b58491d14763c5
 progress:
   total_phases: 3
   completed_phases: 1
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 
 Phase: 40 (Transit-Encrypted Deploy Keys in the API) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-19 — Phase 40 execution started
 
 Progress: [███░░░░░░░] 33%
@@ -62,6 +62,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 40 P02 | 16 min | 3 tasks | 12 files |
 | Phase 40 P03 | 10 min | 3 tasks | 11 files |
 | Phase 40 P04 | 4 min | 2 tasks | 4 files |
+| Phase 40 P05 | 50min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,8 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 40]: 40-03: create() logs only err.code for a generate error; the API answers 503 with exactly {success: false, response: key_service_unavailable}; all three consoles show the fixed D-03 sentence and a 503 without that code stays generic
 - [Phase 40]: 40-04: THINX_DEPLOY_KEYGEN=enabled is mirrored in thinx.yml and docker-swarm.yml; the wiring gate asserts it (KEYGEN_SWITCH), retires the Phase 39 client-file and new-client scope checks, keeps SCOPE_NO_NEW_DEPENDENCY, and --live ignores the image and the switch
 - [Phase 40]: 40-04: kill-switch spec backups are thinx-api-pre-keygen-<UTC>.json (0600 root), distinct from the thinx-api-pre-openbao-* baseline the gate reads; a full revert keeps the docker-swarm.yml switch line
+- [Phase 40]: 40-05: Phase 40 cut over on the operator's advance go, conditional on a green Task 1; thinx-staging 8b6879e0 live as thinx_api tk89thgjiptv1d1z4e9l1kepw, all live gates green
+- [Phase 40]: 40-05: API container PID 1 is the sh entrypoint with node as last foreground child; crash-case assumption holds in effect (exec node is an optional later hardening)
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-19T08:48:16.394Z
-**Stopped At:** Completed 40-04-PLAN.md
+**Last session:** 2026-10-19T09:40:12.103Z
+**Stopped At:** Completed 40-05-PLAN.md
 **Resume File:** None
