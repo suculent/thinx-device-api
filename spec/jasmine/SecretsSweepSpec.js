@@ -43,7 +43,17 @@ const FAKE = {
   rollbarAccessFile: "spec-fake-rollbaraccess-file-2d95",
   rollbarAccessEnv: "spec-fake-rollbaraccess-env-f0a1",
   passphraseFile: "spec-fake-passphrase-file-93be",
-  passphraseEnv: "spec-fake-passphrase-env-47c2"
+  passphraseEnv: "spec-fake-passphrase-env-47c2",
+  baoRoleFile: "spec-fake-baorole-file-1e8c",
+  baoRoleEnv: "spec-fake-baorole-env-7d20",
+  baoSecretFile: "spec-fake-baosecret-file-c4f9",
+  baoSecretEnv: "spec-fake-baosecret-env-58ab",
+  baoToken: "spec-fake-baotoken-0f3d",
+  // vault:v1: + base64("spec-fake-ct-9a4e"): the shape transit.js accepts.
+  baoCiphertext: "vault:v1:c3BlYy1mYWtlLWN0LTlhNGU=",
+  baoCiphertextBody: "c3BlYy1mYWtlLWN0LTlhNGU",
+  baoPlaintext: "spec-fake-plaintext-5d71",
+  baoPlaintextB64: Buffer.from("spec-fake-plaintext-5d71").toString("base64").replace(/=+$/, "")
 };
 
 // ---------------------------------------------------------------------------
@@ -836,4 +846,155 @@ describe("Secrets sweep: GIT_KEY_PASSPHRASE in rsakey.js", function () {
     expect(countMatching(lines, /GIT_KEY_PASSPHRASE not set/)).to.equal(1);
     expectNoFakeValues(lines);
   });
+});
+
+// ---------------------------------------------------------------------------
+// BAO_ROLE_ID / BAO_SECRET_ID — lib/thinx/transit.js (Phase 40, KEYENC-04)
+// The OpenBao Transit client against the in-process https mock. Fake role_id,
+// secret_id, token, ciphertext and plaintext values flow through every path;
+// none may reach a console line, a Slack text or a TransitError field.
+// ---------------------------------------------------------------------------
+
+describe("Secrets sweep: OpenBao Transit client", function () {
+
+  const Transit = require("../../lib/thinx/transit.js");
+  const MockOpenBao = require("../fixtures/mock-openbao.js");
+
+  const VARIANTS = {
+    file: {
+      secrets: {
+        BAO_ROLE_ID: { file: FAKE.baoRoleFile, env: FAKE.baoRoleEnv },
+        BAO_SECRET_ID: { file: FAKE.baoSecretFile, env: FAKE.baoSecretEnv },
+        SLACK_WEBHOOK: { file: FAKE.slackWebhookFile }
+      },
+      roleId: FAKE.baoRoleFile,
+      secretId: FAKE.baoSecretFile
+    },
+    env: {
+      secrets: {
+        BAO_ROLE_ID: { env: FAKE.baoRoleEnv },
+        BAO_SECRET_ID: { env: FAKE.baoSecretEnv },
+        SLACK_WEBHOOK: { env: FAKE.slackWebhookEnv }
+      },
+      roleId: FAKE.baoRoleEnv,
+      secretId: FAKE.baoSecretEnv
+    }
+  };
+
+  function expectNoFakeIn(values) {
+    for (const v of values) {
+      for (const key of Object.keys(FAKE)) {
+        expect(String(v).includes(FAKE[key]), "Transit output leaks a credential or key value").to.equal(false);
+      }
+    }
+  }
+
+  // Runs action(transit) with the variant's secrets, a fresh mock and a Slack
+  // stub; returns everything the client emitted.
+  async function sweep(variantName, mockOpts, action, transitOpts) {
+    const variant = VARIANTS[variantName];
+    const mock = await MockOpenBao.start(Object.assign({
+      token: FAKE.baoToken,
+      ciphertext: FAKE.baoCiphertext,
+      roleId: variant.roleId,
+      secretId: variant.secretId
+    }, mockOpts || {}));
+    const slackTexts = [];
+    const webhooks = [];
+    const errors = [];
+    let result;
+    try {
+      const lines = await withSecrets(variant.secrets, () => captureLogs(async () => {
+        const t = new Transit(Object.assign({
+          addr: mock.addr,
+          caFile: mock.caFile,
+          hostname: "sweep-host",
+          slackNotify: (webhook) => {
+            webhooks.push(webhook);
+            return { send: (p) => { slackTexts.push(p && p.text); return Promise.resolve(); } };
+          }
+        }, transitOpts || {}));
+        if (mockOpts && typeof mockOpts.scriptFn === "function") mock.script(mockOpts.scriptFn);
+        try {
+          result = await action(t);
+        } catch (e) {
+          errors.push(e);
+        }
+      }));
+      return { lines, slackTexts, webhooks, errors, result, mock };
+    } finally {
+      await mock.close();
+    }
+  }
+
+  function expectClean(out) {
+    expectNoFakeValues(out.lines);
+    expectNoFakeIn(out.slackTexts);
+    for (const e of out.errors) {
+      expect(e).to.be.instanceOf(Transit.TransitError);
+      expectNoFakeIn([e.message, e.reason, String(e.status), util.inspect(e)]);
+    }
+  }
+
+  for (const variantName of Object.keys(VARIANTS)) {
+    describe(variantName + " credentials", function () {
+
+      it("success: encrypt and decrypt round-trip without leaking", async function () {
+        const out = await sweep(variantName, {}, async (t) => {
+          const ct = await t.encryptKey(Buffer.from(FAKE.baoPlaintext));
+          const pt = await t.decryptKey(ct);
+          const text = pt.toString("utf8");
+          pt.fill(0);
+          return { ct, text };
+        });
+        expect(out.errors.length).to.equal(0);
+        expect(out.result.ct).to.equal(FAKE.baoCiphertext);
+        expect(out.result.text).to.equal(FAKE.baoPlaintext);
+        expectClean(out);
+      });
+
+      it("403 retry: one fresh login, then success, without leaking", async function () {
+        const out = await sweep(variantName, {
+          scriptFn: ({ op, opIndex }) => (op === "encrypt" && opIndex === 0) ? { status: 403, body: { errors: [FAKE.baoToken] } } : undefined
+        }, (t) => t.encryptKey(Buffer.from(FAKE.baoPlaintext)));
+        expect(out.errors.length).to.equal(0);
+        expect(out.mock.count("login")).to.equal(2);
+        expectClean(out);
+      });
+
+      it("sealed: FAILING alert carries only the reason class", async function () {
+        const out = await sweep(variantName, {
+          scriptFn: ({ op }) => op === "encrypt" ? { status: 503, body: { errors: [FAKE.baoToken, FAKE.baoCiphertext] } } : undefined
+        }, (t) => t.encryptKey(Buffer.from(FAKE.baoPlaintext)));
+        expect(out.errors.map((e) => e.reason)).to.deep.equal(["sealed"]);
+        expect(out.slackTexts.length).to.equal(1);
+        expect(out.slackTexts[0]).to.match(/FAILING on sweep-host since .*: SEALED\./);
+        expect(out.webhooks.length).to.equal(1);
+        expectClean(out);
+      });
+
+      it("denied: a wrong secret_id is refused without leaking either id", async function () {
+        const out = await sweep(variantName, { secretId: "spec-expected-other-secret" },
+          (t) => t.encryptKey(Buffer.from(FAKE.baoPlaintext)));
+        expect(out.errors.map((e) => e.reason)).to.deep.equal(["denied"]);
+        expectClean(out);
+      });
+
+      it("timeout: a hung decrypt is unreachable without leaking the ciphertext", async function () {
+        const out = await sweep(variantName, {
+          scriptFn: ({ op }) => op === "decrypt" ? { hang: true } : undefined
+        }, (t) => t.decryptKey(FAKE.baoCiphertext), { requestTimeoutMs: 200 });
+        expect(out.errors.map((e) => e.reason)).to.deep.equal(["unreachable"]);
+        expectClean(out);
+      });
+
+      it("oversize: a body over 64 KiB is server_error without echoing it", async function () {
+        const out = await sweep(variantName, {
+          scriptFn: ({ op }) => op === "decrypt" ? { oversize: true } : undefined
+        }, (t) => t.decryptKey(FAKE.baoCiphertext));
+        expect(out.errors.map((e) => e.reason)).to.deep.equal(["server_error"]);
+        expectClean(out);
+      });
+    });
+  }
 });

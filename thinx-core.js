@@ -5,6 +5,7 @@ const InfluxConnector = require('./lib/thinx/influx');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
 const RedisHealth = require('./lib/thinx/redis-health');
+const Transit = require('./lib/thinx/transit');
 
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
@@ -108,6 +109,12 @@ module.exports = class THiNX extends EventEmitter {
     // the throttled signal that posts to Slack. Attached BEFORE .connect()
     // so the very first connection failure is captured.
     RedisHealth.attach(app.redis_store_client);
+
+    // Phase 40 boot probe: one non-blocking OpenBao AppRole login on an unref'd
+    // 5 s timer (skipped under ENVIRONMENT=test or without BAO_ADDR). It only
+    // feeds the Transit incident tracker; the API serves even when the probe
+    // fails, because :7442, MQTT and public builds do not depend on OpenBao.
+    Transit.probeSoon();
 
     // Section that requires initialized Redis
     console.log("ℹ️ [info] Connecting Redis client...");
