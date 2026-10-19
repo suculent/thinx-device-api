@@ -915,3 +915,143 @@ test('G1 a named real generate lists that name and an OpenSSH SHA256 fingerprint
     });
   } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
+
+// ---------------------------------------------------------------- Phase 40 Plan 03 (D-03, D-07; KEYENC-03)
+
+// Runs fn with THINX_DEPLOY_KEYGEN set to value (undefined = unset) and restores the env after.
+async function withKeygen(value, fn) {
+  const had = Object.prototype.hasOwnProperty.call(process.env, 'THINX_DEPLOY_KEYGEN');
+  const prev = process.env.THINX_DEPLOY_KEYGEN;
+  if (typeof value === 'undefined') delete process.env.THINX_DEPLOY_KEYGEN;
+  else process.env.THINX_DEPLOY_KEYGEN = value;
+  try { return await fn(); } finally {
+    if (had) process.env.THINX_DEPLOY_KEYGEN = prev;
+    else delete process.env.THINX_DEPLOY_KEYGEN;
+  }
+}
+const UNAVAILABLE_BODY = { success: false, response: 'key_service_unavailable' };
+
+test('KS1 router: key_service_unavailable answers 503 with exactly {success, response} on PUT v2 and GET v1 (D-03)', async () => {
+  const realCreate = RSAKey.prototype.create;
+  try {
+    loadRouter(); // registers with the real prototype; the refusal replaces it below
+    RSAKey.prototype.create = function (owner, cb) { cb(false, 'key_service_unavailable'); };
+    const session = { owner: OWNER };
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'Firmware' } }),
+      { status: 503, body: UNAVAILABLE_BODY });
+    assert.deepEqual(await callRoute('GET /api/user/rsakey/create', { method: 'GET', session, query: { name: 'Firmware' } }),
+      { status: 503, body: UNAVAILABLE_BODY });
+    // Unnamed creates take the same path.
+    assert.deepEqual(await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: {} }),
+      { status: 503, body: UNAVAILABLE_BODY });
+    // Any other refusal keeps the generic responder (200 with success false).
+    RSAKey.prototype.create = function (owner, cb) { cb(false); };
+    const plain = await callRoute('PUT /api/v2/rsakey', { method: 'PUT', session, body: { name: 'Firmware' } });
+    assert.equal(plain.status, 200, 'a plain failure is not reported as 503');
+  } finally { RSAKey.prototype.create = realCreate; }
+});
+
+test('KS2 a create refused by Transit calls back key_service_unavailable and releases the claim (D-03, KEYENC-03)', async () => {
+  const {dir, key} = fixture({ failReason: 'sealed' });
+  try {
+    key.newUniqueIdentifier = () => 9100;
+    const r = await withKeygen(undefined, () => new Promise((resolve) => key.create(OWNER,
+      (success, response, reason) => resolve({ success, response, reason }), 'Refused')));
+    assert.deepEqual(r, { success: false, response: 'key_service_unavailable', reason: undefined });
+    assert.equal(key.transit.calls.encrypt, 1);
+    assert.deepEqual(fs.readdirSync(dir), [], 'the claimed .pub is released, no private file');
+    // A non-Transit generate error stays a plain refusal.
+    key.generate = (owner, date, cb) => { const e = new Error('disk'); e.code = 'ENOSPC'; cb(e); };
+    const plain = await new Promise((resolve) => key.create(OWNER, (...args) => resolve(args)));
+    assert.deepEqual(plain, [false]);
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+});
+
+test('KS3 THINX_DEPLOY_KEYGEN disabled refuses before the name check, the claim and Transit (D-07)', async () => {
+  for (const value of ['disabled', 'Disabled', 'off']) {
+    const {dir, key} = fixture();
+    try {
+      const existing = writePair(dir, OWNER, 1000, 'Existing key');
+      const before = fs.readdirSync(dir).sort();
+      let reserved = 0;
+      const realReserve = key.reserveIdentifier;
+      key.reserveIdentifier = function (...a) { reserved++; return realReserve.apply(this, a); };
+      const lines = [];
+      const realLog = console.log;
+      console.log = (...a) => lines.push(a.join(' '));
+      let named, bad;
+      try {
+        named = await withKeygen(value, () => new Promise((resolve) => key.create(OWNER, (...args) => resolve(args), 'Firmware')));
+        // The switch precedes name validation: even an invalid name gets the switch refusal.
+        bad = await withKeygen(value, () => new Promise((resolve) => key.create(OWNER, (...args) => resolve(args), '')));
+      } finally { console.log = realLog; }
+      assert.deepEqual(named, [false, 'key_service_unavailable'], value);
+      assert.deepEqual(bad, [false, 'key_service_unavailable'], value + ' before the name check');
+      assert.equal(key.transit.calls.encrypt, 0, value + ': no Transit call');
+      assert.equal(reserved, 0, value + ': no claim attempted');
+      assert.deepEqual(fs.readdirSync(dir).sort(), before, value + ': directory listing unchanged');
+      assert.deepEqual(key.getKeyPathsForOwner(OWNER), [existing]);
+      assert.ok(lines.some((l) => l.includes('THINX_DEPLOY_KEYGEN')), 'the log line names the switch');
+      assert.ok(!lines.some((l) => l.includes(value)), 'the log line never carries the value');
+    } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+  }
+});
+
+test('KS4 THINX_DEPLOY_KEYGEN unset, empty or "enabled" creates a Transit key (D-07)', async () => {
+  for (const value of [undefined, '', 'enabled']) {
+    const {dir, key} = fixture();
+    try {
+      const r = await withKeygen(value, () => new Promise((resolve) => key.create(OWNER,
+        (success, response) => resolve({ success, response }), 'Firmware')));
+      assert.equal(r.success, true, JSON.stringify(value) + ' generates');
+      assert.equal(key.transit.calls.encrypt, 1);
+      const stored = fs.readFileSync(path.join(dir, r.response.filename), 'utf8');
+      assert.equal(keyformat.detect(stored), 'transit');
+    } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+  }
+  assert.equal(RSAKey.deployKeygenEnabled(), !process.env.THINX_DEPLOY_KEYGEN || process.env.THINX_DEPLOY_KEYGEN === 'enabled',
+    'the env is restored after each case');
+});
+
+test('KS5 builds ignore the switch: with "disabled" a fetch still attempts the Transit key and the legacy key (D-07)', async () => {
+  const Git = require('../../lib/thinx/git.js');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-keys-'));
+  const learned = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-learned-'));
+  const build = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-build-'));
+  try {
+    const transit = new FakeTransit();
+    const pem = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    }).privateKey;
+    const transitName = OWNER + '-1000';
+    const legacyName = OWNER + '-2000';
+    fs.writeFileSync(path.join(dir, transitName), (await transit.encryptKey(Buffer.from(pem, 'utf8'))) + '\n', { mode: 0o600 });
+    fs.writeFileSync(path.join(dir, legacyName),
+      '-----BEGIN ENCRYPTED ' + 'PRIVATE KEY-----\nnot a real key\n-----END ENCRYPTED ' + 'PRIVATE KEY-----\n', { mode: 0o600 });
+    const git = new Git(undefined, {
+      sshKeysDir: dir,
+      seededKnownHosts: path.join(learned, 'seeded'),
+      learnedKnownHostsDir: path.join(learned, 'ssh_known_hosts')
+    });
+    git.transit = transit;
+    git.keyNamesForOwner = () => [transitName, legacyName];
+    const attempts = [];
+    git.cloneHoldingLock = async (b, u, br, env) => {
+      attempts.push(env && env.SSH_AUTH_SOCK ? 'agent' : (env && env.THINX_GIT_KEY ? 'legacy' : 'keyless'));
+      return { ok: false, repoPath: null, reason: 'clone_failed' };
+    };
+    const realLog = console.log;
+    console.log = () => {};
+    let r;
+    try {
+      r = await withKeygen('disabled', () => git.fetchDetailed(OWNER, 'ssh://git@127.0.0.1:9/x.git', 'main', build));
+    } finally { console.log = realLog; }
+    assert.deepEqual(attempts, ['agent', 'legacy'], 'both key kinds are still read with the switch off');
+    assert.equal(transit.calls.decrypt, 1, 'the Transit key was decrypted');
+    assert.deepEqual(r, { ok: false, keyUnavailable: null });
+  } finally {
+    for (const d of [dir, learned, build]) fs.rmSync(d, {recursive: true, force: true});
+  }
+});
