@@ -46,7 +46,7 @@ Previously: v1.12 Inbox Drawdown (2026-06-29) — GDPR owner purge, per-user Git
 
 ## Next Milestone Goals
 
-v1.17 Deploy-Key Vault Transit runs as the `vault-transit` workstream (Phase 39, internal OpenBao on the swarm). For the root track, run `/gsd-new-milestone`; for the console, `/gsd-new-milestone --ws vue-console` (next phase number 49).
+v1.17 Deploy-Key Vault Transit runs as the `vault-transit` workstream: Phase 39 (internal OpenBao on the swarm) and Phase 40 (new deploy keys stored only as OpenBao Transit ciphertext, decrypted in memory into a per-attempt ssh-agent; legacy passphrase keys keep building; `THINX_DEPLOY_KEYGEN` kill switch) are complete; Phase 41 (key migration, passphrase retirement, rotation) is next. For the root track, run `/gsd-new-milestone`; for the console, `/gsd-new-milestone --ws vue-console` (next phase number 49).
 
 Carried out of v1.18 (console):
 - Operator checks still pending from Phase 48.1 UAT: CircleCI run for `95ea22f`, served-console admin/non-admin/logged-out reload and offline checks, impersonation → Header → exit spot-check, decision on the build-log scroll defect (fix `BuildLogDialog.vue` or accept with an override)
@@ -326,4 +326,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Context + Next Milestone Goals updated
 
 ---
-*Last updated: 2026-10-18 after v1.18 milestone*
+*Last updated: 2026-10-19 after v1.17 Phase 40*

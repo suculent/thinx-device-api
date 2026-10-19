@@ -1,7 +1,7 @@
 ---
 phase: 40-transit-encrypted-deploy-keys-in-the-api
 verified: 2026-10-19T10:35:00Z
-status: human_needed
+status: passed
 score: 4/5 must-haves verified
 covered_files:
   - .circleci/config.yml
@@ -225,36 +225,43 @@ Disabled tests on requirements: 0. Circular patterns: none found. Insufficient a
 ### Human Verification Required
 
 #### 1. Deploy 9fd2c640 and re-gate the new task
+
 **Test:** Push thinx-staging at or after 71a7bbf1. When the new thinx_api task is running, check `[transit] probe ok` and run `openbao-api-wiring.test.sh --live`.
 **Expected:** `cloneFailedPastKey` present in the deployed git.js; probe ok; API-WIRING-OK mode=live.
 **Why human:** The hand-off said the review fixes are not on thinx-staging. Three of the four are, and they are live in task w8qcwhvtruo8sf14bt2tldero (10:10Z). The missing 9fd2c640 is the fix for the WR-01 regression that 115a5740 introduced, so the live build can omit the D-04 build-log line during an outage. Pushing thinx-staging redeploys production.
 
 #### 2. Private-repo build with only the Transit key (SC2)
+
 **Test:** Add the new key's .pub as the deploy key of a private repo that no legacy key of the owner can read, then build.
 **Expected:** Success; no Transit skip or agent failure line; 0 `thinx-agent-*` dirs afterwards.
 **Why human:** Needs a real ssh clone, and the 09:45Z fetch may have used one of the owner's 4 legacy keys.
 
 #### 3. Legacy-only owner build (SC3)
+
 **Test:** Build a private repo for an owner whose only working key is a legacy passphrase key.
 **Expected:** Success.
 **Why human:** Real build in the deployed image.
 
 #### 4. Public HTTPS worker build (SC4)
+
 **Test:** Build a device from a public HTTPS repo; grep the API log for `public prefetch git result OK` and for `[transit]` failures.
 **Expected:** Success, OK line present, no transit failure.
 **Why human:** Full build path through the worker.
 
 #### 5. Live 503 sentence (optional)
+
 **Test:** Kill switch per runbook section 11, then create a key in both consoles, then re-enable.
 **Expected:** 503 with exactly the two-field body; the D-03 sentence in both consoles.
 **Why human:** Restarts the task; the path has not been seen through Traefik and the browser.
 
 #### 6. Console retest
+
 **Test:** The console-retest checklist on rtm.thinx.cloud.
 **Expected:** All items pass.
 **Why human:** Browser checks.
 
 #### 7. Prohibitions
+
 **Test:** Review the 21 judgment-tier prohibitions above.
 **Expected:** Accepted as held.
 **Why human:** No test-tier enforcement exists for them.
