@@ -103,6 +103,7 @@ services:
       - transformer
       - thinx-redis
       - mosquitto
+      - openbao
     networks:
       - nat
       - internal
@@ -171,6 +172,14 @@ services:
       # production credential (production reads the INFLUXDB_TOKEN secret).
       - 'INFLUXDB_URL=http://influxdb:8086'
       - 'INFLUXDB_TOKEN=thinx-ci-influx-token'
+      # OpenBao dev server started by the openbao + openbao-setup pair below.
+      # The role_id and secret_id are throwaways pinned by openbao-setup for
+      # that ephemeral CI instance, never production credentials (production
+      # reads the BAO_ROLE_ID and BAO_SECRET_ID secret files).
+      - 'BAO_ADDR=https://openbao:8200'
+      - 'BAO_CACERT=/run/openbao-dev/vault-ca.pem'
+      - 'BAO_ROLE_ID=thinx-ci-bao-role'
+      - 'BAO_SECRET_ID=thinx-ci-bao-secret'
     ports:
       - '7442:7442'
       - '7443:7443'
@@ -181,6 +190,7 @@ services:
       - '/cache'
       - '/mnt/data/statistics:/mnt/data/statistics'
       - '/mnt/data/repos:/mnt/data/repos'
+      - 'openbao-devtls:/run/openbao-dev:ro'
     labels:
       - traefik.docker.network=nat
       - traefik.enable=true
@@ -274,3 +284,70 @@ services:
         influx setup --host http://influxdb:8086 --force
         --username thinx-ci --password thinx-ci-password
         --org thinx --bucket stats --token thinx-ci-influx-token
+
+  # Phase 40: OpenBao 2.7.1 dev server for the Transit specs (KEYENC-05), the
+  # tag production runs. -dev-tls writes vault-ca.pem and a leaf whose SANs
+  # include the container hostname (hence hostname: openbao) and 127.0.0.1
+  # into the openbao-devtls volume. thinx-ci-bao-root is a throwaway root
+  # token for this ephemeral instance. Never print this service's log: the
+  # dev server writes its root token and unseal key there.
+  openbao:
+    image: openbao/openbao:2.7.1
+    hostname: openbao
+    networks:
+      - internal
+    ports:
+      - '8200'
+    environment:
+      - BAO_DEV_ROOT_TOKEN_ID=thinx-ci-bao-root
+    command:
+      - server
+      - -dev
+      - -dev-no-store-token
+      - -dev-tls
+      - -dev-tls-cert-dir=/openbao/file
+      - -dev-listen-address=0.0.0.0:8200
+    volumes:
+      - 'openbao-devtls:/openbao/file'
+
+  # One-shot setup, like influxdb-setup: the thinx-deploy-keys Transit key and
+  # the thinx-api AppRole with the production policy and role parameters
+  # (thinx-swarm openbao/policies/thinx-api.hcl, scripts/openbao-bootstrap.sh).
+  # role_id thinx-ci-bao-role and secret_id thinx-ci-bao-secret are CI
+  # throwaways for this ephemeral instance, never production credentials.
+  openbao-setup:
+    image: openbao/openbao:2.7.1
+    depends_on:
+      - openbao
+    networks:
+      - internal
+    restart: "no"
+    volumes:
+      - 'openbao-devtls:/devtls:ro'
+    environment:
+      - BAO_ADDR=https://openbao:8200
+      - BAO_CACERT=/devtls/vault-ca.pem
+      - BAO_TOKEN=thinx-ci-bao-root
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        i=0; until [ -f /devtls/vault-ca.pem ] && bao status >/dev/null 2>&1;
+        do i=$$((i+1)); [ $$i -gt 60 ] && exit 1; sleep 1; done;
+        bao secrets enable transit >/dev/null &&
+        bao write -f transit/keys/thinx-deploy-keys type=aes256-gcm96 exportable=false allow_plaintext_backup=false >/dev/null &&
+        bao write transit/keys/thinx-deploy-keys/config deletion_allowed=false >/dev/null &&
+        bao auth enable approle >/dev/null &&
+        printf '%s\n'
+        'path "transit/encrypt/thinx-deploy-keys" {' '  capabilities = ["update"]' '}' ''
+        'path "transit/decrypt/thinx-deploy-keys" {' '  capabilities = ["update"]' '}' ''
+        'path "transit/rewrap/thinx-deploy-keys" {' '  capabilities = ["update"]' '}'
+        | bao policy write thinx-api - >/dev/null &&
+        bao write auth/approle/role/thinx-api token_policies=thinx-api token_no_default_policy=true token_type=service
+        token_ttl=20m token_max_ttl=1h secret_id_ttl=0 secret_id_num_uses=0 bind_secret_id=true >/dev/null &&
+        bao write auth/approle/role/thinx-api/role-id role_id=thinx-ci-bao-role >/dev/null &&
+        bao write -f auth/approle/role/thinx-api/custom-secret-id secret_id=thinx-ci-bao-secret >/dev/null &&
+        echo OPENBAO-SETUP-OK
+
+volumes:
+  openbao-devtls: {}

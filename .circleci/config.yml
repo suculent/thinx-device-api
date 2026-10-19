@@ -860,6 +860,16 @@ jobs:
           docker compose logs thinx-redis
 
     - run:
+        name: Starting OpenBao
+        command: |
+          # Phase 40 (KEYENC-05): OpenBao 2.7.1 dev server for TransitIntegrationSpec.
+          # openbao-setup pins the thinx-deploy-keys key and the thinx-api AppRole with
+          # throwaway CI ids. Never print the openbao service log: the dev server
+          # writes its root token and unseal key there.
+          docker compose up -d openbao
+          docker compose run --rm openbao-setup
+
+    - run:
         name: Starting Support Services
         command: |
           export ENVIRONMENT=test
