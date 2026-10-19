@@ -664,16 +664,40 @@ describe("Git", function () {
             expect(lines.filter((l) => l === "[git] key transit-undecryptable skipped: deploy key unavailable: unreachable").length).to.equal(1);
         });
 
-        it("(T2) with every attempt failing, the first Transit reason is reported and fetch() still resolves a boolean (D-04)", async function () {
+        it("(T2) when no key reaches a clone, the first Transit reason is reported and fetch() still resolves a boolean (D-04)", async function () {
             const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
-            const git = transitGit(transit, ["transit-undecryptable", "legacy"]);
-            spyOn(git, "cloneHoldingLock").and.callFake(async () => ({ ok: false, repoPath: null, reason: "clone_failed" }));
+            const git = transitGit(transit, ["transit-undecryptable", "unknown"]);
+            const clone = spyOn(git, "cloneHoldingLock").and.callFake(async () => ({ ok: false, repoPath: null, reason: "clone_failed" }));
             captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: false, keyUnavailable: "unreachable" });
+            expect(clone.calls.count()).to.equal(0);
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(false);
             expect(typeof ok).to.equal("boolean");
+        });
+
+        // WR-01: once a key reached a clone, the clone failure (wrong branch, no
+        // access) is the cause; the build log must not blame the key service.
+        it("(T2b) an undecryptable Transit key beside a legacy key whose clone fails reports no keyUnavailable (WR-01)", async function () {
+            const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
+            const git = transitGit(transit, ["transit-undecryptable", "legacy"]);
+            const attempts = [];
+            spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: false, repoPath: null, reason: "branch_not_found" }; });
+            captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
+            expect(attempts).to.deep.equal(["legacy:legacy"]);
+        });
+
+        it("(T2c) the same holds when the legacy key is tried before the undecryptable Transit key (WR-01)", async function () {
+            const transit = new FakeTransit({ failReason: "sealed", failOps: ["decrypt"] });
+            const git = transitGit(transit, ["legacy", "transit-undecryptable"]);
+            spyOn(git, "cloneHoldingLock").and.callFake(async () => ({ ok: false, repoPath: null, reason: "repo_not_found_or_no_access" }));
+            captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
+            expect(transit.calls.decrypt).to.equal(1);
         });
 
         it("(T3) a Transit key that decrypts but whose clone fails reports no keyUnavailable", async function () {
