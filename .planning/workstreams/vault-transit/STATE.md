@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 40
 current_phase_name: Transit-Encrypted Deploy Keys in the API
 status: executing
-stopped_at: Completed 40-03-PLAN.md
-last_updated: "2026-10-19T01:20:27.786Z"
+stopped_at: Completed 40-04-PLAN.md
+last_updated: "2026-10-19T08:48:16.760Z"
 last_activity: 2026-10-19
 last_activity_desc: Phase 40 execution started
-state_head: d12c937b72c4ac5f85f90c297a32fc1f58569c93
+state_head: 2b22f3053086192db0d70cdd55c9eb3d97a55236
 progress:
   total_phases: 3
   completed_phases: 1
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 40 (Transit-Encrypted Deploy Keys in the API) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-10-19 — Phase 40 execution started
 
@@ -61,6 +61,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 40 P01 | 9 min | 2 tasks | 9 files |
 | Phase 40 P02 | 16 min | 3 tasks | 12 files |
 | Phase 40 P03 | 10 min | 3 tasks | 11 files |
+| Phase 40 P04 | 4 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 40]: 40-03: THINX_DEPLOY_KEYGEN is fail-closed; only unset, empty or exactly enabled generates, any other value refuses with key_service_unavailable
 - [Phase 40]: 40-03: the kill switch is the first statement of create(), before the name check, reserveIdentifier and Transit; builds, list, rename and revoke never read it
 - [Phase 40]: 40-03: create() logs only err.code for a generate error; the API answers 503 with exactly {success: false, response: key_service_unavailable}; all three consoles show the fixed D-03 sentence and a 503 without that code stays generic
+- [Phase 40]: 40-04: THINX_DEPLOY_KEYGEN=enabled is mirrored in thinx.yml and docker-swarm.yml; the wiring gate asserts it (KEYGEN_SWITCH), retires the Phase 39 client-file and new-client scope checks, keeps SCOPE_NO_NEW_DEPENDENCY, and --live ignores the image and the switch
+- [Phase 40]: 40-04: kill-switch spec backups are thinx-api-pre-keygen-<UTC>.json (0600 root), distinct from the thinx-api-pre-openbao-* baseline the gate reads; a full revert keeps the docker-swarm.yml switch line
 
 ### Pending Todos
 
@@ -132,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-19T01:20:27.704Z
-**Stopped At:** Completed 40-03-PLAN.md
+**Last session:** 2026-10-19T08:48:16.394Z
+**Stopped At:** Completed 40-04-PLAN.md
 **Resume File:** None
