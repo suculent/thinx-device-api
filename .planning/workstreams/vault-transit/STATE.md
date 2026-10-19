@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 40
 current_phase_name: Transit-Encrypted Deploy Keys in the API
 status: executing
-stopped_at: context exhaustion at 85% (2026-10-19)
-last_updated: "2026-10-19T00:29:40.912Z"
+stopped_at: Completed 40-01-PLAN.md
+last_updated: "2026-10-19T00:45:05.696Z"
 last_activity: 2026-10-19
-last_activity_desc: Phase 39 complete, transitioned to Phase 40
-state_head: ab3ae8ba1e4914b98b494fdf632c4ceef5c819b8
+last_activity_desc: Phase 40 execution started
+state_head: a1f88dd1a5cd715c4569286f3c59d552463c6d88
 progress:
   total_phases: 3
   completed_phases: 1
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-transit/REQUIREMENTS.md`
 
 **Core value:** Possession of the deploy-key files (GlusterFS volume, backup, snapshot, file-read bug) must not be sufficient to decrypt any owner's git deploy private key, while THiNX still clones and builds autonomously with the owner logged out.
-**Current focus:** Phase 39 — Internal OpenBao on the Swarm
+**Current focus:** Phase 40 — Transit-Encrypted Deploy Keys in the API
 
 ## Current Position
 
-Phase: 40 (Transit-Encrypted Deploy Keys in the API) — READY TO EXECUTE
-Plan: Not started
+Phase: 40 (Transit-Encrypted Deploy Keys in the API) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-10-19 — Phase 39 complete, transitioned to Phase 40
+Last activity: 2026-10-19 — Phase 40 execution started
 
 Progress: [███░░░░░░░] 33%
 
@@ -58,6 +58,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 39 P03 | 130 min | 3 tasks | 13 files |
 | Phase 39 P05 | 5h03m | 3 tasks | 7 files |
 | Phase 39 P06 | 33min | 3 tasks | 5 files |
+| Phase 40 P01 | 9 min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,10 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 39]: 39-06: source YAMLs pin the CA config the trust consumer reports (openbao-ca-a2b56707515146d7a580); re-pin after every issuer swap
 - [Phase 39]: 39-06: CA config mode left at the Docker default 0444 (YAML 1.2 reads 0444 as decimal)
 - [Phase 39]: 39-06: authenticated owner-path WS gate is operator-only; any x-thx-core value gets 101, only a socket held open proves a session
+- [Phase 40]: 40-01: a denied AppRole login is final (no retry); a denied, sealed, unreachable or server_error encrypt/decrypt gets one fresh login and one retry, at most four requests per key
+- [Phase 40]: 40-01: Transit SNI servername only for DNS names; IP literals verify against the IP SAN without SNI
+- [Phase 40]: 40-01: Transit Slack alerts username transit, channel thinx; undeliverable alerts dropped silently; webhook read lazily on first alert
+- [Phase 40]: 40-01: invalid caller input to encryptKey/decryptKey is logged but opens no incident; malformed ciphertext is bad_ciphertext with no request
 
 ### Pending Todos
 
@@ -118,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-18T22:20:50.216Z
-**Stopped At:** context exhaustion at 85% (2026-10-19)
-**Resume File:** .planning/workstreams/vault-transit/phases/40-transit-encrypted-deploy-keys-in-the-api/40-CONTEXT.md
+**Last session:** 2026-10-19T00:45:05.628Z
+**Stopped At:** Completed 40-01-PLAN.md
+**Resume File:** None
