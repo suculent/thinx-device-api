@@ -833,18 +833,34 @@ describe("Secrets sweep: GIT_KEY_PASSPHRASE in rsakey.js", function () {
     expectNoFakeValues(lines);
   });
 
-  it("generate() refuses with one info line when the passphrase is absent", async function () {
+  // Phase 40, KEYENC-03: new keys never fall back to the passphrase.
+  it("generate() with the passphrase set and Transit unavailable refuses, writes no private file and logs no FAKE value", async function () {
+    const os = require("os");
+    const path = require("path");
+    const FakeTransit = require("../fixtures/fake-transit.js");
     const envi = require("../_envi.json");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "thinx-sweep-keys-"));
     let err;
-    const lines = await withSecrets({ GIT_KEY_PASSPHRASE: "absent" }, () => captureLogs(async () => {
-      err = await new Promise((resolve) => {
-        new RSAKey().generate(envi.oid, 1, (e) => resolve(e));
-      });
-    }));
-    expect(err).to.be.an("error");
-    expect(err.message).to.equal("GIT_KEY_PASSPHRASE is not set; refusing to generate a deploy key");
-    expect(countMatching(lines, /GIT_KEY_PASSPHRASE not set/)).to.equal(1);
-    expectNoFakeValues(lines);
+    try {
+      const lines = await withSecrets({ GIT_KEY_PASSPHRASE: { file: FAKE.passphraseFile, env: FAKE.passphraseEnv } }, () => captureLogs(async () => {
+        const rsakey = new RSAKey();
+        rsakey.ssh_keys = dir;
+        rsakey.transit = new FakeTransit({ failReason: "sealed" });
+        const passphraseSpy = spyOn(RSAKey, "keyPassphrase").and.callThrough();
+        err = await new Promise((resolve) => {
+          rsakey.generate(envi.oid, 1, (e) => resolve(e));
+        });
+        expect(passphraseSpy.calls.count()).to.equal(0);
+      }));
+      expect(err).to.be.an("error");
+      expect(err.code).to.equal("key_service_unavailable");
+      expect(err.reason).to.equal("sealed");
+      expect(fs.readdirSync(dir)).to.deep.equal([]);
+      expect(countMatching(lines, /deploy-key generation refused: key service unavailable \(sealed\)/)).to.equal(1);
+      expectNoFakeValues(lines);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 

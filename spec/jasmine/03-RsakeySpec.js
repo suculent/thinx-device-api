@@ -5,18 +5,31 @@ describe("RSA Key", function() {
   var os = require("os");
   var path = require("path");
   var RSAKey = require("../../lib/thinx/rsakey");
+  var FakeTransit = require("../fixtures/fake-transit.js");
+  var keyformat = require("../../lib/thinx/keyformat");
+  var secrets = require("../../lib/thinx/secrets");
   var rsakey = new RSAKey();
+  var savedPassphrase;
 
   // 34-REVIEW WR-05: every key this spec creates goes into a per-run temp
   // directory, never into Globals.app_config().ssh_keys (in development that
   // is the developer's real ~/.ssh, on CI /mnt/data/ssh_keys). The directory
   // and all key material in it are removed after the spec.
+  // Phase 40: keys are Transit ciphertext, made through a deterministic fake
+  // Transit, and GIT_KEY_PASSPHRASE is removed for the whole spec, so no create
+  // below can depend on it (KEYENC-03).
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running RSA spec`);
     rsakey.ssh_keys = fs.mkdtempSync(path.join(os.tmpdir(), "rsakey-spec-"));
+    rsakey.transit = new FakeTransit();
+    savedPassphrase = process.env.GIT_KEY_PASSPHRASE;
+    delete process.env.GIT_KEY_PASSPHRASE;
+    secrets._resetCacheForTests();
   });
 
   afterAll(() => {
+    if (typeof savedPassphrase !== "undefined") process.env.GIT_KEY_PASSPHRASE = savedPassphrase;
+    secrets._resetCacheForTests();
     fs.rmSync(rsakey.ssh_keys, { recursive: true, force: true });
     console.log(`🚸 [chai] <<< completed RSA spec`);
   });
@@ -47,6 +60,10 @@ describe("RSA Key", function() {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
       first_key = listFilename(response);
+      // KEYENC-01: the private half on disk is Transit ciphertext, mode 0600.
+      const privatePath = rsakey.ssh_keys + "/" + first_key;
+      expect(keyformat.detect(fs.readFileSync(privatePath, "utf8"))).to.equal("transit");
+      expect(fs.statSync(privatePath).mode & 0o777).to.equal(0o600);
       done();
     });
   }, 10000);
@@ -211,22 +228,33 @@ describe("RSA Key", function() {
     expect(RSAKey.toOpenSSH(line, "ignored")).to.equal(line);
   });
 
-  // The passphrase must match what git.js feeds ssh-add via SSH_ASKPASS;
-  // generating a key we cannot decrypt only fails later, as a clone that
-  // silently offers no identity at all.
-  it("(11) should refuse to generate a key when GIT_KEY_PASSPHRASE is unset", function (done) {
+  // KEYENC-03, no fallback: with the passphrase SET and Transit unreachable,
+  // generation is refused with key_service_unavailable, writes no private file
+  // and never even reads the passphrase.
+  it("(11) should refuse to generate a key when Transit is unavailable, even with GIT_KEY_PASSPHRASE set", function (done) {
     // keyPassphrase() reads through readSecret (D-04), which caches per name.
-    const { _resetCacheForTests } = require("../../lib/thinx/secrets");
-    const saved = process.env.GIT_KEY_PASSPHRASE;
-    delete process.env.GIT_KEY_PASSPHRASE;
-    _resetCacheForTests();
-    rsakey.generate(owner, new Date().getTime(), (err) => {
-      if (typeof saved !== "undefined") process.env.GIT_KEY_PASSPHRASE = saved;
-      _resetCacheForTests();
+    process.env.GIT_KEY_PASSPHRASE = "spec-passphrase-set-for-case-11";
+    secrets._resetCacheForTests();
+    const working = rsakey.transit;
+    rsakey.transit = new FakeTransit({ failReason: "unreachable" });
+    const passphraseSpy = spyOn(RSAKey, "keyPassphrase").and.callThrough();
+    const date = new Date().getTime();
+    const privatePath = rsakey.ssh_keys + "/" + owner + "-" + date;
+    rsakey.generate(owner, date, (err, pub, extra) => {
+      rsakey.transit = working;
+      delete process.env.GIT_KEY_PASSPHRASE;
+      secrets._resetCacheForTests();
       expect(err).to.be.an('error');
+      expect(err.code).to.equal("key_service_unavailable");
+      expect(err.reason).to.equal("unreachable");
+      expect(err.message).to.equal("key_service_unavailable");
+      expect(pub).to.equal(undefined);
+      expect(extra).to.equal(undefined);
+      expect(fs.existsSync(privatePath)).to.equal(false);
+      expect(passphraseSpy.calls.count()).to.equal(0);
       done();
     });
-  });
+  }, 10000);
 
   it("(12) should discover key owners from the key directory", function () {
     const owners = rsakey.listOwnersOnDisk();

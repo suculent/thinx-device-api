@@ -16,12 +16,16 @@ test.after(() => fs.rmSync(TEST_HOME, { recursive: true, force: true }));
 process.env.ENVIRONMENT = 'development';
 const RSAKey = require('../../lib/thinx/rsakey');
 const Util = require('../../lib/thinx/util');
+const keyformat = require('../../lib/thinx/keyformat');
+// Phase 40: keys are made through a deterministic fake Transit, never OpenBao or the passphrase.
+const FakeTransit = require('../fixtures/fake-transit.js');
 const OWNER = 'a'.repeat(64);
 const OTHER = 'b'.repeat(64);
-function fixture() {
+function fixture(transitOptions) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-keys-'));
   const key = Object.create(RSAKey.prototype);
   key.ssh_keys = dir;
+  key.transit = new FakeTransit(transitOptions);
   return {dir, key};
 }
 test('tests run against a temporary HOME, never the real ~/.ssh (34-REVIEW WR-05)', () => {
@@ -135,7 +139,10 @@ test('two creates in the same millisecond get distinct names and neither key is 
     for (const r of [a,b]) {
       const base=path.basename(r.response.filename,'.pub');
       assert.equal(fs.readFileSync(path.join(dir,base+'.pub'),'utf8'),r.response.pubkey);
-      assert.match(fs.readFileSync(path.join(dir,base),'utf8'),/BEGIN ENCRYPTED PRIVATE KEY/);
+      const stored=fs.readFileSync(path.join(dir,base),'utf8');
+      assert.equal(keyformat.detect(stored),'transit','the private half is Transit ciphertext (KEYENC-01)');
+      assert.equal(stored.includes('PRIVATE KEY'),false);
+      assert.equal(fs.statSync(path.join(dir,base)).mode & 0o777,0o600);
       assert.equal(r.response.created,Number(base.split('-')[1]));
     }
     assert.notEqual(a.response.pubkey,b.response.pubkey);
@@ -153,6 +160,21 @@ test('a failed generation releases the claimed name and leaves no file behind', 
     const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success)));
     assert.equal(ok,false);
     assert.deepEqual(fs.readdirSync(dir),[]);
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('a create refused by Transit releases the claimed .pub and leaves the directory as it was (KEYENC-03)', async () => {
+  const {dir,key}=fixture({ failReason: 'unreachable' });
+  try {
+    const existing=writePair(dir,OWNER,1000,'Existing key');
+    const snapshot=()=>fs.readdirSync(dir).sort().map(n=>[n,fs.readFileSync(path.join(dir,n),'utf8')]);
+    const before=snapshot();
+    key.newUniqueIdentifier=()=>8800;
+    const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success),'Refused'));
+    assert.equal(ok,false);
+    assert.equal(key.transit.calls.encrypt,1,'generation reached Transit');
+    assert.deepEqual(snapshot(),before,'no private file, no claimed .pub, the existing pair untouched');
+    assert.equal(fs.existsSync(path.join(dir,OWNER+'-8800.pub')),false);
+    assert.deepEqual(key.getKeyPathsForOwner(OWNER),[existing]);
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });
 test('keys created within the same second still list newest first (38 WR-01)', () => {
@@ -177,6 +199,7 @@ test('a filesystem error after key generation fails the create instead of crashi
     fsx.chmodSync=(p,mode)=>{ if (p===privatePath) { const e=new Error('synthetic EIO'); e.code='EIO'; throw e; } return realChmod(p,mode); };
     const ok=await new Promise(resolve=>key.create(OWNER,success=>resolve(success),'Broken disk'));
     assert.equal(ok,false,'create reports failure through the callback');
+    assert.equal(key.transit.calls.encrypt,1,'Transit encrypted the key, so the failure is the chmod after the write');
     assert.deepEqual(fs.readdirSync(dir),[],'no private key and no claimed .pub are left behind');
   } finally {
     fsx.chmodSync=realChmod;
