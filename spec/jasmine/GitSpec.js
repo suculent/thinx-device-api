@@ -17,6 +17,8 @@ const Git = require("../../lib/thinx/git");
 // 64 hex chars, the shape of a real owner id; matches no key file anywhere.
 const OWNER = "0f".repeat(32);
 
+const LEGACY_PLACEHOLDER = "-----BEGIN ENCRYPTED " + "PRIVATE KEY-----\nnot a real key\n-----END ENCRYPTED " + "PRIVATE KEY-----\n";
+
 function tmpdir(root, name) {
     return fs.mkdtempSync(path.join(root, name + "-"));
 }
@@ -66,7 +68,9 @@ describe("Git", function () {
         seeded = path.join(root, "seeded_known_hosts");
         fs.writeFileSync(seeded, "", { mode: 0o600 });
         keysDir = tmpdir(root, "keys");
-        fs.writeFileSync(path.join(keysDir, "k1"), "not a real key\n", { mode: 0o600 });
+        // PEM-armored placeholders: keyformat classifies them "legacy" (Phase 40,
+        // KEYENC-06), so every keyed case below keeps taking the askpass path.
+        for (const name of ["k1", "k2"]) fs.writeFileSync(path.join(keysDir, name), LEGACY_PLACEHOLDER, { mode: 0o600 });
     });
 
     afterAll(() => {

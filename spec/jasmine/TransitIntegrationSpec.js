@@ -145,3 +145,123 @@ describe("Transit integration (OpenBao dev server)", function () {
 		}
 	});
 });
+
+// Phase 40 Plan 02, Task 1 (KEYENC-01, KEYENC-02, KEYENC-06): a key created
+// against the dev server is one vault:vN: line on disk, and a keyed fetch
+// decrypts it in memory into a per-attempt ssh-agent that the attempt really
+// uses, then removes it. cloneHoldingLock is spied: there is no sshd here, so
+// the spy proves the agent from inside the attempt instead of cloning.
+describe("Transit integration: deploy key end to end", function () {
+
+	const fs = require("fs");
+	const os = require("os");
+	const path = require("path");
+	const exec = require("child_process");
+	const RSAKey = require("../../lib/thinx/rsakey.js");
+	const Git = require("../../lib/thinx/git.js");
+	const keyformat = require("../../lib/thinx/keyformat.js");
+
+	const OWNER = "4e".repeat(32);
+	const TRANSIT_LINE = /^vault:v[1-9][0-9]*:[A-Za-z0-9+/]+={0,2}\n$/;
+	const lines = [];
+	let origLog;
+	let root;
+
+	function agentDirs() {
+		return fs.readdirSync(os.tmpdir()).filter((n) => n.indexOf("thinx-agent-") === 0);
+	}
+
+	beforeAll(function () {
+		root = fs.mkdtempSync(path.join(os.tmpdir(), "thinx-transit-e2e-"));
+		origLog = console.log;
+		console.log = function (...args) {
+			lines.push(args.map(String).join(" "));
+			return origLog.apply(console, args);
+		};
+	});
+
+	afterAll(function () {
+		console.log = origLog;
+		if (root) fs.rmSync(root, { recursive: true, force: true });
+	});
+
+	it("(E1) stores a new key as Transit ciphertext and builds through a per-attempt agent", async function () {
+		if (!guard()) return;
+		const keysDir = fs.mkdtempSync(path.join(root, "keys-"));
+		const t = makeTransit();
+		const rsakey = new RSAKey();
+		rsakey.ssh_keys = keysDir;
+		rsakey.transit = t;
+
+		const created = await new Promise((resolve) => rsakey.create(OWNER, (success, response) => resolve({ success, response }), "it-key"));
+		expect(created.success).to.equal(true);
+		const filename = created.response.filename;
+		const privatePath = path.join(keysDir, filename);
+		const publicPath = privatePath + ".pub";
+
+		// KEYENC-01: one vault:vN: line, mode 0600, no PEM anywhere in the dir.
+		const stored = fs.readFileSync(privatePath, "utf8");
+		const storedCiphertext = stored.trim();
+		expect(TRANSIT_LINE.test(stored)).to.equal(true);
+		expect(fs.statSync(privatePath).mode & 0o777).to.equal(0o600);
+		expect(keyformat.readKey(privatePath).kind).to.equal("transit");
+		for (const name of fs.readdirSync(keysDir)) {
+			expect(fs.readFileSync(path.join(keysDir, name), "utf8").includes("PRIVATE KEY"), name).to.equal(false);
+		}
+		const pubFingerprint = RSAKey.fingerprint(fs.readFileSync(publicPath, "utf8"));
+		expect(pubFingerprint).to.match(/^SHA256:/);
+
+		const seeded = path.join(root, "seeded_known_hosts");
+		fs.writeFileSync(seeded, "", { mode: 0o600 });
+		const git = new Git(null, {
+			sshKeysDir: keysDir,
+			seededKnownHosts: seeded,
+			learnedKnownHostsDir: path.join(fs.mkdtempSync(path.join(root, "learned-")), "ssh_known_hosts")
+		});
+		git.rsa = rsakey;
+		git.transit = t;
+
+		const before = new Set(agentDirs());
+		const seen = {};
+		spyOn(git, "cloneHoldingLock").and.callFake(async function (buildPath, url, branch, env) {
+			seen.socketDir = path.dirname(env.SSH_AUTH_SOCK);
+			seen.socketDirMode = fs.statSync(seen.socketDir).mode & 0o777;
+			seen.sshCommand = env.GIT_SSH_COMMAND;
+			seen.forbidden = ["SSH_ASKPASS", "SSH_ASKPASS_REQUIRE", "GIT_KEY_PASSPHRASE"].filter((k) => k in env);
+			// Only PATH and the attempt's socket: the agent itself must hold the key.
+			const listed = exec.execFileSync("ssh-add", ["-l", "-E", "sha256"], {
+				env: { PATH: process.env.PATH, SSH_AUTH_SOCK: env.SSH_AUTH_SOCK },
+				encoding: "utf8"
+			}).trim().split("\n").filter((l) => l.length > 0);
+			seen.agentKeys = listed.length;
+			seen.agentFingerprint = (listed[0] || "").split(/\s+/)[1];
+			seen.pubPathFingerprint = RSAKey.fingerprint(fs.readFileSync(env.THINX_GIT_KEY_PUB, "utf8"));
+			seen.agentDirEntries = fs.readdirSync(seen.socketDir).sort();
+			return { ok: true, repoPath: buildPath, reason: null };
+		});
+
+		const ok = await git.fetch(OWNER, "ssh://git@example.invalid/owner/repo.git", "main", fs.mkdtempSync(path.join(root, "build-")));
+		expect(ok).to.equal(true);
+		expect(git.cloneHoldingLock.calls.count()).to.equal(1);
+
+		// KEYENC-02: the agent held exactly this key, the attempt used the agent command
+		// and saw no askpass helper or passphrase.
+		expect(seen.agentKeys).to.equal(1);
+		expect(seen.agentFingerprint).to.equal(pubFingerprint);
+		expect(seen.pubPathFingerprint).to.equal(pubFingerprint);
+		expect(seen.sshCommand).to.equal(Git.AGENT_SSH_COMMAND);
+		expect(seen.forbidden).to.deep.equal([]);
+		expect(seen.socketDirMode).to.equal(0o700);
+		expect(seen.agentDirEntries).to.deep.equal(["agent.sock", "key.pub"]);
+
+		// Cleanup: the attempt's directory is gone and no new agent dir remains.
+		expect(fs.existsSync(seen.socketDir)).to.equal(false);
+		expect(agentDirs().filter((n) => !before.has(n))).to.deep.equal([]);
+
+		// Nothing printed carries the ciphertext or a PEM header.
+		for (const line of lines) {
+			expect(line.includes(storedCiphertext)).to.equal(false);
+			expect(line.includes("PRIVATE KEY")).to.equal(false);
+		}
+	}, 60000);
+});
