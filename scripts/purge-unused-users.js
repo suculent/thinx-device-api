@@ -171,6 +171,17 @@ Output: JSON lines with owner IDs and a summary; no emails or credentials.
 Exit: 0 complete, 1 runtime failure or concurrent changes, 2 usage/config error.
 `;
 
+// A short, credential-free code for the abort line. Our own errors carry a
+// snake_case code as their message; CouchDB errors become couchdb_<status>,
+// file-system errors their errno code. Raw messages are never printed: a
+// nano error can carry the request URL, which holds the CouchDB credentials.
+function failureReason(err) {
+    if (err && /^[a-z][a-z0-9_]{0,63}$/.test(err.message || "")) return err.message;
+    if (err && Number.isInteger(err.statusCode)) return "couchdb_" + err.statusCode;
+    if (err && /^E[A-Z0-9]{1,31}$/.test(err.code || "")) return err.code;
+    return "unexpected_error";
+}
+
 function connection(env, readSecret) {
     const url = new URL(env.COUCHDB_URL || "http://couchdb:5984");
     if (!["http:", "https:"].includes(url.protocol) || url.search || url.hash) throw new Error("invalid_url");
@@ -205,11 +216,12 @@ async function main(argv = process.argv.slice(2)) {
         const report = await run({ users: client.use(usersName), devices: client.use(devicesName) }, { ...opts, emit });
         emit({ action: "summary", ...report });
         return report.conflicts || report.changed ? 1 : 0;
-    } catch (_err) {
-        console.error("Cleanup aborted: database or snapshot operation failed. Review emitted progress before retrying.");
+    } catch (err) {
+        console.error(`Cleanup aborted (${failureReason(err)}): database or snapshot operation failed. ` +
+            "Review emitted progress and docs/administration/purge-unused-users.md before retrying.");
         return 1;
     }
 }
 
-module.exports = { classifyUser, parseArgs, run, connection, main };
+module.exports = { classifyUser, parseArgs, run, connection, failureReason, main };
 if (require.main === module) main().then(code => { process.exitCode = code; });

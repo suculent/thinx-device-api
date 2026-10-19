@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { classifyUser, parseArgs, run, connection } = require("../../scripts/purge-unused-users");
+const { classifyUser, parseArgs, run, connection, failureReason } = require("../../scripts/purge-unused-users");
 const { spawnSync } = require("node:child_process");
 
 const user = (letter, extra = {}) => ({
@@ -85,6 +85,18 @@ describe("purge-unused-users", function () {
         assert.throws(() => connection({}, () => null));
         assert.throws(() => connection({ THINX_PREFIX: "../../" }, name => secrets[name]));
         assert.throws(() => connection({ COUCHDB_URL: "file:///tmp/couch" }, name => secrets[name]));
+    });
+
+    it("names the abort reason without echoing raw error messages", async () => {
+        const devices = database([{ _id: "device", owner: user("b").owner, _conflicts: ["2-other"] }]);
+        let thrown;
+        try { await run({ users: database([user("a")]), devices }, {}); } catch (err) { thrown = err; }
+        assert.equal(failureReason(thrown), "conflicted_device");
+        const couchErr = Object.assign(new Error("GET http://admin:secret-value@couchdb:5984/x failed"), { statusCode: 401 });
+        assert.equal(failureReason(couchErr), "couchdb_401");
+        assert.equal(failureReason(Object.assign(new Error("EEXIST: /secure/x"), { code: "EEXIST" })), "EEXIST");
+        assert.equal(failureReason(new Error("connect ECONNREFUSED 10.0.0.1 secret-value")), "unexpected_error");
+        assert.equal(failureReason(undefined), "unexpected_error");
     });
 
     it("offers help and rejects unsafe apply before any connection, without leaking input", () => {
