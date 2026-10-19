@@ -1,7 +1,8 @@
 ---
 phase: 40-transit-encrypted-deploy-keys-in-the-api
-reviewed: 2026-10-19T09:49:44Z
+reviewed: 2026-10-19T10:16:16Z
 depth: standard
+iteration: 3
 files_reviewed: 31
 files_reviewed_list:
   - .circleci/config.yml
@@ -36,214 +37,204 @@ files_reviewed_list:
   - /Users/sychram/Repositories/thinx-swarm/tests/openbao-api-wiring.test.sh
   - /Users/sychram/Repositories/thinx-swarm/thinx.yml
 findings:
-  critical: 1
-  warning: 2
-  info: 8
-  total: 11
-status: issues_found
+  critical: 0
+  warning: 0
+  info: 13
+  total: 13
+status: clean
 ---
 
-# Phase 40: Code Review Report
+# Phase 40: Code Review Report (iteration 3)
 
-**Reviewed:** 2026-10-19T09:49:44Z
+**Reviewed:** 2026-10-19T10:16:16Z
 **Depth:** standard
 **Files Reviewed:** 31
-**Status:** issues_found
+**Status:** clean (no critical or warning findings; 13 Info items remain)
 
 ## Narrative Findings (AI reviewer)
 
 ## Summary
 
-Scope: the phase diff `3e605630..HEAD` in the parent repo, console commits `ec63c74..7e3d1fe`, and thinx-swarm
-commit `8cfa7dd`. I read the production paths in full: `transit.js`, `keyformat.js`, the Phase 40 parts of
-`git.js`, `rsakey.js`, `builder.js`, `github_link.js`, `router.rsakey.js` and `thinx-core.js`. I checked the spec
-and fixture files only for whether the tests are reliable.
+This pass re-reviews commit `9fd2c640`, the fix for iteration 2's WR-01. It changes only `lib/thinx/git.js` and
+`spec/jasmine/GitSpec.js`. Since iteration 1 (`748f8798`), the only files in scope that changed are `git.js`,
+`keyformat.js`, `GitSpec.js`, `KeyFormatSpec.js` and `TransitIntegrationSpec.js`. The analysis of the other files
+from earlier iterations still holds. I re-checked every carried Info finding against the current line numbers.
+Commit `04a8d26b` (purge-unused-users) is out of scope and was not reviewed.
 
-The secret-handling discipline holds up under tracing:
-- No log line, Slack text or HTTP body carries a token, role/secret id, ciphertext or plaintext.
-- `ssh-agent` and `ssh-add` get a `PATH`-only (plus socket) env.
-- The PEM reaches the agent on stdin only.
-- `baseEnv()` strips any inherited agent.
-- The agent directory is removed and the decrypted buffer zeroed in `finally`.
-- TLS trusts only `BAO_CACERT`.
+**WR-01 (iteration 2): fixed and correct.** I traced `cloneFailedPastKey` (`git.js:42-46`) against every value the
+real `cloneHoldingLock` (`git.js:551-615`) can return:
+- `ok: true` → false. Not counted, and the caller returns success anyway.
+- `invalid_input`, `no_checkout`, `pull_failed`, `chmod_failed`, `metadata_failed` → true. The key got past
+  authentication, or the input was bad for every key. The clone's own failure is the cause.
+- `clone_failed` with `publickey_denied`, `repo_not_found_or_no_access` or `key_unusable` → false. This is the
+  normal outcome for another repository's deploy key, so the first Transit reason is still reported. That fixes
+  the silent case from iteration 2.
+- `clone_failed` with `branch_not_found`, `https_auth_required`, `other` or `no_stderr` (for example a timeout
+  kill) → true. The Transit reason is suppressed.
+- A missing result or a throw → true. The legacy `catch` only sets the flag once `askpass` exists
+  (`git.js:857`). `sshEnv` and `readSecret` never throw, so the flag is set only when the clone path itself
+  threw. In the Transit path, the flag is set to true before the clone and overwritten by the result
+  (`git.js:788-790`). An agent start or load failure leaves it false (see IN-08).
 
-The kill switch and the 503 `key_service_unavailable` path are wired the same way in both routers and both
-consoles. The API routers do not use the Traefik `error-pages-middleware`, so the JSON 503 body reaches the
-consoles.
+**No regression in the per-fetch loop.**
+- WR-02 skip semantics are unchanged. `serviceDown` is still checked only in the Transit branch
+  (`git.js:827-839`), so legacy keys after an outage are still tried (T8, all five reasons). `bad_ciphertext`
+  and `server_error` still do not skip later keys (T10, T11).
+- `keyUnavailable` is still the first Transit reason seen (`git.js:835`, guarded by `=== null`). T9 confirms that a
+  Transit-only fetch still reports the outage with one decrypt.
+- The legacy path is unchanged except for how the flag is derived. Success still calls `rememberKey` and returns
+  before the flag is read.
 
-Main defect: the new in-process key-file read (`keyformat.readKey`) uses a blocking `open(2)` on entries of the
-shared key volume. A FIFO there freezes the whole API event loop, and I reproduced this locally. Two robustness
-issues are in the outage path: the build-log attribution can be wrong, and Transit keys get no short-circuit when
-OpenBao is down.
+**`cause` does not leak stderr.** `Git.failureCause` (`git.js:267-282`) returns only one of seven fixed codes,
+`other` or `no_stderr`. `cause` is never built from stderr text. `fetchHoldingLock` reads it but does not return
+it. The only log line that uses it is the existing `cause=` field.
 
-Not verified: an end-to-end SSH clone through `AGENT_SSH_COMMAND`. Every spec stubs `cloneHoldingLock`, and the
-production check is still queued as end-of-phase UAT (40-05-SUMMARY).
+**builder.js and sources.js are unaffected.** `builder.prefetchPublic` (`builder.js:701-707`) reads `.ok` and
+`.reason`. `builder.prefetchPrivate` (`builder.js:740-743`) reads `.ok` and `.keyUnavailable` from
+`fetchDetailed`, whose shape did not change. `sources.js:291-296` and `devices.js:81` use `.ok` and the boolean
+`fetch()`. None of them logs or serialises the whole clone result.
 
-## Critical Issues
+**Tests.** I ran them locally from the main checkout (`ENVIRONMENT=development`, dummy CouchDB credentials, no
+Redis). KeyFormatSpec, GitSpec, TransitSpec, SecretsSweepSpec, BuilderRemoteJobSpec and GitFailureCauseSpec gave
+**245 specs, 0 failures**. The new specs exercise the real return shape:
+- b2 runs a real `file://` clone. It returns `cause: repo_not_found_or_no_access` for a missing repository and
+  `branch_not_found` for a missing branch.
+- T2b to T2g stub `{ reason: "clone_failed" | "pull_failed", cause }`.
 
-### CR-01: `keyformat.readKey` blocks the API event loop forever on a FIFO in `ssh_keys`
+This resolves iteration 2's IN-10. I did not start the OpenBao dev server, so I did not re-run
+TransitIntegrationSpec. Its pass comes from the fix report. Its assertions (E2/E3) expect `ok: true` and do not
+depend on the changed flag.
 
-**File:** `lib/thinx/keyformat.js:56` (called from `lib/thinx/git.js:782` in `fetchHoldingLock`)
-**Issue:** `readKey` calls `fs.openSync(path, "r")` on the main thread. It relies on the later `fstatSync` to
-reject anything that is not a regular file (comment at lines 49-50). But `open(2)` with `O_RDONLY` on a FIFO blocks
-until a writer appears, so the `fstat` check is never reached.
-
-The module's own header treats the directory as untrusted ("shared, historically world-writable volume"). On
-production it is the GlusterFS `thinx/ssh_keys` tree, which `thinx_worker` also mounts read-write through
-`/mnt/gluster/thinx`. One `mkfifo /mnt/data/ssh_keys/<owner>-<digits>` is therefore enough: the next keyed fetch
-for that owner (build, source add, device attach) hangs the whole Node process. That takes down HTTP on
-7442/7443, socket.io and MQTT handling. The process stays alive, so Swarm does not restart it.
-
-Before Phase 40 the same file was only opened by `ssh -i` inside the git child, which the git timeout bounds and
-which does not block the API. This contradicts the CONTEXT rule for unknown or corrupt files ("skip and log,
-never crash") and is worse than a crash.
-
-Reproduced locally with `mkfifo k; node -e 'require("./lib/thinx/keyformat.js").readKey("k")'`: the call never
-returned, a 500 ms timer never fired, and the run was killed at 5 s.
-**Fix:** Open non-blocking, so a FIFO open returns at once and the existing `fstat` check rejects it (verified
-locally: `isFile=false`, no hang). Regular files are unaffected by `O_NONBLOCK`:
-```js
-fd = fs.openSync(String(filePath), fs.constants.O_RDONLY | fs.constants.O_NONBLOCK);
-```
-Add a GitSpec/KeyFormatSpec case with a `mkfifo` entry next to the existing `adir`/`dangling` cases (expect
-`not_regular`).
-
-## Warnings
-
-### WR-01: "deploy key unavailable" is logged even when the build failed for another reason
-
-**File:** `lib/thinx/git.js:786,807` and `lib/thinx/builder.js:1017-1018`
-**Issue:** `fetchHoldingLock` records the first Transit decrypt failure in `keyUnavailable` and returns it whenever
-no attempt succeeded, even after other keys were really tried and failed for unrelated reasons.
-
-Example: an owner has an undecryptable Transit key and a legacy key. OpenBao is down, the legacy key clones, and
-the clone fails with `branch_not_found` or `repo_not_found_or_no_access`. The build log still gets exactly one
-cause line: `deploy key unavailable: key service unreachable`. The user and operator are then sent to OpenBao
-for a typo in the branch name.
-
-D-04 scopes the line to "a keyed build that fails **because no key could be decrypted**". The implementation
-writes it when *any* key could not be decrypted.
-**Fix:** Return `keyUnavailable` only when no clone attempt was made at all, or when every attempted key failed
-at decryption. Track `let attempted = false;`, set it before each `cloneHoldingLock` call (legacy, keyless and
-Transit-after-decrypt), then:
-```js
-return { ok: false, keyUnavailable: attempted ? null : keyUnavailable };
-```
-Or keep the current return and change the builder sentence so it does not claim to be the cause, for example
-"note: a deploy key was skipped: <sentence>".
-
-### WR-02: Each Transit key repeats the full login/retry cycle during an outage, under the checkout lock
-
-**File:** `lib/thinx/git.js:779-788` (with `lib/thinx/transit.js:264-284`)
-**Issue:** When OpenBao is stalled (TCP accepted, no answer) or blackholed, every Transit key goes through its own
-`_withRetry`: up to login + op + login + op at 3 s each, which is 12 s per key.
-
-The loop never learns that the failure is service-wide. An owner with N Transit keys waits up to 12·N s before
-reaching a legacy key or failing. This is plausible: the GitHub-link flow mints a new key every time the existing
-ones are "in use elsewhere".
-
-That wait happens:
-- inside the per-directory checkout lock;
-- in user-facing request paths: `sources.js:293` (source add) and `devices.js:81` (attach) await `git.fetch`
-  within the HTTP request;
-- with 2-4 log lines and repeated logins per key.
-
-D-02 asks that "a build never hangs on OpenBao". Each key is bounded, but the total is not.
-**Fix:** After the first Transit failure whose reason is service-level (`unreachable`, `sealed`, `tls`,
-`not_configured`, `denied`), skip decrypt for the remaining Transit keys in this fetch. Log them with the same
-reason, and go straight to the legacy keys:
-```js
-if (key.kind === "transit") {
-	if (serviceDown) { console.log(`[git] key ${name} skipped: deploy key unavailable: ${serviceDown}`); continue; }
-	const attempt = await this.transitAttempt(...);
-	if (attempt.ok) return { ok: true, keyUnavailable: null };
-	if (attempt.unavailable && attempt.unavailable !== "bad_ciphertext") serviceDown = attempt.unavailable;
-	...
-}
-```
+One residual limit, already named in the fix report, is filed as IN-13. Over ssh, `failureCause` never returns
+`host_key_failed` or `network` for a real git stderr. So these failures count as refusals in the WR-01 decision.
+The effect is a less precise cause line in a double-fault case, not a wrong outcome.
 
 ## Info
 
-### IN-01: Agent socket readiness is probed with `lstat`, which can succeed before `listen()`
+### IN-01: Agent socket readiness is probed with `lstat`, which can succeed before `listen()` (carried over)
 
-**File:** `lib/thinx/git.js:198-208,397-398`
-**Issue:** `waitForSocket` returns as soon as the socket inode exists. `ssh-agent` creates it in `bind()`, just
-before `listen()`. An `ssh-add` that connects in that window gets `ECONNREFUSED`, and the key is skipped as
-`agent_load_failed`. The window is microseconds, so this is a rare flake rather than a bug.
-**Fix:** Treat the socket as ready only when a connect succeeds: try `net.connect(sock)` in the poll loop. Or
-retry `loadIntoAgent` once on failure.
+**File:** `lib/thinx/git.js:219-229,418-419`
+**Issue:** `waitForSocket` returns as soon as the socket inode exists. `ssh-agent` creates the inode in `bind()`,
+just before `listen()`. An `ssh-add` in that window gets `ECONNREFUSED`, and the key is skipped as
+`agent_load_failed`. This is a rare flake.
+**Fix:** Treat the socket as ready only after a successful `net.connect(sock)`, or retry `loadIntoAgent` once.
 
-### IN-02: The decrypted key's raw response bytes are never zeroed
+### IN-02: The decrypted key's raw response bytes are never zeroed (carried over)
 
-**File:** `lib/thinx/transit.js:185,189,152`
-**Issue:** `decryptKey` documents that its caller zeroes the returned Buffer, and `withAgent` does. But two
-wipeable copies of the base64 private key stay in the heap until GC: the response `chunks` Buffers and the
-`Buffer.concat` result. The encrypt request body `data` is a JS string holding the base64 plaintext, and strings
-cannot be wiped. This does not leak to logs, disk or env, but it is weaker than the zeroing the code advertises.
-**Fix:** Keep the concatenated Buffer in a variable and call `fill(0)` on it and on each chunk after
-`JSON.parse`. Note in the header that the JSON and string copies cannot be wiped.
+**File:** `lib/thinx/transit.js:152,175-189`
+**Issue:** `withAgent` zeroes the returned Buffer. The response `chunks` and the `Buffer.concat` result keep a
+base64 copy of the private key until GC. The encrypt request body `data` is a string, which cannot be wiped.
+**Fix:** Keep the concatenated Buffer in a variable, and `fill(0)` it and each chunk after `JSON.parse`. Document
+that the JSON and string copies cannot be wiped.
 
-### IN-03: `readKey` turns a legacy (possibly unencrypted) PEM into a JS string before classifying it
+### IN-03: `readKey` stringifies a legacy (possibly unencrypted) PEM before classifying it (carried over)
 
-**File:** `lib/thinx/keyformat.js:66-67,74`
-**Issue:** The `finally` zeroes `buf` because "a legacy file may hold an unencrypted key". But
-`buf.toString("utf8", …)` has already made an unwipeable string copy of the whole file, including pre-2022
-unencrypted `ssh-keygen -N ""` keys. The fill therefore achieves nothing for those keys.
-**Fix:** Classify on the Buffer. Check whether the first non-whitespace bytes are `vault:v` or
-`-----BEGIN … PRIVATE KEY-----` with a bounded slice, and stringify only the Transit case.
+**File:** `lib/thinx/keyformat.js:72-73,80`
+**Issue:** `buf.toString("utf8", …)` makes a copy of the whole file that cannot be wiped, before the `finally`
+zeroes `buf`. For a pre-2022 unencrypted key, the fill therefore achieves nothing.
+**Fix:** Classify on the Buffer with a bounded prefix check, and stringify only the Transit case.
 
-### IN-04: An explicit `:443` in `BAO_ADDR` silently becomes port 8200
+### IN-04: An explicit `:443` in `BAO_ADDR` silently becomes port 8200 (carried over)
 
 **File:** `lib/thinx/transit.js:139`
-**Issue:** WHATWG `URL` drops a scheme's default port: `new URL("https://h:443").port === ""` (verified).
-`Number(url.port || 8200)` then connects to 8200. Production uses `:8200`, so nothing breaks today. A future
-`BAO_ADDR=https://openbao.internal:443` would fail as `unreachable` with no hint why.
-**Fix:** Default to 8200 only when the original string has no port:
-`port: url.port ? Number(url.port) : (/:\d+(\/|$)/.test(String(this.addr)) ? 443 : 8200)`.
-Or document that BAO_ADDR must carry a non-443 port.
+**Issue:** WHATWG `URL` drops the scheme's default port, so `Number(url.port || 8200)` maps `https://h:443` to 8200.
+**Fix:** Default to 8200 only when the original string has no port, or document the constraint.
 
-### IN-05: Every HTTP 400 on decrypt is classified `bad_ciphertext`, which the incident tracker ignores
+### IN-05: Every HTTP 400 on decrypt is `bad_ciphertext`, which the incident tracker ignores (carried over)
 
 **File:** `lib/thinx/transit.js:211,316`
-**Issue:** OpenBao answers 400 for more than corrupt ciphertext. Examples are a missing or renamed transit key
-("encryption key not found") and, after Phase 41 rotation, ciphertext below `min_decryption_version`. Both are
-`bad_ciphertext` here, and `_fail` drops that class. So a fleet-wide decrypt failure caused by key configuration
-never raises the D-05 Slack alert, and every build says "stored key could not be decrypted".
-**Fix:** Look at the 400 body's `errors[0]` text internally, without logging it. Map key-level messages
-("encryption key not found", "decryption version") to a separate reason that does feed `_fail`. Or count
-`bad_ciphertext` per window and alert past a threshold.
+**Issue:** A missing or renamed transit key also returns a 400. So does ciphertext below
+`min_decryption_version` after a Phase 41 rotation. Such a fleet-wide failure never raises the D-05 alert and
+never short-circuits (WR-02). The WR-01 fix keeps it as the reported `keyUnavailable` when the other keys are
+refused, so the build log at least names it.
+**Fix:** Map key-level 400 messages (checked internally, never logged) to a reason that feeds `_fail`, or alert on
+a `bad_ciphertext` rate.
 
-### IN-06: `transportReason` has a dead branch
+### IN-06: `transportReason` has a dead branch (carried over)
 
 **File:** `lib/thinx/transit.js:82-83`
-**Issue:** `if (UNREACHABLE_CODES.has(c)) return "unreachable"; return "unreachable";`. The set lookup changes
-nothing, so the set reads as if unknown codes were classified differently.
-**Fix:** Drop the set and keep the fallthrough with its comment, or return `server_error` for codes outside the
-set.
+**Issue:** Both branches return `"unreachable"`, so `UNREACHABLE_CODES` has no effect.
+**Fix:** Drop the set, or return `server_error` for codes outside it.
 
-### IN-07: The dev OpenBao is published on all host interfaces with a fixed root token
+### IN-07: The dev OpenBao is published on all interfaces with a fixed root token, and its state dir is predictable (carried over)
 
-**File:** `docker-compose.test.yml:299-300`, `scripts/openbao-dev.sh:17-18,47-49`
-**Issue:**
-- `ports: - '8200'` publishes the dev server on `0.0.0.0:<random>` with root token `thinx-ci-bao-root`. A laptop
-  running `scripts/openbao-dev.sh up` exposes a root-token OpenBao to the local network. The data is throwaway,
-  but this is still an open root endpoint.
-- On Linux, `openbao-dev.sh` uses the predictable `${TMPDIR:-/tmp}/thinx-openbao-dev`. In a shared `/tmp`
-  another user can pre-create that directory before `chmod 700`.
-**Fix:** Use `'127.0.0.1::8200'`, and make the state dir with `mktemp -d`, recording its path, or fail if it
-already exists and is not owned by `$USER`.
+**File:** `docker-compose.test.yml:299-300`, `scripts/openbao-dev.sh:18-19,46-47`
+**Issue:** `ports: - '8200'` binds `0.0.0.0:<random>` with the root token `thinx-ci-bao-root`. The state dir
+`${TMPDIR:-/tmp}/thinx-openbao-dev` can be created in advance by another user on a shared Linux `/tmp`.
+**Fix:** Use `'127.0.0.1::8200'`. Create the state dir with `mktemp -d`, or refuse one not owned by `$USER`.
 
-### IN-08: A Transit key that decrypts but cannot be loaded leaves no reason in the build log
+### IN-08: A Transit key that decrypts but cannot be loaded leaves no reason in the build log (carried over)
 
-**File:** `lib/thinx/git.js:757-766`, `lib/thinx/builder.js:1017`
-**Issue:** `agent_start_failed` / `agent_load_failed` reach only the API console log. For example, `ssh-agent` is
-missing from the base image, or the plaintext is not a valid PEM. `keyUnavailable` stays null, so an owner whose
-only keys are Transit keys sees a bare `error` state with no explanation.
-**Fix:** Return `{ ok: false, unavailable: null, agentFailure: e.code }` and log a fixed sentence such as
-"deploy key could not be loaded" when no clone was attempted. This reuses the WR-01 "attempted" tracking.
+**File:** `lib/thinx/git.js:797-804`, `lib/thinx/builder.js:1017-1019`
+**Issue:** `agent_start_failed` and `agent_load_failed` reach only the API console. These attempts set neither
+`unavailable` nor `failedPastKey`. Consider an owner whose Transit keys all decrypt but cannot be loaded, for
+example because `ssh-agent` is missing from the image. Their build log still shows a bare `error`.
+**Fix:** Return `agentFailure: e.code` from `transitAttempt`. When nothing else explains the failure, log a fixed
+sentence such as "deploy key could not be loaded".
+
+### IN-09: The FIFO specs hang the runner instead of failing if CR-01 regresses (carried over)
+
+**File:** `spec/jasmine/KeyFormatSpec.js:98-105`, `spec/jasmine/GitSpec.js:634,784-791` (T4 `afifo`)
+**Issue:** A blocking `openSync` on a FIFO freezes the whole jasmine process. A synchronous block means the
+elapsed-time assertion never runs and jasmine's async timeout cannot fire. A regression would therefore show up as
+a CI job stalled until CircleCI's no-output timeout, not as a named failure.
+**Fix:** Run the check in a child process with a hard timeout, for example
+`execFileSync(process.execPath, ["-e", "…readKey(FIFO)…"], { timeout: 3000 })`, and assert on its output.
+
+### IN-10: `server_error` stays per-key even when it comes from the AppRole login (carried over, was IN-11)
+
+**File:** `lib/thinx/git.js:26-29,838`, `lib/thinx/transit.js:236-246,57`
+**Issue:** `transitAttempt` sees only the reason, not which request produced it. A 5xx or malformed reply from
+`auth/approle/login`, or a 500 from a broken storage backend, is service-wide. Each Transit key still runs the full
+retry cycle (`server_error` is in `RETRYABLE`). A backend that answers slowly with 5xx brings back the N-key
+multiplication that WR-02 removed.
+**Fix:** Tag `TransitError` with the failing op. Treat `server_error` from `login` as service-level in
+`fetchHoldingLock`, and keep `server_error` from `decrypt` per-key.
+
+### IN-11: The CR-01 FIFO freeze is still reachable through the `.pub` paths in `rsakey.js` (pre-existing, was IN-12)
+
+**File:** `lib/thinx/rsakey.js:252` (`exportKeysForList`), `lib/thinx/rsakey.js:458` (`rename`), `lib/thinx/rsakey.js:656` (`generate`)
+**Issue:** `readFileSync(<key>.pub)` in list and rename blocks the event loop on a FIFO `.pub`.
+`writeFileSync(public_path, …)` runs after the awaited Transit encrypt. During that wait, the claimed empty `.pub`
+can be swapped for a FIFO, and the write then blocks. A writer on the volume needs `thinx_worker`-level access,
+and that access already means `docker.sock`.
+**Fix:** In a follow-up, route these paths through a shared helper. The helper should open with `O_NONBLOCK`,
+check the result with `fstat`, and reject anything that is not a regular file.
+
+### IN-12: `cloneHoldingLock`'s contract comment omits `cause`, and two early returns leave it undefined (new)
+
+**File:** `lib/thinx/git.js:531,554,575,613`
+**Issue:** The doc comment still says "Resolves { ok, repoPath, reason }". The `invalid_input` and `no_checkout`
+returns have no `cause`, and only the catch path sets it. `cloneFailedPastKey` checks `reason` before `cause`, so
+the decision is correct today. A future caller that switches on `cause` alone would read `undefined` for those
+two stages.
+**Fix:** Document `cause` (a `Git.failureCause` code, or `null` when no git command failed). Return
+`cause: null` from the two early returns and the success path.
+
+### IN-13: Over ssh, `host_key_failed` and `network` are unreachable, so they count as key refusals in the WR-01 decision (pre-existing classifier, now load-bearing)
+
+**File:** `lib/thinx/git.js:269-276` (pattern order), `lib/thinx/git.js:34,45` (`KEY_REFUSED_CAUSES`)
+**Issue:** Over ssh, git appends "fatal: Could not read from remote repository." to every failure. The
+`repo_not_found_or_no_access` pattern matches that line, and it is checked before `host_key_failed` and
+`network`. I checked this locally against the current `failureCause`:
+- `Host key verification failed.` plus the git trailer gives `repo_not_found_or_no_access`. The same line without
+  the trailer gives `host_key_failed`.
+- `ssh: Could not resolve hostname …` plus the trailer gives `repo_not_found_or_no_access`.
+- `ssh: connect to host … Connection timed out` plus the trailer gives `repo_not_found_or_no_access`.
+
+GitFailureCauseSpec only tests the bare lines (`:14,17`), so it does not catch this. There are two effects:
+- A host-key change, which can signal a MITM, is logged on the API console as `cause=repo_not_found_or_no_access`,
+  and that hides the signal.
+- During an OpenBao outage, such a failure counts as a refusal, so the build log names the key service. That is
+  still true in this double fault, so it is not a wrong outcome. The fix report notes this and accepts it.
+
+**Fix:** Before matching `repo_not_found_or_no_access`, strip git's generic trailer (`fatal: Could not read from
+remote repository.` and the "Please make sure…" paragraph). Alternatively, move `host_key_failed` and `network`
+ahead of it. Add trailer-bearing cases to GitFailureCauseSpec. If you want those causes to stay "refusals" for
+WR-01, add them to `KEY_REFUSED_CAUSES` explicitly instead of relying on misclassification.
 
 ---
 
-_Reviewed: 2026-10-19T09:49:44Z_
+_Reviewed: 2026-10-19T10:16:16Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
