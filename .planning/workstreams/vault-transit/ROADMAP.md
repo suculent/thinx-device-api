@@ -72,13 +72,13 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   4. With OpenBao sealed, unreachable or denying, key generation is refused with an explicit error and a keyed build fails with an explicit, logged status. A new key never falls back to the passphrase. Public HTTPS builds, device check-in on `:7442` and plain MQTT keep working.
   5. The OpenBao client logs in with AppRole (credentials through `readSecret`), renews or logs in again before its token lapses, and times out instead of hanging. `SecretsSweepSpec` asserts that no token, plaintext key or ciphertext reaches a log line. Unit specs with a mocked OpenBao and an integration spec against an OpenBao dev server in `docker-compose.test.yml` pass, and CI is green.
 
-**Plans**: 1/5 plans executed across 5 waves (serial: every plan commits to the one parent worktree)
+**Plans**: 2/5 plans executed across 5 waves (serial: every plan commits to the one parent worktree)
 
 **Wave 1**
 - [x] 40-01-PLAN.md — OpenBao Transit client (AppRole, re-login, timeouts, D-02 retry, D-05 alerts, boot probe) and the OpenBao dev server in CI and on the laptop
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 40-02-PLAN.md — new keys as Transit ciphertext, per-attempt ssh-agent fetch path, dual read by file format, D-01 skip and D-04 build-log line
+- [x] 40-02-PLAN.md — new keys as Transit ciphertext, per-attempt ssh-agent fetch path, dual read by file format, D-01 skip and D-04 build-log line
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 40-03-PLAN.md — key_service_unavailable refusal (503), kill switch in code, D-03 sentence in the Vue and legacy consoles
@@ -130,7 +130,7 @@ Phases execute in numeric order: 39 → 40 → 41. Phase 40 code and CI work may
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 39. Internal OpenBao on the Swarm | v1.17 | 6/6 | Complete    | 2026-10-19 |
-| 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 1/5 | In Progress | - |
+| 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 2/5 | In Progress | - |
 | 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 0/? | Not started | - |
 
 ---

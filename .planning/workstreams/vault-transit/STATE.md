@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 40
 current_phase_name: Transit-Encrypted Deploy Keys in the API
 status: executing
-stopped_at: Completed 40-01-PLAN.md
-last_updated: "2026-10-19T00:45:05.696Z"
+stopped_at: Completed 40-02-PLAN.md
+last_updated: "2026-10-19T01:05:20.028Z"
 last_activity: 2026-10-19
 last_activity_desc: Phase 40 execution started
-state_head: a1f88dd1a5cd715c4569286f3c59d552463c6d88
+state_head: ea473b63b0362222758568376c4f7e0a04e2e2e6
 progress:
   total_phases: 3
   completed_phases: 1
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 40 (Transit-Encrypted Deploy Keys in the API) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-10-19 — Phase 40 execution started
 
@@ -59,6 +59,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 39 P05 | 5h03m | 3 tasks | 7 files |
 | Phase 39 P06 | 33min | 3 tasks | 5 files |
 | Phase 40 P01 | 9 min | 2 tasks | 9 files |
+| Phase 40 P02 | 16 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,10 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 40]: 40-01: Transit SNI servername only for DNS names; IP literals verify against the IP SAN without SNI
 - [Phase 40]: 40-01: Transit Slack alerts username transit, channel thinx; undeliverable alerts dropped silently; webhook read lazily on first alert
 - [Phase 40]: 40-01: invalid caller input to encryptKey/decryptKey is logged but opens no incident; malformed ciphertext is bad_ciphertext with no request
+- [Phase 40]: 40-02: new deploy-key ciphertext holds bare unencrypted PKCS8 PEM, no owner header and no Transit AAD; cross-owner swap stays an accepted residual
+- [Phase 40]: 40-02: fetchDetailed keyUnavailable is the first Transit reason of any class, bad_ciphertext included, and only when no attempt succeeded; fetch() stays boolean
+- [Phase 40]: 40-02: withAgent raises only agent_start_failed or agent_load_failed; agentEnv deletes SSH_ASKPASS, SSH_ASKPASS_REQUIRE and GIT_KEY_PASSPHRASE; baseEnv drops SSH_AUTH_SOCK and SSH_AGENT_PID
+- [Phase 40]: 40-02: generate() refusal is an Error with code key_service_unavailable and the reason; create() still answers callback(false) until 40-03 maps it
 
 ### Pending Todos
 
@@ -123,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-19T00:45:05.628Z
-**Stopped At:** Completed 40-01-PLAN.md
+**Last session:** 2026-10-19T01:05:19.951Z
+**Stopped At:** Completed 40-02-PLAN.md
 **Resume File:** None
