@@ -1030,3 +1030,45 @@ the purge scan.
     1789766455048) and no Transit key, each mode 600 with a `.pub`. Host first-line kinds agree with `--report`
     (72/4/1/1). Only first lines were read, and only the kind word was printed.
 - Not pushed: `main` and no tag. This entry is a local docs commit.
+
+### 2026-10-20 Plan 41-02 Task 3: production migration
+
+Run 12:33-12:53Z from the laptop, after the operator's Task 2 answer "go", which also accepted the persistent
+console audit-log warning entry as the D-03 quarantine-notification channel. Live mutations: the D-05 tar on micro,
+the orphan purge and `--migrate`, all in task `j9n880hztl5pg4fnptefq6eh7` on micro (unchanged since Task 1).
+No `docker stack deploy`, no `restart.sh`, no `docker service update`. Every read printed counts, modes, first bytes
+(`head -c 9`) and verdicts only.
+
+- D-05 backup, 12:33:59Z, root on micro, `set -eu; umask 077`:
+  - `/root/thinx-backups` `700 root`; `deploy-keys-premig-20261020T123359Z.tar` `600 root`, 440320 bytes; its `.sha256`
+    `600 root`, sha256 first 12 hex `14b0c741a762`, `sha256sum -c` ok.
+  - Tar entries 157 = 156 `ssh_keys` entries + the directory. `findmnt -T` ext4 (micro's `/dev/vda1`, 16G free), not
+    GlusterFS. `grep -c /root /etc/cron.daily/backup` = 0. The tar was not copied off micro or into the container.
+- D-01 orphan purge, `purge-orphaned-rsa-keys.js --apply --askfiles --json`, exit 0: owners_in_db 378, owners_on_disk 29,
+  owners_retained 28, orphaned_owners 1, keys_affected 1, stray_askfiles 0, removed_askfiles 0. Same owner and count as
+  the Task 1 scan. The orphan's key was a pkcs1 key.
+- Dry-run re-run: private_files 77, transit 1 (`v1`), legacy 76 (encrypted_pkcs8 72, pkcs1 3, openssh 1), unknown 0,
+  unreadable 0; decrypted_with secret 72, historic_literal 0, unencrypted 4; predicted migrate 76, quarantine 0; the
+  quarantine list was empty, so no quarantine the operator had not seen. writes 0, transit_requests 0, aborted null.
+- `--migrate --json`, 12:46:33Z: migrated 76, already_transit 1, quarantined 0, notified 0, failed 0,
+  changed_during_run 0, pub_mismatch 0, decrypted_with secret 72 / historic_literal 0 / unencrypted 4, writes 76,
+  transit_requests 152, aborted null. Quarantine entries: none, so no D-03 audit-log warning was written.
+  - Executor error, no data effect: the executor's shell command for this run redirected the report on micro to a stray host file
+    (`/dev/null.tmp`, 536 bytes, 644) instead of returning it. The executor read its last line (the JSON above, counts only, no owner
+    id because the quarantine list is empty) and then removed it. `/dev/null` was not affected.
+- Idempotent re-run, `--migrate --json` (the plan's verify command): migrated 0, failed 0, legacy_total 0, already_transit
+  77, transit `v1` 77, changed_during_run 0, writes 0, transit_requests 0, aborted null.
+- Host checks (`ssh_keys` on micro, the plan's verify command, all pass): 77 private files, 77 starting with `vault:v`,
+  0 not mode 600, 0 files with a `PRIVATE KEY` line, 77 `.pub`, 154 entries (156 minus the orphan pair), 0 tmp leftovers.
+  The backup custody checks above re-ran in the same command.
+- D-10 keyed fetch: owner `test` (`cedc16bb…`, unique in `ssh_keys`; all 5 keys were legacy before this run), repository
+  `git@github.com:suculent/thinx-autoflood.git`, default branch `main`:
+  `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0`.
+- **D10_GATE pass**: the re-run has 0 legacy and 0 failed, and a migrated key cloned the private repository through the
+  production fetch path. Plan 41-05 may push the legacy-path removal on this record.
+- After the run: the task has 0 restarts. Its logs since 12:33Z have zero `probe failed` and zero
+  `deploy key unavailable` lines. 7442, 1883 and 8883 are open from the laptop.
+- Rollback while dual-read is deployed (D-07): untar the D-05 copy over `/mnt/gluster/thinx/ssh_keys` on micro. The tar
+  stays until Plan 41-08 shreds it (D-06). It can be decrypted with the old passphrase, and DO snapshots of micro may
+  capture it (accepted residual, 2026-10-09).
+- Not pushed: `main` and no tag. This entry is a local docs commit.
