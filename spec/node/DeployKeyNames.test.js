@@ -124,9 +124,6 @@ test('deletion follows the selected filename, not its position or another owner'
 });
 test('two creates in the same millisecond get distinct names and neither key is overwritten (34-REVIEW IN-08)', async () => {
   const {dir,key}=fixture();
-  const saved=process.env.GIT_KEY_PASSPHRASE;
-  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
-  require('../../lib/thinx/secrets')._resetCacheForTests();
   try {
     key.newUniqueIdentifier=()=>12345; // force the clash the wall clock only produces sometimes
     const create=()=>new Promise(resolve=>key.create(OWNER,(success,response)=>resolve({success,response})));
@@ -147,8 +144,6 @@ test('two creates in the same millisecond get distinct names and neither key is 
     }
     assert.notEqual(a.response.pubkey,b.response.pubkey);
   } finally {
-    if (typeof saved==='undefined') delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=saved;
-    require('../../lib/thinx/secrets')._resetCacheForTests();
     fs.rmSync(dir,{recursive:true,force:true});
   }
 });
@@ -189,10 +184,8 @@ test('keys created within the same second still list newest first (38 WR-01)', (
 });
 test('a filesystem error after key generation fails the create instead of crashing, and leaves no key (38 WR-02)', async () => {
   const {dir,key}=fixture();
-  const prevPass=process.env.GIT_KEY_PASSPHRASE;
   const fsx=require('fs-extra'); // rsakey.js writes through fs-extra
   const realChmod=fsx.chmodSync;
-  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
   try {
     key.newUniqueIdentifier=()=>4242;
     const privatePath=path.join(dir,OWNER+'-4242');
@@ -203,20 +196,10 @@ test('a filesystem error after key generation fails the create instead of crashi
     assert.deepEqual(fs.readdirSync(dir),[],'no private key and no claimed .pub are left behind');
   } finally {
     fsx.chmodSync=realChmod;
-    if (prevPass===undefined) delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=prevPass;
     fs.rmSync(dir,{recursive:true,force:true});
   }
 });
 
-async function withPassphrase(fn) {
-  const saved=process.env.GIT_KEY_PASSPHRASE;
-  process.env.GIT_KEY_PASSPHRASE='synthetic-test-passphrase';
-  require('../../lib/thinx/secrets')._resetCacheForTests();
-  try { return await fn(); } finally {
-    if (typeof saved==='undefined') delete process.env.GIT_KEY_PASSPHRASE; else process.env.GIT_KEY_PASSPHRASE=saved;
-    require('../../lib/thinx/secrets')._resetCacheForTests();
-  }
-}
 test('an unnamed create returns the list() shape: date string name, bare filename (38 WR-06)', async () => {
   const {dir,key}=fixture();
   try {
@@ -233,7 +216,7 @@ test('a failed private-key write leaves nothing listed and never touches an exis
   const fsx=require('fs-extra');
   const realWrite=fsx.writeFileSync;
   try {
-    await withPassphrase(async () => {
+    {
       key.newUniqueIdentifier=()=>5100;
       const privatePath=path.join(dir,OWNER+'-5100');
       // ENOSPC after open: the private file exists but is truncated.
@@ -243,9 +226,9 @@ test('a failed private-key write leaves nothing listed and never touches an exis
       assert.equal(ok,false);
       assert.deepEqual(fs.readdirSync(dir),[],'truncated private key and claim are both removed');
       assert.deepEqual(key.exportKeysForList(key.getKeyPathsForOwner(OWNER),OWNER),[]);
-    });
+    }
     // EEXIST: a private key already sits under the generated name; it and its .pub stay as they were.
-    await withPassphrase(async () => {
+    {
       const existing=writePair(dir,OWNER,5200,'Existing key');
       fs.unlinkSync(path.join(dir,existing+'.pub')); // claim succeeds only when the .pub is absent
       key.newUniqueIdentifier=()=>5200;
@@ -254,7 +237,7 @@ test('a failed private-key write leaves nothing listed and never touches an exis
       assert.equal(ok,false);
       assert.equal(fs.readFileSync(path.join(dir,existing),'utf8'),'synthetic-private-fixture','existing private key untouched');
       assert.equal(fs.readFileSync(path.join(dir,existing+'.pub'),'utf8'),'','claimed .pub was never overwritten with a foreign public key');
-    });
+    }
   } finally { fsx.writeFileSync=realWrite; fs.rmSync(dir,{recursive:true,force:true}); }
 });
 test('a private key whose .pub is still empty is not listed (38 WR-03)', () => {
@@ -897,7 +880,7 @@ test('S1 router create takes the name from req.query for GET and req.body otherw
 test('G1 a named real generate lists that name and an OpenSSH SHA256 fingerprint (IN-06)', async () => {
   const {dir, key} = fixture();
   try {
-    await withPassphrase(async () => {
+    {
       const r = await new Promise((resolve) => key.create(OWNER,
         (success, response) => resolve({ success, response }), '  Firmware Repository  '));
       assert.equal(r.success, true);
@@ -912,7 +895,7 @@ test('G1 a named real generate lists that name and an OpenSSH SHA256 fingerprint
       assert.equal(listed[0].name, 'Firmware Repository');
       assert.match(listed[0].fingerprint, /^SHA256:[A-Za-z0-9+/]{43}$/);
       assert.equal(listed[0].fingerprint, RSAKey.fingerprint(pub.trim()));
-    });
+    }
   } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
 

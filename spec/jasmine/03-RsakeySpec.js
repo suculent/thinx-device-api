@@ -7,29 +7,21 @@ describe("RSA Key", function() {
   var RSAKey = require("../../lib/thinx/rsakey");
   var FakeTransit = require("../fixtures/fake-transit.js");
   var keyformat = require("../../lib/thinx/keyformat");
-  var secrets = require("../../lib/thinx/secrets");
   var rsakey = new RSAKey();
-  var savedPassphrase;
 
   // 34-REVIEW WR-05: every key this spec creates goes into a per-run temp
   // directory, never into Globals.app_config().ssh_keys (in development that
   // is the developer's real ~/.ssh, on CI /mnt/data/ssh_keys). The directory
   // and all key material in it are removed after the spec.
   // Phase 40: keys are Transit ciphertext, made through a deterministic fake
-  // Transit, and GIT_KEY_PASSPHRASE is removed for the whole spec, so no create
-  // below can depend on it (KEYENC-03).
+  // Transit. Phase 41 (KEYMIG-02): key generation has no passphrase at all.
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running RSA spec`);
     rsakey.ssh_keys = fs.mkdtempSync(path.join(os.tmpdir(), "rsakey-spec-"));
     rsakey.transit = new FakeTransit();
-    savedPassphrase = process.env.GIT_KEY_PASSPHRASE;
-    delete process.env.GIT_KEY_PASSPHRASE;
-    secrets._resetCacheForTests();
   });
 
   afterAll(() => {
-    if (typeof savedPassphrase !== "undefined") process.env.GIT_KEY_PASSPHRASE = savedPassphrase;
-    secrets._resetCacheForTests();
     fs.rmSync(rsakey.ssh_keys, { recursive: true, force: true });
     console.log(`🚸 [chai] <<< completed RSA spec`);
   });
@@ -228,22 +220,22 @@ describe("RSA Key", function() {
     expect(RSAKey.toOpenSSH(line, "ignored")).to.equal(line);
   });
 
-  // KEYENC-03, no fallback: with the passphrase SET and Transit unreachable,
-  // generation is refused with key_service_unavailable, writes no private file
-  // and never even reads the passphrase.
-  it("(11) should refuse to generate a key when Transit is unavailable, even with GIT_KEY_PASSPHRASE set", function (done) {
-    // keyPassphrase() reads through readSecret (D-04), which caches per name.
-    process.env.GIT_KEY_PASSPHRASE = "spec-passphrase-set-for-case-11";
-    secrets._resetCacheForTests();
+  // KEYENC-03, no fallback: with Transit unreachable, generation is refused with
+  // key_service_unavailable and writes no private file. KEYMIG-02 (R1): the
+  // passphrase reader no longer exists.
+  it("(11) should refuse to generate a key when Transit is unavailable, and has no passphrase reader", function (done) {
+    expect(RSAKey.keyPassphrase).to.equal(undefined);
     const working = rsakey.transit;
     rsakey.transit = new FakeTransit({ failReason: "unreachable" });
-    const passphraseSpy = spyOn(RSAKey, "keyPassphrase").and.callThrough();
+    const lines = [];
+    const realLog = console.log;
+    console.log = (...a) => { lines.push(a.join(" ")); };
     const date = new Date().getTime();
     const privatePath = rsakey.ssh_keys + "/" + owner + "-" + date;
     rsakey.generate(owner, date, (err, pub, extra) => {
+      console.log = realLog;
       rsakey.transit = working;
-      delete process.env.GIT_KEY_PASSPHRASE;
-      secrets._resetCacheForTests();
+      expect(lines.filter((l) => /deploy-key generation refused: key service unavailable \(unreachable\)/.test(l)).length).to.equal(1);
       expect(err).to.be.an('error');
       expect(err.code).to.equal("key_service_unavailable");
       expect(err.reason).to.equal("unreachable");
@@ -251,7 +243,6 @@ describe("RSA Key", function() {
       expect(pub).to.equal(undefined);
       expect(extra).to.equal(undefined);
       expect(fs.existsSync(privatePath)).to.equal(false);
-      expect(passphraseSpy.calls.count()).to.equal(0);
       done();
     });
   }, 10000);

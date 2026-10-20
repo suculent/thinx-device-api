@@ -808,32 +808,13 @@ describe("Secrets sweep: GIT_KEY_PASSPHRASE in rsakey.js", function () {
 
   const RSAKey = require("../../lib/thinx/rsakey.js");
 
-  async function passphrase(secretSpec) {
-    let value;
-    const lines = await withSecrets({ GIT_KEY_PASSPHRASE: secretSpec }, () => captureLogs(async () => {
-      value = RSAKey.keyPassphrase();
-    }));
-    return { value, lines };
-  }
-
-  it("returns null when the passphrase is absent", async function () {
-    const { value, lines } = await passphrase("absent");
-    expect(value).to.equal(null);
-    expectNoFakeValues(lines);
+  // Phase 41, KEYMIG-02: rsakey.js has no passphrase reader any more.
+  it("has no passphrase reader", function () {
+    expect(RSAKey.keyPassphrase).to.equal(undefined);
   });
 
-  it("returns null for an empty env value", async function () {
-    const { value } = await passphrase({ env: "" });
-    expect(value).to.equal(null);
-  });
-
-  it("prefers the secret file over a different env value, as git.js does", async function () {
-    const { value, lines } = await passphrase({ file: FAKE.passphraseFile, env: FAKE.passphraseEnv });
-    expect(value).to.equal(FAKE.passphraseFile);
-    expectNoFakeValues(lines);
-  });
-
-  // Phase 40, KEYENC-03: new keys never fall back to the passphrase.
+  // Phase 40, KEYENC-03: new keys never fall back to the passphrase. A FAKE value
+  // present as both a secret file and an env value never reaches a log line.
   it("generate() with the passphrase set and Transit unavailable refuses, writes no private file and logs no FAKE value", async function () {
     const os = require("os");
     const path = require("path");
@@ -846,11 +827,9 @@ describe("Secrets sweep: GIT_KEY_PASSPHRASE in rsakey.js", function () {
         const rsakey = new RSAKey();
         rsakey.ssh_keys = dir;
         rsakey.transit = new FakeTransit({ failReason: "sealed" });
-        const passphraseSpy = spyOn(RSAKey, "keyPassphrase").and.callThrough();
         err = await new Promise((resolve) => {
           rsakey.generate(envi.oid, 1, (e) => resolve(e));
         });
-        expect(passphraseSpy.calls.count()).to.equal(0);
       }));
       expect(err).to.be.an("error");
       expect(err.code).to.equal("key_service_unavailable");
