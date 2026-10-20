@@ -24,7 +24,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
 
 - [x] **Phase 39: Internal OpenBao on the Swarm** - OpenBao runs internal-only with verified TLS, node-local Raft, auto-unseal, audit, a locked-down Transit key and the `thinx-api` AppRole (PRODUCTION) (completed 2026-10-19)
 - [x] **Phase 40: Transit-Encrypted Deploy Keys in the API** - new keys stored as `vault:vN:` ciphertext and decrypted in memory for builds, legacy keys still read; CI against an OpenBao dev server, then production cut-over (PRODUCTION at cut-over) (completed 2026-10-19)
-- [ ] **Phase 41: Key Migration, Passphrase Retirement & Rotation** - every legacy key migrated, `GIT_KEY_PASSPHRASE` removed everywhere, Transit key rotated and rewrapped (PRODUCTION)
+- [x] **Phase 41: Key Migration, Passphrase Retirement & Rotation** - every legacy key migrated, `GIT_KEY_PASSPHRASE` removed everywhere, Transit key rotated and rewrapped (PRODUCTION) (completed 2026-10-20)
 
 ## Phase Details
 
@@ -100,7 +100,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   2. After zero legacy keys are reported, `GIT_KEY_PASSPHRASE` and the legacy read path are gone from the code, the Dockerfiles, the compose files, `thinx.yml`, `docker-swarm.yml`, the live `thinx_api` spec (neither secret nor env) and `docker secret ls`. No `*.sh` askpass file is left in `ssh_keys`. CI is green, and keyed builds for migrated owners still succeed.
   3. After `thinx-deploy-keys` is rotated and the rewrap job has run, every key file carries the latest `vault:vN:` prefix and `min_decryption_version` equals N. OpenBao refuses an older-version ciphertext, and a keyed build still succeeds.
 
-**Plans**: 8/8 plans executed across 8 waves (serial: every plan commits to the one parent worktree, and production steps follow the migrate → remove → rotate order)
+**Plans**: 8/8 plans complete across 8 waves (serial: every plan commits to the one parent worktree, and production steps follow the migrate → remove → rotate order)
 
 **Wave 1**
 - [x] 41-01-PLAN.md — migration and rewrap tool (scripts/migrate-deploy-keys.js), Transit#rewrapKey, canary and fetch-check modes; CI only
@@ -155,7 +155,7 @@ Phases execute in numeric order: 39 → 40 → 41. Phase 40 code and CI work may
 |-------|-----------|----------------|--------|-----------|
 | 39. Internal OpenBao on the Swarm | v1.17 | 6/6 | Complete    | 2026-10-19 |
 | 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 5/5 | Complete    | 2026-10-19 |
-| 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 8/8 | In Progress | - |
+| 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 8/8 | Complete    | 2026-10-20 |
 
 ---
 *v1.17 Deploy-Key OpenBao Transit roadmap created 2026-10-09: 17 requirements across 3 phases (39–41). Next: `/gsd-discuss-phase 39`.*
