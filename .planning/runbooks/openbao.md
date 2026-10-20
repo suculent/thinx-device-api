@@ -1284,3 +1284,34 @@ executor did not take part and saw no token or password.
     still at v1, below latest; the rewrap to v2 is Plan 41-07.
 - Restore limitation 2 (section 9) now applies: `openbao-20261020T184042Z-pre-change` cannot decrypt v2 ciphertext.
   Plan 41-07 takes a fresh snapshot after the rewrap.
+
+### 2026-10-20 Plan 41-07 Task 1: rewrap (D-12, D-14)
+
+Run 18:51-18:53Z from the laptop, in task `74bunku80wzuf5q63cfxuderj` on micro (unchanged since 41-06 Task 1, 0
+restarts, started 18:38:41Z). Live mutation: the rewrap of the 77 key files, through the thinx-api AppRole
+(`transit/rewrap`, granted since Phase 39). Every output was counts, versions and verdict lines only; no ciphertext,
+canary or key content left micro.
+
+- L0 = 1, L1 = 2 (operator resume signal in 41-06: `rotated latest_version=2 min_decryption_version=1`).
+- Pre-state `--report --json`, 18:51:48Z: private_files 77, transit_total 77, `{"v1":77}`, legacy_total 0, unknown 0,
+  unreadable 0, leftover_tmp 0.
+- `--rewrap --json`, 18:51:55-18:52:08Z, exit 0: latest `v2`, versions_before `{"v1":77}`, versions_after
+  `{"v2":77}`, rewrapped 77, at_latest 0, failed 0, failures [], changed_during_run 0, writes 77, transit_requests 232
+  (1 key read + 77 x rewrap, decrypt-old, decrypt-new), aborted null, legacy_total 0. No abort, so no
+  `openbao-verify.sh --health` re-run was needed.
+- Re-run `--rewrap --json`, 18:52:14-18:52:17Z, exit 0: latest `v2`, versions_before = versions_after `{"v2":77}`,
+  rewrapped 0, at_latest 77, failed 0, changed_during_run 0, writes 0, transit_requests 1, aborted null. The plan's
+  verify command ran it a third time (18:52:2xZ) with the same result (jq gate exit 0).
+- Host check on micro, `ssh_keys`, 18:52:31Z: 77 private files, 77 whose first 9 bytes are exactly `vault:v2:`, 0 not
+  mode 600, 77 `.pub`, 154 entries, 0 tmp leftovers.
+- D-10/D-14 keyed fetch, owner `test` (`cedc16bb…`), `git@github.com:suculent/thinx-autoflood.git` branch `main`,
+  18:52:48Z: `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0` (all five of that owner's
+  keys are now v2 ciphertext).
+- Canary, 18:52:55Z: `transit-canary-20261020T184027Z.ct` -> `CANARY result=ok version=v1` (min_decryption_version
+  still 1).
+- API task log since 18:51Z: 0 lines matching `probe failed`, `deploy key unavailable` or `retired_version`.
+- **D14_GATE pass**: the re-run shows every file at v2 with 0 rewrapped and 0 failed, and a rewrapped key cloned a
+  private repository through the production fetch path. The operator may raise min_decryption_version to 2 (Task 2).
+- Restore window: until Task 3's `--post-change` snapshot, the newest snapshot that can decrypt the v2 files does not
+  exist (`openbao-20261020T184042Z-pre-change` predates the rotation; section 9 limitation 2).
+- Not pushed: `main` and no tag. This entry is a local docs commit.
