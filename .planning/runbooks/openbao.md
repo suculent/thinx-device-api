@@ -225,9 +225,11 @@ What `thinx_api` carries (source: `thinx-swarm/thinx.yml`, mirrored in the paren
 | config | `openbao-ca-<sha256(bundle)[0:20]>` -> `/run/openbao/ca.pem` (0444, public certificates only) | `BAO_CACERT` |
 | env | `BAO_ADDR=https://openbao.internal:8200`, `BAO_CACERT=/run/openbao/ca.pem` | the Phase 40 client |
 
-Nothing else of the API changes in Phase 39: no client module, no `rsakey.js`/`git.js` change, `GIT_KEY_PASSPHRASE`
-stays mounted and set (its removal is Phase 41). `readSecret()` caches per process, so a new secret value reaches the
-API only through a deliberate task restart.
+Nothing else of the API changed in Phase 39: no client module, no `rsakey.js`/`git.js` change. `GIT_KEY_PASSPHRASE`
+stayed mounted and set until Phase 41: its secret mount and env entry were removed from the live `thinx_api` spec on
+2026-10-20 (Plan 41-06, one `docker service update --secret-rm --env-rm`), and the swarm secret and the
+`/mnt/gluster/thinx/.env` line were deleted the same day (evidence log). `readSecret()` caches per process, so a new
+secret value reaches the API only through a deliberate task restart.
 
 **Attach (done once, 2026-10-18; evidence log below).** Repo first, then on micro: a root-only node-local rollback
 directory `/var/lib/openbao-maintenance/rollback/api-service` (0700) with a 0600 `docker service inspect thinx_api`
@@ -1158,3 +1160,49 @@ service; the deployed code no longer reads them (D-08: code first).
   change made). State at the pause: task `b0el7hlnn988mpg3y3njk1qrh` Running on micro, 0 restarts, zero
   `probe failed` / `deploy key unavailable` lines since 15:32Z; for `8fd573aa` every CircleCI context is success except
   `vue-console-registry`, which was still pending (no console source in this range).
+
+### 2026-10-20 Plan 41-06 Task 1: passphrase retired from the live swarm (paused at the `.env*` sweep)
+
+Run 18:17-18:24Z from the laptop, under the operator's 41-05 Task 3 answer "go". Live mutations: thinx-swarm push to
+origin and into micro (ff-merge), `openbao-install.sh`, the spec backup, one `docker service update` of `thinx_api`,
+`docker secret rm`, and the `.env` line. No `docker stack deploy`, no `restart.sh`, no edge change. Every read printed
+names, counts, modes, SHAs and verdicts only.
+
+- Precondition: the first attempt (earlier on 2026-10-20) stopped before any action because micro's checkout had 6 untracked
+  `*.yml.bak.20261007222957.pre-v3-labels` files (`git status --porcelain | wc -l` = 6, tracked changes 0). Operator
+  answer: "operator moved them". Re-run 18:17:58Z: count 0, `Decision 41-05 Task 3: go` present once,
+  `origin/master..HEAD` = exactly thinx.yml, tests/openbao-api-wiring.test.sh, scripts/openbao-verify.sh.
+- Pre-state 18:18Z: task `b0el7hlnn988mpg3y3njk1qrh` on micro, image digest `f4492b4fb94134e5`, 13 secrets including the
+  passphrase, 1 passphrase env key, PreviousSpec present; swarm secret listed. Routers 29, `fa0afd608550e585`, none
+  disabled. 7442, 1883 and 8883 open.
+- Repo-first: thinx-swarm `8cfa7dd..48581e9` pushed to origin 18:18:27Z; CircleCI `docker-build-error-page` and
+  `docker-build-downtime-page` success 18:20:20Z; Swarmpit redeployed `downtime_downtime` 18:20:52Z and
+  `errorpage_errorpage` 18:20:58Z. Pushed into micro as `p41-ff` (+ `refs/remotes/origin/master`), `merge --ff-only`,
+  branch deleted, checkout clean. Laptop = origin = micro = `48581e99fda875dcf46ddddfd655701a9faf6475`.
+- `openbao-install.sh`: `OPENBAO-INSTALL-OK mode=install`; only `/usr/local/sbin/openbao-verify.sh` COPY_UPDATED, every
+  other file unchanged; `cmp` with the checkout copy equal.
+- Spec backup `thinx-api-pre-passphrase-rm-20261020T182137Z.json`, 600 root, in the 700 root `rollback/api-service`
+  (alongside one `pre-openbao` and one `pre-keygen` backup).
+- Update 18:21:41-18:22:02Z (`--secret-rm GIT_KEY_PASSPHRASE --env-rm GIT_KEY_PASSPHRASE`, converged): new task
+  `tkl1vzagwlv0j3dkumkn66eld` on micro, started 18:21:56Z, 0 restarts, same image `f4492b4fb94134e5`; `.Spec` 12 secrets,
+  0 passphrase secret, 0 passphrase env key.
+- Checks 18:22-18:23Z, all pass:
+  1. One `[transit] probe ok`, zero `probe failed`, zero `deploy key unavailable` since 18:21:40Z.
+  2. `--live` -> `API-WIRING-OK mode=live`: `SPEC_ATTACHMENTS ok` (no passphrase secret or env key), `PREVIOUS_SPEC info`
+     (expected before the forced update), `SPEC_DELTA ok`, `TRANSIT_CANARY ok`, `FORBIDDEN_DENIED` 13/13, `OUTPUT_CLEAN ok`.
+  3. `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> `OPENBAO-VERIFY-OK
+     mode=full`; `--api-service thinx_api` -> `OPENBAO-VERIFY-OK mode=api` with `API_PASSPHRASE_ABSENT ok`,
+     `API_SECRET_MOUNTED ok` for BAO_ROLE_ID and BAO_SECRET_ID, `API_PORT_7442 ok`.
+  4. `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0` (owner `test`, thinx-autoflood `main`).
+  5. 7442, 1883, 8883 open; routers 29, `fa0afd608550e585`, none disabled; traefik_traefik and traefik_socket-proxy
+     UpdatedAt still 2026-10-18 06:47:26Z.
+- `docker secret rm GIT_KEY_PASSPHRASE` 18:23:29Z, exit 0; `docker secret ls` count 0.
+- `/mnt/gluster/thinx/.env` 18:23:39Z: `grep -c` 1 -> 0, `600 root:root` before and after.
+- **Stopped at the sweep (plan: any non-zero count stops for the operator).** `find /mnt/gluster/thinx
+  /mnt/gluster/deployment -maxdepth 2 -type f -name '.env*'` counts of lines starting with the variable name:
+  `thinx/.env.bak.20260619154540.cors` **1**, `thinx/.env.bak.20260929142800` **1** (both 600 root:root);
+  `thinx/.env`, `thinx/conf/.env`, `deployment/replica/.env`, `deployment/middleware/.env.local`,
+  `deployment/ovpn-unused/.env` 0.
+- State at the stop (18:24Z): `.Spec` clean, `.PreviousSpec` still carries the secret and the env entry (2 matches),
+  ssh_keys `*.sh` 0 (read-only count; step 9 not run), step 10 (forced update) not run. No rollback: every check before
+  the `secret rm` passed, and `--rollback` is no longer usable now that the secret is gone.
