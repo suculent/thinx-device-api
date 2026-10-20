@@ -996,7 +996,7 @@ test('KS4 THINX_DEPLOY_KEYGEN unset, empty or "enabled" creates a Transit key (D
     'the env is restored after each case');
 });
 
-test('KS5 builds ignore the switch: with "disabled" a fetch still attempts the Transit key and the legacy key (D-07)', async () => {
+test('KS5 builds ignore the switch: with "disabled" a fetch still attempts the Transit key; a legacy file is a logged skip (D-07, Phase 41 D-09)', async () => {
   const Git = require('../../lib/thinx/git.js');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-keys-'));
   const learned = fs.mkdtempSync(path.join(os.tmpdir(), 'thinx-learned-'));
@@ -1022,17 +1022,19 @@ test('KS5 builds ignore the switch: with "disabled" a fetch still attempts the T
     git.keyNamesForOwner = () => [transitName, legacyName];
     const attempts = [];
     git.cloneHoldingLock = async (b, u, br, env) => {
-      attempts.push(env && env.SSH_AUTH_SOCK ? 'agent' : (env && env.THINX_GIT_KEY ? 'legacy' : 'keyless'));
+      attempts.push(env && env.SSH_AUTH_SOCK ? 'agent' : 'keyless');
       return { ok: false, repoPath: null, reason: 'clone_failed' };
     };
     const realLog = console.log;
-    console.log = () => {};
+    const lines = [];
+    console.log = (...a) => { lines.push(a.join(' ')); };
     let r;
     try {
       r = await withKeygen('disabled', () => git.fetchDetailed(OWNER, 'ssh://git@127.0.0.1:9/x.git', 'main', build));
     } finally { console.log = realLog; }
-    assert.deepEqual(attempts, ['agent', 'legacy'], 'both key kinds are still read with the switch off');
+    assert.deepEqual(attempts, ['agent'], 'the Transit key is still tried with the switch off');
     assert.equal(transit.calls.decrypt, 1, 'the Transit key was decrypted');
+    assert.ok(lines.includes('[git] key ' + legacyName + ' skipped: legacy_format_unsupported'), 'the legacy file is skipped and logged');
     assert.deepEqual(r, { ok: false, keyUnavailable: null });
   } finally {
     for (const d of [dir, learned, build]) fs.rmSync(d, {recursive: true, force: true});
