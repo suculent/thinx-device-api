@@ -4,12 +4,12 @@ milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
-status: executing
-stopped_at: Completed 41-07-PLAN.md
-last_updated: "2026-10-20T19:44:36.232Z"
+status: verifying
+stopped_at: Completed 41-08-PLAN.md
+last_updated: "2026-10-20T20:09:11.126Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: 78cdd6c613239dc2d7af3af07c7dafa4917d2cba
+state_head: ab538d416e4fad33d1d2873d9c2853263c5d3f6a
 progress:
   total_phases: 3
   completed_phases: 2
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-20 — Phase 41 execution started
 
 Progress: [███████░░░] 67%
@@ -71,6 +71,7 @@ Progress: [███████░░░] 67%
 | Phase 41 P05 | 40min | 3 tasks | 6 files |
 | Phase 41 P06 | 31min | 3 tasks | 2 files |
 | Phase 41 P07 | 53min | 3 tasks | 2 files |
+| Phase 41 P08 | 23min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,8 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-07: D14_GATE before the raise (rewrap re-run all at v2, keyed fetch ok); operator raised min_decryption_version to 2 = latest
 - [Phase 41]: 41-07: post-change snapshot taken first after the raise to close the no-v2-snapshot window
 - [Phase 41]: 41-07: v1 canary refused as retired_version; rotation recipe is runbook section 12, no cron
+- [Phase 41]: 41-08: operator chose shred-all (verbatim 'shread-all'); D-05 tar, sha256, canary and four spec backups shredded, --live baseline sanitized in place, SPEC_DELTA ok
+- [Phase 41]: 41-08: /root/thinx-swarm-backup-untracked (moved .env.bak copies with the literal passphrase) removed by the operator with rm -rf; 41-06 deletion claim corrected
 
 ### Pending Todos
 
@@ -167,6 +170,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T19:44:35.364Z
-**Stopped At:** Completed 41-07-PLAN.md
+**Last session:** 2026-10-20T20:09:10.291Z
+**Stopped At:** Completed 41-08-PLAN.md
 **Resume File:** None
