@@ -124,7 +124,6 @@ services:
         - 'THINX_OWNER_EMAIL=${THINX_OWNER_EMAIL}'
         - 'WORKER_SECRET=${WORKER_SECRET}'
         - 'MAILGUN_API_KEY=${MAILGUN_API_KEY}'
-        - 'GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE:-thinx}'
     environment:
       # Node resolves hostnames via libuv's thread pool (default 4 threads). The
       # messenger opens a per-owner MQTT client, so a load-heavy spec run fires
