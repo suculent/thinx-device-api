@@ -1303,7 +1303,9 @@ names, counts, modes, SHAs and verdicts only.
   ssh_keys `*.sh` 0 (read-only count; step 9 not run), step 10 (forced update) not run. No rollback: every check before
   the `secret rm` passed, and `--rollback` is no longer usable now that the secret is gone.
 - Operator answer to the stop: "you deleted the .env.bak files, GIT_KEY_PASSPHRASE not present". The operator removed
-  both `/mnt/gluster/thinx/.env.bak*` files themselves. Plan human-check (laptop `.env` and the CircleCI project env
+  both `/mnt/gluster/thinx/.env.bak*` files from Gluster themselves. **Correction (Plan 41-08 Task 1):** they were
+  moved off Gluster to micro's `/root/thinx-swarm-backup-untracked/` (600 root:root, no container mount), not
+  deleted; the operator removed that directory with `rm -rf` on 2026-10-20 at about 20:07Z (see the 41-08 Task 3 entry). Plan human-check (laptop `.env` and the CircleCI project env
   var of suculent/thinx-device-api): **not present (operator)** for both.
 - Resumed 18:38:22Z. Sweep re-run: 5 `.env*` files remain (`thinx/.env`, `thinx/conf/.env`, `deployment/replica/.env`,
   `deployment/middleware/.env.local`, `deployment/ovpn-unused/.env`), every count 0; `thinx/.env` 0, `600 root:root`.
@@ -1541,4 +1543,52 @@ Every read printed names, modes, sizes, counts, versions and verdicts only.
     The two `.env.bak*` files carry the same basenames as the two Gluster `.env.bak*` files that 41-06 recorded as
     deleted by the operator; the directory (`755 root:root`, 8 entries) also holds the six moved `pre-v3-labels`
     files. Neither Task 2 option covers them; their handling needs the operator's explicit direction.
+    Outcome: the operator removed `/root/thinx-swarm-backup-untracked/` with `rm -rf` before Task 3 finished (Task 3
+    entry).
 - Not pushed: `main` and no tag. This entry is a local docs commit.
+
+### 2026-10-20 Plan 41-08 Task 3: D-06 shred record
+
+Run 20:06-20:08Z from the laptop, on the operator's Task 2 answer. Only files in the Task 1 inventory were touched by
+the executor. Every check printed basenames, modes, sizes, counts and verdicts only.
+
+- Operator answer, verbatim: `shread-all` (typo for shred-all).
+- D-06 option: shred-all
+- `shred` present on micro (`/usr/bin/shred`); every removal below used `shred -u`, no `rm` fallback.
+- D-06, micro `/root/thinx-backups`, 20:06:13-20:06:14Z:
+  - `shred -u deploy-keys-premig-20261020T123359Z.tar` (the D-05 tar, legacy key material): gone;
+  - `shred -u deploy-keys-premig-20261020T123359Z.tar.sha256`: gone;
+  - `shred -u transit-canary-20261020T184027Z.ct` (junk v1 canary): gone;
+  - `ls -A` count 0, then `rmdir /root/thinx-backups`: the directory no longer exists.
+- Open Question 4, micro `/var/lib/openbao-maintenance/rollback`, 20:06:19Z, `shred -u` on:
+  - `api-service/thinx-api-pre-keygen-20261019T133316Z.json`: gone;
+  - `api-service/thinx-api-pre-passphrase-rm-20261020T182137Z.json`: gone;
+  - `api-trust/thinx_api-20261018T194057Z-1765792.json`: gone;
+  - `api-trust/thinx_api-20261018T194128Z-1765792.json`: gone.
+  Afterwards `api-service` (700) holds 1 entry, the baseline; `api-trust` (700) is empty. The inventory grep then
+  listed only the baseline.
+- Gate baseline `api-service/thinx-api-pre-openbao-20261018T193726Z.json` sanitized in place, 20:06:30Z: umask 077,
+  `mktemp` in the same directory, jq deleted from `.[0].Spec` and `.[0].PreviousSpec` `TaskTemplate.ContainerSpec`
+  every Secrets entry whose SecretName or File.Name is the passphrase name, and every Env entry starting with the name
+  plus `=` (before: per spec 11 secrets / 27 env with 1 / 1 passphrase entries, 6 name occurrences in total; after:
+  10 secrets / 26 env per spec, 0 occurrences). Then `touch -r` (original mtime kept), chmod 0600, chown root:root,
+  `mv -f` over the baseline; leftover temp files 0 (an EXIT trap would have shredded one). Result: `600 root:root`,
+  20786 B (was 29058 B; jq writes 2-space indentation where docker inspect wrote 4), 0 passphrase lines.
+- Post-checks:
+  - `grep -rlI 'GIT_KEY_PASSPHRASE='` under `/var/lib/openbao-maintenance`: micro 0 files, core 0 files.
+  - `/root/thinx-backups` absent on micro.
+  - `tests/openbao-api-wiring.test.sh --live`, 20:07:24Z, exit 0 -> `API-WIRING-OK mode=live`: `SPEC_DELTA ok` against
+    the sanitized `thinx-api-pre-openbao-20261018T193726Z.json`, `SPEC_ATTACHMENTS ok`, `PREVIOUS_SPEC ok`,
+    `TRANSIT_CANARY ok`, `FORBIDDEN_DENIED ok 13/13`, `OUTPUT_CLEAN ok`.
+- Removed by the operator, not by the executor and not shredded: `/root/thinx-swarm-backup-untracked/` on micro, with
+  `rm -rf` (operator message: `removed -rf /root/thinx-swarm-backup-untracked/`). The directory held the two
+  `.env.bak.20260619154540.cors` (1868 B) and `.env.bak.20260929142800` (1759 B) copies with the literal value (600
+  root:root, moved there off Gluster in 41-06) and the six `*.yml.bak.20261007222957.pre-v3-labels` files. Verified
+  read-only: the directory is absent; a rescan of `/root` (depth <= 4, files < 5 MB) finds only
+  `/root/thinx.yml.bak-20260925`, whose single line is a `${...}` variable reference with no value.
+- Residual (accepted 2026-10-09, KEYMIG-04 retest deferred): shred on journaled ext4 is best-effort (it applies to
+  the operator's `rm -rf` too, which did not overwrite at all); DigitalOcean snapshots and the pre-migration Gluster
+  backups may hold copies. After the rotation and the raised minimum, Transit ciphertext copies in them are unusable;
+  legacy copies remain until those backups expire.
+- Not pushed: `main` and no tag. This entry is a local docs commit; it reaches origin with the next deliberate
+  thinx-staging push.
