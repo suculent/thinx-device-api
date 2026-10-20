@@ -5,22 +5,48 @@
 // invoking commit signing and without any user.name/user.email config, so the
 // fixtures build the same way on a developer machine that signs every commit
 // and inside CI. Nothing here touches the network, ~/.ssh or /mnt/data.
+//
+// Keyed attempts use Transit keys only (Phase 41, KEYMIG-02): throwaway RSA
+// keys generated at run time, stored as FakeTransit ciphertext and loaded into
+// each attempt's own ssh-agent. A legacy PEM file is a logged skip (D-09).
 
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
 const exec = require("child_process");
 const expect = require("chai").expect;
 
 const Git = require("../../lib/thinx/git");
+const RSAKey = require("../../lib/thinx/rsakey");
+const FakeTransit = require("../fixtures/fake-transit.js");
 
 // 64 hex chars, the shape of a real owner id; matches no key file anywhere.
 const OWNER = "0f".repeat(32);
 
 const LEGACY_PLACEHOLDER = "-----BEGIN ENCRYPTED " + "PRIVATE KEY-----\nnot a real key\n-----END ENCRYPTED " + "PRIVATE KEY-----\n";
 
+// Never issued by any FakeTransit: bad_ciphertext, unless a spec fails them on purpose.
+const UNDECRYPTABLE = ["vault:v1:QUJDRA==", "vault:v1:RUZHSA=="];
+
 function tmpdir(root, name) {
     return fs.mkdtempSync(path.join(root, name + "-"));
+}
+
+// A throwaway RSA 2048 key: { pem (PKCS#8), fingerprint (OpenSSH SHA256) }.
+function throwawayKey() {
+    const pair = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: "spki", format: "pem" },
+        privateKeyEncoding: { type: "pkcs8", format: "pem" }
+    });
+    return { pem: pair.privateKey, fingerprint: RSAKey.fingerprint(RSAKey.toOpenSSH(pair.publicKey, "spec")) };
+}
+
+function captureLog() {
+    const lines = [];
+    spyOn(console, "log").and.callFake((...a) => lines.push(a.join(" ")));
+    return lines;
 }
 
 // Builds a bare repo with one commit on refs/heads/main containing a regular
@@ -51,26 +77,44 @@ describe("Git", function () {
     let root;        // everything this spec creates lives under here
     let repoUrl;     // file:// URL of the fixture
     let seeded;      // stand-in for the entrypoint-seeded ~/.ssh/known_hosts
-    let keysDir;     // stand-in for app_config.ssh_keys
+    let keysDir;     // stand-in for app_config.ssh_keys: k1 and k2, Transit ciphertext
+    let keyTransit;  // the FakeTransit that issued k1 and k2
+    const keys = {}; // name -> throwawayKey()
 
     function newGit(redis, extra) {
-        return new Git(redis, Object.assign({
+        const git = new Git(redis, Object.assign({
             sshKeysDir: keysDir,
             seededKnownHosts: seeded,
             learnedKnownHostsDir: path.join(tmpdir(root, "learned"), "ssh_known_hosts")
         }, extra || {}));
+        git.transit = keyTransit;
+        return git;
     }
 
-    beforeAll(() => {
+    // The key a keyed attempt's agent was loaded with ("k1", "k2", ...), read
+    // from the derived public key the attempt env names; "keyless" without one.
+    function keyLabel(env) {
+        if (!env || (typeof env.THINX_GIT_KEY_PUB !== "string")) return "keyless";
+        const fingerprint = RSAKey.fingerprint(fs.readFileSync(env.THINX_GIT_KEY_PUB, "utf8"));
+        for (const [name, key] of Object.entries(keys)) {
+            if (key.fingerprint === fingerprint) return name;
+        }
+        return "agent:unknown";
+    }
+
+    beforeAll(async () => {
         console.log(`🚸 [chai] >>> running Git spec`);
         root = fs.mkdtempSync(path.join(os.tmpdir(), "thinx-gitspec-"));
         repoUrl = makeBareRepo(root);
         seeded = path.join(root, "seeded_known_hosts");
         fs.writeFileSync(seeded, "", { mode: 0o600 });
         keysDir = tmpdir(root, "keys");
-        // PEM-armored placeholders: keyformat classifies them "legacy" (Phase 40,
-        // KEYENC-06), so every keyed case below keeps taking the askpass path.
-        for (const name of ["k1", "k2"]) fs.writeFileSync(path.join(keysDir, name), LEGACY_PLACEHOLDER, { mode: 0o600 });
+        keyTransit = new FakeTransit();
+        for (const name of ["k1", "k2"]) {
+            keys[name] = throwawayKey();
+            const ciphertext = await keyTransit.encryptKey(Buffer.from(keys[name].pem, "utf8"));
+            fs.writeFileSync(path.join(keysDir, name), ciphertext + "\n", { mode: 0o600 });
+        }
     });
 
     afterAll(() => {
@@ -202,42 +246,99 @@ describe("Git", function () {
             expect(env.GIT_ASKPASS).to.equal("false");
         });
 
-        it("(g) with one key makes exactly one keyed attempt with the constant SSH env", async function () {
+        it("(g) with one Transit key makes exactly one keyed attempt through its own agent", async function () {
             const git = newGit();
             git.keyNamesForOwner = () => ["k1"];
             let recorded = null;
-            let askpassExisted = false;
+            let label = null;
+            let socketExisted = false;
             const spy = spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
                 recorded = env;
-                askpassExisted = fs.existsSync(env.SSH_ASKPASS);
+                label = keyLabel(env);
+                socketExisted = fs.lstatSync(env.SSH_AUTH_SOCK).isSocket();
                 return Git.prototype.cloneHoldingLock.call(git, b, u, br, env);
             });
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(true);
             expect(spy.calls.count()).to.equal(1);
-            expect(recorded.GIT_SSH_COMMAND).to.equal(Git.SSH_COMMAND);
-            expect(recorded.THINX_GIT_KEY).to.equal(path.join(keysDir, "k1"));
-            expect(recorded.SSH_ASKPASS_REQUIRE).to.equal("force");
+            expect(label).to.equal("k1");
+            expect(recorded.GIT_SSH_COMMAND).to.equal(Git.AGENT_SSH_COMMAND);
+            expect("THINX_GIT_KEY" in recorded).to.equal(false);
+            expect("SSH_ASKPASS" in recorded).to.equal(false);
+            expect("SSH_ASKPASS_REQUIRE" in recorded).to.equal(false);
             expect(recorded.GIT_TERMINAL_PROMPT).to.equal("0");
             expect(recorded.GIT_ASKPASS).to.equal("false");
-            expect(askpassExisted).to.equal(true);
-            expect(fs.existsSync(recorded.SSH_ASKPASS)).to.equal(false);
-            expect(fs.existsSync(path.dirname(recorded.SSH_ASKPASS))).to.equal(false);
-        });
+            expect(socketExisted).to.equal(true);
+            expect(fs.existsSync(path.dirname(recorded.SSH_AUTH_SOCK))).to.equal(false);
+        }, 20000);
 
-        it("(h) resolves false and still removes the askpass dir when an attempt throws", async function () {
+        it("(h) resolves false and still removes the agent dir when an attempt throws", async function () {
             const git = newGit();
             git.keyNamesForOwner = () => ["k1"];
-            let askpass = null;
+            let sock = null;
             spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
-                askpass = env.SSH_ASKPASS;
+                sock = env.SSH_AUTH_SOCK;
                 throw new Error("boom");
             });
+            captureLog();
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(false);
-            expect(typeof askpass).to.equal("string");
-            expect(fs.existsSync(path.dirname(askpass))).to.equal(false);
+            expect(typeof sock).to.equal("string");
+            expect(fs.existsSync(path.dirname(sock))).to.equal(false);
+        }, 20000);
+    });
+
+    // D-09 (Phase 41): after the legacy read path is gone, a PEM key that turns
+    // up in ssh_keys (restored from an old backup, say) is skipped and logged
+    // like an unknown file. No attempt, no keyUnavailable, no Transit call (so
+    // no alert), and the file is never deleted or rewritten.
+    describe("legacy key after removal (D-09)", function () {
+
+        function legacyFixture() {
+            const dir = tmpdir(root, "d09keys");
+            const legacyPath = path.join(dir, "legacy");
+            fs.writeFileSync(legacyPath, LEGACY_PLACEHOLDER, { mode: 0o600 });
+            fs.copyFileSync(path.join(keysDir, "k1"), path.join(dir, "k1"));
+            return { dir, legacyPath, bytes: fs.readFileSync(legacyPath), mode: fs.statSync(legacyPath).mode };
+        }
+
+        function expectUntouched(f) {
+            expect(fs.readFileSync(f.legacyPath).equals(f.bytes)).to.equal(true);
+            expect(fs.statSync(f.legacyPath).mode).to.equal(f.mode);
+        }
+
+        it("(D9a) a legacy file alone gets no attempt, no keyUnavailable and no Transit call, and stays as it is", async function () {
+            const f = legacyFixture();
+            const transit = new FakeTransit();
+            const git = newGit(undefined, { sshKeysDir: f.dir });
+            git.transit = transit;
+            git.keyNamesForOwner = () => ["legacy"];
+            const clone = spyOn(git, "cloneHoldingLock").and.callThrough();
+            const lines = captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
+            expect(clone.calls.count()).to.equal(0);
+            expect(transit.calls).to.deep.equal({ encrypt: 0, decrypt: 0, rewrap: 0 });
+            expect(lines.filter((l) => l === "[git] key legacy skipped: legacy_format_unsupported").length).to.equal(1);
+            expectUntouched(f);
         });
+
+        it("(D9b) a Transit key next to a legacy file still clones; the legacy file is skipped and left alone", async function () {
+            const f = legacyFixture();
+            const git = newGit(undefined, { sshKeysDir: f.dir });
+            git.keyNamesForOwner = () => ["legacy", "k1"];
+            const labels = [];
+            spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
+                labels.push(keyLabel(env));
+                return Git.prototype.cloneHoldingLock.call(git, b, u, br, env);
+            });
+            const lines = captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+            expect(labels).to.deep.equal(["k1"]);
+            expect(lines).to.include("[git] key legacy skipped: legacy_format_unsupported");
+            expectUntouched(f);
+        }, 20000);
     });
 
     // Review iteration 2, WR-02: since git runs async, two clones into one
@@ -252,10 +353,10 @@ describe("Git", function () {
             spyOn(git, "cloneHoldingLock").and.callFake(async function (b, u, br, env) {
                 track.inFlight += 1;
                 track.maxInFlight = Math.max(track.maxInFlight, track.inFlight);
-                const label = (env && env.THINX_GIT_KEY) ? path.basename(env.THINX_GIT_KEY) : "keyless";
+                const label = keyLabel(env);
                 track.events.push("start " + label);
                 try {
-                    return await impl(b, u, br, env);
+                    return await impl(b, u, br, env, label);
                 } finally {
                     track.inFlight -= 1;
                     track.events.push("end " + label);
@@ -308,9 +409,9 @@ describe("Git", function () {
             const git = newGit();
             git.keyNamesForOwner = () => ["k1", "k2"];
             const buildPath = tmpdir(root, "build");
-            const track = trackAttempts(git, async (b, u, br, env) => {
+            const track = trackAttempts(git, async (b, u, br, env, label) => {
                 await new Promise((resolve) => setTimeout(resolve, 30));
-                return { ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null };
+                return { ok: label === "k2", repoPath: null, reason: null };
             });
             const results = await Promise.all([
                 git.fetch(OWNER, repoUrl, "main", buildPath),
@@ -322,7 +423,7 @@ describe("Git", function () {
                 "start k1", "end k1", "start k2", "end k2", // fetch A, both keys
                 "start k1", "end k1", "start k2", "end k2"  // fetch B, only then
             ]);
-        });
+        }, 20000);
 
         it("does not serialise clones into different directories", async function () {
             const git = newGit();
@@ -520,59 +621,83 @@ describe("Git", function () {
             expectFallback(newGit(undefined, { learnedKnownHostsDir: dir }), "file_symlink");
         });
 
-        it("keeps GIT_SSH_COMMAND identical across keys and never relaxes host checking", function () {
+        it("keeps GIT_SSH_COMMAND identical across attempts and never relaxes host checking", function () {
             const git = newGit();
-            const a = git.sshEnv("/keys/k1", "/tmp/a1");
-            const b = git.sshEnv("/keys/k2", "/tmp/a2");
-            expect(a.GIT_SSH_COMMAND).to.equal(Git.SSH_COMMAND);
-            expect(b.GIT_SSH_COMMAND).to.equal(Git.SSH_COMMAND);
-            expect(Git.SSH_COMMAND).to.not.match(/StrictHostKeyChecking=(no|off)/);
-            expect(Git.SSH_COMMAND).to.not.include("/dev/null");
-            expect(Git.SSH_COMMAND).to.include("StrictHostKeyChecking=accept-new");
+            const a = git.agentEnv("/tmp/spec-a1.sock", "/tmp/spec-a1.pub");
+            const b = git.agentEnv("/tmp/spec-a2.sock", "/tmp/spec-a2.pub");
+            expect(a.GIT_SSH_COMMAND).to.equal(Git.AGENT_SSH_COMMAND);
+            expect(b.GIT_SSH_COMMAND).to.equal(Git.AGENT_SSH_COMMAND);
+            expect(Git.AGENT_SSH_COMMAND).to.not.match(/StrictHostKeyChecking=(no|off)/);
+            expect(Git.AGENT_SSH_COMMAND).to.not.include("/dev/null");
+            expect(Git.AGENT_SSH_COMMAND).to.include("StrictHostKeyChecking=accept-new");
+            expect(Git.SSH_COMMAND).to.equal(undefined); // the askpass-era command is gone (KEYMIG-02)
         });
 
         it("points the learned option at the persistent file and the seeded option at the seed", function () {
             const dir = learnedDir();
             const git = newGit(undefined, { learnedKnownHostsDir: dir });
-            const env = git.sshEnv("/keys/k1", "/tmp/a1");
+            const env = git.agentEnv("/tmp/spec-a1.sock", "/tmp/spec-a1.pub");
             expect(env.THINX_GIT_LEARNED_KNOWN_HOSTS).to.equal(path.join(dir, "known_hosts"));
             expect(env.THINX_GIT_SEEDED_KNOWN_HOSTS).to.equal(seeded);
         });
     });
 
-    describe("askpass and passphrase (T-23-02)", function () {
+    // T-23-02 / KEYMIG-02: the API reads no passphrase and runs no askpass
+    // helper. Whatever of that the container env still carries never reaches git.
+    describe("inherited askpass and passphrase env (T-23-02, KEYMIG-02)", function () {
 
-        const secrets = require("../../lib/thinx/secrets.js");
         const PASS = "spec-pass-XYZ";
+        const INHERITED = {
+            GIT_KEY_PASSPHRASE: PASS,
+            SSH_ASKPASS: "/tmp/spec-inherited-askpass",
+            SSH_ASKPASS_REQUIRE: "force"
+        };
         let saved;
 
         beforeEach(() => {
-            saved = process.env.GIT_KEY_PASSPHRASE;
-            process.env.GIT_KEY_PASSPHRASE = PASS;
-            secrets._resetCacheForTests();
+            saved = {};
+            for (const [name, value] of Object.entries(INHERITED)) {
+                saved[name] = process.env[name];
+                process.env[name] = value;
+            }
         });
 
         afterEach(() => {
-            if (typeof (saved) === "undefined") delete process.env.GIT_KEY_PASSPHRASE;
-            else process.env.GIT_KEY_PASSPHRASE = saved;
-            secrets._resetCacheForTests();
-        });
-
-        it("keeps the passphrase out of the helper file and supplies it from env", function () {
-            const git = newGit();
-            const askpass = git.create_askfile();
-            try {
-                expect(fs.readFileSync(askpass, "utf8")).to.not.include(PASS);
-                expect(fs.statSync(askpass).mode & 0o777).to.equal(0o700);
-                const out = exec.execFileSync(askpass, [], { env: git.sshEnv(path.join(keysDir, "k1"), askpass), encoding: "utf8" });
-                expect(out).to.equal(PASS + "\n");
-            } finally {
-                git.delete_askfile(askpass);
+            for (const name of Object.keys(INHERITED)) {
+                if (typeof (saved[name]) === "undefined") delete process.env[name];
+                else process.env[name] = saved[name];
             }
-            expect(fs.existsSync(path.dirname(askpass))).to.equal(false);
         });
 
-        it("never hands the passphrase to an HTTP remote answering 401", async function () {
+        function expectClean(env, label) {
+            for (const name of Object.keys(INHERITED)) expect(name in env, label + " " + name).to.equal(false);
+            for (const value of Object.values(env)) expect(String(value).includes(PASS), label).to.equal(false);
+        }
+
+        it("neither baseEnv nor agentEnv carries an inherited askpass helper or passphrase", function () {
+            const git = newGit();
+            expectClean(git.baseEnv(), "baseEnv");
+            expectClean(git.agentEnv("/tmp/spec-own.sock", "/tmp/spec-own.pub"), "agentEnv");
+        });
+
+        it("no keyed attempt env carries an inherited askpass helper or passphrase", async function () {
+            const git = newGit();
+            git.keyNamesForOwner = () => ["k1", "k2"];
+            const envs = [];
+            spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => {
+                envs.push(Object.assign({}, env));
+                return { ok: false, repoPath: null, reason: "clone_failed", cause: "publickey_denied" };
+            });
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
+            expect(envs.length).to.equal(2);
+            for (const env of envs) {
+                expect(env.GIT_SSH_COMMAND).to.equal(Git.AGENT_SSH_COMMAND);
+                expectClean(env, "attempt");
+            }
+        }, 20000);
+
+        it("gives an HTTP remote answering 401 no credential", async function () {
             const log = path.join(root, "auth-headers.log");
             fs.writeFileSync(log, "");
             // A separate process, so the recorded headers are independent of
@@ -586,17 +711,17 @@ describe("Git", function () {
                 const port = await new Promise((resolve) => server.stdout.once("data", (d) => resolve(parseInt(String(d), 10))));
                 const git = newGit(undefined, { gitTimeoutMs: 20000 });
                 git.keyNamesForOwner = () => ["k1"];
+                const envs = [];
+                spyOn(git, "cloneHoldingLock").and.callFake(function (b, u, br, env) {
+                    envs.push(env.GIT_SSH_COMMAND);
+                    return Git.prototype.cloneHoldingLock.call(git, b, u, br, env);
+                });
                 const ok = await git.fetch(OWNER, "http://127.0.0.1:" + port + "/r.git", "main", tmpdir(root, "build"));
                 expect(ok).to.equal(false);
+                expect(envs).to.deep.equal([Git.AGENT_SSH_COMMAND]); // the keyed agent attempt
                 const lines = fs.readFileSync(log, "utf8").split("\n").filter((l) => l.length > 0);
                 expect(lines.length).to.be.at.least(1); // git did reach the remote
-                for (const line of lines) {
-                    const header = JSON.parse(line);
-                    if (header === null) continue;
-                    const decoded = Buffer.from(header.replace(/^Basic\s+/i, ""), "base64").toString("utf8");
-                    expect(decoded).to.not.include(PASS);
-                    expect(header).to.not.include(PASS);
-                }
+                for (const line of lines) expect(JSON.parse(line)).to.equal(null); // never an Authorization header
             } finally {
                 server.kill();
             }
@@ -610,21 +735,16 @@ describe("Git", function () {
         }, 30000);
     });
 
-    // Phase 40 (D-01, D-04, KEYENC-02, KEYENC-06): Transit keys beside legacy
-    // ones, skip-and-continue on an undecryptable key, odd files, cleanup.
+    // Phase 40 (D-01, D-04, KEYENC-02, KEYENC-06) and Phase 41 (KEYMIG-02,
+    // D-09): skip-and-continue on an undecryptable key, odd and legacy files,
+    // cleanup.
     describe("Transit keys and the try-each-key loop (Phase 40)", function () {
 
-        const crypto = require("crypto");
-        const FakeTransit = require("../fixtures/fake-transit.js");
         let pem;      // a throwaway RSA key, PKCS#8 PEM, generated at run time
         let tkeys;    // a keys dir with transit, legacy and odd entries
 
         beforeAll(async () => {
-            pem = crypto.generateKeyPairSync("rsa", {
-                modulusLength: 2048,
-                publicKeyEncoding: { type: "spki", format: "pem" },
-                privateKeyEncoding: { type: "pkcs8", format: "pem" }
-            }).privateKey;
+            pem = throwawayKey().pem;
             tkeys = tmpdir(root, "tkeys");
             fs.writeFileSync(path.join(tkeys, "legacy"), LEGACY_PLACEHOLDER, { mode: 0o600 });
             fs.writeFileSync(path.join(tkeys, "unknown"), "not a real key\n", { mode: 0o600 });
@@ -632,9 +752,24 @@ describe("Git", function () {
             fs.writeFileSync(path.join(tkeys, "huge"), "x".repeat(70 * 1024), { mode: 0o600 });
             fs.symlinkSync(path.join(tkeys, "nowhere"), path.join(tkeys, "dangling"));
             require("child_process").execFileSync("mkfifo", [path.join(tkeys, "afifo")]); // CR-01
-            fs.writeFileSync(path.join(tkeys, "transit-undecryptable"), "vault:v1:QUJDRA==\n", { mode: 0o600 });
-            fs.writeFileSync(path.join(tkeys, "transit-undecryptable2"), "vault:v1:RUZHSA==\n", { mode: 0o600 });
+            fs.writeFileSync(path.join(tkeys, "transit-undecryptable"), UNDECRYPTABLE[0] + "\n", { mode: 0o600 });
+            fs.writeFileSync(path.join(tkeys, "transit-undecryptable2"), UNDECRYPTABLE[1] + "\n", { mode: 0o600 });
         });
+
+        // A FakeTransit that decrypts what it issued and fails the two
+        // undecryptable fixtures with `reason`, as if OpenBao failed for them only.
+        function transitFailingFixtures(reason) {
+            const t = new FakeTransit();
+            const real = t.decryptKey.bind(t);
+            t.decryptKey = async (ciphertext) => {
+                if (UNDECRYPTABLE.includes(String(ciphertext).trim())) {
+                    t.calls.decrypt += 1;
+                    throw new FakeTransit.TransitError(reason, null, "decrypt");
+                }
+                return real(ciphertext);
+            };
+            return t;
+        }
 
         // A Git over `tkeys` whose transit is `transit`, with the key order `names`.
         function transitGit(transit, names) {
@@ -649,29 +784,24 @@ describe("Git", function () {
             fs.writeFileSync(path.join(tkeys, name), ct + "\n", { mode: 0o600 });
         }
 
-        function captureLog() {
-            const lines = [];
-            spyOn(console, "log").and.callFake((...a) => lines.push(a.join(" ")));
-            return lines;
-        }
-
         function label(env) {
-            if (env && env.THINX_GIT_KEY) return "legacy:" + path.basename(env.THINX_GIT_KEY);
             if (env && env.SSH_AUTH_SOCK) return "agent";
             return "keyless";
         }
 
-        it("(T1) a Transit key OpenBao cannot decrypt is skipped and a working legacy key still builds (D-01)", async function () {
-            const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
-            const git = transitGit(transit, ["transit-undecryptable", "legacy"]);
+        it("(T1) a Transit key OpenBao cannot decrypt is skipped and the next Transit key still builds (D-01)", async function () {
+            const transit = new FakeTransit(); // never issued transit-undecryptable: bad_ciphertext
+            await writeTransitKey(transit, "transit-t1");
+            const git = transitGit(transit, ["transit-undecryptable", "transit-t1"]);
             const attempts = [];
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
             const lines = captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
-            expect(attempts).to.deep.equal(["legacy:legacy"]);
-            expect(lines.filter((l) => l === "[git] key transit-undecryptable skipped: deploy key unavailable: unreachable").length).to.equal(1);
-        });
+            expect(attempts).to.deep.equal(["agent"]);
+            expect(transit.calls.decrypt).to.equal(2);
+            expect(lines.filter((l) => l === "[git] key transit-undecryptable skipped: deploy key unavailable: bad_ciphertext").length).to.equal(1);
+        }, 20000);
 
         it("(T2) when no key reaches a clone, the first Transit reason is reported and fetch() still resolves a boolean (D-04)", async function () {
             const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
@@ -694,53 +824,58 @@ describe("Git", function () {
 
         // WR-01: a key that got past authentication and then failed (missing
         // branch) is the cause; the build log must not blame the key service.
-        it("(T2b) an undecryptable Transit key beside a legacy key that authenticates, then misses the branch, reports no keyUnavailable (WR-01)", async function () {
-            const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
-            const git = transitGit(transit, ["transit-undecryptable", "legacy"]);
+        it("(T2b) an undecryptable Transit key before a Transit key that authenticates, then misses the branch, reports no keyUnavailable (WR-01)", async function () {
+            const transit = new FakeTransit(); // never issued transit-undecryptable: bad_ciphertext
+            await writeTransitKey(transit, "transit-t2b");
+            const git = transitGit(transit, ["transit-undecryptable", "transit-t2b"]);
             const attempts = [];
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return cloneFailure("branch_not_found"); });
             captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
-            expect(attempts).to.deep.equal(["legacy:legacy"]);
-        });
+            expect(attempts).to.deep.equal(["agent"]);
+        }, 20000);
 
         // WR-01 (iteration 2): deploy keys are per-repository, so the other
         // keys of an owner are refused as a rule. A refusal does not explain the
         // build; the undecryptable Transit key (maybe the repository's own) does.
-        it("(T2c) a legacy key the remote refuses, tried before an undecryptable Transit key, still reports the Transit reason (WR-01)", async function () {
-            const transit = new FakeTransit({ failReason: "sealed", failOps: ["decrypt"] });
-            const git = transitGit(transit, ["legacy", "transit-undecryptable"]);
+        it("(T2c) a Transit key the remote refuses, tried before a key OpenBao cannot decrypt, still reports the Transit reason (WR-01)", async function () {
+            const transit = transitFailingFixtures("sealed");
+            await writeTransitKey(transit, "transit-t2c");
+            const git = transitGit(transit, ["transit-t2c", "transit-undecryptable"]);
             const attempts = [];
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return cloneFailure("repo_not_found_or_no_access"); });
             captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: false, keyUnavailable: "sealed" });
-            expect(attempts).to.deep.equal(["legacy:legacy"]);
-            expect(transit.calls.decrypt).to.equal(1);
-        });
+            expect(attempts).to.deep.equal(["agent"]);
+            expect(transit.calls.decrypt).to.equal(2);
+        }, 20000);
 
         for (const cause of ["publickey_denied", "repo_not_found_or_no_access", "key_unusable"]) {
-            it(`(T2d) during an outage, a legacy key refused with '${cause}' leaves the outage as the reported cause (WR-01)`, async function () {
-                const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
-                const git = transitGit(transit, ["transit-undecryptable", "legacy"]);
+            it(`(T2d) a Transit key refused with '${cause}', then an outage, leaves the outage as the reported cause (WR-01)`, async function () {
+                const transit = transitFailingFixtures("unreachable");
+                await writeTransitKey(transit, "transit-t2d-" + cause);
+                const git = transitGit(transit, ["transit-t2d-" + cause, "transit-undecryptable", "transit-undecryptable2"]);
                 const attempts = [];
                 spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return cloneFailure(cause); });
                 captureLog();
                 const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
                 expect(r).to.deep.equal({ ok: false, keyUnavailable: "unreachable" });
-                expect(attempts).to.deep.equal(["legacy:legacy"]);
-            });
+                expect(attempts).to.deep.equal(["agent"]);
+                expect(transit.calls.decrypt).to.equal(2); // the outage skips the last key
+            }, 20000);
         }
 
         it("(T2e) a refusal after the clone stage (a submodule in the pull) counts as past the key (WR-01)", async function () {
-            const transit = new FakeTransit({ failReason: "unreachable", failOps: ["decrypt"] });
-            const git = transitGit(transit, ["legacy", "transit-undecryptable"]);
+            const transit = transitFailingFixtures("unreachable");
+            await writeTransitKey(transit, "transit-t2e");
+            const git = transitGit(transit, ["transit-t2e", "transit-undecryptable"]);
             spyOn(git, "cloneHoldingLock").and.callFake(async () => cloneFailure("publickey_denied", "pull_failed"));
             captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
-        });
+        }, 20000);
 
         it("(T2f) a decrypted Transit key the remote refuses does not hide the next key's reason (WR-01)", async function () {
             const transit = new FakeTransit(); // never issued transit-undecryptable: bad_ciphertext
@@ -780,18 +915,22 @@ describe("Git", function () {
             expect(attempts).to.deep.equal(["agent"]);
         }, 20000);
 
-        it("(T4) unknown, directory, FIFO, oversized and dangling entries are skipped with their cause and never stop the loop", async function () {
-            const git = transitGit(new FakeTransit(), ["unknown", "adir", "afifo", "huge", "dangling", "legacy"]);
+        it("(T4) legacy, unknown, directory, FIFO, oversized and dangling entries are skipped with their cause and never stop the loop (D-09)", async function () {
+            const transit = new FakeTransit();
+            await writeTransitKey(transit, "transit-t4");
+            const git = transitGit(transit, ["legacy", "unknown", "adir", "afifo", "huge", "dangling", "transit-t4"]);
             const attempts = [];
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
             const lines = captureLog();
             const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
-            expect(attempts).to.deep.equal(["legacy:legacy"]);
-            for (const [name, cause] of [["unknown", "unknown_key_format"], ["adir", "not_regular"], ["afifo", "not_regular"], ["huge", "too_large"], ["dangling", "read_error"]]) {
+            expect(attempts).to.deep.equal(["agent"]);
+            expect(transit.calls.decrypt).to.equal(1);
+            for (const [name, cause] of [["legacy", "legacy_format_unsupported"], ["unknown", "unknown_key_format"], ["adir", "not_regular"], ["afifo", "not_regular"], ["huge", "too_large"], ["dangling", "read_error"]]) {
                 expect(lines).to.include(`[git] key ${name} skipped: ${cause}`);
             }
-        });
+            expect(fs.readFileSync(path.join(tkeys, "legacy"), "utf8")).to.equal(LEGACY_PLACEHOLDER);
+        }, 20000);
 
         it("(T5) an attempt that throws inside the agent still removes its directory and zeroes the decrypted key", async function () {
             const transit = new FakeTransit();
@@ -816,22 +955,22 @@ describe("Git", function () {
         }, 20000);
 
         // WR-02: an outage-class failure is service-wide, so the next Transit
-        // keys of the same fetch are skipped without a request; legacy keys in
-        // the same fetch are still tried.
+        // keys of the same fetch are skipped without a request. A legacy file
+        // in the same fetch is still a plain D-09 skip.
         for (const reason of ["unreachable", "sealed", "tls", "not_configured", "denied"]) {
-            it(`(T8) after one '${reason}' the remaining Transit keys are skipped and the legacy key still builds (WR-02)`, async function () {
+            it(`(T8) after one '${reason}' the remaining Transit keys are skipped and a legacy file is a logged skip (WR-02, D-09)`, async function () {
                 const transit = new FakeTransit({ failReason: reason, failOps: ["decrypt"] });
                 const git = transitGit(transit, ["transit-undecryptable", "transit-undecryptable2", "legacy"]);
-                const attempts = [];
-                spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(label(env)); return { ok: true, repoPath: b, reason: null }; });
+                const clone = spyOn(git, "cloneHoldingLock").and.callFake(async (b) => ({ ok: true, repoPath: b, reason: null }));
                 const lines = captureLog();
                 const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
-                expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+                expect(r).to.deep.equal({ ok: false, keyUnavailable: reason });
                 expect(transit.calls.decrypt).to.equal(1);
-                expect(attempts).to.deep.equal(["legacy:legacy"]);
+                expect(clone.calls.count()).to.equal(0);
                 for (const name of ["transit-undecryptable", "transit-undecryptable2"]) {
                     expect(lines).to.include(`[git] key ${name} skipped: deploy key unavailable: ${reason}`);
                 }
+                expect(lines).to.include("[git] key legacy skipped: legacy_format_unsupported");
             });
         }
 
@@ -938,16 +1077,15 @@ describe("Git", function () {
             }
         });
 
-        it("(T6) an inherited SSH_AUTH_SOCK / SSH_AGENT_PID reaches neither the keyless nor the legacy env (T-40-08)", function () {
+        it("(T6) an inherited SSH_AUTH_SOCK / SSH_AGENT_PID reaches neither baseEnv nor agentEnv (T-40-08)", function () {
             const saved = { sock: process.env.SSH_AUTH_SOCK, pid: process.env.SSH_AGENT_PID };
             process.env.SSH_AUTH_SOCK = "/tmp/spec-inherited-agent.sock";
             process.env.SSH_AGENT_PID = "1";
             try {
                 const git = newGit();
-                for (const env of [git.baseEnv(), git.sshEnv("/keys/k1", "/tmp/a1")]) {
-                    expect("SSH_AUTH_SOCK" in env).to.equal(false);
-                    expect("SSH_AGENT_PID" in env).to.equal(false);
-                }
+                const base = git.baseEnv();
+                expect("SSH_AUTH_SOCK" in base).to.equal(false);
+                expect("SSH_AGENT_PID" in base).to.equal(false);
                 const agent = git.agentEnv("/tmp/own.sock", "/tmp/own.pub");
                 expect(agent.SSH_AUTH_SOCK).to.equal("/tmp/own.sock");
                 expect("SSH_AGENT_PID" in agent).to.equal(false);
@@ -1017,13 +1155,13 @@ describe("Git", function () {
                 set(...a) { sets.push(a); const cb = a[a.length - 1]; if (typeof cb === "function") cb(null, "OK"); }
             });
             git.keyNamesForOwner = () => ["k1", "k2"];
-            spyOn(git, "cloneHoldingLock").and.callFake((b, u, br, env) => ({ ok: path.basename(env.THINX_GIT_KEY) === "k2", repoPath: null, reason: null }));
+            spyOn(git, "cloneHoldingLock").and.callFake((b, u, br, env) => ({ ok: keyLabel(env) === "k2", repoPath: null, reason: null }));
             const ok = await git.fetch(OWNER, repoUrl, "main", tmpdir(root, "build"));
             expect(ok).to.equal(true);
             expect(sets.length).to.equal(1);
             expect(sets[0].slice(0, 4)).to.deep.equal(["gitkey:" + OWNER, "k2", "EX", 2592000]);
             expect(typeof sets[0][4]).to.equal("function");
-        });
+        }, 20000);
     });
 
     describe("Builder prefetch", function () {

@@ -280,12 +280,12 @@ describe("Transit integration: deploy key end to end", function () {
 	}
 
 	function envLabel(env) {
-		if (env && env.THINX_GIT_KEY) return "legacy";
 		if (env && env.SSH_AUTH_SOCK) return "agent";
 		return "keyless";
 	}
 
-	it("(E2) an unreachable OpenBao costs one Transit key per fetch; the legacy key still builds (WR-02)", async function () {
+	// Phase 41 (D-09): the legacy file in the same fetch is a logged skip, not an attempt.
+	it("(E2) an unreachable OpenBao costs one Transit key per fetch; a legacy file is a logged skip (WR-02, D-09)", async function () {
 		if (!guard()) return;
 		const keysDir = fs.mkdtempSync(path.join(root, "keys-"));
 		// Real ciphertexts from the dev server, read back through a dead address.
@@ -304,12 +304,13 @@ describe("Transit integration: deploy key end to end", function () {
 		spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => { attempts.push(envLabel(env)); return { ok: true, repoPath: b, reason: null }; });
 
 		const r = await git.fetchDetailed(OWNER, "ssh://git@example.invalid/owner/repo.git", "main", fs.mkdtempSync(path.join(root, "build-")));
-		expect(r).to.deep.equal({ ok: true, keyUnavailable: null });
+		expect(r).to.deep.equal({ ok: false, keyUnavailable: "unreachable" });
 		expect(dead.decryptKey.calls.count()).to.equal(1);
-		expect(attempts).to.deep.equal(["legacy"]);
+		expect(attempts).to.deep.equal([]);
 		for (const name of ["t2", "t3"]) {
 			expect(lines).to.include(`[git] key ${name} skipped: deploy key unavailable: unreachable`);
 		}
+		expect(lines).to.include("[git] key legacy skipped: legacy_format_unsupported");
 	}, 60000);
 
 	it("(E3) a real bad_ciphertext key does not skip the next Transit key (WR-02)", async function () {

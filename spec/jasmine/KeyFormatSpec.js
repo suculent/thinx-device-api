@@ -2,9 +2,10 @@
 // (Phase 40, KEYENC-06; reused by the Phase 41 migration).
 //
 // The table pins what each stored shape is classified as. The invariant at the
-// end is the add-alongside test of Plan 40-02: every supported key format
-// reaches its own keyed-attempt path (askpass for legacy, the per-attempt
-// ssh-agent for Transit) and an unknown file reaches none. Key material is
+// end started as the add-alongside test of Plan 40-02. Since the legacy read
+// path is gone (Phase 41, KEYMIG-02, D-09), only Transit reaches a keyed attempt
+// (the per-attempt ssh-agent); a legacy file of either kind is skipped with
+// legacy_format_unsupported, and an unknown file reaches none. Key material is
 // generated at run time into a temp directory; nothing is committed.
 
 const fs = require("fs");
@@ -131,9 +132,9 @@ describe("Deploy-key format (keyformat)", function () {
         });
     });
 
-    // Plan 40-02 assumption_delta invariant: every supported format reaches its
-    // own path; an unknown file reaches no attempt at all.
-    describe("format invariant: each format reaches its keyed-attempt path", function () {
+    // Plan 40-02 assumption_delta invariant, after the removal (Phase 41, D-09):
+    // Transit reaches its path; legacy and unknown files reach no attempt at all.
+    describe("format invariant: only Transit reaches a keyed attempt", function () {
 
         const OWNER = "5a".repeat(32);
         let pkcs8, encrypted, pkcs1;
@@ -166,35 +167,37 @@ describe("Deploy-key format (keyformat)", function () {
             spyOn(git, "cloneHoldingLock").and.callFake(async (b, u, br, env) => {
                 envs.push({
                     command: env.GIT_SSH_COMMAND,
-                    askpass: typeof env.SSH_ASKPASS === "string",
-                    sock: typeof env.SSH_AUTH_SOCK === "string" && fs.existsSync(env.SSH_AUTH_SOCK),
-                    passphrase: "GIT_KEY_PASSPHRASE" in env
+                    askpass: ("SSH_ASKPASS" in env) || ("SSH_ASKPASS_REQUIRE" in env),
+                    sock: typeof env.SSH_AUTH_SOCK === "string" && fs.existsSync(env.SSH_AUTH_SOCK)
                 });
                 return { ok: true, repoPath: b, reason: null };
             });
+            const lines = [];
+            spyOn(console, "log").and.callFake((...a) => lines.push(a.join(" ")));
             const ok = await git.fetch(OWNER, "ssh://git@example.invalid/r.git", "main", fs.mkdtempSync(path.join(root, "build-")));
-            return { ok, envs };
+            return { ok, envs, lines, path: path.join(keysDir, "k") };
         }
 
-        function expectLegacy(r) {
-            expect(r.ok).to.equal(true);
-            expect(r.envs.length).to.equal(1);
-            expect(r.envs[0].command).to.equal(Git.SSH_COMMAND);
-            expect(r.envs[0].askpass).to.equal(true);
-            expect(r.envs[0].sock).to.equal(false);
+        async function expectLegacySkip(contents) {
+            expect(keyformat.detect(contents)).to.equal("legacy");
+            const transit = new FakeTransit();
+            const r = await attemptFor(contents, transit);
+            expect(r.ok).to.equal(false);
+            expect(r.envs.length).to.equal(0);
+            expect(transit.calls.decrypt).to.equal(0);
+            expect(r.lines).to.include("[git] key k skipped: legacy_format_unsupported");
+            expect(fs.readFileSync(r.path, "utf8")).to.equal(contents); // never rewritten (D-09)
         }
 
-        it("legacy encrypted PKCS#8 takes the askpass path", async function () {
-            expect(keyformat.detect(encrypted)).to.equal("legacy");
-            expectLegacy(await attemptFor(encrypted));
+        it("legacy encrypted PKCS#8 reaches no attempt and logs legacy_format_unsupported", async function () {
+            await expectLegacySkip(encrypted);
         });
 
-        it("legacy unencrypted (pre-2022) takes the askpass path", async function () {
-            expect(keyformat.detect(pkcs1)).to.equal("legacy");
-            expectLegacy(await attemptFor(pkcs1));
+        it("legacy unencrypted (pre-2022) reaches no attempt and logs legacy_format_unsupported", async function () {
+            await expectLegacySkip(pkcs1);
         });
 
-        it("Transit takes the agent path with AGENT_SSH_COMMAND and no askpass or passphrase", async function () {
+        it("Transit takes the agent path with AGENT_SSH_COMMAND and SSH_AUTH_SOCK, and no askpass", async function () {
             const transit = new FakeTransit();
             const ciphertext = await transit.encryptKey(Buffer.from(pkcs8, "utf8"));
             const r = await attemptFor(ciphertext + "\n", transit);
@@ -203,7 +206,6 @@ describe("Deploy-key format (keyformat)", function () {
             expect(r.envs[0].command).to.equal(Git.AGENT_SSH_COMMAND);
             expect(r.envs[0].sock).to.equal(true);
             expect(r.envs[0].askpass).to.equal(false);
-            expect(r.envs[0].passphrase).to.equal(false);
             expect(transit.calls.decrypt).to.equal(1);
         }, 20000);
 
@@ -211,6 +213,7 @@ describe("Deploy-key format (keyformat)", function () {
             const r = await attemptFor("not a real key\n");
             expect(r.ok).to.equal(false);
             expect(r.envs.length).to.equal(0);
+            expect(r.lines).to.include("[git] key k skipped: unknown_key_format");
         });
     });
 });
