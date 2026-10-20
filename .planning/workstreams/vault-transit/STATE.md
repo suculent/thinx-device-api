@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-10-20T12:56:45.434Z"
+stopped_at: Completed 41-03-PLAN.md
+last_updated: "2026-10-20T14:17:44.847Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: f2f2f4b04e2ad8c8f7b00c7ca6f775b5a9366a97
+state_head: 22d098a735af8963f1a7e5a6ac298af182f26c6f
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -66,6 +66,7 @@ Progress: [███████░░░] 67%
 | Phase 40 P05 | 50min | 3 tasks | 1 files |
 | Phase 41 P01 | 16 min | 3 tasks | 6 files |
 | Phase 41 P02 | 55min | 3 tasks | 1 files |
+| Phase 41 P03 | 75min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-02: operator answered go and accepted the persistent console audit-log warning entry as the D-03 quarantine-notification channel
 - [Phase 41]: 41-02: D10_GATE pass recorded 2026-10-20 (re-run 0 legacy / 0 failed, FETCH_CHECK ok=true owner test on suculent/thinx-autoflood); Plan 41-05 may push the legacy-path removal
 - [Phase 41]: 41-02: D-05 tar /root/thinx-backups/deploy-keys-premig-20261020T123359Z.tar stays on micro local ext4 until Plan 41-08 shreds it
+- [Phase 41]: D-13 classes: retired_version (exact ErrTooOld, per key, never retried, one-per-process Slack latch with no RECOVERED) and key_missing (exact 'encryption key not found', service level, D-05 incident, SERVICE_DOWN_REASONS)
+- [Phase 41]: IN-10: TransitError.op on every failure; a login server_error skips the owner's remaining Transit keys, a decrypt server_error stays per key; T-40-12 attempt errors log the fixed token attempt_error
+- [Phase 41]: KEYMIG-02 part 1: RSAKey.keyPassphrase() and the readSecret import removed from rsakey.js; ships with 41-04 in the 41-05 removal push, nothing pushed in 41-03
 
 ### Pending Todos
 
@@ -149,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T12:56:44.669Z
-**Stopped At:** Completed 41-02-PLAN.md
+**Last session:** 2026-10-20T14:17:16.271Z
+**Stopped At:** Completed 41-03-PLAN.md
 **Resume File:** None
