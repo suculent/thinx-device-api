@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Phase 41 context gathered
-last_updated: "2026-10-20T10:37:29.261Z"
-last_activity: 2026-10-19
-last_activity_desc: Phase 40 complete, transitioned to Phase 41
-state_head: fb53a8f20cd3d87964267b2ed570f415559e088a
+stopped_at: Completed 41-01-PLAN.md
+last_updated: "2026-10-20T11:02:38.913Z"
+last_activity: 2026-10-20
+last_activity_desc: Phase 41 execution started
+state_head: e5c8a39405ccb8872e4b2ac782d19e60e8206d58
 progress:
   total_phases: 3
   completed_phases: 2
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 
 ## Current Position
 
-Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — READY TO EXECUTE
-Plan: Not started
+Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-10-19 — Phase 40 complete, transitioned to Phase 41
+Last activity: 2026-10-20 — Phase 41 execution started
 
 Progress: [███████░░░] 67%
 
@@ -64,6 +64,7 @@ Progress: [███████░░░] 67%
 | Phase 40 P03 | 10 min | 3 tasks | 11 files |
 | Phase 40 P04 | 4 min | 2 tasks | 4 files |
 | Phase 40 P05 | 50min | 3 tasks | 1 files |
+| Phase 41 P01 | 16 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 40]: 40-04: kill-switch spec backups are thinx-api-pre-keygen-<UTC>.json (0600 root), distinct from the thinx-api-pre-openbao-* baseline the gate reads; a full revert keeps the docker-swarm.yml switch line
 - [Phase 40]: 40-05: Phase 40 cut over on the operator's advance go, conditional on a green Task 1; thinx-staging 8b6879e0 live as thinx_api tk89thgjiptv1d1z4e9l1kepw, all live gates green
 - [Phase 40]: 40-05: API container PID 1 is the sh entrypoint with node as last foreground child; crash-case assumption holds in effect (exec node is an optional later hardening)
+- [Phase 41]: 41-01: migrate-deploy-keys tries every passphrase candidate on any parse error; wrong_passphrase only when one try reported BAD_DECRYPT (a wrong passphrase yields ERR_OSSL_UNSUPPORTED ~1/300)
+- [Phase 41]: 41-01: OpenSSH key type is read from the openssh-key-v1 public half before ssh-keygen conversion; non-ssh-rsa is unsupported_type (ssh-keygen -m PKCS8 refuses ed25519)
+- [Phase 41]: 41-01: quarantine re-checks the file sha256 before revokeUserKeys; the canary modes load only transit.js and log to stderr so stdout is exactly one line
 
 ### Pending Todos
 
@@ -141,6 +145,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T09:24:29.218Z
-**Stopped At:** Phase 41 context gathered
-**Resume File:** .planning/workstreams/vault-transit/phases/41-key-migration-passphrase-retirement-rotation/41-CONTEXT.md
+**Last session:** 2026-10-20T11:02:37.943Z
+**Stopped At:** Completed 41-01-PLAN.md
+**Resume File:** None
