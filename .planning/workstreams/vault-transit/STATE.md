@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-05-PLAN.md
-last_updated: "2026-10-20T18:13:20.211Z"
+stopped_at: Completed 41-06-PLAN.md
+last_updated: "2026-10-20T18:50:26.752Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: fdbf16c5cd63590a2d97e3dddc93aa18e9a11c37
+state_head: c1d5ee467d1540ac5be9aa73d4fceba9a3aca104
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -69,6 +69,7 @@ Progress: [███████░░░] 67%
 | Phase 41 P03 | 75min | 3 tasks | 13 files |
 | Phase 41 P04 | 48 min | 3 tasks | 13 files |
 | Phase 41 P05 | 40min | 3 tasks | 6 files |
+| Phase 41 P06 | 31min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-04: PassphraseRetiredSpec requires Dockerfile and a root compose file; Dockerfile.test is scanned only when present, because CircleCI moves it over Dockerfile before the image build
 - [Phase 41]: 41-04: migrate-deploy-keys.js keeps --dry-run/--migrate as recognised modes that exit 2 with a fixed 'legacy migration retired' stderr line
 - [Phase 41]: 41-05 Task 3: operator go for the live passphrase retirement (repo-first order, 12 thinx.yml.bak* kept as history)
+- [Phase 41]: 41-06: GIT_KEY_PASSPHRASE retired from the live swarm (Spec, PreviousSpec, swarm secret, Gluster .env*, askpass); operator removed two .env.bak files
+- [Phase 41]: 41-06: thinx-deploy-keys rotated once by the operator, latest_version 2, min_decryption_version 1; v1 canary and pre-change snapshot stored
+- [Phase 41]: 41-06: operator OpenBao login in the container uses the stdin userpass recipe (runbook section 6); bao login prints the token on the read-only FS
 
 ### Pending Todos
 
@@ -159,6 +163,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T18:13:19.481Z
-**Stopped At:** Completed 41-05-PLAN.md
+**Last session:** 2026-10-20T18:50:25.946Z
+**Stopped At:** Completed 41-06-PLAN.md
 **Resume File:** None
