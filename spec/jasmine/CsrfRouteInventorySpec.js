@@ -54,6 +54,7 @@ const GUARDED = [
     ["router.rsakey.js", "delete", "/api/v2/rsakey"],
     ["router.rsakey.js", "get", "/api/user/rsakey/create"], // state-changing GET
     ["router.rsakey.js", "post", "/api/user/rsakey/revoke"],
+    ["router.rsakey.js", "patch", "/api/v2/rsakey"], // Phase 45 rename (D-02)
     ["router.env.js", "put", "/api/v2/env"],
     ["router.env.js", "delete", "/api/v2/env"],
     ["router.env.js", "post", "/api/user/env/add"],

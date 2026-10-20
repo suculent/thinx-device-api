@@ -1142,7 +1142,7 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 builder.getDeviceAPIKey = (owner, device, cb) => cb(true, "spec-api-key");
                 builder.createBuildPath = () => { };
                 builder.prefetchPublic = async () => true;
-                builder.prefetchPrivate = async () => true;
+                builder.prefetchPrivate = opts.prefetchPrivate || (async () => true);
                 builder.runGitCommand = () => "1";
                 builder.getTag = () => "1.0";
                 builder.generate_thinx_json = () => ({});
@@ -1226,6 +1226,58 @@ describe("Builder remote job protocol (SEC-EXEC-02)", function () {
                 expect(stats.filter((s) => s[1] === "BUILD_FAILED").map((s) => s[2])).to.deep.equal([build_id]);
                 expect(blogStates).to.deep.equal([[build_id, envi.oid, envi.udid, "error"]]);
                 expect(fs.existsSync(path.join(h.XBUILD_PATH, "environment.json"))).to.equal(false);
+            });
+
+            // Phase 40, D-04: a keyed fetch that failed because no Transit key could be
+            // decrypted says so in one build-log line, then takes the existing error
+            // state and git_fetch_failed; no new status value.
+            describe("deploy key unavailable build-log line (Phase 40, D-04)", function () {
+
+                function runDirect(h) {
+                    const calls = [];
+                    const events = [];
+                    BuildLog.prototype.log.and.callFake((...a) => events.push(["log", a[3]]));
+                    BuildLog.prototype.state.and.callFake((...a) => { blogStates.push(a); events.push(["state", a[3]]); });
+                    h.builder.run_build({
+                        build_id: BUILD_A,
+                        owner: envi.oid,
+                        git: GIT,
+                        branch: "main",
+                        udid: envi.udid,
+                        source_id: envi.sid,
+                        worker: { running: true, socket: { connected: true, on() { }, emit() { } } }
+                    }, {}, (success, response) => calls.push([success, response]));
+                    return { calls, events };
+                }
+
+                it("writes the sentence before the error state and calls back git_fetch_failed", async function () {
+                    const seen = [];
+                    const h = harness({
+                        prefetchPrivate: async (br, BUILD_PATH, url, branch, outcome) => {
+                            seen.push(typeof outcome);
+                            if (outcome && typeof outcome === "object") outcome.keyUnavailable = "unreachable";
+                            return false;
+                        }
+                    });
+                    const r = runDirect(h);
+                    await until(() => r.calls.length === 1);
+                    expect(seen).to.deep.equal(["object"]);
+                    expect(r.calls).to.deep.equal([[false, "git_fetch_failed"]]);
+                    const line = r.events.findIndex((e) => e[0] === "log" && e[1] === "deploy key unavailable: key service unreachable");
+                    const error = r.events.findIndex((e) => e[0] === "state" && e[1] === "error");
+                    expect(line).to.be.at.least(0);
+                    expect(error).to.be.above(line);
+                    expect(r.events.filter((e) => e[0] === "log" && /deploy key unavailable/.test(e[1])).length).to.equal(1);
+                });
+
+                it("writes no such line when no Transit key was unavailable", async function () {
+                    const h = harness({ prefetchPrivate: async () => false });
+                    const r = runDirect(h);
+                    await until(() => r.calls.length === 1);
+                    expect(r.calls).to.deep.equal([[false, "git_fetch_failed"]]);
+                    expect(r.events.some((e) => e[0] === "log" && /deploy key unavailable/.test(e[1]))).to.equal(false);
+                    expect(r.events.some((e) => e[0] === "state" && e[1] === "error")).to.equal(true);
+                });
             });
 
             it("a complete device is dispatched (the harness reaches the emit)", async function () {

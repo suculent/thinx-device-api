@@ -2,10 +2,10 @@ const EventEmitter = require('events');
 
 const JWTLogin = require("./lib/thinx/jwtlogin");
 const InfluxConnector = require('./lib/thinx/influx');
-const Util = require('./lib/thinx/util');
 const Owner = require('./lib/thinx/owner');
 const Device = require('./lib/thinx/device');
 const RedisHealth = require('./lib/thinx/redis-health');
+const Transit = require('./lib/thinx/transit');
 
 const { RedisStore } = require("connect-redis");
 const session = require("express-session");
@@ -109,6 +109,12 @@ module.exports = class THiNX extends EventEmitter {
     // the throttled signal that posts to Slack. Attached BEFORE .connect()
     // so the very first connection failure is captured.
     RedisHealth.attach(app.redis_store_client);
+
+    // Phase 40 boot probe: one non-blocking OpenBao AppRole login on an unref'd
+    // 5 s timer (skipped under ENVIRONMENT=test or without BAO_ADDR). It only
+    // feeds the Transit incident tracker; the API serves even when the probe
+    // fails, because :7442, MQTT and public builds do not depend on OpenBao.
+    Transit.probeSoon();
 
     // Section that requires initialized Redis
     console.log("ℹ️ [info] Connecting Redis client...");
@@ -309,6 +315,7 @@ module.exports = class THiNX extends EventEmitter {
             const Buildlog = require("./lib/thinx/buildlog"); // must be after initDBs as it lacks it now
             const blog = new Buildlog();
             const SocketSession = require("./lib/thinx/socket_session"); // WebSocket owner binding and frame dispatch
+            const SocketUpgrade = require("./lib/thinx/socket_upgrade"); // per-connection upgrade tracking, per-owner cap
 
 
             // DI
@@ -483,69 +490,20 @@ module.exports = class THiNX extends EventEmitter {
               return;
             }
 
-            const socketMap = new Map();
+            // Phase 43 (NOTIF-02): upgrades are tracked per connection and per verified
+            // owner in SocketUpgrade, so several console tabs of one owner can hold
+            // sockets on the same /<owner> path. Each raw socket releases its own slot
+            // on close (REFACTOR-03).
+            const socketUpgrade = new SocketUpgrade({ wss: wss, sessionParser: sessionParser });
 
             this.server.on('upgrade', function (request, socket, head) {
-
-              let socketKey = request.url.replace(/^\/+/, "");
-
-              if (typeof (socketMap.get(socketKey)) !== "undefined") {
-                console.log(`ℹ️ [info] Socket already mapped for ${socketKey}, dropping duplicate upgrade.`);
-                socket.destroy();
-                return;
-              }
-
-              sessionParser(request, {}, () => {
-
-                let cookies = request.headers.cookie;
-
-                if (Util.isDefined(cookies)) {
-                  // other x-thx cookies are now deprecated and can be removed
-                  if (cookies.indexOf("x-thx-core") === -1) {
-                    console.log("Should destroy socket, access unauthorized.", Util.redactCookieHeader(cookies));
-                    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-                    socket.destroy();
-                    return;
-                  }
-                }
-
-                if (typeof (socketMap.get(socketKey)) === "undefined") {
-
-                  socketMap.set(socketKey, socket);
-
-                  // REFACTOR-03: raw-socket close handler — releases the socketMap entry deterministically when the upgrade aborts mid-flight (before wss-level ws.on('close') at :597 gets a chance to attach). Map.delete is idempotent so double-firing with the wss-level handler is safe.
-                  socket.on('close', () => {
-                    socketMap.delete(socketKey);
-                  });
-
-                  try {
-                    wss.handleUpgrade(request, socket, head, function (ws) {
-                      ws.socketKey = socketKey;
-                      console.log("ℹ️ [info] WS Session upgrade...");
-                      wss.emit('connection', ws, request);
-                    });
-                  } catch (_upgradeException) {
-                    // fails on duplicate upgrade, why does it happen?
-                    console.log("☣️ [error] Exception caught upgrading same socket twice.");
-                    socketMap.delete(socketKey);
-                  }
-
-                }
-              });
+              socketUpgrade.handle(request, socket, head);
             });
 
-            setInterval(function ping() {
-              if (typeof (wss.clients) !== "undefined") {
-                wss.clients.forEach(function each(ws) {
-                  if (ws.isAlive === false) {
-                    console.log("🔨 [debug] Terminating websocket!");
-                    ws.terminate();
-                  } else {
-                    ws.ping();
-                  }
-                });
-              }
-            }, 30000);
+            // WR-01: every 30 s each socket is pinged; one that did not answer the
+            // previous ping is terminated, so its 'close' frees the owner slot in
+            // SocketUpgrade and the messenger subscription (REFACTOR-03).
+            SocketUpgrade.startHeartbeat(wss, SocketUpgrade.HEARTBEAT_INTERVAL_MS);
 
             //
             // Behaviour of new WSS connection (authenticate and add router paths that require websocket)
@@ -571,22 +529,8 @@ module.exports = class THiNX extends EventEmitter {
             app._ws = {}; // list of all owner websockets
 
             // Frames are dispatched by SocketSession (lib/thinx/socket_session.js),
-            // attached in SocketSession.accept for verified sockets only.
-            function initSocket(ws) {
-
-              function heartbeat() {
-                if (typeof(this.clientId) !== "undefined") {
-                  console.log(`pong client ${this.clientId}`);
-                }
-                this.isAlive = true;
-              }
-
-              ws.on('pong', heartbeat);
-
-              ws.on('close', () => {
-                socketMap.delete(ws.socketKey);
-              });
-            }
+            // attached in SocketSession.accept for verified sockets only. The pong
+            // handler and isAlive flag belong to SocketUpgrade.startHeartbeat.
 
             wss.on('connection', function (ws, req) {
 
@@ -601,27 +545,17 @@ module.exports = class THiNX extends EventEmitter {
                 return;
               }
 
-              let socketKey = req.url.replace(/^\/+/, "");
-
               // Quick 261003-v05: the socket owner is the session owner parsed at
               // upgrade and must equal the first path segment. Anything else is
               // closed with 1008 by accept() and gets no listener or registry entry.
               // Owner connections register as app._ws[<owner>], log connections
               // as app._ws[<owner>/<id>].
-              const owner = SocketSession.accept(ws, req, {
+              SocketSession.accept(ws, req, {
                 registry: app._ws,
                 blog: blog,
                 messenger: app.messenger,
                 callback: logtail_callback
               });
-              if (owner === null) return;
-
-              ws.isAlive = true;
-              ws.socketKey = socketKey;
-
-              socketMap.set(socketKey, ws); // public websocket stored in app, needs to be set to builder/buildlog!
-
-              initSocket(ws);
 
             }).on("error", function (err) {
 

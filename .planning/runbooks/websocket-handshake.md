@@ -327,6 +327,53 @@ The Phase 12 TEST-WS-01 in-process CI spec (`spec/jasmine/ZZ-WebSocketHandshakeR
 
 ---
 
+## Several tabs per owner (Phase 43, NOTIF-02)
+
+**What changed.** Until Phase 43 `thinx-core.js` kept one socket per URL path (`socketMap`) and dropped a
+second upgrade on a path that already had one. Each Legacy console tab opens `/<owner>` (owner socket) and
+`/<owner>/<timestamp>` (log socket), so a second tab of the same owner got no owner socket and no toasts;
+production answered its upgrade with 502. Since Phase 43 the upgrade handler delegates to
+`lib/thinx/socket_upgrade.js` (`SocketUpgrade.handle`), which tracks live sockets **per connection and per
+verified owner**: every concurrent upgrade on one path is answered, and each raw socket releases only its own
+slot on its own `close` (the REFACTOR-03 release guarantee, now per connection). Delivery is unchanged:
+`Messenger.sendToOwner` writes each owner frame once to every socket that sent `{init: owner}` for that owner,
+and to no other owner's socket.
+
+**Cap.** At most **10 live sockets per verified owner** (`SocketUpgrade.MAX_SOCKETS_PER_OWNER`, five Legacy
+tabs at two sockets each). The 11th concurrent upgrade of that owner is answered
+`HTTP/1.1 429 Too Many Requests` before the handshake and logs exactly one line:
+
+```
+⚠️ [warning] [ws] upgrade refused: per-owner socket limit (10) reached
+```
+
+The line carries no cookie, session id, owner or URL. Other owners are unaffected and a slot freed by a close
+is reusable at once. Upgrades without a verified owner (no session owner, or a path whose first segment is not
+the session owner) are not counted; `SocketSession.accept` still closes them 1008 after the handshake, and a
+Cookie header without `x-thx-core` still gets `HTTP/1.1 401 Unauthorized`. The device port 7442 and plain MQTT
+are not touched by any of this.
+
+**Live check (credential-free).** From the laptop or a CI runner:
+
+```bash
+node scripts/check-ws-multitab.js wss://rtm.thinx.cloud
+```
+
+It opens two cookie-less sockets at once on one random non-owner path (`/p43probe-<ts>-<hex>`) and sends no
+cookie or credential. Before Phase 43 the first socket opened (then closed 1008) and the second got `HTTP 502`:
+`WS-MULTITAB FAIL 1/2 opened`, exit 1. After Phase 43 both open, then both close 1008 because no session is
+sent: `WS-MULTITAB OK 2/2 opened`, exit 0. Exit 2 is a usage error. `--sockets N` (at most 10) and
+`--timeout-ms M` (default 8000) are optional.
+
+**Specs.** `spec/jasmine/SocketUpgradeSpec.js` (runs locally and in the CI `test` job) proves two same-path
+sockets both receive, a close releases only its own socket, aborted upgrades leave no slot, the 429 refusal
+and its log line, and both probe outcomes. `ZZ-WebSocketHandshakeRtmSpec` (same-path concurrent case) and
+`ZZ-WebSocketLifecycleSpec` (the second raw upgrade on a path gets `HTTP/1.1 101`) state the same contract in
+the ZZ tier, which the CI entrypoint does not run.
+
+---
+
 *Runbook initialized: 2026-06-02 (Phase 6 / SEC-WS-01 close-out — documentation-only, fix deferred to edge-redesign).*
 *SEC-COOKIE-01 rollback section appended: 2026-06-02 (Phase 6 / Plan 06-02 close-out).*
 *SEC-WS-01 rollback section appended: 2026-06-04 (Phase 13 / Plan 13-01 prep).*
+*Several-tabs-per-owner section appended: 2026-10-12 (v1.18 Phase 43 / Plan 43-01).*

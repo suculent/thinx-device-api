@@ -22,6 +22,12 @@
  * raw-socket-based variant that tests aborted upgrades — that spec DIVERGES from this
  * one because it observes abort behavior, not successful handshake completion.
  *
+ * NOTIF-02 (v1.18 Phase 43) removed the duplicate-path refusal: upgrades are now tracked per
+ * connection (lib/thinx/socket_upgrade.js), so several sockets on the same `/<owner>` path are
+ * all answered. The third case pins that: two clients on one path, created in the same tick,
+ * both open. Frame delivery to several tabs needs a session owner and is proven in the local
+ * SocketUpgradeSpec, not here (these clients send no cookie and are closed 1008 after open).
+ *
  * Local-vs-CI note (Phase 5 Test-env ACCEPT pattern, carried into Phase 12 per D-41):
  * local `npm test` aborts on missing `/mnt/data/conf/config.json`; the canonical
  * green-gate for this spec is the CircleCI-side Jasmine run inside the Docker test
@@ -128,6 +134,38 @@ describe("WebSocket Handshake (rtm)", function () {
     });
     ws.on('error', (_err) => {
       /* see sibling it() for the rationale */
+    });
+  }, 30000);
+
+  it("GET /<owner> twice on the same path at once (NOTIF-02 multi-tab upgrade)", function (done) {
+    const port = getPort();
+    if (!port) {
+      done();
+      return;
+    }
+    const url = "ws://127.0.0.1:" + port + "/" + envi.oid;
+    const pair = [new WebSocket(url), new WebSocket(url)];
+    const opened = [false, false];
+    let finished = false;
+    const openTimer = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      done(new Error("WebSocket 'open' fired for " + opened.filter(Boolean).length + "/2 same-path sockets within 5000ms — regression of NOTIF-02 per-connection upgrade tracking"));
+    }, 5000);
+    pair.forEach((ws, i) => {
+      openSockets.push(ws);
+      ws.on('open', () => {
+        opened[i] = true;
+        if (!finished && opened[0] && opened[1]) {
+          finished = true;
+          clearTimeout(openTimer);
+          expect(opened).to.deep.equal([true, true]);
+          done();
+        }
+      });
+      ws.on('error', (_err) => {
+        /* see the first it() for the rationale */
+      });
     });
   }, 30000);
 

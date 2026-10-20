@@ -13,13 +13,13 @@ findings:
     title: "Assignment-failure message still refers to \"the list\""
   - id: IN-02
     severity: info
-    disposition: open
+    disposition: fixed
     title: "The emphasised Manage Transformers button drops unsaved checkbox changes without warning"
   - id: IN-03
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Cypress colour assertion is tied to the theme value; the save test does not check UI feedback"
-open: 2
+open: 0
 total: 4
 recorded: 2026-10-12T12:39:16.856Z
 ---
@@ -30,8 +30,8 @@ recorded: 2026-10-12T12:39:16.856Z
 |---------|----------|-------------|--------|
 | WR-01 | warning | fixed (console ff6e809) | - |
 | IN-01 | info | fixed (console ff6e809) | - |
-| IN-02 | info | open | - |
-| IN-03 | info | open | - |
+| IN-02 | info | fixed (console dac2c5e, d526ff7) | - |
+| IN-03 | info | fixed (console a16307a) | - |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.

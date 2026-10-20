@@ -5,15 +5,20 @@ describe("RSA Key", function() {
   var os = require("os");
   var path = require("path");
   var RSAKey = require("../../lib/thinx/rsakey");
+  var FakeTransit = require("../fixtures/fake-transit.js");
+  var keyformat = require("../../lib/thinx/keyformat");
   var rsakey = new RSAKey();
 
   // 34-REVIEW WR-05: every key this spec creates goes into a per-run temp
   // directory, never into Globals.app_config().ssh_keys (in development that
   // is the developer's real ~/.ssh, on CI /mnt/data/ssh_keys). The directory
   // and all key material in it are removed after the spec.
+  // Phase 40: keys are Transit ciphertext, made through a deterministic fake
+  // Transit. Phase 41 (KEYMIG-02): key generation has no passphrase at all.
   beforeAll(() => {
     console.log(`🚸 [chai] >>> running RSA spec`);
     rsakey.ssh_keys = fs.mkdtempSync(path.join(os.tmpdir(), "rsakey-spec-"));
+    rsakey.transit = new FakeTransit();
   });
 
   afterAll(() => {
@@ -47,6 +52,10 @@ describe("RSA Key", function() {
       expect(success).to.equal(true);
       expect(response).to.be.a('object');
       first_key = listFilename(response);
+      // KEYENC-01: the private half on disk is Transit ciphertext, mode 0600.
+      const privatePath = rsakey.ssh_keys + "/" + first_key;
+      expect(keyformat.detect(fs.readFileSync(privatePath, "utf8"))).to.equal("transit");
+      expect(fs.statSync(privatePath).mode & 0o777).to.equal(0o600);
       done();
     });
   }, 10000);
@@ -109,6 +118,23 @@ describe("RSA Key", function() {
       }, {});
     });
   }, 10000);
+
+  // Phase 45 D-14 (38 IN-04): a filename named twice in one request is deleted once
+  // and reported once.
+  it("(04b) should report a key named twice in one revoke only once", function(done) {
+    rsakey.create(owner, (success, response) => {
+      expect(success).to.equal(true);
+      var k = listFilename(response);
+      rsakey.revoke(owner, [k, k], function(_res, succ, mess) {
+        expect(succ).to.equal(true);
+        expect(mess).to.deep.equal([k]);
+        expect(rsakey.getKeyPathsForOwner(owner)).to.not.include(k);
+        expect(fs.existsSync(rsakey.ssh_keys + "/" + k + ".pub")).to.equal(false);
+        expect(rsakey.getKeyPathsForOwner(owner)).to.include(first_key);
+        done();
+      }, {});
+    });
+  }, 30000);
 
 
   // 34-REVIEW IN-08: keys are named <owner>-<timestamp>; two concurrent
@@ -194,22 +220,32 @@ describe("RSA Key", function() {
     expect(RSAKey.toOpenSSH(line, "ignored")).to.equal(line);
   });
 
-  // The passphrase must match what git.js feeds ssh-add via SSH_ASKPASS;
-  // generating a key we cannot decrypt only fails later, as a clone that
-  // silently offers no identity at all.
-  it("(11) should refuse to generate a key when GIT_KEY_PASSPHRASE is unset", function (done) {
-    // keyPassphrase() reads through readSecret (D-04), which caches per name.
-    const { _resetCacheForTests } = require("../../lib/thinx/secrets");
-    const saved = process.env.GIT_KEY_PASSPHRASE;
-    delete process.env.GIT_KEY_PASSPHRASE;
-    _resetCacheForTests();
-    rsakey.generate(owner, new Date().getTime(), (err) => {
-      if (typeof saved !== "undefined") process.env.GIT_KEY_PASSPHRASE = saved;
-      _resetCacheForTests();
+  // KEYENC-03, no fallback: with Transit unreachable, generation is refused with
+  // key_service_unavailable and writes no private file. KEYMIG-02 (R1): the
+  // passphrase reader no longer exists.
+  it("(11) should refuse to generate a key when Transit is unavailable, and has no passphrase reader", function (done) {
+    expect(RSAKey.keyPassphrase).to.equal(undefined);
+    const working = rsakey.transit;
+    rsakey.transit = new FakeTransit({ failReason: "unreachable" });
+    const lines = [];
+    const realLog = console.log;
+    console.log = (...a) => { lines.push(a.join(" ")); };
+    const date = new Date().getTime();
+    const privatePath = rsakey.ssh_keys + "/" + owner + "-" + date;
+    rsakey.generate(owner, date, (err, pub, extra) => {
+      console.log = realLog;
+      rsakey.transit = working;
+      expect(lines.filter((l) => /deploy-key generation refused: key service unavailable \(unreachable\)/.test(l)).length).to.equal(1);
       expect(err).to.be.an('error');
+      expect(err.code).to.equal("key_service_unavailable");
+      expect(err.reason).to.equal("unreachable");
+      expect(err.message).to.equal("key_service_unavailable");
+      expect(pub).to.equal(undefined);
+      expect(extra).to.equal(undefined);
+      expect(fs.existsSync(privatePath)).to.equal(false);
       done();
     });
-  });
+  }, 10000);
 
   it("(12) should discover key owners from the key directory", function () {
     const owners = rsakey.listOwnersOnDisk();
@@ -227,5 +263,47 @@ describe("RSA Key", function() {
       done();
     });
   }, 10000);
+
+  // Phase 45 (KEY-04, D-01): a rename changes the name only. The fingerprint is the
+  // OpenSSH SHA256 of the key blob, so it survives the rename, and the private key
+  // file is never touched (vault-transit Phase 40 safety).
+  it("(14) should rename a key without changing its fingerprint, key material or private file", function (done) {
+    rsakey.create(owner, (success, created) => {
+      expect(success).to.equal(true);
+      const filename = listFilename(created);
+      const privatePath = rsakey.ssh_keys + "/" + filename;
+      const privateBefore = fs.readFileSync(privatePath);
+      const find = (list) => list.find(key => key.filename === filename);
+      rsakey.list(owner, (_ok, before) => {
+        const original = find(before);
+        expect(original.name).to.equal("P45 original");
+        expect(original.fingerprint).to.match(/^SHA256:[A-Za-z0-9+/]{43}$/);
+        rsakey.rename(owner, filename, "P45 renamed", (renamedOk, renamed) => {
+          expect(renamedOk).to.equal(true);
+          expect(renamed.filename).to.equal(filename);
+          rsakey.list(owner, (_ok2, after) => {
+            const entry = find(after);
+            expect(entry.name).to.equal("P45 renamed");
+            expect(entry.fingerprint).to.equal(original.fingerprint);
+            expect(entry.pubkey.split(" ").slice(0, 2)).to.deep.equal(original.pubkey.split(" ").slice(0, 2));
+            expect(fs.readFileSync(privatePath).equals(privateBefore)).to.equal(true);
+            rsakey.revoke(owner, [filename], (_res, revokedOk, revoked) => {
+              expect(revokedOk).to.equal(true);
+              expect(revoked).to.deep.equal([filename]);
+              done();
+            }, {});
+          });
+        });
+      });
+    }, "P45 original");
+  }, 15000);
+
+  // GitHub's RSA host key, the `ssh-rsa` entry of `ssh_keys` in https://api.github.com/meta
+  // (fetched 2026-10-13), and its published `ssh_key_fingerprints.SHA256_RSA`.
+  const GITHUB_RSA = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=";
+
+  it("(15) should fingerprint the GitHub RSA host key as GitHub publishes it", function () {
+    expect(RSAKey.fingerprint(GITHUB_RSA)).to.equal("SHA256:uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s");
+  });
 
 });

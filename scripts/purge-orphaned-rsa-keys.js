@@ -7,11 +7,11 @@
  * Accounts deleted before revokeAllForOwner existed (GDPR #353) left their
  * private keys on disk indefinitely.
  *
- * Also reports stray askpass scripts. git.js now keeps its helper in the
- * container tmpdir and has it read GIT_KEY_PASSPHRASE from the environment,
- * so anything matching *.sh in the key directory is a leftover from the older
- * scheme -- and those DO carry the passphrase in cleartext (the legacy
- * `askpass.sh` held `echo "thinx"`). Nothing references them any more.
+ * Also reports stray askpass scripts. Anything matching *.sh in the key
+ * directory is a leftover of the retired askpass scheme for passphrase-
+ * encrypted deploy keys, and such a file may hold the old key passphrase in
+ * cleartext (the legacy `askpass.sh` held `echo "thinx"`). Nothing references
+ * them any more.
  *
  * Modes:
  *   --scan    Dry-run (DEFAULT). Reports what would be deleted, touches nothing.

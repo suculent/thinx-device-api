@@ -1,5 +1,7 @@
 // v1.18 Phase 42 (CI-04, CI-05): offline checks of the parent CircleCI gates in .circleci/config.yml
-// and of the rules in scripts/check-ci-gates.js. The live compiler run is
+// and of the rules in scripts/check-ci-gates.js. Phase 48: CI-06 restored the legacy console builds
+// (build_legacy_console defaults to true and stays as a kill switch, D-08) and CI-07 gates both Vue
+// image jobs on the test-vue-console suite (D-01). The live compiler run is
 // `node scripts/check-ci-gates.js compile`; this spec needs no network.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -51,12 +53,30 @@ function simulateCompile(value) {
     return { valid: true, errors: null, "output-yaml": YAML.stringify({ version: 2, workflows }) };
 }
 
-test("build_legacy_console is a boolean pipeline parameter with a boolean default", () => {
+test("build_legacy_console is a boolean pipeline parameter whose default is true (CI-06, D-08)", () => {
     const param = config.parameters && config.parameters[PARAM];
     assert.ok(param, "parameters." + PARAM + " is declared");
     assert.equal(param.type, "boolean");
-    // The value is not asserted: Phase 48 (CI-06) flips it in one line and must not need a test edit.
-    assert.equal(typeof param.default, "boolean");
+    // D-08: Phase 48 restored the legacy builds by flipping the default, not by deleting the
+    // parameter; it stays as the kill switch, and a normal push runs the legacy jobs.
+    assert.equal(param.default, true);
+});
+
+test("a default pipeline runs the legacy jobs; an explicit false is the kill switch (CI-06, D-08)", () => {
+    const staging = selectJobs(config, "thinx-staging", {}).map((job) => job.name);
+    for (const job of ["console-classic-registry", "test", "test-vue-console", "api-registry", "vue-console-registry"]) {
+        assert.ok(staging.includes(job), job + " runs on a default thinx-staging pipeline");
+    }
+    const main = selectJobs(config, "main", {}).map((job) => job.name);
+    for (const job of ["console-classic-hub", "snyk-monitor-console-classic"]) {
+        assert.ok(main.includes(job), job + " runs on a default main pipeline");
+    }
+    for (const branch of BRANCHES) {
+        const ran = selectJobs(config, branch, { [PARAM]: false }).map((job) => job.name);
+        for (const job of LEGACY_JOBS) assert.ok(!ran.includes(job), job + " runs on " + branch + " with the kill switch off");
+    }
+    assert.deepEqual(evaluateJobs(staging, { branch: "thinx-staging", legacy: true }), []);
+    assert.deepEqual(evaluateJobs(main, { branch: "main", legacy: true }), []);
 });
 
 test("exactly one workflow, legacy-console, is gated on build_legacy_console and holds exactly the legacy jobs", () => {
@@ -79,14 +99,14 @@ test("no workflow other than legacy-console builds or monitors the legacy consol
 
 test("thinx-staging with the gate closed runs test, api-registry, vue-console-registry and no legacy job", () => {
     const ran = names("thinx-staging", false);
-    for (const job of ["test", "api-registry", "vue-console-registry"]) assert.ok(ran.includes(job), job + " runs");
+    for (const job of ["test", "test-vue-console", "api-registry", "vue-console-registry"]) assert.ok(ran.includes(job), job + " runs");
     assert.deepEqual(ran.filter((job) => job.startsWith("console-classic-")), []);
 });
 
 test("thinx-staging with the gate open also runs console-classic-registry", () => {
     const ran = names("thinx-staging", true);
     assert.ok(ran.includes("console-classic-registry"));
-    for (const job of ["test", "api-registry", "vue-console-registry"]) assert.ok(ran.includes(job), job + " runs");
+    for (const job of ["test", "test-vue-console", "api-registry", "vue-console-registry"]) assert.ok(ran.includes(job), job + " runs");
 });
 
 test("main runs no legacy job with the gate closed, console-classic-hub with it open", () => {
@@ -119,12 +139,12 @@ test("every requires entry names a job selected in the same workflow on every br
 });
 
 test("evaluateJobs flags a legacy build on thinx-staging with the gate closed", () => {
-    const problems = evaluateJobs(["test", "api-registry", "vue-console-registry", "console-classic-registry"], { branch: "thinx-staging", legacy: false });
+    const problems = evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry", "console-classic-registry"], { branch: "thinx-staging", legacy: false });
     assert.ok(problems.some((p) => p.includes("console-classic-registry") && p.includes("CI-05")), problems.join("\n"));
 });
 
 test("evaluateJobs requires the production deploy jobs on thinx-staging", () => {
-    const problems = evaluateJobs(["test", "vue-console-registry"], { branch: "thinx-staging", legacy: false });
+    const problems = evaluateJobs(["test", "test-vue-console", "vue-console-registry"], { branch: "thinx-staging", legacy: false });
     assert.ok(problems.some((p) => p.includes("api-registry")), problems.join("\n"));
 });
 
@@ -234,7 +254,7 @@ test("thinx-staging and thinx-console run no snyk-* job with the gate closed or 
 
 test("main runs every monitor; the gate adds the legacy hub build and its monitor", () => {
     const closed = names("main", false);
-    for (const job of ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"]) {
+    for (const job of ["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"]) {
         assert.ok(closed.includes(job), job + " runs on main");
     }
     const open = names("main", true);
@@ -246,13 +266,102 @@ test("main runs every monitor; the gate adds the legacy hub build and its monito
 });
 
 test("evaluateJobs flags a Snyk job on thinx-staging", () => {
-    const problems = evaluateJobs(["test", "api-registry", "vue-console-registry", "snyk-code-monitor"], { branch: "thinx-staging", legacy: false });
+    const problems = evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry", "snyk-code-monitor"], { branch: "thinx-staging", legacy: false });
     assert.ok(problems.some((p) => p.includes("snyk-code-monitor") && p.includes("CI-04")), problems.join("\n"));
 });
 
 test("evaluateJobs requires the main monitors", () => {
-    const problems = evaluateJobs(["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api"], { branch: "main", legacy: false });
+    const problems = evaluateJobs(["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api"], { branch: "main", legacy: false });
     assert.ok(problems.some((p) => p.includes("snyk-monitor-console-vue") && p.includes("CI-04")), problems.join("\n"));
+});
+
+// ---------------------------------------------------------------------------
+// CI-07 (Phase 48, D-01): the Vue image jobs wait for the green Vue suite
+// ---------------------------------------------------------------------------
+
+const VUE_GATE = "test-vue-console";
+
+function runCommands(job) {
+    return (job.steps || [])
+        .filter((step) => step && typeof step === "object" && step.run)
+        .map((step) => (typeof step.run === "string" ? step.run : step.run.command || ""));
+}
+
+test("test-vue-console is defined with the console build image and no context (CI-07, D-01)", () => {
+    const job = config.jobs && config.jobs[VUE_GATE];
+    assert.ok(job, "jobs." + VUE_GATE + " is defined");
+    assert.equal(job.docker[0].image, "thinxcloud/console-build-env:vue");
+    assert.ok(!Object.prototype.hasOwnProperty.call(job.docker[0], "auth"), "the public image is pulled anonymously");
+    const commands = runCommands(job).join("\n");
+    for (const needle of ["yarn test:unit", "yarn test:ci", "node ../src/test/deploykey.cjs", "node ../src/test/legacy-close-out.cjs", "yarn build:perf"]) {
+        assert.ok(commands.includes(needle), VUE_GATE + " runs " + needle);
+    }
+    assert.ok(runCommands(job).some((command) => command.includes("git submodule") && command.includes("services/console")), "the submodule step names services/console");
+    const results = (job.steps || []).filter((step) => step && typeof step === "object" && step.store_test_results);
+    assert.ok(results.some((step) => String(step.store_test_results.path).endsWith("cypress/results")), "store_test_results points at the Cypress JUnit output");
+});
+
+test("test-vue-console runs where the Vue image jobs run and they require it (CI-07)", () => {
+    const gate = findJob(VUE_GATE);
+    assert.equal(gate.workflow, "main");
+    assert.ok(!Object.prototype.hasOwnProperty.call(gate.cfg, "context"), VUE_GATE + " has no context");
+    assert.deepEqual(gate.cfg.filters.branches.only.slice().sort(), ["main", "thinx-console", "thinx-staging"]);
+    for (const dependant of ["vue-console-registry", "vue-console-hub"]) {
+        assert.ok((findJob(dependant).cfg.requires || []).includes(VUE_GATE), dependant + " requires " + VUE_GATE);
+    }
+    for (const branch of ["thinx-staging", "thinx-console", "main"]) {
+        for (const value of VALUES) assert.ok(names(branch, value).includes(VUE_GATE), VUE_GATE + " runs on " + branch + "/" + value);
+    }
+});
+
+test("evaluateJobs requires test-vue-console on thinx-staging and main (CI-07)", () => {
+    const staging = evaluateJobs(["test", "api-registry", "vue-console-registry"], { branch: "thinx-staging", legacy: false });
+    assert.ok(staging.some((p) => p.includes(VUE_GATE)), staging.join("\n"));
+    const main = evaluateJobs(["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"], { branch: "main", legacy: false });
+    assert.ok(main.some((p) => p.includes(VUE_GATE)), main.join("\n"));
+});
+
+// ---------------------------------------------------------------------------
+// 48-REVIEW WR-02: the Legacy image jobs wait for the green Legacy unit tests
+// ---------------------------------------------------------------------------
+
+const { LEGACY_GATE_JOB } = gates;
+
+test("test-console-classic runs the Legacy unit tests with the console build image and no context (WR-02)", () => {
+    assert.equal(LEGACY_GATE_JOB, "test-console-classic");
+    const job = config.jobs && config.jobs[LEGACY_GATE_JOB];
+    assert.ok(job, "jobs." + LEGACY_GATE_JOB + " is defined");
+    assert.equal(job.docker[0].image, "thinxcloud/console-build-env:vue");
+    assert.ok(!Object.prototype.hasOwnProperty.call(job.docker[0], "auth"), "the public image is pulled anonymously");
+    const commands = runCommands(job).join("\n");
+    for (const needle of ["node src/test/deploykey.cjs", "node src/test/legacy-close-out.cjs"]) {
+        assert.ok(commands.includes(needle), LEGACY_GATE_JOB + " runs " + needle);
+    }
+    assert.ok(runCommands(job).some((command) => command.includes("git submodule") && command.includes("services/console")), "the submodule step names services/console");
+});
+
+test("both Legacy image builds require test-console-classic inside legacy-console, which runs wherever they do (WR-02)", () => {
+    const gate = findJob(LEGACY_GATE_JOB);
+    assert.equal(gate.workflow, LEGACY_WORKFLOW);
+    assert.ok(!Object.prototype.hasOwnProperty.call(gate.cfg, "context"), LEGACY_GATE_JOB + " has no context");
+    assert.deepEqual(gate.cfg.filters.branches.only.slice().sort(), ["main", "thinx-staging"]);
+    for (const dependant of ["console-classic-registry", "console-classic-hub"]) {
+        const job = findJob(dependant);
+        assert.equal(job.workflow, LEGACY_WORKFLOW);
+        assert.ok((job.cfg.requires || []).includes(LEGACY_GATE_JOB), dependant + " requires " + LEGACY_GATE_JOB);
+    }
+    for (const branch of ["thinx-staging", "main"]) {
+        assert.ok(names(branch, true).includes(LEGACY_GATE_JOB), LEGACY_GATE_JOB + " runs on " + branch + " with the switch on");
+        assert.ok(!names(branch, false).includes(LEGACY_GATE_JOB), LEGACY_GATE_JOB + " does not run on " + branch + " with the switch off");
+    }
+});
+
+test("evaluateJobs requires test-console-classic on main with the gate open (WR-02)", () => {
+    const main = ["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue", "console-classic-hub", "snyk-monitor-console-classic"];
+    const problems = evaluateJobs(main, { branch: "main", legacy: true });
+    assert.ok(problems.some((p) => p.includes(LEGACY_GATE_JOB) && p.includes("CI-07")), problems.join("\n"));
+    assert.deepEqual(evaluateJobs(main.concat(LEGACY_GATE_JOB), { branch: "main", legacy: true }), []);
+    assert.deepEqual(evaluateJobs(main.slice(0, 8), { branch: "main", legacy: false }), [], "no Legacy gate with the switch off");
 });
 
 // ---------------------------------------------------------------------------
@@ -262,9 +371,10 @@ test("evaluateJobs requires the main monitors", () => {
 const { parseArgs, UsageError } = gates;
 
 test("evaluateJobs with the gate open accepts a thinx-staging legacy build and requires it", () => {
-    assert.deepEqual(evaluateJobs(["test", "api-registry", "vue-console-registry", "console-classic-registry"], { branch: "thinx-staging", legacy: true }), []);
-    const problems = evaluateJobs(["test", "api-registry", "vue-console-registry"], { branch: "thinx-staging", legacy: true });
+    assert.deepEqual(evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry", "test-console-classic", "console-classic-registry"], { branch: "thinx-staging", legacy: true }), []);
+    const problems = evaluateJobs(["test", "test-vue-console", "api-registry", "vue-console-registry"], { branch: "thinx-staging", legacy: true });
     assert.ok(problems.some((p) => p.includes("console-classic-registry")), problems.join("\n"));
+    assert.ok(problems.some((p) => p.includes("test-console-classic")), problems.join("\n"));
 });
 
 test("parseArgs: pipeline needs exactly one of --revision or --pipeline-id", () => {
@@ -280,13 +390,25 @@ test("parseArgs: pipeline needs exactly one of --revision or --pipeline-id", () 
 
 test("parseArgs: pipeline defaults and flag forms", () => {
     assert.deepEqual(parseArgs(["pipeline", "--revision", "ABC1234"]), {
-        command: "pipeline", revision: "abc1234", branch: "thinx-staging", pipelineId: undefined, expect: "legacy-off", wait: false, timeoutMin: 30
+        command: "pipeline", revision: "abc1234", branch: "thinx-staging", pipelineId: undefined, expect: "legacy-on", wait: false, timeoutMin: 30
     });
-    const byId = parseArgs(["pipeline", "--pipeline-id=27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--expect", "legacy-on", "--wait", "--timeout-min", "5"]);
+    const byId = parseArgs(["pipeline", "--pipeline-id=27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--expect", "legacy-off", "--wait", "--timeout-min", "5"]);
     assert.equal(byId.pipelineId, "27d73a7d-4afd-4fbb-932f-e853ebef5eb4");
     assert.equal(byId.branch, undefined);
-    assert.equal(byId.expect, "legacy-on");
+    assert.equal(byId.expect, "legacy-off");
     assert.equal(byId.wait, true);
     assert.equal(byId.timeoutMin, 5);
     assert.throws(() => parseArgs(["pipeline", "--pipeline-id", "27d73a7d-4afd-4fbb-932f-e853ebef5eb4", "--branch", "main"]), UsageError);
+});
+
+test("parseArgs: --timeout-min accepts only plain positive decimals (Codacy detect-unsafe-regex)", () => {
+    const withTimeout = (value) => parseArgs(["pipeline", "--revision", "abc1234", "--timeout-min=" + value]);
+    for (const [text, expected] of [["1", 1], ["2.5", 2.5], ["0.5", 0.5], ["007", 7], ["30", 30]]) {
+        assert.equal(withTimeout(text).timeoutMin, expected, JSON.stringify(text));
+    }
+    assert.equal(parseArgs(["pipeline", "--revision", "abc1234"]).timeoutMin, 30, "default");
+    assert.equal(parseArgs(["pipeline", "--revision", "abc1234", "--timeout-min", "5"]).timeoutMin, 5, "separate-argument form");
+    for (const text of ["", "0", "0.0", "00", "-1", "+1", "1e3", "0x10", "1.", ".5", " 5", "5 ", "1.2.3", "Infinity", "NaN", "1,5", "\u0661"]) {
+        assert.throws(() => withTimeout(text), UsageError, JSON.stringify(text));
+    }
 });

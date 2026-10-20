@@ -1,0 +1,11 @@
+{
+  "command": "ENVIRONMENT=development COUCHDB_USER=u COUCHDB_PASS=p npx jasmine --config=$TMPDIR/p43-jasmine.json --reporter=<scratch>/tap-reporter.js spec/jasmine/SocketUpgradeSpec.js",
+  "exitCode": 3,
+  "output": "TAP version 13\n1..2\nnot ok 1 - SocketUpgradeSpec (Phase 43, NOTIF-02) WS multi-tab: same-path sockets per owner U1 two A sockets on the same /<owner> path both connect and each receives the owner frame once; B receives nothing\n  ---\n  message: \"AssertionError: lib/thinx/socket_upgrade.js: expected null to not equal null\"\n  ...\nnot ok 2 - SocketUpgradeSpec (Phase 43, NOTIF-02) WS static: thinx-core wiring S1 thinx-core delegates the upgrade to SocketUpgrade.handle, keeps no path map, keeps the connection handler and the HTTP listen line\n  ---\n  message: \"AssertionError: require socket_upgrade: expected false to equal true\"\n  ...\n",
+  "consoleOutput": "Configuration loaded from: /Users/sychram/Repositories/thinx-api/thinx-device-api/lib/thinx/../../spec/mnt/data/conf/config.json\nℹ️ [info] [globals] ROLLBAR_SERVER_TOKEN not set — Rollbar reporting disabled\n[logger] Cannot create stats dir /mnt/data/statistics (ENOENT): logging to tmp\n",
+  "format": "tap",
+  "targetTest": "SocketUpgradeSpec (Phase 43, NOTIF-02) WS multi-tab: same-path sockets per owner U1 two A sockets on the same /<owner> path both connect and each receives the owner frame once; B receives nothing",
+  "targetFile": "spec/jasmine/SocketUpgradeSpec.js",
+  "expected": "U1 fails on an assertion because SocketUpgrade does not exist yet",
+  "actual": "U1 fails: lib/thinx/socket_upgrade.js missing (expected null to not equal null); S1 fails: thinx-core does not require socket_upgrade"
+}

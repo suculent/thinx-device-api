@@ -2,16 +2,21 @@
 /**
  * CircleCI gate checker for the parent pipeline. v1.18 Phase 42: CI-04 (Snyk monitors on main
  * only) and CI-05 (legacy console image builds behind the `build_legacy_console` pipeline
- * parameter).
+ * parameter). Phase 48 (CI-06, D-08): that parameter is now a kill switch whose default is true,
+ * so a normal pipeline builds the legacy console again; CI-07 (D-01) adds the test-vue-console gate.
  *
  * The rules live in evaluateJobs(): given the job names a pipeline runs on a branch, it lists
  * every job that must not run there and every job that must.
- *   CI-05  gate closed: no console-classic-registry / console-classic-hub /
+ *   CI-05  switch off: no test-console-classic / console-classic-registry / console-classic-hub /
  *          snyk-monitor-console-classic on any branch. thinx-staging always needs test,
- *          api-registry and vue-console-registry, plus console-classic-registry with the gate open.
+ *          api-registry and vue-console-registry, plus console-classic-registry with the switch on.
  *   CI-04  no snyk-* job outside main and base. main needs test, api-hub, vue-console-hub,
  *          snyk-code-monitor, snyk-oss-monitor, snyk-monitor-api and snyk-monitor-console-vue,
- *          plus console-classic-hub and snyk-monitor-console-classic with the gate open.
+ *          plus console-classic-hub and snyk-monitor-console-classic with the switch on.
+ *   CI-07  thinx-staging and main also need test-vue-console, the Vue/Legacy unit, build and
+ *          Cypress suite that vue-console-registry and vue-console-hub require (Phase 48, D-01).
+ *          With the switch on they also need test-console-classic, the Legacy unit tests that
+ *          console-classic-registry and console-classic-hub require (48-REVIEW WR-02).
  *
  * Usage:
  *   node scripts/check-ci-gates.js compile
@@ -26,7 +31,8 @@
  *   node scripts/check-ci-gates.js pipeline --pipeline-id <uuid> [--expect ...] [--wait] [--timeout-min 30]
  *       Reads a real pipeline's job list through the public CircleCI API v2 (unauthenticated GETs,
  *       project gh/suculent/thinx-device-api) and checks it with evaluateJobs(); --expect legacy-on
- *       means the CI-05 gate was open for that pipeline (default legacy-off).
+ *       (the default since Phase 48) means the kill switch was on for that pipeline, as on every
+ *       normal push; --expect legacy-off checks a pipeline run with the switch off.
  *       --revision finds the newest push (trigger webhook) pipeline on --branch whose revision
  *       starts with <sha> (at least 7 hex characters), polling every 15 s until it appears.
  *       --pipeline-id addresses one pipeline directly (e.g. the API-triggered Phase 43 bypass);
@@ -62,11 +68,14 @@ const COMPILE_URL = "https://circleci.com/api/v2/compile-config-with-defaults";
 
 const PARAM = "build_legacy_console";
 const LEGACY_WORKFLOW = "legacy-console";
-const LEGACY_JOBS = ["console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
-const STAGING_REQUIRED = ["test", "api-registry", "vue-console-registry"];
+// Every job of the legacy-console workflow; none of them may run with the kill switch off.
+const LEGACY_JOBS = ["test-console-classic", "console-classic-registry", "console-classic-hub", "snyk-monitor-console-classic"];
+const VUE_GATE_JOB = "test-vue-console";
+const LEGACY_GATE_JOB = "test-console-classic";
+const STAGING_REQUIRED = ["test", "test-vue-console", "api-registry", "vue-console-registry"];
 const COMPILE_BRANCHES = ["thinx-staging", "main"];
 const SNYK_BRANCHES = ["main", "base"];
-const MAIN_REQUIRED = ["test", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
+const MAIN_REQUIRED = ["test", "test-vue-console", "api-hub", "vue-console-hub", "snyk-code-monitor", "snyk-oss-monitor", "snyk-monitor-api", "snyk-monitor-console-vue"];
 const MAIN_LEGACY_REQUIRED = ["console-classic-hub", "snyk-monitor-console-classic"];
 
 // Verified 2026-10-12: GET /api/v2/project/gh/suculent/thinx-device-api returns this slug.
@@ -168,14 +177,19 @@ function selectJobs(config, branch, params) {
 // The jobs a pipeline on `branch` must run, each with the requirement that demands it.
 function requiredJobs(branch, legacy) {
     const required = [];
-    // CI-05: trimming CI must never stop production deploys.
+    // CI-05: trimming CI must never stop production deploys. CI-07: the Vue image jobs require
+    // test-vue-console, so it must run wherever they do.
+    // 48-REVIEW WR-02: with the switch on, the Legacy builds require test-console-classic.
     if (branch === "thinx-staging") {
-        for (const job of STAGING_REQUIRED) required.push({ job, req: "CI-05" });
-        if (legacy) required.push({ job: "console-classic-registry", req: "CI-05" });
+        for (const job of STAGING_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-05" });
+        if (legacy) required.push({ job: LEGACY_GATE_JOB, req: "CI-07" }, { job: "console-classic-registry", req: "CI-05" });
     }
     if (branch === "main") {
-        for (const job of MAIN_REQUIRED) required.push({ job, req: "CI-04" });
-        if (legacy) for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
+        for (const job of MAIN_REQUIRED) required.push({ job, req: job === VUE_GATE_JOB ? "CI-07" : "CI-04" });
+        if (legacy) {
+            required.push({ job: LEGACY_GATE_JOB, req: "CI-07" });
+            for (const job of MAIN_LEGACY_REQUIRED) required.push({ job, req: "CI-04" });
+        }
     }
     return required;
 }
@@ -185,7 +199,7 @@ function evaluateJobs(names, options) {
     const ran = new Set(names);
     const problems = [];
 
-    // CI-05: no legacy console image build while the gate is closed.
+    // CI-05: no legacy console image build while the kill switch is off.
     if (!legacy) {
         for (const job of LEGACY_JOBS) {
             if (ran.has(job)) problems.push("CI-05: " + job + " ran on " + branch + " with build_legacy_console closed");
@@ -216,6 +230,13 @@ const USAGE = [
 
 const PIPELINE_VALUE_FLAGS = new Set(["--revision", "--branch", "--pipeline-id", "--expect", "--timeout-min"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// ASCII digits, optionally one dot and more ASCII digits. Each dot-separated part is checked on its
+// own, so no regex here nests a quantifier (Codacy security/detect-unsafe-regex).
+function isPlainDecimal(text) {
+    const parts = text.split(".");
+    return parts.length <= 2 && parts.every((part) => /^\d+$/.test(part));
+}
 
 function parsePipelineArgs(args) {
     const seen = {};
@@ -257,11 +278,12 @@ function parsePipelineArgs(args) {
     }
     const branch = seen["--branch"] === undefined ? "thinx-staging" : seen["--branch"];
     if (!/^[A-Za-z0-9._/-]+$/.test(branch)) throw new UsageError("--branch has unexpected characters");
-    const expect = seen["--expect"] === undefined ? "legacy-off" : seen["--expect"];
+    // Phase 48 (CI-06): the tool's default matches the pipeline default (build_legacy_console true).
+    const expect = seen["--expect"] === undefined ? "legacy-on" : seen["--expect"];
     if (expect !== "legacy-off" && expect !== "legacy-on") throw new UsageError("--expect must be legacy-off or legacy-on");
     const timeoutText = seen["--timeout-min"] === undefined ? "30" : seen["--timeout-min"];
     const timeoutMin = Number(timeoutText);
-    if (!/^\d+(\.\d+)?$/.test(timeoutText) || !(timeoutMin > 0)) throw new UsageError("--timeout-min must be a positive number");
+    if (!isPlainDecimal(timeoutText) || !(timeoutMin > 0)) throw new UsageError("--timeout-min must be a positive number");
 
     return {
         command: "pipeline",
@@ -536,7 +558,8 @@ module.exports = {
     CONFIG_PATH,
     PARAM,
     LEGACY_WORKFLOW,
-    LEGACY_JOBS
+    LEGACY_JOBS,
+    LEGACY_GATE_JOB
 };
 
 if (require.main === module) {

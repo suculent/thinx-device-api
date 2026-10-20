@@ -1,5 +1,54 @@
 # Milestones
 
+## v1.17 — Deploy-Key OpenBao Transit (Shipped: 2026-10-20)
+
+**Workstream:** `vault-transit` (detailed ledger in `.planning/workstreams/vault-transit/MILESTONES.md`; archive in `.planning/workstreams/vault-transit/milestones/`)
+
+**Delivered:** PwnDoc finding `6ac64bcfdd94eb38dba4c3a4` is closed in production. Every owner's git deploy key on GlusterFS is now OpenBao Transit ciphertext (`vault:v2:`) that only the `thinx-api` AppRole can decrypt, through an internal-only OpenBao 2.7.1 on the swarm. `GIT_KEY_PASSPHRASE` is gone everywhere. Builds still run with the owner logged out.
+
+**Phases completed:** 39–41 (3 phases, 19 plans, 44 tasks)
+
+**Key accomplishments:**
+- Internal-only OpenBao on micro: node-local Raft, private-CA TLS, static-seal auto-unseal, file audit, root token revoked, snapshot/renewal/rehearsal host jobs with Slack alerts (VAULT-01..08)
+- Dependency-free Transit/AppRole client; new keys written only as ciphertext and decrypted in memory into a per-attempt `ssh-agent`; `503 key_service_unavailable` plus a kill switch (KEYENC-01..06)
+- 77/77 production keys on Transit (76 migrated, 0 failed); passphrase, askpass files and legacy read path removed from code, images, compose files and swarm secrets (KEYMIG-01/02)
+- Transit key rotated to v2, rewrapped, `min_decryption_version` = 2; pre-migration tar and passphrase-bearing spec backups shredded (KEYMIG-03)
+
+**Stats:** 17/17 requirements; parent `aa4372de` (2026-10-12) → `6915b6fa` (2026-10-20), 434 commits, 65 non-planning files, +12,826 / −916
+
+**Closeout:** `override_closeout`. 1 todo newly acknowledged and 16 carried forward. Phases 39/40 have stale verification digests (Phase 41 removed the dual-read path they verified, as planned). No milestone audit was run. KEYMIG-04 (PwnDoc retest) is future.
+
+---
+
+## v1.18 — Console Improvements (Shipped: 2026-10-18)
+
+**Workstream:** `vue-console` (detailed ledger in `.planning/workstreams/vue-console/MILESTONES.md`; archive in `.planning/workstreams/vue-console/milestones/`)
+
+**Delivered:** The Vue console reached Legacy-console parity on the pages operators use every day (device list, deploy keys, transformers and environment globals, build logs), deep links survive a reload, a context-free `test-vue-console` CircleCI job with 16 Cypress specs gates every Vue image build, and the three gaps the milestone audit found were closed in an inserted Phase 48.1.
+
+**Phases completed:** 42–48 and 48.1 (8 phases, 37 plans, 82 tasks)
+
+**Key accomplishments:**
+- CI trimmed for the milestone (Snyk on `main` only, legacy console build behind `build_legacy_console`), then re-enabled with the new Cypress gate (CI-04..07)
+- Notification delivery fixed end to end: several Legacy tabs per owner, one terminal build-status frame per build, the escaped toast live (NOTIF-01..03)
+- Device list, deploy keys, transformers and environment globals at parity: icon actions, rename, confirmed and typed-`confirm` deletes, atomic env edit, unsaved-change guards
+- Build-log search with highlight, count and stepping; one `hasBuildLog` predicate and status-colour scheme; WCAG 2.5.3 View label
+- Deep links survive a reload (admin route included); four stores surface a network failure as one error; five stub-backed Cypress specs cover the Phase 44–47 pages (48, 48.1)
+- 48.1 review loop closed a stale-profile class across sign-out, sign-in, impersonation and the Header
+
+**Stats:**
+- 33/33 requirements; 8 phases, 37 plans, 82 tasks
+- Console `thinx-staging` 60a0de4 → ec63c74 (163 signed commits); parent `thinx-staging` 9183c69c → 95ea22f6 plus the close-out commits
+- 7 days (2026-10-12 → 2026-10-18)
+
+**Git range:** parent `9183c69c` → `95ea22f6`; console `60a0de4` → `ec63c74`
+
+**Closeout:** `override_closeout`. Known verification overrides: 10 newly acknowledged, 10 carried forward (see workstream STATE.md Deferred Items). Phases 42 and 44–48 have stale verification digests; Phase 48.1 is `human_needed` with 5 operator checks in its UAT (CircleCI run for `95ea22f`, served-console checks, impersonation spot-check, build-log scroll decision, judgment prohibitions). Audit `tech_debt`; real gaps W1–W3 closed by 48.1.
+
+**What's next:** `/gsd-new-milestone --ws vue-console` (Phase 49+) or a new root milestone.
+
+---
+
 ## v1.16 — Console Usability & Deploy Keys (Shipped: 2026-10-12)
 
 **Delivered:** The console usability and deploy-key items from Drive THiNX/TODOs.md: a cleaner Vue console and device page, full build logs reachable from every build list with TIMEOUT status for stale builds, Vue transformer editing with per-device assignment, and named, sortable, copyable deploy keys in Vue and Legacy. 11/11 requirements across Phases 35–38, all accepted by live UAT on `rtm.thinx.cloud` (35: 5/5, 36: 5/5, 37: 6/6, 38: 6/6), including three gap-closure plans (G-35-4, G-36-3, G-37-5).

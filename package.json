@@ -1,6 +1,6 @@
 {
   "name": "thinx",
-  "version": "1.14.4031",
+  "version": "1.18.4749",
   "description": "THiNX IoT Device Management API",
   "bugs": {
     "url": "https://github.com/suculent/thinx-device-api/issues"
@@ -33,7 +33,7 @@
     "postpublish": "git push origin --tags",
     "split-tests": "if [ \"$CIRCLE_NODE_INDEX\" = \"0\" ]; then for f in ./spec/jasmine/ZZ*.js; do [ \"$f\" = ./spec/jasmine/ZZ-LogPagingCouchSpec.js ] || rm -f \"$f\"; done; fi; if [ \"$CIRCLE_NODE_INDEX\" = \"1\" ]; then ls ./spec/jasmine/*.js | grep -v 'ZZ' | xargs rm -f; fi",
     "test:csp": "node --test spec/node/StaticCsp.test.js",
-    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js",
+    "test:node": "node --test spec/node/StaticCsp.test.js spec/node/InstallLogRetentionCron.test.js spec/node/ThinxLogRetentionWrapper.test.js spec/node/TestScriptExitCode.test.js spec/node/CiPipelineGates.test.js spec/node/DeployKeyNames.test.js",
     "test:deploykeys": "node --test spec/node/DeployKeyNames.test.js"
   },
   "dependencies": {
@@ -65,6 +65,7 @@
     "mongo-sanitize": "^1.1.0",
     "mqtt": "^5.16.0",
     "nano": "^11.0.7",
+    "newrelic": "14.5.1",
     "node-forge": "^1.4.0",
     "node-schedule": "^2.1.1",
     "redis": "^5.8.2",
@@ -129,7 +130,7 @@
     "moment": "2.31.0",
     "netmask": "2.0.2",
     "path-to-regexp": "8.4.0",
-    "protobufjs": "7.1.1",
+    "protobufjs": "7.6.6",
     "serialize-javascript": "^7.0.5",
     "proxy-addr": "2.0.8",
     "proxy-agent": "4.0.1",
