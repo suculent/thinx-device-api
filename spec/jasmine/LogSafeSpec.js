@@ -7,12 +7,12 @@ describe("logSafe (log-injection guard)", function () {
 		expect(logSafe("udid 1234-abcd")).toBe("udid 1234-abcd");
 	});
 
-	it("replaces CR, LF and CRLF so a value cannot forge a second log line", function () {
-		expect(logSafe("a\nINFO fake\r\nb\rc")).toBe("a INFO fake b c");
+	it("removes CR, LF and CRLF so a value cannot forge a second log line", function () {
+		expect(logSafe("a\nINFO fake\r\nb\rc")).toBe("aINFO fakebc");
 	});
 
 	it("replaces other control characters and Unicode line separators", function () {
-		expect(logSafe("a\u0000b\u001bc\u007fd e f")).toBe("a?b?c?d?e?f");
+		expect(logSafe("a\u0000b\u001bc\u007fd\u2028e\u2029f")).toBe("a?b?c?d?e?f");
 	});
 
 	it("keeps tab", function () {
@@ -24,7 +24,7 @@ describe("logSafe (log-injection guard)", function () {
 		expect(logSafe(null)).toBe("null");
 		expect(logSafe(42)).toBe("42");
 		expect(logSafe({ a: "x\ny" })).not.toMatch(/[\r\n]/);
-		expect(logSafe(new Error("bad\nthing"))).toBe("Error: bad thing");
+		expect(logSafe(new Error("bad\nthing"))).toBe("Error: badthing");
 	});
 
 	it("never throws on a circular object", function () {
