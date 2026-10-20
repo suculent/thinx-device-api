@@ -4,16 +4,16 @@ milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
-status: planning
+status: executing
 stopped_at: Phase 41 context gathered
-last_updated: "2026-10-20T09:24:30.105Z"
+last_updated: "2026-10-20T10:37:29.261Z"
 last_activity: 2026-10-19
 last_activity_desc: Phase 40 complete, transitioned to Phase 41
-state_head: 7063efab65b7b431da923e4f68f43f58f9e418f9
+state_head: fb53a8f20cd3d87964267b2ed570f415559e088a
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 5
+  total_plans: 8
   completed_plans: 0
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 
 ## Current Position
 
-Phase: 41 — Key Migration, Passphrase Retirement & Rotation
+Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — READY TO EXECUTE
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-10-19 — Phase 40 complete, transitioned to Phase 41
 
 Progress: [███████░░░] 67%
