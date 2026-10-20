@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-01-PLAN.md
-last_updated: "2026-10-20T11:02:38.913Z"
+stopped_at: Completed 41-02-PLAN.md
+last_updated: "2026-10-20T12:56:45.434Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: e5c8a39405ccb8872e4b2ac782d19e60e8206d58
+state_head: f2f2f4b04e2ad8c8f7b00c7ca6f775b5a9366a97
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -65,6 +65,7 @@ Progress: [███████░░░] 67%
 | Phase 40 P04 | 4 min | 2 tasks | 4 files |
 | Phase 40 P05 | 50min | 3 tasks | 1 files |
 | Phase 41 P01 | 16 min | 3 tasks | 6 files |
+| Phase 41 P02 | 55min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-01: migrate-deploy-keys tries every passphrase candidate on any parse error; wrong_passphrase only when one try reported BAD_DECRYPT (a wrong passphrase yields ERR_OSSL_UNSUPPORTED ~1/300)
 - [Phase 41]: 41-01: OpenSSH key type is read from the openssh-key-v1 public half before ssh-keygen conversion; non-ssh-rsa is unsupported_type (ssh-keygen -m PKCS8 refuses ed25519)
 - [Phase 41]: 41-01: quarantine re-checks the file sha256 before revokeUserKeys; the canary modes load only transit.js and log to stderr so stdout is exactly one line
+- [Phase 41]: 41-02: operator answered go and accepted the persistent console audit-log warning entry as the D-03 quarantine-notification channel
+- [Phase 41]: 41-02: D10_GATE pass recorded 2026-10-20 (re-run 0 legacy / 0 failed, FETCH_CHECK ok=true owner test on suculent/thinx-autoflood); Plan 41-05 may push the legacy-path removal
+- [Phase 41]: 41-02: D-05 tar /root/thinx-backups/deploy-keys-premig-20261020T123359Z.tar stays on micro local ext4 until Plan 41-08 shreds it
 
 ### Pending Todos
 
@@ -145,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T11:02:37.943Z
-**Stopped At:** Completed 41-01-PLAN.md
+**Last session:** 2026-10-20T12:56:44.669Z
+**Stopped At:** Completed 41-02-PLAN.md
 **Resume File:** None
