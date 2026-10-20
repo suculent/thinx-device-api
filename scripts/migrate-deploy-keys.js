@@ -2,31 +2,26 @@
 /*
  * scripts/migrate-deploy-keys.js
  *
- * Moves every legacy deploy private key in app_config.ssh_keys (/mnt/data/ssh_keys)
- * to OpenBao Transit ciphertext (Phase 41, KEYMIG-01, D-04).
+ * Deploy-key maintenance on app_config.ssh_keys (/mnt/data/ssh_keys) through OpenBao
+ * Transit (Phase 41, KEYMIG-03, D-12, D-14).
  *
- * A legacy file is re-encrypted as exactly the plaintext generate() sends today,
- * unencrypted PKCS#8 PEM, and written as one `vault:vN:` line under the same name,
- * mode 0600. The replace is atomic: an exclusive-create temp file
- * `.<name>.<12 hex>.keymig.tmp` in the key directory (fsync), renamed over the
- * original only when the original still holds the bytes it held when it was read.
+ * The legacy migration (KEYMIG-01) moved every PEM deploy key to Transit ciphertext
+ * in Phase 41 and is retired (KEYMIG-02): the script holds no conversion code and no
+ * passphrase. --dry-run and --migrate exit 2. A legacy file found now (restored from
+ * an old backup, say) is counted by --report and never opened as a key or changed;
+ * its owner regenerates the key (D-07, D-09).
  *
- * Legacy kinds: passphrase PKCS#8 (and Proc-Type PKCS#1) are opened with the
- * candidates in order (the GIT_KEY_PASSPHRASE secret, then the historic literal);
- * unencrypted PKCS#1 / PKCS#8 are parsed directly; an unencrypted OpenSSH key is
- * converted with `ssh-keygen -p -m PKCS8` on a 0600 copy in a 0700 directory under
- * /dev/shm (tmpfs), removed at once. A file that cannot be converted
- * (wrong_passphrase, unparseable, unsupported_type, conversion_failed) is
- * quarantined (D-02): its pair is removed through RSAKey#revokeUserKeys and its
- * owner gets one audit-log warning naming only the key's creation date (D-03).
+ * A rewritten file is one `vault:vN:` line under the same name, mode 0600. The replace
+ * is atomic: an exclusive-create temp file `.<name>.<12 hex>.keymig.tmp` in the key
+ * directory (fsync), renamed over the original only when the original still holds the
+ * bytes it held when it was read.
  *
  * Modes (exactly one; none means --report):
  *   --report          Read-only (DEFAULT). Counts files by kind and Transit version
- *                     (`transit`: vN -> count, ascending N).
- *   --dry-run         Converts in memory only. Zero Transit requests, no file
- *                     changes; predicts how many files migrate or are quarantined.
- *   --migrate         WRITES. Encrypts each legacy key through Transit, verifies the
- *                     round trip and replaces the file atomically.
+ *                     (`transit`: vN -> count, ascending N); legacy files by their
+ *                     first-line kind.
+ *   --dry-run, --migrate
+ *                     Retired (KEYMIG-02). Print one line on stderr and exit 2.
  *   --rewrap          WRITES (KEYMIG-03, D-12). Learns the latest key version from one
  *                     encrypt of random bytes, rewraps every Transit file below it,
  *                     checks old and new decrypt to the same bytes, replaces atomically.
@@ -44,18 +39,17 @@
  *   --help, -h  Print usage and exit 0.
  *
  * A Transit failure of class unreachable, sealed, tls, not_configured or denied
- * aborts the run: nothing more is written and every untried file counts as failed.
+ * aborts a rewrap: nothing more is written and every untried file counts as failed.
  * Exit 0 = success, 1 = failed > 0 or aborted (or a fetch-check that failed),
- * 2 = usage, 3 = --canary-check refused (any Transit reason class).
+ * 2 = usage or a retired mode, 3 = --canary-check refused (any Transit reason class).
  *
  * Output rule: owner ids, key timestamps, cause classes and counts only. Never
- * PEM, a passphrase candidate, ciphertext (outside --canary-capture's one line),
- * a Transit error text, a token or a path.
+ * PEM, ciphertext (outside --canary-capture's one line), a Transit error text, a
+ * token or a path.
  *
  * Usage (inside the API container):
  *   node scripts/migrate-deploy-keys.js --report
- *   node scripts/migrate-deploy-keys.js --dry-run --json
- *   node scripts/migrate-deploy-keys.js --migrate --json
+ *   node scripts/migrate-deploy-keys.js --report --json
  *   node scripts/migrate-deploy-keys.js --rewrap --json
  *   node scripts/migrate-deploy-keys.js --canary-capture > canary   # host side: 0600 file
  *   node scripts/migrate-deploy-keys.js --canary-check < canary
@@ -67,10 +61,13 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const exec = require('child_process');
 const keyformat = require('../lib/thinx/keyformat.js');
 
 const MODES = ['--report', '--dry-run', '--migrate', '--rewrap', '--canary-capture', '--canary-check', '--fetch-check'];
+
+// The legacy migration modes (KEYMIG-01) ran in Phase 41 and are retired (KEYMIG-02).
+const RETIRED_MODES = new Set(['--dry-run', '--migrate']);
+const RETIRED_LINE = '[migrate-deploy-keys] legacy migration retired (KEYMIG-02); use --report';
 
 // Exactly the temp files this script writes, and nothing else (Pattern 2 step 6).
 const LEFTOVER_TMP = /^\.[0-9a-f]{64}-[0-9]+\.[0-9a-f]{12}\.keymig\.tmp$/;
@@ -79,9 +76,6 @@ const TRANSIT_VERSION = /^vault:v([1-9][0-9]*):/;
 
 // Service-level Transit classes (Pitfall 7): asking again with the next key cannot help.
 const ABORT_CLASSES = new Set(['unreachable', 'sealed', 'tls', 'not_configured', 'denied']);
-
-// generate() used this literal from 2023-01-14 to 2026-09-18 (RESEARCH Pattern 1).
-const HISTORIC_LITERAL = 'thinx';
 
 const OPEN_FLAGS = fs.constants.O_RDONLY | (fs.constants.O_NONBLOCK || 0);
 
@@ -126,6 +120,7 @@ function readFileBounded(filePath) {
 	}
 }
 
+// The kind of a legacy file, from its first line only (report counts, KEYMIG-02).
 function legacyKind(firstLine) {
 	if (/^-----BEGIN ENCRYPTED PRIVATE KEY-----$/.test(firstLine)) return 'encrypted_pkcs8';
 	if (/^-----BEGIN RSA PRIVATE KEY-----$/.test(firstLine)) return 'pkcs1';
@@ -228,212 +223,6 @@ function baseReport(mode, scanned) {
 	};
 }
 
-// --- conversion ----------------------------------------------------------------
-
-// File-level causes (D-02): the file itself cannot become a key, so it is quarantined.
-// Any other cause (no_scratch_tmpfs, a Transit class, write_failed) leaves the file.
-const QUARANTINE_CAUSES = new Set(['wrong_passphrase', 'unparseable', 'unsupported_type', 'conversion_failed']);
-
-const SSH_KEYGEN_TIMEOUT_MS = 10000;
-const AUDIT_TIMEOUT_MS = 10000;
-
-// A legacy file's bytes -> { pem: Buffer (unencrypted PKCS#8), spki: Buffer, spkiPem, via }
-// or { cause }. Never throws, never logs; the caller zeroes `data` and `pem`.
-//   ENCRYPTED PRIVATE KEY or a Proc-Type 4,ENCRYPTED header: the candidates in order
-//   OPENSSH PRIVATE KEY: ssh-keygen -p -m PKCS8 on a copy in the scratch tmpfs
-//   anything else PEM: parsed directly (unencrypted PKCS#1 / PKCS#8)
-function convertLegacy(entry, data, env) {
-	if (entry.legacyKind === 'openssh') return convertOpenSSH(data, env);
-	const text = data.toString('utf8');
-	const encrypted = entry.legacyKind === 'encrypted_pkcs8' || /^Proc-Type:[ \t]*4,ENCRYPTED[ \t]*\r?$/m.test(text);
-	if (!encrypted) {
-		let keyObject;
-		try {
-			keyObject = crypto.createPrivateKey({ key: data, format: 'pem' });
-		} catch (_e) {
-			return { cause: 'unparseable' };
-		}
-		return exportPkcs8(keyObject, 'unencrypted');
-	}
-	const candidates = Array.isArray(env.candidates) ? env.candidates : [];
-	// Every candidate is tried on any error: a wrong passphrase leaves valid CBC padding
-	// about 1 time in 256, and OpenSSL then reports a decoder error, not BAD_DECRYPT.
-	let sawBadDecrypt = false;
-	for (const candidate of candidates) {
-		let keyObject;
-		try {
-			keyObject = crypto.createPrivateKey({ key: data, format: 'pem', passphrase: String(candidate.value) });
-		} catch (e) {
-			if (e && e.code === 'ERR_OSSL_BAD_DECRYPT') sawBadDecrypt = true;
-			continue;
-		}
-		return exportPkcs8(keyObject, candidate.label);
-	}
-	return { cause: (sawBadDecrypt || candidates.length === 0) ? 'wrong_passphrase' : 'unparseable' };
-}
-
-function exportPkcs8(keyObject, via) {
-	if (keyObject.asymmetricKeyType !== 'rsa') return { cause: 'unsupported_type' };
-	const pem = Buffer.from(keyObject.export({ type: 'pkcs8', format: 'pem' }), 'utf8');
-	const publicKey = crypto.createPublicKey(keyObject);
-	return {
-		pem,
-		spki: publicKey.export({ type: 'spki', format: 'der' }),
-		spkiPem: publicKey.export({ type: 'spki', format: 'pem' }),
-		via
-	};
-}
-
-// The key type named in the public half of an openssh-key-v1 blob ("ssh-rsa", ...),
-// or null when the blob is not one. Reads length-prefixed fields only; the private
-// section is never parsed, and the decoded buffer is zeroed.
-function opensshKeyType(data) {
-	const lines = data.toString('utf8').split(/\r?\n/).map((l) => l.trim());
-	const begin = lines.indexOf('-----BEGIN OPENSSH PRIVATE KEY-----');
-	const end = lines.indexOf('-----END OPENSSH PRIVATE KEY-----');
-	if (begin !== 0 || end <= begin) return null;
-	const body = lines.slice(begin + 1, end).join('');
-	if (!/^[A-Za-z0-9+/]+={0,2}$/.test(body)) return null;
-	const blob = Buffer.from(body, 'base64');
-	try {
-		const MAGIC = 'openssh-key-v1\0';
-		if (blob.length < MAGIC.length || blob.toString('latin1', 0, MAGIC.length) !== MAGIC) return null;
-		let off = MAGIC.length;
-		const field = () => {
-			if (off + 4 > blob.length) return null;
-			const n = blob.readUInt32BE(off);
-			if (off + 4 + n > blob.length) return null;
-			const value = blob.subarray(off + 4, off + 4 + n);
-			off += 4 + n;
-			return value;
-		};
-		if (field() === null || field() === null || field() === null) return null; // cipher, kdf, kdf options
-		if (off + 4 > blob.length || blob.readUInt32BE(off) !== 1) return null;    // exactly one key
-		off += 4;
-		const pub = field();
-		if (pub === null || pub.length < 4) return null;
-		const n = pub.readUInt32BE(0);
-		if (4 + n > pub.length) return null;
-		return pub.toString('latin1', 4, 4 + n);
-	} finally {
-		blob.fill(0);
-	}
-}
-
-// Node cannot parse openssh-key-v1, and withAgent needs a key createPublicKey reads
-// (Pitfall 1). The copy lives only in a 0700 mkdtemp directory under the scratch
-// tmpfs (/dev/shm in the container), overwritten and removed in finally.
-function convertOpenSSH(data, env) {
-	const type = opensshKeyType(data);
-	if (type === null) return { cause: 'unparseable' };
-	if (type !== 'ssh-rsa') return { cause: 'unsupported_type' };
-	let scratchOk = false;
-	try { scratchOk = typeof env.scratchDir === 'string' && fs.statSync(env.scratchDir).isDirectory(); } catch (_e) { scratchOk = false; }
-	if (!scratchOk) return { cause: 'no_scratch_tmpfs' };
-	let dir = null;
-	let out = null;
-	try {
-		try {
-			dir = fs.mkdtempSync(path.join(env.scratchDir, 'keymig-'));
-			fs.chmodSync(dir, 0o700);
-		} catch (_e) {
-			return { cause: 'no_scratch_tmpfs' };
-		}
-		const copy = path.join(dir, 'key');
-		const fd = fs.openSync(copy, 'wx', 0o600);
-		try {
-			fs.writeSync(fd, data);
-		} finally {
-			fs.closeSync(fd);
-		}
-		try {
-			exec.execFileSync('ssh-keygen', ['-q', '-p', '-m', 'PKCS8', '-N', '', '-P', '', '-f', copy], {
-				env: { PATH: process.env.PATH || '/usr/bin:/bin' },
-				stdio: 'ignore',
-				timeout: SSH_KEYGEN_TIMEOUT_MS,
-				shell: false
-			});
-		} catch (_e) {
-			return { cause: 'conversion_failed' };
-		}
-		const read = readFileBounded(copy);
-		if (!read.ok) return { cause: 'conversion_failed' };
-		out = read.data;
-		let keyObject;
-		try {
-			keyObject = crypto.createPrivateKey({ key: out, format: 'pem' });
-		} catch (_e) {
-			return { cause: 'conversion_failed' };
-		}
-		return exportPkcs8(keyObject, 'unencrypted');
-	} catch (_e) {
-		return { cause: 'conversion_failed' };
-	} finally {
-		if (out !== null) out.fill(0);
-		if (dir !== null) removeScratch(dir);
-	}
-}
-
-function removeScratch(dir) {
-	try {
-		for (const name of fs.readdirSync(dir)) {
-			const p = path.join(dir, name);
-			try {
-				const size = fs.statSync(p).size;
-				if (size > 0) fs.writeFileSync(p, Buffer.alloc(size));
-			} catch (_e) { /* removed below */ }
-		}
-	} catch (_e) { /* removed below */ }
-	try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_e) { /* best effort */ }
-}
-
-// Information only (never blocks): the .pub next to a key names a different key.
-function pubMismatch(entry, converted) {
-	if (!entry.pubExisted) return false;
-	const read = readFileBounded(entry.pubPath);
-	if (!read.ok) return false;
-	try {
-		const RSAKey = require('../lib/thinx/rsakey.js');
-		const stored = RSAKey.fingerprint(RSAKey.toOpenSSH(read.data, 'x'));
-		const own = RSAKey.fingerprint(RSAKey.toOpenSSH(converted.spkiPem, 'x'));
-		return stored !== null && own !== null && stored !== own;
-	} catch (_e) {
-		return false;
-	} finally {
-		read.data.fill(0);
-	}
-}
-
-// --- quarantine (D-02, D-03) ---------------------------------------------------
-
-function noticeFor(key) {
-	const d = new Date(Number(key));
-	const date = Number.isFinite(d.getTime()) ? d.toISOString().slice(0, 10) : 'on an unknown date';
-	return 'A deploy key created ' + date + ' could not be moved to the key service and was removed. ' +
-		'Create a new deploy key and add it to your repository.';
-}
-
-// Resolves true only when the audit callback answered true within the bound.
-function notifyOwner(env, owner, message) {
-	const timeoutMs = (typeof env.auditTimeoutMs === 'number') ? env.auditTimeoutMs : AUDIT_TIMEOUT_MS;
-	return new Promise((resolve) => {
-		let settled = false;
-		let timer = null;
-		const finish = (value) => {
-			if (settled) return;
-			settled = true;
-			if (timer !== null) clearTimeout(timer);
-			resolve(value);
-		};
-		timer = setTimeout(() => finish(false), timeoutMs);
-		try {
-			env.audit.log(owner, message, 'warning', (result) => finish(result === true));
-		} catch (_e) {
-			finish(false);
-		}
-	});
-}
-
 // --- atomic replace ------------------------------------------------------------
 
 function tempPathFor(entry, env) {
@@ -520,126 +309,6 @@ function equalBuffers(a, b) {
 
 function report(env) {
 	return baseReport('report', scan(env));
-}
-
-async function migrate(env, opts) {
-	const dryRun = !!(opts && opts.dryRun);
-	const scanned = scan(env);
-	const rep = baseReport(dryRun ? 'dry-run' : 'migrate', scanned);
-	Object.assign(rep, {
-		decrypted_with: { secret: 0, historic_literal: 0, unencrypted: 0 },
-		migrated: 0,
-		already_transit: scanned.entries.filter((e) => e.kind === 'transit').length,
-		quarantined: 0,
-		notified: 0,
-		failed: 0,
-		changed_during_run: 0,
-		pub_mismatch: 0,
-		quarantine: [],
-		failures: [],
-		writes: 0,
-		transit_requests: 0,
-		aborted: null
-	});
-	if (dryRun) rep.predicted = { migrate: 0, quarantine: 0 };
-	if (!dryRun) rep.writes += removeLeftoverTemps(env);
-
-	const fail = (entry, cause) => {
-		rep.failed += 1;
-		rep.failures.push({ owner: entry.owner, key: entry.key, cause });
-	};
-
-	for (const entry of scanned.entries) {
-		if (entry.kind !== 'legacy') continue;
-		if (rep.aborted !== null) {
-			fail(entry, 'not_attempted');
-			continue;
-		}
-		const read = readFileBounded(entry.path);
-		if (!read.ok || read.sha256 !== entry.sha256) {
-			if (read.ok) read.data.fill(0);
-			rep.changed_during_run += 1;
-			continue;
-		}
-		let converted;
-		try {
-			converted = convertLegacy(entry, read.data, env);
-		} finally {
-			read.data.fill(0);
-		}
-		if (!converted.pem) {
-			if (!QUARANTINE_CAUSES.has(converted.cause)) {
-				fail(entry, converted.cause);
-				continue;
-			}
-			const item = { owner: entry.owner, key: entry.key, cause: converted.cause };
-			if (dryRun) {
-				rep.predicted.quarantine += 1;
-				rep.quarantine.push(item);
-				continue;
-			}
-			// Remove only what was judged: a file rewritten since the read is left alone.
-			if (!sameBytes(entry)) {
-				rep.changed_during_run += 1;
-				continue;
-			}
-			const revoked = env.rsakey.revokeUserKeys([entry.name], entry.owner);
-			if (!Array.isArray(revoked) || !revoked.includes(entry.name)) {
-				rep.changed_during_run += 1;
-				continue;
-			}
-			rep.quarantined += 1;
-			rep.writes += 1;
-			rep.quarantine.push(item);
-			if (await notifyOwner(env, entry.owner, noticeFor(entry.key))) rep.notified += 1;
-			continue;
-		}
-		const pem = converted.pem;
-		let back = null;
-		try {
-			if (Object.prototype.hasOwnProperty.call(rep.decrypted_with, converted.via)) rep.decrypted_with[converted.via] += 1;
-			if (pubMismatch(entry, converted)) rep.pub_mismatch += 1;
-			if (dryRun) {
-				rep.predicted.migrate += 1;
-				continue;
-			}
-			let ciphertext;
-			try {
-				rep.transit_requests += 1;
-				ciphertext = await env.transit.encryptKey(pem);
-				rep.transit_requests += 1;
-				back = await env.transit.decryptKey(ciphertext);
-			} catch (e) {
-				const reason = transitReason(e);
-				fail(entry, reason);
-				if (ABORT_CLASSES.has(reason)) rep.aborted = reason;
-				continue;
-			}
-			let spkiBack = null;
-			try { spkiBack = crypto.createPublicKey(back).export({ type: 'spki', format: 'der' }); } catch (_e) { spkiBack = null; }
-			if (!equalBuffers(pem, back) || !equalBuffers(converted.spki, spkiBack)) {
-				fail(entry, 'verify_mismatch');
-				continue;
-			}
-			if (typeof ciphertext !== 'string' || !TRANSIT_VERSION.test(ciphertext)) {
-				fail(entry, 'verify_mismatch');
-				continue;
-			}
-			const outcome = replaceFile(entry, ciphertext, env);
-			if (outcome === 'replaced') {
-				rep.migrated += 1;
-				rep.writes += 1;
-			} else if (outcome === 'changed') {
-				rep.changed_during_run += 1;
-			} else {
-				fail(entry, 'write_failed');
-			}
-		} finally {
-			pem.fill(0);
-			if (Buffer.isBuffer(back)) back.fill(0);
-		}
-	}
-	return rep;
 }
 
 // --- rewrap (KEYMIG-03, D-12) ----------------------------------------------------
@@ -843,7 +512,7 @@ function formatValue(v) {
 // each: owner, key timestamp and cause class only.
 function formatText(rep) {
 	const labels = Object.keys(rep).filter((k) => !Array.isArray(rep[k]));
-	const width = Math.max(0, ...labels.map((k) => k.length), 'quarantine'.length, 'failures'.length);
+	const width = Math.max(0, ...labels.map((k) => k.length), 'failures'.length);
 	const lines = [];
 	for (const k of Object.keys(rep)) {
 		if (Array.isArray(rep[k])) {
@@ -864,8 +533,6 @@ function usage() {
 		'Usage: node scripts/migrate-deploy-keys.js [MODE] [--json]',
 		'',
 		'  --report                    Read-only (default). Counts key files by kind and version.',
-		'  --dry-run                   Converts legacy keys in memory; no Transit request, no write.',
-		'  --migrate                   WRITES. Moves every legacy key to Transit ciphertext.',
 		'  --rewrap                    WRITES. Rewraps every Transit file below the latest version.',
 		'  --canary-capture            Prints one ciphertext of 32 random bytes (redirect it to a 0600 file).',
 		'  --canary-check              Reads one ciphertext on stdin, prints CANARY result=<class> version=<vN>.',
@@ -873,7 +540,10 @@ function usage() {
 		'                              One keyed fetch with the owner\'s keys into a temp dir, prints FETCH_CHECK.',
 		'  --json                      One compact JSON line, the last line on stdout (report modes).',
 		'',
-		'Exit 0 = success, 1 = failed > 0 or aborted (or fetch not ok), 2 = usage, 3 = canary refused.'
+		'  --dry-run, --migrate        Retired (KEYMIG-02): the legacy migration ran in Phase 41. Exit 2.',
+		'',
+		'Exit 0 = success, 1 = failed > 0 or aborted (or fetch not ok), 2 = usage or retired mode,',
+		'3 = canary refused.'
 	].join('\n');
 }
 
@@ -896,30 +566,12 @@ function parseArgs(argv) {
 function cliEnv() {
 	const RSAKey = require('../lib/thinx/rsakey.js');
 	const Transit = require('../lib/thinx/transit.js');
-	const { readSecret } = require('../lib/thinx/secrets.js');
 	const rsakey = new RSAKey();
-	const candidates = [];
-	const secret = readSecret('GIT_KEY_PASSPHRASE');
-	if (typeof secret === 'string' && secret.length > 0) candidates.push({ label: 'secret', value: secret });
-	candidates.push({ label: 'historic_literal', value: HISTORIC_LITERAL });
-	let audit = null;
 	let git = null;
 	return {
 		sshKeysDir: rsakey.ssh_keys,
 		transit: Transit.shared(),
 		rsakey,
-		// Lazy: Audit opens CouchDB, which only a quarantine needs.
-		audit: {
-			log: (...a) => {
-				if (audit === null) {
-					const Audit = require('../lib/thinx/audit.js');
-					audit = new Audit();
-				}
-				return audit.log(...a);
-			}
-		},
-		candidates,
-		scratchDir: '/dev/shm',
 		// Lazy: the production fetch path, used by --fetch-check only.
 		get git() {
 			if (git === null) {
@@ -961,6 +613,10 @@ async function main(argv) {
 		console.error(usage());
 		return 2;
 	}
+	if (RETIRED_MODES.has(parsed.mode)) {
+		console.error(RETIRED_LINE);
+		return 2;
+	}
 	if (parsed.mode === '--fetch-check' && !/^[0-9a-f]{64}$/.test(parsed.owner)) {
 		console.error(usage());
 		return 2;
@@ -989,17 +645,13 @@ async function main(argv) {
 		if (r.line !== null) console.log(r.line);
 		return r.code;
 	}
-	let rep;
-	if (parsed.mode === '--report') rep = report(env);
-	else if (parsed.mode === '--rewrap') rep = await rewrap(env);
-	else rep = await migrate(env, { dryRun: parsed.mode === '--dry-run' });
+	const rep = (parsed.mode === '--rewrap') ? await rewrap(env) : report(env);
 	emit(rep, parsed.json);
 	return exitCode(rep);
 }
 
 module.exports = {
 	report,
-	migrate,
 	rewrap,
 	canaryCapture,
 	canaryCheck,
