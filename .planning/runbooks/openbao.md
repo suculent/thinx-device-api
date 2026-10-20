@@ -1161,9 +1161,9 @@ service; the deployed code no longer reads them (D-08: code first).
   `probe failed` / `deploy key unavailable` lines since 15:32Z; for `8fd573aa` every CircleCI context is success except
   `vue-console-registry`, which was still pending (no console source in this range).
 
-### 2026-10-20 Plan 41-06 Task 1: passphrase retired from the live swarm (paused at the `.env*` sweep)
+### 2026-10-20 Plan 41-06 Task 1: passphrase retired from the live swarm
 
-Run 18:17-18:24Z from the laptop, under the operator's 41-05 Task 3 answer "go". Live mutations: thinx-swarm push to
+Run 18:17-18:24Z and 18:38-18:40Z from the laptop, under the operator's 41-05 Task 3 answer "go". Live mutations: thinx-swarm push to
 origin and into micro (ff-merge), `openbao-install.sh`, the spec backup, one `docker service update` of `thinx_api`,
 `docker secret rm`, and the `.env` line. No `docker stack deploy`, no `restart.sh`, no edge change. Every read printed
 names, counts, modes, SHAs and verdicts only.
@@ -1206,3 +1206,25 @@ names, counts, modes, SHAs and verdicts only.
 - State at the stop (18:24Z): `.Spec` clean, `.PreviousSpec` still carries the secret and the env entry (2 matches),
   ssh_keys `*.sh` 0 (read-only count; step 9 not run), step 10 (forced update) not run. No rollback: every check before
   the `secret rm` passed, and `--rollback` is no longer usable now that the secret is gone.
+- Operator answer to the stop: "you deleted the .env.bak files, GIT_KEY_PASSPHRASE not present". The operator removed
+  both `/mnt/gluster/thinx/.env.bak*` files themselves. Plan human-check (laptop `.env` and the CircleCI project env
+  var of suculent/thinx-device-api): **not present (operator)** for both.
+- Resumed 18:38:22Z. Sweep re-run: 5 `.env*` files remain (`thinx/.env`, `thinx/conf/.env`, `deployment/replica/.env`,
+  `deployment/middleware/.env.local`, `deployment/ovpn-unused/.env`), every count 0; `thinx/.env` 0, `600 root:root`.
+- Step 9 (D-08 step 3): ssh_keys `*.sh` count 0, nothing deleted.
+- Step 10, forced update 18:38:27-18:38:47Z (converged): task `74bunku80wzuf5q63cfxuderj` on micro, started 18:38:41Z,
+  0 restarts, image `f4492b4fb94134e5`; PreviousSpec present and clean.
+- Checks 18:38-18:40Z, all pass:
+  1. One `[transit] probe ok`, zero `probe failed` since 18:38:25Z.
+  2. `--live` -> `API-WIRING-OK mode=live` with `WIRING PREVIOUS_SPEC ok` (no secret or env key in `.PreviousSpec`),
+     `SPEC_ATTACHMENTS ok`, `SPEC_DELTA ok`, `TRANSIT_CANARY ok`, `FORBIDDEN_DENIED` 13/13, `OUTPUT_CLEAN ok`.
+  3. Plan verify block on micro: `API_PASSPHRASE_ABSENT ok`, no swarm secret, `.env` count 0 at `600 root:root`,
+     ssh_keys `*.sh` 0, `.Spec` + `.PreviousSpec` passphrase matches 0. `openbao-verify.sh --full` -> `OPENBAO-VERIFY-OK
+     mode=full`.
+  4. 7442, 1883, 8883 open; routers 29, `fa0afd608550e585`, none disabled.
+  5. thinx-swarm laptop = origin = micro = `48581e9`, installed verifier equal to the checkout copy.
+- Result (KEYMIG-02 live, ROADMAP criterion 2): no passphrase in the live Spec, PreviousSpec, the swarm secret store,
+  the Gluster `.env*` files or ssh_keys. Its value survives only in the root-only 0600 spec backups in
+  `rollback/api-service` on micro (`thinx-api-pre-openbao-*`, `thinx-api-pre-keygen-*`,
+  `thinx-api-pre-passphrase-rm-20261020T182137Z.json`) until Plan 41-08. Task ids: before `b0el7hlnn988mpg3y3njk1qrh`,
+  after the update `tkl1vzagwlv0j3dkumkn66eld`, after the forced update `74bunku80wzuf5q63cfxuderj`.
