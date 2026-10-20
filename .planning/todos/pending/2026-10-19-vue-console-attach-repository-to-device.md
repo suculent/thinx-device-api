@@ -9,6 +9,9 @@ files:
   - lib/router.device.js /api/device/attach, /api/device/detach (API side exists)
   - lib/thinx/devices.js attach(owner, body, callback, res) (sets device.source)
   - services/console/src/app/js (legacy console: the only UI that can attach today)
+audit_acknowledged:
+  milestone: v1.17
+  at: 2026-10-20
 ---
 
 ## Problem
