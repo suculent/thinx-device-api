@@ -10,8 +10,9 @@
 // Dockerfile.test over Dockerfile and docker-compose.test.yml over
 // docker-compose.yml, so Dockerfile.test may be absent there; Dockerfile and at
 // least one root compose file must exist. Negative assertions under spec/ and
-// history under .planning/ are allowed and not scanned. Plan 41-05 adds
-// docker-swarm.yml to the file set.
+// history under .planning/ are allowed and not scanned. Plan 41-05 added
+// docker-swarm.yml, the parent mirror of thinx-swarm's thinx.yml, to the file
+// set; it must exist (COPY . . puts it in the CI test image as well).
 
 const fs = require("fs");
 const path = require("path");
@@ -41,6 +42,7 @@ const RETIRED = {
 };
 
 const MIGRATION_SCRIPT = "scripts/migrate-deploy-keys.js";
+const SWARM_FILE = "docker-swarm.yml";
 const COMPOSE_NAME = /^docker-compose.*\.ya?ml$/;
 
 // Every .js file under dir (repo-relative), skipping node_modules and symlinks.
@@ -67,6 +69,9 @@ function fileSet() {
     files.push("Dockerfile");
     if (fs.existsSync(path.join(ROOT, "Dockerfile.test"))) files.push("Dockerfile.test");
     const compose = fs.readdirSync(ROOT).filter((name) => COMPOSE_NAME.test(name)).sort();
+    // Plan 41-05: the swarm stack mirror. Pushed unconditionally, so a missing
+    // file fails the isFile check below instead of shrinking the set.
+    files.push(SWARM_FILE);
     return { files: files.concat(compose), compose };
 }
 
@@ -84,10 +89,11 @@ function hits(rel, tokens) {
 
 describe("Passphrase retirement gate (KEYMIG-02)", function () {
 
-    it("scans lib/ and scripts/ .js files, Dockerfile and at least one root compose file", function () {
+    it("scans lib/ and scripts/ .js files, Dockerfile, docker-swarm.yml and at least one root compose file", function () {
         const set = fileSet();
         expect(set.files.filter((f) => f.startsWith("lib" + path.sep)).length).to.be.above(10);
         expect(set.files).to.include(MIGRATION_SCRIPT.split("/").join(path.sep));
+        expect(set.files).to.include(SWARM_FILE);
         expect(set.compose.length).to.be.at.least(1);
         for (const rel of set.files) expect(fs.statSync(path.join(ROOT, rel)).isFile(), rel).to.equal(true);
     });

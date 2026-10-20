@@ -30,7 +30,7 @@ networks:
 #
 #   api          CSRF_SECRET, SLACK_BOT_TOKEN, SLACK_WEBHOOK,
 #                GITHUB_CLIENT_SECRET, GOOGLE_OAUTH_SECRET, MAILGUN_API_KEY,
-#                GIT_KEY_PASSPHRASE, ROLLBAR_SERVER_TOKEN, WORKER_SECRET,
+#                ROLLBAR_SERVER_TOKEN, WORKER_SECRET,
 #                INFLUXDB_TOKEN (Phase 27, mounted 2026-10-03)
 #                NEW_RELIC_LICENSE_KEY (quick 261013-kvm, mounted 2026-10-13;
 #                thinx-swarm thinx.yml 2121066)
@@ -101,8 +101,6 @@ secrets:
   ROLLBAR_SERVER_TOKEN:
     external: true
   WORKER_SECRET:
-    external: true
-  GIT_KEY_PASSPHRASE:
     external: true
   CSRF_SECRET:
     external: true
@@ -327,7 +325,6 @@ services:
       - MAILGUN_API_KEY
       - ROLLBAR_SERVER_TOKEN
       - WORKER_SECRET
-      - GIT_KEY_PASSPHRASE
       - CSRF_SECRET
       - INFLUXDB_TOKEN
       - NEW_RELIC_LICENSE_KEY
@@ -356,7 +353,6 @@ services:
       - "SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}"
       - "SLACK_WEBHOOK=${SLACK_WEBHOOK}"
       - "MAILGUN_API_KEY=${MAILGUN_API_KEY}"
-      - "GIT_KEY_PASSPHRASE=${GIT_KEY_PASSPHRASE}"
       # Phase 25: CSRF_MODE legacy|observe|signed; roll back with CSRF_MODE=legacy. CSRF_ENFORCE stays true.
       - "CSRF_ENFORCE=true"
       - "CORS_ENFORCE=true"
