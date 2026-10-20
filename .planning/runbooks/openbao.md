@@ -1096,3 +1096,61 @@ No `docker stack deploy`, no `restart.sh`, no `docker service update`. Every rea
   stays until Plan 41-08 shreds it (D-06). It can be decrypted with the old passphrase, and DO snapshots of micro may
   capture it (accepted residual, 2026-10-09).
 - Not pushed: `main` and no tag. This entry is a local docs commit.
+
+### 2026-10-20 Plan 41-05 Task 1: removal deploy (D-08 step 1)
+
+Run 15:18-15:40Z from the laptop. Live mutations: the `thinx-unit` push and the parent `thinx-staging` push. CI and
+Swarmpit did the rest. No `docker stack deploy`, no `restart.sh`, no `docker service update` by hand, and
+swarm-autopull-recovery was not needed. No key file was written. The passphrase secret and env are still on the
+service; the deployed code no longer reads them (D-08: code first).
+
+- D-10 record: `D10_GATE pass` (Plan 41-02 Task 3). Fresh re-check right before the push, 15:19Z, `--report --json` in
+  the old task `j9n880hztl5pg4fnptefq6eh7`: private_files 77, transit_total 77 (`v1` 77), legacy_total 0, unknown 0,
+  unreadable 0, stray_askfiles 0, leftover_tmp 0. No operator go was taken for this push (D-10).
+- SHAs: parent `8fd573aa` (`8fd573aa395f8cb62ff0cd92fe9e7d577c7b97f9`, the 41-04 docs head). origin `thinx-staging` and
+  `thinx-unit` were both `5d972067`, an ancestor; the pushed range (19 commits) differs from it only in the 41-03 and
+  41-04 files plus `.planning/`. thinx-swarm unchanged at `8cfa7dd`.
+- Pre-state 15:19Z: thinx_api task `j9n880hztl5pg4fnptefq6eh7` on micro, image digest `d021ae3ce2b55920`, spec UpdatedAt
+  12:26:35Z, 0 restarts. Traefik http routers: 29, sorted `name status` sha256/16 `fa0afd608550e585`, none disabled.
+  7442, 1883 and 8883 open from the laptop.
+- Local regression (all exit 0; `--config=/dev/null --random=false`, `ENVIRONMENT=development` with placeholder CouchDB
+  names):
+  - Jasmine: PassphraseRetiredSpec 4/0, MigrateDeployKeysSpec 17/0 (1 pending = the dev-server case, run below),
+    TransitSpec 39/0, KeyFormatSpec 30/0, GitSpec 73/0, SecretsSweepSpec 42/0, BuilderRemoteJobSpec 77/0,
+    BuilderApiKeySpec 54/0, RedisHealthSpec 4/0.
+  - 03-RsakeySpec with `^RSA Key \((?!13\))`: 17/0.
+  - `node --test` DeployKeyNames + CiPipelineGates: 76/76.
+  - `scripts/openbao-dev.sh run` TransitIntegrationSpec + MigrateDeployKeysSpec + TransitRotationSpec: 29 specs,
+    0 failures, none pending, no key/ciphertext/token shape in the log, no `thinx-openbao-dev` container left.
+  - thinx-swarm wiring gate (pre-retirement version): `--source thinx.yml <parent>/docker-swarm.yml` ->
+    `API-WIRING-OK mode=source`; `--self-test` -> `SELF_TEST ok 17/17`, `API-WIRING-OK mode=self-test`.
+- CircleCI:
+  - `thinx-unit` `5d972067..8fd573aa` (fast-forward): `test` #16160, success 15:25:48Z, first run, no fix rounds.
+  - `thinx-staging` `5d972067..8fd573aa` at 15:26:13Z: `test` #16163 15:29:44Z, `api-registry` #16164 15:32:05Z,
+    `test-console-classic` #16165 and `console-classic-registry` #16166 success; `test-vue-console` #16161 still
+    running at 15:33Z (no console source changed in this range).
+- Rollout: new thinx_api task `b0el7hlnn988mpg3y3njk1qrh` on micro, container started 15:33:16Z with 0 restarts, image
+  digest `f4492b4fb94134e5`, spec UpdatedAt 15:33:22Z, UpdateStatus completed (about 70 s after api-registry).
+- Live checks (15:34-15:40Z), all pass:
+  1. Transit log since 15:32Z: one `[transit] probe ok`, zero `probe failed`, zero `deploy key unavailable`, zero
+     `[git] key ... skipped` lines.
+  2. `REMOVAL_LIVE retired_version=true key_missing=true sshEnv=undefined keyPassphrase=undefined` (D-13 is live,
+     the legacy helpers are gone from the running image; RESEARCH Pitfall 10).
+  3. `--report --json` in the new task: the same counts as the pre-push re-check (77/77 `v1`, legacy_total 0).
+  4. D-10 keyed fetch through the Transit-only code, owner `test` (`cedc16bb…`), `git@github.com:suculent/thinx-autoflood.git`
+     `main`: `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0`.
+  5. `tests/openbao-api-wiring.test.sh --live` (pre-retirement version) -> `API-WIRING-OK mode=live`: `SPEC_ATTACHMENTS ok`
+     (the passphrase secret still attached, as expected before Plan 41-06), `SPEC_DELTA ok`, `TRANSIT_CANARY ok`,
+     `FORBIDDEN_DENIED` 13/13, `OUTPUT_CLEAN ok`.
+  6. `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> `OPENBAO-VERIFY-OK
+     mode=full`; `openbao-verify.sh --api-service thinx_api` (installed pre-retirement version) -> `OPENBAO-VERIFY-OK
+     mode=api` (`API_SECRET_MOUNTED ok` for BAO_ROLE_ID, BAO_SECRET_ID and the passphrase secret, `API_TASK_PROBE ok`,
+     `API_PORT_7442 ok`); `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> `OPENBAO-REHEARSAL-MATRIX-OK
+     generations=g1,g2`.
+  7. Ports 7442, 1883 and 8883 open.
+  8. Routers identical to the pre-state (29, `fa0afd608550e585`, none disabled); traefik_traefik and
+     traefik_socket-proxy UpdatedAt still 2026-10-18 06:47:26Z.
+- Rollback (not needed): `git revert` of the 41-03 and 41-04 commits on `thinx-staging`, pushed through `thinx-unit`,
+  restores the dual-read code. Safe while the passphrase secret is still mounted, because every key is Transit
+  ciphertext. From this deploy on, a legacy file restored from a backup is a logged skip (D-07, D-09).
+- Not pushed: `main` and no tag. This entry is a local docs commit.
