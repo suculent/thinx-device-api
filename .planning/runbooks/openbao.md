@@ -1452,3 +1452,93 @@ post-change snapshot only. Output: verdict lines, versions and counts.
 - Logs since 19:30Z (counts only): thinx_api `deploy key unavailable` 0, `retired_version` 0, `[git] key ... skipped`
   0 (102 lines carry the build id); thinx_worker (task `4ss4vlnluqw67255gxbac09w9`, micro) `deploy key unavailable`
   0, `retired_version` 0.
+
+### 2026-10-20 Plan 41-08 Task 1: Phase 41 final live gate
+
+Run 19:45-20:01Z from the laptop. Live mutations: the `thinx-unit` push and the parent `thinx-staging` push. CI and
+Swarmpit did the rest. No `docker stack deploy`, no `restart.sh`, no `docker service update` by hand, no edge change,
+and swarm-autopull-recovery was not needed. Nothing was shredded, deleted or sanitized (Task 2 decides the scope).
+Every read printed names, modes, sizes, counts, versions and verdicts only.
+
+- Preconditions: 41-07-SUMMARY.md records `D14_GATE pass` and `CANARY result=retired_version`; origin `thinx-staging`
+  and `thinx-unit` both `8fd573aa`, an ancestor of HEAD; the pushed range (12 commits) differs from it outside
+  `.planning/` only in `docker-swarm.yml` and `spec/jasmine/PassphraseRetiredSpec.js`; `gh auth status` ok.
+- SHAs: parent `8bc53a75` (`8bc53a751d0028971ae8cbde31a07fc5fc245bc3`, the 41-07 docs head). thinx-swarm laptop =
+  origin = `48581e9` (micro unchanged since 41-06).
+- Pre-state 19:47Z: thinx_api task `74bunku80wzuf5q63cfxuderj` on micro, image digest `f4492b4fb94134e5`, spec UpdatedAt
+  18:38:47Z, UpdateStatus completed. Traefik http routers 29, sorted `name status` sha256/16 `fa0afd608550e585`, none
+  disabled. 7442, 1883 and 8883 open from the laptop.
+- Local regression (all exit 0; `--config=/dev/null --random=false`, `ENVIRONMENT=development` with placeholder CouchDB
+  names):
+  - Jasmine: PassphraseRetiredSpec 4/0 (now covering docker-swarm.yml), MigrateDeployKeysSpec 17/0 (1 pending = the
+    dev-server case, run below), TransitSpec 39/0, KeyFormatSpec 30/0, GitSpec 73/0, SecretsSweepSpec 42/0,
+    BuilderRemoteJobSpec 77/0, BuilderApiKeySpec 54/0, RedisHealthSpec 4/0.
+  - 03-RsakeySpec with `^RSA Key \((?!13\))`: 17/0.
+  - `node --test` DeployKeyNames + CiPipelineGates: 76/76.
+  - `scripts/openbao-dev.sh run` TransitIntegrationSpec + MigrateDeployKeysSpec + TransitRotationSpec: 29 specs,
+    0 failures, none pending, no key/ciphertext/token shape in the log, no `thinx-openbao-dev` container left.
+  - thinx-swarm wiring gate (retired form): `--source thinx.yml <parent>/docker-swarm.yml` -> `PASSPHRASE_ABSENT ok`
+    for both files, `BASELINE_UNCHANGED ok`, `FILES_MATCH ok`, `API-WIRING-OK mode=source`; `--self-test` ->
+    `SELF_TEST ok 18/18 mutations refused`, `API-WIRING-OK mode=self-test`.
+- CircleCI:
+  - `thinx-unit` `8fd573aa..8bc53a75` (fast-forward, never forced) at 19:47:54Z: `test` #16167 success by 19:51:22Z,
+    first run, no fix rounds.
+  - `thinx-staging` `8fd573aa..8bc53a75` at 19:51:28Z: `test` #16170 success 19:54:56Z (the jasmine glob
+    `jasmine/*[sS]pec.js` includes PassphraseRetiredSpec, which requires docker-swarm.yml to exist in the CI image
+    and to carry no passphrase), `api-registry` #16171 success 19:57:14Z, `test-console-classic` #16172,
+    `console-classic-registry` #16173, `test-vue-console` #16168 success; `vue-console-registry` #16169 still pending
+    at 20:00Z (no console source in this range). The deployed SHA equals the thinx-unit-green SHA; its
+    `docker-swarm.yml` names BAO_SECRET_ID and has 0 passphrase lines (plan verify 1 passes).
+- Rollout: new thinx_api task `tj430niq4fnlvnchu3ljga2ml` on micro, container started 19:58:14Z, 0 restarts, image
+  digest `64ff48ed8543b1a7`, spec UpdatedAt 19:58:20Z, UpdateStatus completed (about 60 s after api-registry). The roll
+  replaced `.PreviousSpec` with the 41-06 spec (clean).
+- Final live gate (19:58-20:01Z), all pass:
+  1. API task log since 19:57Z: one `[transit] probe ok`, 0 `probe failed`, 0 `deploy key unavailable`, 0
+     `retired_version`, 0 `[git] key ... skipped`.
+  2. `REMOVAL_LIVE retired_version=true key_missing=true sshEnv=undefined keyPassphrase=undefined` (19:58:44Z).
+  3. `--report --json` (19:58:53Z): private_files 77, transit_total 77, `{"v2":77}` (every file at vL1 = 2),
+     legacy_total 0 (all four kinds 0), unknown 0, unreadable 0, stray_askfiles 0, leftover_tmp 0. Plan verify 3 passes.
+  4. `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0` (owner `test`, `cedc16bb…`,
+     `git@github.com:suculent/thinx-autoflood.git` `main`, 19:59:09Z).
+  5. Stored v1 canary `transit-canary-20261020T184027Z.ct` -> `CANARY result=retired_version version=v1` (19:59:16Z).
+  6. `tests/openbao-api-wiring.test.sh --live` -> `API-WIRING-OK mode=live` (19:59:23Z): `SPEC_ATTACHMENTS ok` (no
+     passphrase secret or env key), `WIRING PREVIOUS_SPEC ok`, `SPEC_DELTA ok` against
+     `thinx-api-pre-openbao-20261018T193726Z.json`, `TRANSIT_CANARY ok`, `FORBIDDEN_DENIED ok 13/13`,
+     `UNAUTHENTICATED_DENIED ok`, `OUTPUT_CLEAN ok`; 0 key/ciphertext/token shapes in the log.
+  7. `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> `OPENBAO-VERIFY-OK
+     mode=full`; `--api-service thinx_api` -> `OPENBAO-VERIFY-OK mode=api` with `API_PASSPHRASE_ABSENT ok`,
+     `API_SECRET_MOUNTED ok` for BAO_ROLE_ID and BAO_SECRET_ID only, `API_PORT_7442 ok`, `API_TASK_PROBE ok`;
+     `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> `OPENBAO-REHEARSAL-MATRIX-OK generations=g1,g2`.
+  8. Absence (the 41-06 check): `docker secret ls` passphrase 0; `/mnt/gluster/thinx/.env` passphrase lines 0, `600
+     root:root`; ssh_keys `*.sh` 0; `.Spec` + `.PreviousSpec` passphrase matches 0 (PreviousSpec present); 12 api
+     secrets.
+  9. Ports 7442, 1883 and 8883 open; routers 29, `fa0afd608550e585`, none disabled, list byte-identical to the
+     pre-state; traefik_traefik and traefik_socket-proxy UpdatedAt still 2026-10-18 06:47:26Z.
+- Inventory for the Task 2 decision (names, modes, sizes, mtimes, counts; no content read out):
+  - `shred` present on both nodes (`/usr/bin/shred`).
+  - micro `/root/thinx-backups` (`700 root:root`), 3 files, all `600 root:root`:
+    - `deploy-keys-premig-20261020T123359Z.tar` 440320 B, 12:33:59Z (D-05, legacy key material);
+    - `deploy-keys-premig-20261020T123359Z.tar.sha256` 126 B, 12:33:59Z;
+    - `transit-canary-20261020T184027Z.ct` 90 B, 18:40:27Z (junk v1 ciphertext, now refused).
+  - micro `grep -rlI 'GIT_KEY_PASSPHRASE='` under `/var/lib/openbao-maintenance` (`700 root:root`), 5 files, all
+    `600 root:root` in `700 root:root` directories, each with 2 `NAME=<literal>` occurrences (Spec and PreviousSpec
+    env), none a variable reference:
+    - `rollback/api-service/thinx-api-pre-openbao-20261018T193726Z.json` 29058 B, 2026-10-18 19:37:26Z, **the --live
+      gate baseline** (the only, so newest, `pre-openbao` backup; SPEC_DELTA reads it);
+    - `rollback/api-service/thinx-api-pre-keygen-20261019T133316Z.json` 32440 B, 2026-10-19 13:33:16Z (Phase 40 UAT 5);
+    - `rollback/api-service/thinx-api-pre-passphrase-rm-20261020T182137Z.json` 32549 B, 2026-10-20 18:21:37Z (41-06);
+    - `rollback/api-trust/thinx_api-20261018T194057Z-1765792.json` 30819 B, 2026-10-18 19:40:57Z (trust consumer,
+      openbao-cert-renew.sh);
+    - `rollback/api-trust/thinx_api-20261018T194128Z-1765792.json` 32439 B, 2026-10-18 19:41:28Z (trust consumer).
+    `log/openbao-verify.log` names the variable (verdict lines) with 0 `NAME=` lines: not a copy.
+  - core: `/var/lib/openbao-maintenance` (`700 root:root`) has 0 files with the name; no rollback directory.
+  - **Outside the plan's inventory scope (informational, read-only `grep -lI` over `/root` depth <= 4, files < 5 MB,
+    excluding `/root/thinx-backups`)** on micro:
+    - `/root/thinx-swarm-backup-untracked/.env.bak.20260619154540.cors` 1868 B `600 root:root`, 1 literal value line;
+    - `/root/thinx-swarm-backup-untracked/.env.bak.20260929142800` 1759 B `600 root:root`, 1 literal value line;
+    - `/root/thinx-swarm-backup-untracked/thinx.yml.bak.20261007222957.pre-v3-labels` and
+      `/root/thinx.yml.bak-20260925`: 1 line each, a `${...}` variable reference, no value.
+    The two `.env.bak*` files carry the same basenames as the two Gluster `.env.bak*` files that 41-06 recorded as
+    deleted by the operator; the directory (`755 root:root`, 8 entries) also holds the six moved `pre-v3-labels`
+    files. Neither Task 2 option covers them; their handling needs the operator's explicit direction.
+- Not pushed: `main` and no tag. This entry is a local docs commit.
