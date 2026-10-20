@@ -406,6 +406,50 @@
 
 ---
 
+## Milestone: v1.17 — Deploy-Key OpenBao Transit
+
+**Shipped:** 2026-10-20
+**Phases:** 3 (39–41) | **Plans:** 19 | **Tasks:** 44
+
+### What Was Built
+
+- Internal-only OpenBao 2.7.1 on micro: node-local Raft, private-CA TLS verified by the API, `seal "static"` auto-unseal, file audit, a non-exportable Transit key and a least-privilege `thinx-api` AppRole. The root token is revoked after a custody-gated bootstrap. Host jobs cover snapshots on both nodes, CA/leaf renewal, audit rotation and restore rehearsal (39).
+- A dependency-free Transit/AppRole client and Transit-only key generation. In-memory decrypt into a per-attempt `ssh-agent`, a `503 key_service_unavailable` refusal and a kill switch; dual-read kept legacy keys building through the cut-over (40).
+- 77/77 production keys on Transit, then the passphrase, askpass files and legacy read path removed everywhere. Transit key rotated to v2, rewrapped, `min_decryption_version` raised, and the pre-migration copies shredded (41).
+
+### What Worked
+
+- Exact-image fixture harnesses (136 and 59 checks) proved bootstrap, recovery and renewal against `openbao/openbao:2.7.1` before any production access, so no live step needed a redesign.
+- Dual-read (D-04) made the migration a non-event for builds: migrate, re-run idempotently, then remove the legacy path in a separate deploy.
+- Static and live "absence gates" with mutation self-tests turned "the passphrase is gone" into a check that can be re-run, not a claim.
+- Operator go/no-go checkpoints before each irreversible step (root revoke, purge, retirement, rotation raise, shred) kept every live change deliberate.
+
+### What Was Inefficient
+
+- The 41-06 operator logins failed twice, which left time-bounded userpass tokens (T-41-27) and a corrected deletion claim in the record.
+- Phases 39/40 reached the close with stale verification digests. This was predictable, because Phase 41 was designed to remove what they verified.
+- A live spec drift (`THINX_DEPLOY_KEYGEN` left set by UAT) diverged from runbook §11 and was only recorded, not reconciled.
+
+### Patterns Established
+
+- Custody receipts compared by sha256 in memory, never displayed. Secrets live only in 0600 tmpfs between invocations.
+- Every live `thinx_api` change is one targeted `docker service update` from a 0600 node-local spec backup, with an in-task probe.
+- Retirement is written as an absence gate (source and `--live`) with mutation self-tests, not as a checklist.
+- Rotation is a runbook recipe (section 12), canary-proven, deliberately not a cron.
+
+### Key Lessons
+
+- Plan the verification shape of a migration milestone up front. When a later phase is meant to delete what an earlier one verified, re-verify the earlier phases in the last phase, or accept the override knowingly.
+- Do not let UAT leave state on a live spec. Reconcile it in the same plan or record it as a blocker with an owner.
+- Run the milestone audit even when every phase passed; v1.17 was closed without one.
+
+### Cost Observations
+
+- Sessions: spread over 2026-10-12 → 2026-10-20 (9 days, 434 parent commits including planning).
+- Notable: most of the risk sat in operator-gated live steps, not in code. The API change itself is +12.8k / −0.9k lines across 65 files, mostly tests and host scripts.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -420,6 +464,7 @@
 | v1.14 | 7 | 47 | Milestone re-audit with an integration regression check standing in for stale phase verifications; gated push-to-redeploy measurement for ops phases; three-mode security rollout switch |
 | v1.15 | 6 | 19 | Infrastructure-only milestone on an external source repo: generated mirror + CI gate, repo-first one-update live changes with auto-revert gates, external scan as the phase gate |
 | v1.16 | 4 | 7 | Feature milestone across parent + console submodule, closed on live UAT with same-day gap-closure plans; no milestone audit |
+| v1.17 | 3 | 19 | Second workstream milestone, security-finding driven: exact-image fixture harnesses before production, dual-read cut-over, absence gates with mutation self-tests, operator go/no-go before each irreversible step |
 | v1.18 | 8 | 37 | First workstream milestone; audit-driven inserted gap-closure phase (48.1); Cypress gate on the Vue image build; `--auto` review loop ran to its 3-iteration cap on one defect class |
 
 ### Cumulative Quality
@@ -433,6 +478,7 @@
 | v1.14 | CsrfRouteInventory/SessionFlow, Git/BuilderPath/SafePath, SecretsSweep, LogPaging/BuildLogOwner, Influx* (CI 1756 specs, 0 failures) | api, worker, transformer, both consoles; InfluxDB 2.9.1; Swarmpit 1.10 | tech_debt (24/24; override_closeout) |
 | v1.15 | mirror check + `traefik-edge-scan.sh` (EDGE-SCAN OK, 16 hosts) | ~15 live `traefik_traefik` service updates; socket-proxy; tls-config-3 | tech_debt (14/14; override_closeout) |
 | v1.16 | deploy-key Node tests, BuildlogPagingSpec, Vue `milestone-v116` unit suite, whole-page render tests + Cypress specs | api + both consoles via thinx-staging (PR #572, console PR #32 and follow-ups) | no audit (11/11 live UAT; override_closeout) |
+| v1.17 | Transit client specs (mock + OpenBao dev server in CI), migration tool specs, static passphrase-retirement gate, 39 fixture harnesses (136 + 59 checks) | `thinx_api` cut-over and retirement via thinx-staging; OpenBao stack on micro; Transit key rotation | no audit (17/17; override_closeout) |
 | v1.18 | `audit-gaps-v118.cjs` (32 checks), `close-out-v118.cjs`, 5 new Cypress specs (16 total, 93 tests), `CiPipelineGates` spec | console + API via thinx-staging pipelines 5655–5677 and the 48.1 push (`95ea22f`) | tech_debt (33/33; W1–W3 closed by 48.1; override_closeout) |
 
 ### Recurring Backlog Themes
@@ -447,6 +493,7 @@
 - **v1.15 → carried forward:** real client IPs → `ipAllowList`/`rateLimit`, `sniStrict`, socket-proxy repin, edge doc drift. v1.14 carry-overs untouched (v1.15 was edge-only).
 - **v1.16 → carried forward:** AR-36-01 full-log payload size, open review items 35–38, UI-review polish. v1.14/v1.15 carry-overs untouched (v1.16 was console-only).
 - **v1.18 → carried forward:** 48.1 operator checks (CI run, served console, impersonation spot-check), build-log scroll defect, review Info items IN-01..IN-06, `auth/setUser` for impersonation, stale digests on 42/44–48, CI-04 first `main` run. v1.16 carry-overs (AR-36-01, review items 35–38) untouched.
+- **v1.17 → carried forward:** KEYMIG-04 PwnDoc retest, pre-migration Gluster backups / DO snapshots (accepted residual), no owner AAD on ciphertext, 41 review residuals, `THINX_DEPLOY_KEYGEN` spec/runbook drift, cloud-KMS seal and Raft HA.
 - **v1.14 → carried forward:** OPS-SWARM-03, SEC-CSP-02, worker lifecycle / build-queue cron, API-key storage hardening, Rollbar token split, legacy worker `cmd` removal, CI exit on spec failure. TEST-CHAI-01, OPS-02/03, `uuid #194` survive again.
 
 ---
@@ -458,3 +505,4 @@
 *v1.15 milestone section appended: 2026-10-12*
 *v1.16 milestone section appended: 2026-10-12*
 *v1.18 milestone section appended: 2026-10-18*
+*v1.17 milestone section appended: 2026-10-20*

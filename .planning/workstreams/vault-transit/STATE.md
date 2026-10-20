@@ -2,39 +2,36 @@
 gsd_state_version: "1.0"
 milestone: v1.17
 milestone_name: Deploy-Key OpenBao Transit
-current_phase: 41
-current_phase_name: Key Migration, Passphrase Retirement & Rotation
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 41 complete — all phases complete
-last_updated: "2026-10-20T20:47:26.636Z"
+last_updated: "2026-10-20T20:56:34.545Z"
 last_activity: 2026-10-20
-last_activity_desc: Phase 41 complete
-state_head: 51e53aa88699177daa34f66cbad14031d81c28c4
+last_activity_desc: Milestone v1.17 completed and archived
+state_head: 6915b6fa4f656535a152a954329d1499911a0e9d
 progress:
   total_phases: 3
   completed_phases: 3
   total_plans: 19
   completed_plans: 19
-  percent: 100
+current_phase: 41
+current_phase_name: Key Migration, Passphrase Retirement & Rotation
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-transit/REQUIREMENTS.md`
+See: .planning/PROJECT.md (updated 2026-10-20) and `.planning/workstreams/vault-transit/milestones/v1.17-REQUIREMENTS.md`
 
 **Core value:** Possession of the deploy-key files (GlusterFS volume, backup, snapshot, file-read bug) must not be sufficient to decrypt any owner's git deploy private key, while THiNX still clones and builds autonomously with the owner logged out.
-**Current focus:** v1.17 complete — next: `/gsd-complete-milestone v1.17 --ws vault-transit`
+**Current focus:** v1.17 shipped and archived 2026-10-20 — planning the next milestone (`/gsd-new-milestone`)
 
 ## Current Position
 
-Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — COMPLETE
-Plan: 8 of 8
-Status: All phases complete
-Last activity: 2026-10-20 — Phase 41 complete
-
-Progress: [██████████] 100%
+Phase: Milestone v1.17 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-20 — Milestone v1.17 completed and archived
 
 ## Performance Metrics
 
@@ -156,11 +153,8 @@ None yet.
 ### Blockers/Concerns
 
 - [Phase 41] T-41-27 accepted time-bounded (AR-41-02): up to two operator userpass tokens from the failed 41-06 logins expire by TTL ≤22:48Z 2026-10-20. Open review residuals WR-01, WR-04, WR-05, WR-06, IN-07, IN-09 (41-REVIEW-DISPOSITION.md). KEYMIG-04 PwnDoc retest still future.
-- [D-05 resolved 2026-10-12] Archived `.planning/milestones/v1.15-ROADMAP.md` records that Phase 34 D-20 was dropped and moved to v1.17. Phase 39 owns the OpenBao replacement; inspect the current vault.yml during planning.
-- [Phase 39] Node-local Raft + static-seal key bind OpenBao to one node; confirm the manager set and pin by hostname. Decide how the seal key reaches the container (bind mount vs swarm secret).
 - [Phase 41] Pre-migration backup, pre-migration Gluster backups and DO VM snapshots hold `thinx`-passphrase keys — ACCEPTED residual risk (operator, 2026-10-09); no destroy/re-issue requirement.
 - [Phase 40] Phase 45 (vue-console, v1.18) landed first in lib/thinx/rsakey.js: `RSAKey.validateKeyName` is now the shared create/rename name rule and returns reason codes (`empty`, `too_long`, `control_chars`, `line_separator`, `bidi`); `rsakey.rename` rewrites only `<owner>-<ts>.pub` through a dot-prefixed temp file in the same directory and `renameSync`, keeps the file mode, and never opens the private file; `RSAKey.fingerprint` is the OpenSSH SHA256 over the decoded key blob (Phase 45 D-01), so a rename keeps it; and the D-08 display-name rule (`RSAKey.storedName`) shows the stored comment only on a single-line `ssh-` key that passes the validator. Phase 40 keeps the `.pub` as plaintext OpenSSH, keeps rename independent of private-key storage, and rebases on these (Phase 45 D-15).
-- [Phase 40 → 41, resolved in Phase 41] `retired_version` is its own alerting class since 41-03; the rotation ran after it was proven. Original note: before the Transit key rotation: a decrypt HTTP 400 is classed `bad_ciphertext` and never alerts (review IN-05), so ciphertext below `min_decryption_version` would fail silently; a login `server_error` is retried per key (IN-10). See 40-SECURITY.md residuals.
 - [Phase 40] Live `thinx_api` spec now carries `THINX_DEPLOY_KEYGEN=enabled` (left by UAT 5); runbook §11 says it has none — reconcile on the next stack deploy.
 - [Console] Vue console cannot attach a repository to a device — `.planning/todos/pending/2026-10-19-vue-console-attach-repository-to-device.md` (fix soon).
 
@@ -170,9 +164,14 @@ None yet.
 |----------|------|--------|-------------|-----------|
 | requirement | KEYMIG-04 PwnDoc retest of finding `6ac64bcfdd94eb38dba4c3a4` | Future | 2026-10-09 | v1.17 |
 | requirement | Cloud-KMS auto-unseal; OpenBao Raft HA | Future | 2026-10-09 | v1.17 |
+| todos | 2026-10-19-vue-console-attach-repository-to-device.md | (presence-only) | 2026-10-20 | v1.17 |
 
 ## Session Continuity
 
 **Last session:** 2026-10-20T20:09:10.291Z
-**Stopped At:** Phase 41 complete — all phases complete
+**Stopped At:** v1.17 milestone completed and archived
 **Resume File:** None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

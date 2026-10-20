@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.17 — Deploy-Key OpenBao Transit (Shipped: 2026-10-20)
+
+**Workstream:** `vault-transit` (detailed ledger in `.planning/workstreams/vault-transit/MILESTONES.md`; archive in `.planning/workstreams/vault-transit/milestones/`)
+
+**Delivered:** PwnDoc finding `6ac64bcfdd94eb38dba4c3a4` is closed in production. Every owner's git deploy key on GlusterFS is now OpenBao Transit ciphertext (`vault:v2:`) that only the `thinx-api` AppRole can decrypt, through an internal-only OpenBao 2.7.1 on the swarm. `GIT_KEY_PASSPHRASE` is gone everywhere. Builds still run with the owner logged out.
+
+**Phases completed:** 39–41 (3 phases, 19 plans, 44 tasks)
+
+**Key accomplishments:**
+- Internal-only OpenBao on micro: node-local Raft, private-CA TLS, static-seal auto-unseal, file audit, root token revoked, snapshot/renewal/rehearsal host jobs with Slack alerts (VAULT-01..08)
+- Dependency-free Transit/AppRole client; new keys written only as ciphertext and decrypted in memory into a per-attempt `ssh-agent`; `503 key_service_unavailable` plus a kill switch (KEYENC-01..06)
+- 77/77 production keys on Transit (76 migrated, 0 failed); passphrase, askpass files and legacy read path removed from code, images, compose files and swarm secrets (KEYMIG-01/02)
+- Transit key rotated to v2, rewrapped, `min_decryption_version` = 2; pre-migration tar and passphrase-bearing spec backups shredded (KEYMIG-03)
+
+**Stats:** 17/17 requirements; parent `aa4372de` (2026-10-12) → `6915b6fa` (2026-10-20), 434 commits, 65 non-planning files, +12,826 / −916
+
+**Closeout:** `override_closeout`. 1 todo newly acknowledged and 16 carried forward. Phases 39/40 have stale verification digests (Phase 41 removed the dual-read path they verified, as planned). No milestone audit was run. KEYMIG-04 (PwnDoc retest) is future.
+
+---
+
 ## v1.18 — Console Improvements (Shipped: 2026-10-18)
 
 **Workstream:** `vue-console` (detailed ledger in `.planning/workstreams/vue-console/MILESTONES.md`; archive in `.planning/workstreams/vue-console/milestones/`)
