@@ -277,9 +277,11 @@ update --rollback thinx_api` is equivalent (PreviousSpec = the backup); after a 
 the consumer with it (`obc_state_set` key `armed` in `state/api-trust`) only if the API is detached for good: an
 armed consumer with no CA config refuses issuer renewals (`API_TRUST_NOT_ATTACHED`, nothing changed) and alerts.
 
-## 11. The API Transit client (Phase 40)
+## 11. The API Transit client (Phase 40, legacy path removed in Phase 41)
 
-Phase 40 makes `thinx_api` the client of the section 10 wiring. Code: `lib/thinx/transit.js` (client),
+Phase 40 makes `thinx_api` the client of the section 10 wiring. Phase 41 migrated every legacy key to Transit and
+then removed the legacy read path and the passphrase (KEYMIG-02): since that deploy a keyed build reads only Transit
+ciphertext. Code: `lib/thinx/transit.js` (client),
 `lib/thinx/rsakey.js` (generation and the kill switch), `lib/thinx/git.js` (keyed fetch), `lib/thinx/keyformat.js`
 (file format), `lib/thinx/builder.js` (build-log line). The SSH form below is the literal one from `AGENTS.md`;
 `ssh micro` / `ssh core` from the operator's aliases are equivalent.
@@ -292,18 +294,26 @@ Phase 40 makes `thinx_api` the client of the section 10 wiring. Code: `lib/thinx
 - **Keyed build.** Each key file is classified by content when it is tried, never by name. A Transit key is
   decrypted in memory and loaded with `ssh-add -` into its own per-attempt `ssh-agent` (socket in a 0700 temp
   directory, removed afterwards); git then uses the agent, with no askpass and no passphrase in its environment.
-- **Legacy keys** (PEM, encrypted PKCS#8 or older unencrypted keys) keep the askpass path with `GIT_KEY_PASSPHRASE`
-  until Phase 41 migrates them. Files that are neither are skipped with a cause (`unknown_key_format`,
-  `not_regular`, `too_large`, `read_error`).
-- **D-01.** A Transit key that cannot be decrypted is skipped, and the owner's next key is tried, legacy keys
-  included. An owner with a working legacy key still builds during an OpenBao outage.
+  An askpass helper or a passphrase variable inherited from the container env is dropped before git runs.
+- **Legacy keys (D-09).** A PEM key (encrypted PKCS#8 or an older unencrypted key) found in `ssh_keys`, for example
+  one restored from an old backup, is skipped and logged as `legacy_format_unsupported`, on the same path as the other
+  skip causes (`unknown_key_format`, `not_regular`, `too_large`, `read_error`). It gets no attempt, sets no
+  `deploy key unavailable` line, raises no Slack alert, and the API never deletes or rewrites it; the owner's other
+  keys are still tried. The operator decides what happens to the file.
+- **D-07.** After the removal deploy, a legacy file restored from an old backup cannot be read by anything: there is
+  no passphrase path left. Its owner regenerates the deploy key and adds the new public key to the repository.
+  (Rolling back by untarring legacy files only worked while the dual-read code was deployed.)
+- **D-01.** A Transit key that cannot be decrypted is skipped, and the owner's next key is tried. During an OpenBao
+  outage keyed builds fail (WR-02 below); public builds, 7442 and MQTT do not need OpenBao.
 - **AppRole.** Login is through `BAO_ROLE_ID` / `BAO_SECRET_ID` (`readSecret()`, file first). Tokens are never
   renewed: the client logs in again before the 1 h cap. TLS trusts only `BAO_CACERT`, and every request has a 3 s
   timeout.
 - **D-02 retry.** `unreachable`, `sealed`, `denied` and `server_error` get one retry after a fresh login. A login
   refused as `denied` is not retried, because the same credentials would be refused again.
 
-**Reason classes.** Every failure is reported as one of seven classes; no address, body or token is logged.
+**Reason classes.** Every failure is reported as one of nine classes; no address, body or token is logged.
+`retired_version` and `key_missing` (Phase 41, D-13) are told apart from `bad_ciphertext` by exact equality with
+OpenBao's error string on a decrypt or rewrap 400; the string itself is never logged.
 
 | Class | Meaning | First check |
 |---|---|---|
@@ -313,7 +323,9 @@ Phase 40 makes `thinx_api` the client of the section 10 wiring. Code: `lib/thinx
 | `sealed` | HTTP 503 from OpenBao | `openbao-verify.sh --health`; the static seal file of the current generation (section 1); restart rules in section 4 |
 | `denied` | HTTP 403, or 400 on the AppRole login | the AppRole secrets `BAO_ROLE_ID`/`BAO_SECRET_ID` and the `thinx-api` policy (`openbao-verify.sh --full --maintenance --api-service thinx_api`); `readSecret()` caches per process, so a new secret value needs a task restart |
 | `bad_ciphertext` | HTTP 400 on decrypt: one stored key file is damaged or not ours | that key only; other keys and other owners are unaffected, no incident is opened and no Slack text is posted. The owner creates a new deploy key |
-| `server_error` | any other status, or a body over 64 KiB | `openbao-verify.sh --full`; the OpenBao audit log on micro (HMAC-redacted) |
+| `retired_version` | HTTP 400 on decrypt or rewrap: the stored ciphertext is below the key's `min_decryption_version`. Per key, never retried | is a key file below `min_decryption_version`? Run `migrate-deploy-keys.js --report` and `--rewrap`; section 12 |
+| `key_missing` | HTTP 400 on decrypt or rewrap: the `thinx-deploy-keys` Transit key does not exist. Service level: it opens an incident and skips the owner's other Transit keys | the transit mount and key exist; `openbao-verify.sh --full` |
+| `server_error` | any other status, or a body over 64 KiB. A `server_error` raised by the AppRole login is service level (IN-10) | `openbao-verify.sh --full`; the OpenBao audit log on micro (HMAC-redacted) |
 
 **Log lines.** Placement floats: find the node first, then read the task's logs with `docker logs` (never
 `docker service logs`, which hangs on micro).
@@ -326,10 +338,12 @@ ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "C=\$(docker ps -q -f label=com.
 
 | Line | Written when |
 |---|---|
-| `[transit] <op> failed: <reason> status=<n>` | an OpenBao request failed; `<op>` is `login`, `encrypt`, `decrypt` or `probe`, and `status=0` means no HTTP answer |
+| `[transit] <op> failed: <reason> status=<n>` | an OpenBao request failed; `<op>` is `login`, `encrypt`, `decrypt`, `rewrap` or `probe`, and `status=0` means no HTTP answer |
 | `[transit] probe ok` | the boot probe logged in |
 | `[git] key <name> skipped: deploy key unavailable: <reason>` | a Transit key could not be decrypted during a fetch (D-01) |
+| `[git] key <name> skipped: legacy_format_unsupported` | a legacy PEM key file was found and skipped (D-09); nothing else happens to it |
 | `[git] key <name> skipped: <cause>` | a key file was skipped for its format or the agent failed (`agent_start_failed`, `agent_load_failed`) |
+| `[git] fetch attempt with key <name> failed: attempt_error` | a keyed attempt threw an error with no code of its own (T-40-12); the message is never logged |
 | `[rsakey] create failed: <code>` | a create was refused (`key_service_unavailable`) or failed |
 | `deploy-key generation refused: key service unavailable (<reason>)` | Transit refused a new key |
 | `deploy-key generation refused: THINX_DEPLOY_KEYGEN is not enabled` | the kill switch refused a new key (the value is never logged) |
@@ -343,13 +357,19 @@ API's `SLACK_WEBHOOK` (nothing is posted without one):
 The incident is held per process: a task restart during an outage alerts once more. `bad_ciphertext` never opens an
 incident. No repeats are posted in between.
 
+`retired_version` posts its own text, once per process, through a separate latch that never opens or closes the
+incident (so no RECOVERED follows it, and a real outage still alerts):
+
+- `THiNX OpenBao: API Transit RETIRED_VERSION on <host> at <ts>: a stored deploy key is below min_decryption_version and cannot be decrypted; rewrap it. One alert per process.`
+
 **Boot probe.** About 5 s after the task starts the API makes one AppRole login and logs `[transit] probe ok`. A
 failure logs `[transit] probe failed: <reason> status=<n>` and opens an incident; it never stops the API (7442, MQTT
 and public builds do not need OpenBao). After any `thinx_api` update, check for the probe line first.
 
 **Build latency during an OpenBao outage.** One Transit key costs at most four OpenBao requests of 3 s, so 12 s,
 before D-01 skips it. A keyed fetch spends at most 12 s per Transit key of the owner on OpenBao, under that build
-directory's checkout lock, before it reaches the legacy keys. Refused connections, 503 and 403 answer at once; only a
+directory's checkout lock, before it reaches the next key. After the first service-level class (WR-02) the remaining
+Transit keys of that fetch are skipped without a request, so an outage costs one key's 12 s per fetch. Refused connections, 503 and 403 answer at once; only a
 hung or black-holed OpenBao approaches the bound. An owner with several Transit keys waits that long for each of them.
 The kill switch does not shorten this: it stops new keys only, and builds keep trying every key.
 
@@ -359,7 +379,8 @@ The kill switch does not shorten this: it stops new keys only, and builds keep t
   build log carries one line `deploy key unavailable: <sentence>` (D-04), the sentence being one of:
   `key service unreachable`, `key service sealed`, `key service refused the request`,
   `key service certificate not trusted`, `key service not configured`, `stored key could not be decrypted`,
-  `key service error`.
+  `key service error`, `stored key uses a retired key version`, `key service has no deploy-key key`.
+  A skipped legacy file adds no line: if it was the owner's only key, the build fails with the existing status.
 - A refused create (Transit down or the kill switch) answers HTTP 503
   `{success: false, response: "key_service_unavailable"}` on `PUT /api/v2/rsakey`, `GET /api/user/rsakey/create`
   and the GitHub-link flow (D-03). Both consoles show: Deploy keys can't be created right now, try again later.
@@ -367,7 +388,8 @@ The kill switch does not shorten this: it stops new keys only, and builds keep t
 **Kill switch (D-07).** `THINX_DEPLOY_KEYGEN`: unset, empty or exactly `enabled` generates; any other value
 (`disabled`) refuses every new deploy key with `key_service_unavailable`, before any name check or Transit call.
 Builds, existing keys, listing and revoking are unaffected. `thinx.yml` and `docker-swarm.yml` carry
-`THINX_DEPLOY_KEYGEN=enabled`; the live spec has no entry until a later stack deploy, and unset means enabled. The
+`THINX_DEPLOY_KEYGEN=enabled`. The live spec carries `THINX_DEPLOY_KEYGEN=enabled` too, since the 2026-10-19 UAT 5
+re-enable (step 4 with `--env-add`); this corrects the 40-SECURITY doc drift (residual 6). Unset still means enabled. The
 name has no `BAO_`/`VAULT_` prefix on purpose: the env guards allow only `BAO_ADDR` and `BAO_CACERT`.
 
 1. Back up the live spec on micro. The backup holds the live env values, so it is 0600 root, in the existing 0700
@@ -399,17 +421,19 @@ Never `docker stack deploy` or `restart.sh` for this. Do not commit `disabled` i
 
 **Rollback order.**
 
-1. The kill switch first. It stops new Transit keys at once, and existing keys of both kinds keep building.
+1. The kill switch first. It stops new Transit keys at once, and existing Transit keys keep building.
 2. A full revert: `git revert` the Phase 40 commits on `thinx-staging` (with their console gitlink commits) and
-   push. CircleCI builds the image and Swarmpit rolls it out; nothing is changed by hand on the swarm.
+   push. After Phase 41 this no longer brings legacy keys back: every key is Transit ciphertext and the passphrase
+   is gone (D-07), so a revert only matters for a defect in the Phase 40 code itself. CircleCI builds the image and Swarmpit rolls it out; nothing is changed by hand on the swarm.
    - The `docker-swarm.yml` switch line can stay: the old code ignores the variable, and keeping it keeps
      `--source` green.
    - The cost: keys minted after the cut-over are `vault:vN:` files, which the old code cannot use. Leave them in
      place, because they work again after the roll-forward. Their owners build with their legacy keys meanwhile, or
      fail until then. Legacy keys are unaffected (D-06).
 
-**Not here.** Migrating legacy keys to Transit, removing `GIT_KEY_PASSPHRASE`, and Transit key rotation or rewrap
-are Phase 41.
+**Not here.** Transit key rotation, rewrap and raising `min_decryption_version` are in section 12 (the recipe added by
+Plan 41-07). The migration, removal and rotation evidence of Phase 41 is in the evidence log below and the Phase 41
+plan summaries.
 
 ---
 
