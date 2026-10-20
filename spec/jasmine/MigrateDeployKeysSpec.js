@@ -577,6 +577,181 @@ describe("migrate-deploy-keys: every legacy kind, quarantine, dry-run, abort, ra
 	});
 });
 
+describe("migrate-deploy-keys: rewrap, canary and fetch-check (KEYMIG-03)", function () {
+
+	async function rewrapDir() {
+		const fx = fixture();
+		const t = new FakeTransit();
+		const plain = new Map();
+		for (const ts of [1700000003001, 1700000003002, 1700000003003]) {
+			const name = OWNER + "-" + ts;
+			const bytes = crypto.randomBytes(64);
+			plain.set(name, bytes);
+			fs.writeFileSync(path.join(fx.dir, name), (await t.encryptKey(bytes)) + "\n", { mode: 0o600 });
+			fs.writeFileSync(path.join(fx.dir, name + ".pub"), "ssh-rsa AAAA synthetic\n", { mode: 0o644 });
+		}
+		const legacy = writeEncryptedPkcs8(fx.dir, OWNER, 1700000003004);
+		fs.writeFileSync(path.join(fx.dir, OWNER + "-1700000003005"), "not a key\n", { mode: 0o600 });
+		t.calls.encrypt = 0;
+		return { fx, t, plain, legacy };
+	}
+
+	function pick(dir, names) {
+		return snapshot(dir).filter((s) => names.includes(s.name));
+	}
+
+	it("(W4) --rewrap after rotate() brings every Transit file to the latest version, then is a no-op", async function () {
+		const { fx, t, plain, legacy } = await rewrapDir();
+		const untouched = [legacy.name, legacy.name + ".pub", OWNER + "-1700000003005"];
+		const before = pick(fx.dir, untouched);
+		t.rotate();
+		const env = envFor(fx, t);
+		const rep = await mig.rewrap(env);
+		expect(rep.mode).to.equal("rewrap");
+		expect(rep.latest).to.equal("v2");
+		expect(rep.versions_before).to.deep.equal({ v1: 3 });
+		expect(rep.versions_after).to.deep.equal({ v2: 3 });
+		expect(rep.rewrapped).to.equal(3);
+		expect(rep.at_latest).to.equal(0);
+		expect(rep.failed).to.equal(0);
+		expect(rep.writes).to.equal(3);
+		expect(rep.aborted).to.equal(null);
+		expect(rep.legacy_total).to.equal(1);
+		expect(rep.unknown).to.equal(1);
+		expect(mig.exitCode(rep)).to.equal(0);
+		for (const [name, bytes] of plain) {
+			const p = path.join(fx.dir, name);
+			const stored = fs.readFileSync(p, "utf8");
+			expect(stored).to.match(/^vault:v2:[A-Za-z0-9+/]+={0,2}\n$/);
+			expect(fs.statSync(p).mode & 0o777).to.equal(0o600);
+			const back = await t.decryptKey(stored.trim());
+			expect(back.equals(bytes)).to.equal(true);
+			back.fill(0);
+		}
+		expect(pick(fx.dir, untouched)).to.deep.equal(before);
+		expect(fs.readdirSync(fx.dir).filter((n) => n.startsWith("."))).to.deep.equal([]);
+
+		const rewraps = t.calls.rewrap;
+		const again = await mig.rewrap(env);
+		expect(again.rewrapped).to.equal(0);
+		expect(again.at_latest).to.equal(3);
+		expect(again.writes).to.equal(0);
+		expect(again.versions_before).to.deep.equal({ v2: 3 });
+		expect(t.calls.rewrap).to.equal(rewraps);
+	});
+
+	it("(W4b) a file rewritten during the rewrap is kept and counts changed_during_run", async function () {
+		const { fx, t } = await rewrapDir();
+		t.rotate();
+		const target = path.join(fx.dir, OWNER + "-1700000003001");
+		const replacement = "vault:v2:" + crypto.randomBytes(24).toString("base64") + "\n";
+		let done = false;
+		spyOn(fx.rsakey, "keyStillListed").and.callFake(function (owner, filename) {
+			if (!done && filename === OWNER + "-1700000003001") {
+				done = true;
+				fs.writeFileSync(target, replacement, { mode: 0o600 });
+			}
+			return true;
+		});
+		const rep = await mig.rewrap(envFor(fx, t));
+		expect(rep.changed_during_run).to.equal(1);
+		expect(rep.rewrapped).to.equal(2);
+		expect(fs.readFileSync(target, "utf8")).to.equal(replacement);
+	});
+
+	it("(W4c) a sealed Transit aborts the rewrap with exit 1 and changes no file", async function () {
+		const { fx, t } = await rewrapDir();
+		t.rotate();
+		const before = snapshot(fx.dir);
+		t.fail("sealed", ["rewrap"]);
+		const rep = await mig.rewrap(envFor(fx, t));
+		expect(rep.aborted).to.equal("sealed");
+		expect(rep.failed).to.equal(3);
+		expect(rep.rewrapped).to.equal(0);
+		expect(mig.exitCode(rep)).to.equal(1);
+		expect(t.calls.rewrap).to.equal(1);
+		expect(snapshot(fx.dir)).to.deep.equal(before);
+	});
+
+	it("(W5) --rewrap with no Transit file makes no request and exits 0", async function () {
+		const fx = fixture();
+		writeEncryptedPkcs8(fx.dir, OWNER, 1700000003101);
+		const t = new FakeTransit();
+		const rep = await mig.rewrap(envFor(fx, t));
+		expect(rep.rewrapped).to.equal(0);
+		expect(rep.at_latest).to.equal(0);
+		expect(rep.failed).to.equal(0);
+		expect(rep.writes).to.equal(0);
+		expect(totalCalls(t)).to.equal(0);
+		expect(mig.exitCode(rep)).to.equal(0);
+		const empty = await mig.rewrap(envFor(fixture(), t));
+		expect(empty.private_files).to.equal(0);
+		expect(empty.versions_before).to.deep.equal({});
+		expect(mig.exitCode(empty)).to.equal(0);
+	});
+
+	it("(W6) canary capture gives one vault: line; check prints only the result class and version", async function () {
+		const t = new FakeTransit();
+		const ct = await mig.canaryCapture({ transit: t });
+		expect(ct).to.match(/^vault:v1:[A-Za-z0-9+/]+={0,2}$/);
+		const ok = await mig.canaryCheck({ transit: t }, ct + "\n");
+		expect(ok).to.deep.equal({ line: "CANARY result=ok version=v1", code: 0 });
+		const bad = await mig.canaryCheck({ transit: t }, "garbage");
+		expect(bad).to.deep.equal({ line: "CANARY result=bad_ciphertext version=none", code: 3 });
+		t.rotate();
+		const sealed = new FakeTransit({ failReason: "sealed" });
+		expect((await mig.canaryCheck({ transit: sealed }, ct)).line).to.equal("CANARY result=sealed version=v1");
+		const client = mig.canaryTransit();
+		expect(client._slackClient()).to.equal(null);
+	});
+
+	it("(W7) fetch-check runs fetchDetailed into a temp dir it removes and prints the key counts", async function () {
+		const fx = fixture();
+		const t = new FakeTransit();
+		await writeTransit(fx.dir, OWNER, 1700000003201, t);
+		writeEncryptedPkcs8(fx.dir, OWNER, 1700000003202);
+		writeEncryptedPkcs8(fx.dir, "0f".repeat(32), 1700000003203);
+		const seen = {};
+		const git = {
+			fetchDetailed: async (owner, url, branch, dir) => {
+				Object.assign(seen, { owner, url, branch, dir, existed: fs.existsSync(dir) });
+				return { ok: true, keyUnavailable: null };
+			}
+		};
+		const r = await mig.fetchCheck(envFor(fx, t, { git }), OWNER, "git@github.com:suculent/private.git", "main");
+		expect(r).to.deep.equal({ line: "FETCH_CHECK ok=true key_unavailable=none keys=2 transit=1 legacy=1 other=0", code: 0 });
+		expect(seen.owner).to.equal(OWNER);
+		expect(seen.existed).to.equal(true);
+		expect(fs.existsSync(seen.dir)).to.equal(false);
+
+		git.fetchDetailed = async (owner, url, branch, dir) => { seen.dir2 = dir; return { ok: false, keyUnavailable: "bad_ciphertext" }; };
+		const no = await mig.fetchCheck(envFor(fx, t, { git }), OWNER, "git@github.com:suculent/private.git", "main");
+		expect(no).to.deep.equal({ line: "FETCH_CHECK ok=false key_unavailable=bad_ciphertext keys=2 transit=1 legacy=1 other=0", code: 1 });
+		expect(fs.existsSync(seen.dir2)).to.equal(false);
+
+		let called = 0;
+		const stub = { fetchDetailed: async () => { called++; return { ok: true, keyUnavailable: null }; } };
+		for (const owner of ["not-an-owner", OWNER.toUpperCase(), OWNER + "0", "../" + OWNER]) {
+			const u = await mig.fetchCheck(envFor(fx, t, { git: stub }), owner, "git@github.com:suculent/private.git", "main");
+			expect(u.code, owner).to.equal(2);
+		}
+		expect(called).to.equal(0);
+	});
+
+	it("(W8) rewrap and canary reports carry no ciphertext or path", async function () {
+		const { fx, t } = await rewrapDir();
+		t.rotate();
+		const env = envFor(fx, t);
+		const outs = [];
+		const rep = await mig.rewrap(env);
+		outs.push(mig.formatText(rep), JSON.stringify(rep));
+		outs.push((await mig.canaryCheck({ transit: t }, await mig.canaryCapture({ transit: t }))).line);
+		for (const out of outs) {
+			for (const banned of ["vault:v", "PRIVATE KEY", fx.dir, os.tmpdir()]) expect(out.includes(banned), banned).to.equal(false);
+		}
+	});
+});
+
 describe("migrate-deploy-keys: dev server end to end", function () {
 
 	const Git = require("../../lib/thinx/git.js");
@@ -624,5 +799,32 @@ describe("migrate-deploy-keys: dev server end to end", function () {
 		expect(again.failed).to.equal(0);
 		expect(again.legacy_total).to.equal(0);
 		expect(again.already_transit).to.equal(1);
+	}, 60000);
+
+	it("(E2) rewrapKey, --rewrap and the canary work through the dev server's AppRole", async function () {
+		if (!guard()) return;
+		const t = makeTransit();
+		const bytes = crypto.randomBytes(48);
+		const ct = await t.encryptKey(bytes);
+		const r = await t.rewrapKey(ct);
+		expect(r.version).to.equal(Number(/^vault:v([0-9]+):/.exec(ct)[1]));
+		expect(r.ciphertext).to.match(/^vault:v[1-9][0-9]*:/);
+		const back = await t.decryptKey(r.ciphertext);
+		expect(back.equals(bytes)).to.equal(true);
+		back.fill(0);
+
+		// Every file is already at the latest version on an unrotated dev key.
+		const fx = fixture();
+		fs.writeFileSync(path.join(fx.dir, OWNER + "-1700000000201"), ct + "\n", { mode: 0o600 });
+		const rep = await mig.rewrap(envFor(fx, t));
+		expect(rep.failed).to.equal(0);
+		expect(rep.rewrapped).to.equal(0);
+		expect(rep.at_latest).to.equal(1);
+		expect(rep.latest).to.match(/^v[1-9][0-9]*$/);
+
+		const canary = await mig.canaryCapture({ transit: t });
+		const check = await mig.canaryCheck({ transit: t }, canary);
+		expect(check.code).to.equal(0);
+		expect(check.line).to.match(/^CANARY result=ok version=v[1-9][0-9]*$/);
 	}, 60000);
 });

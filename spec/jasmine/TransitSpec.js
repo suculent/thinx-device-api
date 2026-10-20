@@ -215,6 +215,70 @@ describe("Transit client (mocked OpenBao)", function () {
 		});
 	});
 
+	describe("rewrap (Phase 41, KEYMIG-03)", function () {
+		it("(W1) rewrapKey re-issues a mock ciphertext with one login and one tokened rewrap", async function () {
+			const h = harness(mock);
+			const ct = await h.t.encryptKey(Buffer.from("deploy key bytes"));
+			const r = await h.t.rewrapKey(ct);
+			expect(r.ciphertext).to.match(/^vault:v[1-9][0-9]*:/);
+			expect(r.ciphertext).to.not.equal(ct);
+			expect(Number.isInteger(r.version)).to.equal(true);
+			expect(r.version).to.equal(1);
+			expect(mock.count("login")).to.equal(1);
+			expect(mock.count("rewrap")).to.equal(1);
+			expect(mock.requests.filter((q) => q.op === "rewrap").every((q) => q.token === true)).to.equal(true);
+			const out = await h.t.decryptKey(r.ciphertext);
+			expect(out.toString()).to.equal("deploy key bytes");
+			out.fill(0);
+		});
+
+		it("(W1b) the mock answers with its configured key version", async function () {
+			await mock.close();
+			mock = await MockOpenBao.start({ roleId: ROLE, secretId: SECRET, keyVersion: 3 });
+			const h = harness(mock);
+			const ct = await h.t.encryptKey(Buffer.from("x"));
+			const r = await h.t.rewrapKey(ct);
+			expect(r.version).to.equal(3);
+			expect(r.ciphertext).to.match(/^vault:v3:/);
+		});
+
+		it("(W2) a rewrap 400 is bad_ciphertext after one rewrap request", async function () {
+			const h = harness(mock);
+			expect(await reasonOf(h.t.rewrapKey("vault:v1:AAAA"))).to.equal("bad_ciphertext");
+			expect(mock.count("rewrap")).to.equal(1);
+		});
+
+		it("(W2b) a 403 on rewrap logs in again and retries once (D-02)", async function () {
+			const h = harness(mock);
+			const ct = await h.t.encryptKey(Buffer.from("x"));
+			mock.script(({ op, opIndex }) => (op === "rewrap" && opIndex === 0) ? { status: 403, body: { errors: ["permission denied"] } } : undefined);
+			const r = await h.t.rewrapKey(ct);
+			expect(r.ciphertext).to.match(/^vault:v1:/);
+			expect(mock.count("rewrap")).to.equal(2);
+			expect(mock.count("login")).to.equal(2);
+		});
+
+		it("(W2c) malformed input is bad_ciphertext with no request", async function () {
+			const h = harness(mock);
+			for (const bad of ["garbage", "", null, 42, "vault:v0:AAAA"]) {
+				expect(await reasonOf(h.t.rewrapKey(bad))).to.equal("bad_ciphertext");
+			}
+			expect(mock.requests.length).to.equal(0);
+		});
+
+		it("(W3) a 200 without data.ciphertext or with a non-integer key_version is server_error", async function () {
+			const h = harness(mock);
+			const ct = await h.t.encryptKey(Buffer.from("x"));
+			mock.script(({ op }) => op === "rewrap" ? { status: 200, body: { data: { key_version: 1 } } } : undefined);
+			expect(await reasonOf(h.t.rewrapKey(ct))).to.equal("server_error");
+			mock.script(({ op }) => op === "rewrap" ? { status: 200, body: { data: { ciphertext: "vault:v1:QUJD", key_version: "one" } } } : undefined);
+			expect(await reasonOf(h.t.rewrapKey(ct))).to.equal("server_error");
+			mock.script(({ op }) => op === "rewrap" ? { status: 200, body: { data: { ciphertext: "not-a-ciphertext", key_version: 1 } } } : undefined);
+			expect(await reasonOf(h.t.rewrapKey(ct))).to.equal("server_error");
+			for (const line of h.logs) expect(line).to.match(/^\[transit\] (rewrap|encrypt) failed: [a-z_]+ status=[0-9]+$/);
+		});
+	});
+
 	describe("D-05 incident alerts", function () {
 		const FAILING = /^THiNX OpenBao: API Transit FAILING on unit-host since 2026-10-19T08:00:00\.000Z: SEALED\. One alert per incident; recovery will be announced\.$/;
 		const RECOVERED = /^THiNX OpenBao: API Transit RECOVERED on unit-host; failing since 2026-10-19T08:00:00\.000Z \(SEALED\)\.$/;
