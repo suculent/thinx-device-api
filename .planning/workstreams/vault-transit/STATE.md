@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-04-PLAN.md
-last_updated: "2026-10-20T15:15:07.617Z"
+stopped_at: Completed 41-05-PLAN.md
+last_updated: "2026-10-20T18:13:20.211Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: e283698e78bae787761009e0656c89e25196bbd5
+state_head: fdbf16c5cd63590a2d97e3dddc93aa18e9a11c37
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -68,6 +68,7 @@ Progress: [███████░░░] 67%
 | Phase 41 P02 | 55min | 3 tasks | 1 files |
 | Phase 41 P03 | 75min | 3 tasks | 13 files |
 | Phase 41 P04 | 48 min | 3 tasks | 13 files |
+| Phase 41 P05 | 40min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,7 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-04: baseEnv drops every inherited env name matching /PASSPHRASE/i plus SSH_ASKPASS/SSH_ASKPASS_REQUIRE, so no git/ssh child inherits the passphrase the swarm still sets until 41-06, and lib/ never names the retired variable
 - [Phase 41]: 41-04: PassphraseRetiredSpec requires Dockerfile and a root compose file; Dockerfile.test is scanned only when present, because CircleCI moves it over Dockerfile before the image build
 - [Phase 41]: 41-04: migrate-deploy-keys.js keeps --dry-run/--migrate as recognised modes that exit 2 with a fixed 'legacy migration retired' stderr line
+- [Phase 41]: 41-05 Task 3: operator go for the live passphrase retirement (repo-first order, 12 thinx.yml.bak* kept as history)
 
 ### Pending Todos
 
@@ -157,6 +159,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T15:15:06.720Z
-**Stopped At:** Completed 41-04-PLAN.md
+**Last session:** 2026-10-20T18:13:19.481Z
+**Stopped At:** Completed 41-05-PLAN.md
 **Resume File:** None
