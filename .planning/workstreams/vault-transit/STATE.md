@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-03-PLAN.md
-last_updated: "2026-10-20T14:17:44.847Z"
+stopped_at: Completed 41-04-PLAN.md
+last_updated: "2026-10-20T15:15:07.617Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: 22d098a735af8963f1a7e5a6ac298af182f26c6f
+state_head: e283698e78bae787761009e0656c89e25196bbd5
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -67,6 +67,7 @@ Progress: [███████░░░] 67%
 | Phase 41 P01 | 16 min | 3 tasks | 6 files |
 | Phase 41 P02 | 55min | 3 tasks | 1 files |
 | Phase 41 P03 | 75min | 3 tasks | 13 files |
+| Phase 41 P04 | 48 min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: D-13 classes: retired_version (exact ErrTooOld, per key, never retried, one-per-process Slack latch with no RECOVERED) and key_missing (exact 'encryption key not found', service level, D-05 incident, SERVICE_DOWN_REASONS)
 - [Phase 41]: IN-10: TransitError.op on every failure; a login server_error skips the owner's remaining Transit keys, a decrypt server_error stays per key; T-40-12 attempt errors log the fixed token attempt_error
 - [Phase 41]: KEYMIG-02 part 1: RSAKey.keyPassphrase() and the readSecret import removed from rsakey.js; ships with 41-04 in the 41-05 removal push, nothing pushed in 41-03
+- [Phase 41]: 41-04: baseEnv drops every inherited env name matching /PASSPHRASE/i plus SSH_ASKPASS/SSH_ASKPASS_REQUIRE, so no git/ssh child inherits the passphrase the swarm still sets until 41-06, and lib/ never names the retired variable
+- [Phase 41]: 41-04: PassphraseRetiredSpec requires Dockerfile and a root compose file; Dockerfile.test is scanned only when present, because CircleCI moves it over Dockerfile before the image build
+- [Phase 41]: 41-04: migrate-deploy-keys.js keeps --dry-run/--migrate as recognised modes that exit 2 with a fixed 'legacy migration retired' stderr line
 
 ### Pending Todos
 
@@ -153,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T14:17:16.271Z
-**Stopped At:** Completed 41-03-PLAN.md
+**Last session:** 2026-10-20T15:15:06.720Z
+**Stopped At:** Completed 41-04-PLAN.md
 **Resume File:** None

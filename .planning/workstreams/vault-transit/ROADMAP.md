@@ -100,7 +100,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
   2. After zero legacy keys are reported, `GIT_KEY_PASSPHRASE` and the legacy read path are gone from the code, the Dockerfiles, the compose files, `thinx.yml`, `docker-swarm.yml`, the live `thinx_api` spec (neither secret nor env) and `docker secret ls`. No `*.sh` askpass file is left in `ssh_keys`. CI is green, and keyed builds for migrated owners still succeed.
   3. After `thinx-deploy-keys` is rotated and the rewrap job has run, every key file carries the latest `vault:vN:` prefix and `min_decryption_version` equals N. OpenBao refuses an older-version ciphertext, and a keyed build still succeeds.
 
-**Plans**: 3/8 plans executed across 8 waves (serial: every plan commits to the one parent worktree, and production steps follow the migrate → remove → rotate order)
+**Plans**: 4/8 plans executed across 8 waves (serial: every plan commits to the one parent worktree, and production steps follow the migrate → remove → rotate order)
 
 **Wave 1**
 - [x] 41-01-PLAN.md — migration and rewrap tool (scripts/migrate-deploy-keys.js), Transit#rewrapKey, canary and fetch-check modes; CI only
@@ -112,7 +112,7 @@ rotated with a rewrap. Builds keep running with the owner logged out the whole t
 - [x] 41-03-PLAN.md — D-13 retired_version/key_missing classes, IN-10, T-40-12, rotation spec on the dev server, keyPassphrase() removed
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 41-04-PLAN.md — legacy read path removed (D-08 step 1, D-09 skip), migration legacy mode retired, Dockerfiles/compose cleaned, static retirement gate
+- [x] 41-04-PLAN.md — legacy read path removed (D-08 step 1, D-09 skip), migration legacy mode retired, Dockerfiles/compose cleaned, static retirement gate
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 41-05-PLAN.md — removal deploy on the D-10 record, swarm retirement authored repo-first with absence gates, operator decision
@@ -155,7 +155,7 @@ Phases execute in numeric order: 39 → 40 → 41. Phase 40 code and CI work may
 |-------|-----------|----------------|--------|-----------|
 | 39. Internal OpenBao on the Swarm | v1.17 | 6/6 | Complete    | 2026-10-19 |
 | 40. Transit-Encrypted Deploy Keys in the API | v1.17 | 5/5 | Complete    | 2026-10-19 |
-| 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 3/8 | In Progress | - |
+| 41. Key Migration, Passphrase Retirement & Rotation | v1.17 | 4/8 | In Progress | - |
 
 ---
 *v1.17 Deploy-Key OpenBao Transit roadmap created 2026-10-09: 17 requirements across 3 phases (39–41). Next: `/gsd-discuss-phase 39`.*
