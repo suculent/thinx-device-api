@@ -447,6 +447,92 @@ Never `docker stack deploy` or `restart.sh` for this. Do not commit `disabled` i
 Plan 41-07). The migration, removal and rotation evidence of Phase 41 is in the evidence log below and the Phase 41
 plan summaries.
 
+## 12. Transit key rotation (Phase 41, D-11)
+
+The repeatable recipe for rotating `thinx-deploy-keys`, bringing every stored deploy key to the new version and
+retiring the old one. First run: 2026-10-20 (Plans 41-06 and 41-07, v1 -> v2; evidence log below).
+
+**Trigger.** A one-off decision or a suspected leak (of the AppRole credentials, a snapshot or a Gluster backup that
+holds old ciphertext). There is no scheduled rotation and no cron (deferred; `auto_rotate_period` stays 0).
+
+**Who does what.** The executor (laptop, ssh) runs everything through the thinx-api AppRole inside the running
+`thinx_api` task: report, canary, rewrap, fetch-check. The AppRole may rewrap but is denied the key config and rotate
+endpoints by design (D-12). The operator does the two key writes (rotate, raise the minimum) in their own section 6
+session. Never with `bao login`.
+
+**Task-exec form.** Query the task and its node every time (placement floats), then exec on that node:
+
+```bash
+T=$(ssh root@188.166.23.244 -i ~/.ssh/DOKey2 -p2020 "docker service ps thinx_api --no-trunc --filter desired-state=running --format '{{.ID}} {{.Node}}'")
+# exactly one line; ID=${T%% *} N=${T#* }; on the node N (micro 188.166.23.244, core 188.166.203.163):
+C=$(docker ps -q --filter label=com.docker.swarm.task.id=$ID | head -1)
+docker exec "$C" node scripts/migrate-deploy-keys.js <mode> [--json] | tail -1
+```
+
+**Preconditions.**
+
+- D-13 is live: the `REMOVAL_LIVE` probe (Plan 41-05 node one-liner in the task) prints
+  `REMOVAL_LIVE retired_version=true key_missing=true sshEnv=undefined keyPassphrase=undefined`.
+- `--report --json` shows legacy_total 0, unknown 0, unreadable 0 and a single version `vL0` in the version map. If
+  more than one version is present, finish the previous rotation's rewrap first.
+- `openbao-verify.sh --full ...` and the `--live` wiring gate pass; `vault_openbao` is healthy.
+
+**Steps.**
+
+1. **Canary.** On micro, with `umask 077`, write one junk ciphertext through the AppRole into a 0600 root file:
+   `docker exec "$C" node scripts/migrate-deploy-keys.js --canary-capture | tail -1 > /root/thinx-backups/transit-canary-<UTC>.ct`
+   (task on core: pipe it over ssh into the micro file). Never display it; check only mode, line count and version.
+   `--canary-check` with the file on stdin (`docker exec -i`) must print `CANARY result=ok version=vL0`.
+2. **Snapshot before.** `/usr/local/sbin/openbao-backup.sh --pre-change` on micro: `OPENBAO-BACKUP-OK mode=pre-change`.
+3. **Operator rotates** (section 6 session): read `latest_version` (must be L0), `bao write -f
+   transit/keys/thinx-deploy-keys/rotate`, read `latest_version` again (L1 = L0 + 1) and `min_decryption_version`
+   (unchanged), then `bao token revoke -self`. Nothing else changes. A fresh `--canary-capture | cut -d: -f2` (only the
+   version leaves the host) confirms the AppRole encrypts at vL1.
+4. **Rewrap twice.** `--rewrap --json`: latest `vL1`, failed 0, aborted null, legacy_total 0, versions_after
+   `{"vL1": <all>}`. Run it again: rewrapped 0, at_latest = all. On an abort with a service class, check
+   `openbao-verify.sh --health` and re-run once if healthy; a second abort or any per-file failure (retired_version,
+   bad_ciphertext, server_error, verify_mismatch) stops the rotation before step 6. Host check on micro: every private
+   file in `ssh_keys` starts with exactly `vault:vL1:` (`head -c` of the prefix length) and the counts match.
+5. **Keyed fetch.** `--fetch-check <owner> <git url> <branch>` for a known owner and private repository (D-10: owner
+   `test` `cedc16bb…`, `git@github.com:suculent/thinx-autoflood.git`, `main`) prints `FETCH_CHECK ok=true ... legacy=0`.
+   Record **D14_GATE pass**. Do not raise the minimum without it.
+6. **Operator raises the minimum** (section 6 session, a prefix check on the token): read `latest_version` (must still
+   be L1), `bao write transit/keys/thinx-deploy-keys/config min_decryption_version=L1` (the number, never above
+   latest_version: OpenBao refuses that), read `min_decryption_version` and `latest_version` back (both L1),
+   `bao token revoke -self; unset BAO_TOKEN; exit`. This is the only config write.
+7. **Refusal proof.** `--canary-check` of the stored canary prints `CANARY result=retired_version version=vL0`.
+   `result=ok` means the raise did not take effect; `bad_ciphertext` means D-13 is not working. Only the junk canary is
+   used for this, never a real key's old ciphertext.
+8. **Keyed fetch again.** As in step 5, plus `--report --json` showing only `vL1`. Count (count only) `retired_version`
+   lines in `timeout 30 docker logs --since <raise ts> <container>`: expect 0.
+9. **Snapshot after.** `openbao-backup.sh --post-change` (do it right after the raise: until then no snapshot can
+   decrypt vL1 ciphertext, section 9 limitation 2).
+10. **Gates.** `tests/openbao-api-wiring.test.sh --live` (API-WIRING-OK; `TRANSIT_CANARY` uses a fresh vL1
+    ciphertext), `openbao-verify.sh --full --expect-seal-generation <gN> --expect-no-runtime-generation <gN-1>` and
+    `--api-service thinx_api`, `openbao-restore-rehearsal.sh --verify-recorded-matrix`, ports 7442, 1883 and 8883 open
+    from the laptop, and one keyed build of a private-repo device from the Vue console.
+
+Keep the canary file until the next phase's cleanup (it is junk, but it is ciphertext: 0600 root, never in git or a
+ticket).
+
+**Rollback.** If a build breaks after step 6: the operator, in a section 6 session, writes
+`min_decryption_version=L0` (any value from the oldest kept version up to latest_version is accepted) and reads it
+back. This works because the key is never trimmed: `min_available_version` stays at its default and the operator policy denies
+`transit/keys/+/trim`, so the old versions still exist. Rewrapped files keep working at any minimum up to latest, so
+the rollback never needs a reverse rewrap. Once the cause is fixed, repeat steps 4-8. Before step 6 there is nothing to
+roll back: vL0 and vL1 are both decryptable.
+
+**Alerts.** A key file below the minimum fails per key with `retired_version`: the fetch skips that key and tries the
+owner's next one; if none works, the build log shows `deploy key unavailable: ...`. The process posts once (never
+repeated, no RECOVERED): `THiNX OpenBao: API Transit RETIRED_VERSION on <host> at <ts>: ... rewrap it. One alert per
+process.` (section 11). It means a file was missed by the rewrap or restored from an old backup. OpenBao refuses to
+rewrap ciphertext below the minimum, so the fix is: lower the minimum (rollback above), run `--rewrap --json` until it
+reports rewrapped 0, then raise it again (steps 6-8).
+
+**Never.** Trim the key, set `exportable`, `allow_plaintext_backup` or `deletion_allowed`, widen the thinx-api
+AppRole, or print a ciphertext, canary, token or key. No `docker stack deploy`, `restart.sh` or `service update` is
+part of a rotation.
+
 ---
 
 ## Evidence log (sanitized: timestamps, SHAs, counts, verdicts; never values)
@@ -1314,4 +1400,47 @@ canary or key content left micro.
   private repository through the production fetch path. The operator may raise min_decryption_version to 2 (Task 2).
 - Restore window: until Task 3's `--post-change` snapshot, the newest snapshot that can decrypt the v2 files does not
   exist (`openbao-20261020T184042Z-pre-change` predates the rotation; section 9 limitation 2).
+- Not pushed: `main` and no tag. This entry is a local docs commit.
+
+### 2026-10-20 Plan 41-07 Task 2: operator raised min_decryption_version (D-14)
+
+The operator raised the minimum in their own terminal (section 6 stdin-userpass login in `vault_openbao` on micro,
+token prefix check, one config write, `bao token revoke -self`). The executor did not take part and saw no token or
+password. The raise happened between 18:53Z (D14_GATE record) and 19:11Z.
+
+- Operator resume signal, verbatim: `raised min_decryption_version=2 latest_version=2`
+- Read back by the operator: min_decryption_version 2, latest_version 2. No trim, no other key setting changed, AppRole
+  policy not widened.
+- Minor deviation: the executor's suggested `bao read -field=display_name auth/token/lookup-self` check was dropped
+  from the relayed steps, because lookup-self returned 403 for the operator token in 41-06. The token prefix check and
+  the latest_version / min_decryption_version reads served as the token validation.
+
+### 2026-10-20 Plan 41-07 Task 3: minimum raised, refusal proven (D-11, D-14)
+
+Run 19:11-19:12Z from the laptop, in task `74bunku80wzuf5q63cfxuderj` on micro (0 restarts). Live mutation: the
+post-change snapshot only. Output: verdict lines, versions and counts.
+
+- L0 = 1, L1 = 2; operator read-back min_decryption_version 2 = latest_version 2.
+- `openbao-backup.sh --post-change`, 19:11:07-19:11:13Z: `OPENBAO-BACKUP-OK mode=post-change
+  stem=openbao-20261020T191108Z-post-change` (pruned 0, 16 pairs kept on each node). This is the first snapshot that
+  can decrypt the v2 key files; the restore window noted in Task 1 is closed.
+- Refusal proof, 19:11:21Z: the stored v1 canary `transit-canary-20261020T184027Z.ct` (junk, never a real key) ->
+  `CANARY result=retired_version version=v1` (the D-13 class; stderr showed `[transit] decrypt failed:
+  retired_version status=400`). ROADMAP criterion 3: OpenBao refuses the older version.
+- Keyed fetch after the raise, owner `test` (`cedc16bb…`), `git@github.com:suculent/thinx-autoflood.git` `main`,
+  19:11:3xZ: `FETCH_CHECK ok=true key_unavailable=none keys=5 transit=5 legacy=0 other=0`.
+- `--report --json`, 19:11:37Z: private_files 77, transit_total 77, `{"v2":77}`, legacy_total 0, unknown 0,
+  unreadable 0, leftover_tmp 0.
+- API task log since 18:53Z: 0 lines containing `retired_version` (no stored key of the API was refused), 0 `probe
+  failed` / `deploy key unavailable`.
+- Gates, 19:11:50-19:12:18Z, all exit 0:
+  - `tests/openbao-api-wiring.test.sh --live` -> `API-WIRING-OK mode=live`: `TRANSIT_CANARY ok` (fresh v2 encrypt,
+    decrypt, rewrap, decrypt-rewrapped 200), `FORBIDDEN_DENIED ok 13/13`, `SPEC_ATTACHMENTS ok`, `PREVIOUS_SPEC ok`,
+    `SPEC_DELTA ok`, `OUTPUT_CLEAN ok`.
+  - `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> `OPENBAO-VERIFY-OK
+    mode=full` (`PRIVILEGED_CHECKS info`: not run without the operator password, as before).
+  - `openbao-verify.sh --api-service thinx_api` -> `OPENBAO-VERIFY-OK mode=api`, `API_PASSPHRASE_ABSENT ok`.
+  - `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> `OPENBAO-REHEARSAL-MATRIX-OK generations=g1,g2`.
+  - Ports 7442, 1883 and 8883 open from the laptop.
+- Section 12 (the repeatable rotation recipe, rollback, alerts) written from this run.
 - Not pushed: `main` and no tag. This entry is a local docs commit.
