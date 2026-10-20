@@ -1099,7 +1099,7 @@ No `docker stack deploy`, no `restart.sh`, no `docker service update`. Every rea
 
 ### 2026-10-20 Plan 41-05 Task 1: removal deploy (D-08 step 1)
 
-Run 15:18-15:40Z from the laptop. Live mutations: the `thinx-unit` push and the parent `thinx-staging` push. CI and
+Run 15:18-15:37Z from the laptop. Live mutations: the `thinx-unit` push and the parent `thinx-staging` push. CI and
 Swarmpit did the rest. No `docker stack deploy`, no `restart.sh`, no `docker service update` by hand, and
 swarm-autopull-recovery was not needed. No key file was written. The passphrase secret and env are still on the
 service; the deployed code no longer reads them (D-08: code first).
@@ -1131,7 +1131,7 @@ service; the deployed code no longer reads them (D-08: code first).
     running at 15:33Z (no console source changed in this range).
 - Rollout: new thinx_api task `b0el7hlnn988mpg3y3njk1qrh` on micro, container started 15:33:16Z with 0 restarts, image
   digest `f4492b4fb94134e5`, spec UpdatedAt 15:33:22Z, UpdateStatus completed (about 70 s after api-registry).
-- Live checks (15:34-15:40Z), all pass:
+- Live checks (15:34-15:36Z), all pass:
   1. Transit log since 15:32Z: one `[transit] probe ok`, zero `probe failed`, zero `deploy key unavailable`, zero
      `[git] key ... skipped` lines.
   2. `REMOVAL_LIVE retired_version=true key_missing=true sshEnv=undefined keyPassphrase=undefined` (D-13 is live,
@@ -1154,3 +1154,7 @@ service; the deployed code no longer reads them (D-08: code first).
   restores the dual-read code. Safe while the passphrase secret is still mounted, because every key is Transit
   ciphertext. From this deploy on, a legacy file restored from a backup is a logged skip (D-07, D-09).
 - Not pushed: `main` and no tag. This entry is a local docs commit.
+- Paused 15:37Z on the operator's instruction, after Task 1 and before Task 2 (no thinx-swarm or docker-swarm.yml
+  change made). State at the pause: task `b0el7hlnn988mpg3y3njk1qrh` Running on micro, 0 restarts, zero
+  `probe failed` / `deploy key unavailable` lines since 15:32Z; for `8fd573aa` every CircleCI context is success except
+  `vue-console-registry`, which was still pending (no console source in this range).
