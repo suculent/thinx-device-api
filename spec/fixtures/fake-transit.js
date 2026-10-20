@@ -19,6 +19,13 @@
  * one, like transit/keys/<key>/rotate. rewrapKey(ct) re-issues a ciphertext this
  * instance issued under the current version and resolves {ciphertext, version},
  * like transit/rewrap; an unknown one rejects bad_ciphertext.
+ *
+ * D-13 (Phase 41): `minDecryption` (option, default 1) is min_decryption_version.
+ * Decrypt and rewrap of a vN below it reject retired_version (400) before any
+ * lookup, as OpenBao checks the version first. IN-10: every rejection carries
+ * err.op like the real client; `failOpLabel` overrides the op stamped on injected
+ * failures (e.g. "login", for a failure the AppRole login raised), default the
+ * operation name.
  */
 
 const crypto = require("crypto");
@@ -27,7 +34,7 @@ const Transit = require("../../lib/thinx/transit.js");
 const TransitError = Transit.TransitError;
 
 // The HTTP status the real client attaches to each reason class.
-const STATUS = { sealed: 503, denied: 403, bad_ciphertext: 400, server_error: 500 };
+const STATUS = { sealed: 503, denied: 403, bad_ciphertext: 400, server_error: 500, retired_version: 400, key_missing: 400 };
 
 class FakeTransit {
 
@@ -35,8 +42,10 @@ class FakeTransit {
 		opts = opts || {};
 		this.failReason = opts.failReason || null;
 		this.failOps = new Set(opts.failOps || ["encrypt", "decrypt", "rewrap"]);
+		this.failOpLabel = (typeof opts.failOpLabel === "string") ? opts.failOpLabel : null;
 		this.calls = { encrypt: 0, decrypt: 0, rewrap: 0 };
 		this.version = 1;
+		this.minDecryption = (typeof opts.minDecryption === "number") ? opts.minDecryption : 1;
 		this._store = new Map();
 	}
 
@@ -63,30 +72,36 @@ class FakeTransit {
 
 	_maybeFail(op) {
 		if (this.failReason && this.failOps.has(op)) {
-			throw new TransitError(this.failReason, STATUS[this.failReason] || null);
+			throw new TransitError(this.failReason, STATUS[this.failReason] || null, this.failOpLabel || op);
 		}
+	}
+
+	// The stored ciphertext for a decrypt or rewrap, or a rejection like OpenBao's.
+	_lookup(ciphertext, op) {
+		const ct = (typeof ciphertext === "string") ? ciphertext.trim() : "";
+		const m = /^vault:v([1-9][0-9]*):/.exec(ct);
+		if (m && Number(m[1]) < this.minDecryption) throw new TransitError("retired_version", 400, op);
+		if (!this._store.has(ct)) throw new TransitError("bad_ciphertext", 400, op);
+		return ct;
 	}
 
 	async encryptKey(buf) {
 		this.calls.encrypt += 1;
 		this._maybeFail("encrypt");
-		if (!Buffer.isBuffer(buf) || buf.length === 0) throw new TransitError("server_error");
+		if (!Buffer.isBuffer(buf) || buf.length === 0) throw new TransitError("server_error", null, "encrypt");
 		return this._issue(buf);
 	}
 
 	async decryptKey(ciphertext) {
 		this.calls.decrypt += 1;
 		this._maybeFail("decrypt");
-		const ct = (typeof ciphertext === "string") ? ciphertext.trim() : "";
-		if (!this._store.has(ct)) throw new TransitError("bad_ciphertext", 400);
-		return Buffer.from(this._store.get(ct));
+		return Buffer.from(this._store.get(this._lookup(ciphertext, "decrypt")));
 	}
 
 	async rewrapKey(ciphertext) {
 		this.calls.rewrap += 1;
 		this._maybeFail("rewrap");
-		const ct = (typeof ciphertext === "string") ? ciphertext.trim() : "";
-		if (!this._store.has(ct)) throw new TransitError("bad_ciphertext", 400);
+		const ct = this._lookup(ciphertext, "rewrap");
 		return { ciphertext: this._issue(this._store.get(ct)), version: this.version };
 	}
 }
