@@ -1228,3 +1228,22 @@ names, counts, modes, SHAs and verdicts only.
   `rollback/api-service` on micro (`thinx-api-pre-openbao-*`, `thinx-api-pre-keygen-*`,
   `thinx-api-pre-passphrase-rm-20261020T182137Z.json`) until Plan 41-08. Task ids: before `b0el7hlnn988mpg3y3njk1qrh`,
   after the update `tkl1vzagwlv0j3dkumkn66eld`, after the forced update `74bunku80wzuf5q63cfxuderj`.
+
+### 2026-10-20 Plan 41-06 Task 2: rotation preconditions
+
+Run 18:40-18:41Z from the laptop, in task `74bunku80wzuf5q63cfxuderj` on micro (unchanged since Task 1). Live mutations: the
+canary file and the pre-change snapshot. The canary was never displayed: it went from the container straight into the
+host file, and checks printed its mode, line count, shape and version only.
+
+- D-13 live, 18:40:13Z: `REMOVAL_LIVE retired_version=true key_missing=true sshEnv=undefined keyPassphrase=undefined`.
+- `--report --json`, 18:40:19Z: private_files 77, transit_total 77, version map `{"v1":77}`, legacy_total 0 (all four
+  kinds 0), unknown 0, unreadable 0, stray_askfiles 0, leftover_tmp 0. **L0 = 1** (one version, so no older rotation
+  exists for Plan 41-07 to cover).
+- Canary, 18:40:27Z: `/root/thinx-backups/transit-canary-20261020T184027Z.ct` on micro, `600 root` in the `700 root`
+  directory, 1 line, `vault:v` shape, version `v1`. Kept until Plan 41-08.
+- Canary check, 18:40:37Z: `CANARY result=ok version=v1`.
+- `openbao-backup.sh --pre-change`, 18:40:42-18:40:47Z: `OPENBAO-BACKUP-OK mode=pre-change
+  stem=openbao-20261020T184042Z-pre-change` (raft_index 1038, 0600 local, replicated and re-hashed on core; 15 pairs
+  kept on each node).
+- Next: the operator's single rotate (Task 3, section 6 login). Expected afterwards: latest_version 2,
+  min_decryption_version unchanged.
