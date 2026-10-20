@@ -974,3 +974,59 @@ swarm-autopull-recovery was not needed.
   - the console-retest checklist;
   - the 503 `key_service_unavailable` sentence seen in the Vue console (needs the kill switch or an OpenBao outage,
     so it is UAT-only).
+
+### 2026-10-20 Plan 41-02 Task 1: migration tool deployed, dry-run
+
+Run 12:00-12:30Z from the laptop. Live mutations: the `thinx-unit` push and the parent `thinx-staging` push. CI and
+Swarmpit did the rest. No `docker stack deploy`, no `restart.sh`, no `docker service update` by hand, and
+swarm-autopull-recovery was not needed. No key file was written: the only in-task runs were `--report`, `--dry-run` and
+the purge scan.
+
+- SHAs: parent `5d972067` (`5d972067ad88c7b955da87475bfaee3d234453d3`, the 41-01 docs head). origin `thinx-staging` was `a1f9176c`, an ancestor;
+  the pushed range differs from it only in the six 41-01 files (`lib/thinx/transit.js`, `scripts/migrate-deploy-keys.js`,
+  `spec/fixtures/fake-transit.js`, `spec/fixtures/mock-openbao.js`, `spec/jasmine/MigrateDeployKeysSpec.js`,
+  `spec/jasmine/TransitSpec.js`) plus `.planning/`. thinx-swarm unchanged at `8cfa7dd`.
+- Pre-state 12:01Z: thinx_api task `jei4hunf12ra5xn8t8rib4ck8` on micro, image digest `47dd29169d32a21f`, spec UpdatedAt
+  2026-10-19 15:19:12Z. Traefik http routers: 29, sorted `name status` sha256/16 `fa0afd608550e585` (the Phase 39
+  baseline), none disabled. 7442, 1883 and 8883 open from the laptop.
+- Local regression (all exit 0; `--config=/dev/null --random=false`, `ENVIRONMENT=development` with placeholder CouchDB
+  names):
+  - Jasmine: MigrateDeployKeysSpec 31/0 (2 pending = the dev-server E1/E2, run below), TransitSpec 33/0, KeyFormatSpec
+    30/0, GitSpec 66/0, SecretsSweepSpec 44/0, BuilderRemoteJobSpec 77/0, BuilderApiKeySpec 54/0, RedisHealthSpec 4/0.
+  - 03-RsakeySpec with `^RSA Key \((?!13\))`: 17/0.
+  - `node --test` DeployKeyNames + CiPipelineGates: 76/76.
+  - `scripts/openbao-dev.sh run` TransitIntegrationSpec + MigrateDeployKeysSpec: 41 specs, 0 failures, none pending, no
+    key/ciphertext/token shape in the log, no `thinx-openbao-dev` container left.
+  - thinx-swarm wiring gate: `--source thinx.yml <parent>/docker-swarm.yml` -> `API-WIRING-OK mode=source`
+    (`KEYGEN_SWITCH ok` x2); `--self-test` -> `SELF_TEST ok 17/17`, `API-WIRING-OK mode=self-test`.
+- CircleCI:
+  - `thinx-unit` `71a7bbf1..5d972067` (fast-forward): `test` #16153, success 12:19:26Z, first run, no fix rounds.
+  - `thinx-staging` `a1f9176c..5d972067` at 12:19:59Z: `test` #16154 12:23:37Z, `api-registry` #16155 12:25:41Z,
+    `test-console-classic` #16158, `console-classic-registry` #16159, `test-vue-console` #16156 all success;
+    `vue-console-registry` #16157 was still running at 12:30Z (no console source changed in this range).
+- Rollout: new thinx_api task `j9n880hztl5pg4fnptefq6eh7` on micro, container started 12:26:29Z with 0 restarts, image
+  digest `d021ae3ce2b55920`, spec UpdatedAt 12:26:35Z (about 55 s after api-registry). `scripts/migrate-deploy-keys.js`
+  present in the task.
+- Live checks (12:27-12:29Z), all pass:
+  1. Transit log since 12:25Z: one `[transit] probe ok`, zero `probe failed`.
+  2. `tests/openbao-api-wiring.test.sh --live` -> `API-WIRING-OK mode=live`: `SPEC_DELTA ok` (image and
+     `THINX_DEPLOY_KEYGEN` ignored), `TRANSIT_CANARY ok` (encrypt, decrypt, rewrap, decrypt-rewrapped 200),
+     `FORBIDDEN_DENIED` 13/13, `OUTPUT_CLEAN ok`.
+  3. `openbao-verify.sh --full --expect-seal-generation g2 --expect-no-runtime-generation g1` -> `OPENBAO-VERIFY-OK
+     mode=full`; `openbao-restore-rehearsal.sh --verify-recorded-matrix` -> `OPENBAO-REHEARSAL-MATRIX-OK
+     generations=g1,g2` (3 mismatch records).
+  4. Ports 7442, 1883 and 8883 open.
+  5. Routers byte-identical to the pre-state (29, `fa0afd608550e585`, none disabled); traefik_traefik and
+     traefik_socket-proxy UpdatedAt still 2026-10-18 06:47:26Z.
+- Read-only data in the task (container path `/mnt/data/ssh_keys` = host `/mnt/gluster/thinx/ssh_keys`):
+  - `--report`: private_files 78, transit_total 1 (`v1` 1), legacy_total 77 (encrypted_pkcs8 72, pkcs1 4, openssh 1,
+    other 0), unknown 0, unreadable 0, stray_askfiles 0, leftover_tmp 0.
+  - `--dry-run`: the same counts; decrypted_with secret 72, historic_literal 0, unencrypted 5; predicted migrate 77,
+    quarantine 0; quarantine list empty; pub_mismatch 0; writes 0, transit_requests 0, aborted null, failed 0.
+  - `purge-orphaned-rsa-keys.js --json` (scan): owners_in_db 378, owners_on_disk 29, owners_retained 28,
+    orphaned_owners 1, keys_affected 1 (one private file plus its `.pub`), stray_askfiles 0.
+  - The OpenSSH-format key is **not** an orphan's: its owner is the D-10 owner `test` (`cedc16bb…`, key
+    1649693687313). That owner has 5 keys, all legacy (pkcs1 2, openssh 1, encrypted_pkcs8 2, among them
+    1789766455048) and no Transit key, each mode 600 with a `.pub`. Host first-line kinds agree with `--report`
+    (72/4/1/1). Only first lines were read, and only the kind word was printed.
+- Not pushed: `main` and no tag. This entry is a local docs commit.
