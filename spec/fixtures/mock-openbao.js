@@ -1,9 +1,11 @@
-/* Scriptable in-process https mock of the three OpenBao calls lib/thinx/transit.js
- * makes (Phase 40, KEYENC-05):
+/* Scriptable in-process https mock of the four OpenBao calls lib/thinx/transit.js
+ * makes (Phase 40, KEYENC-05; rewrap since Phase 41, KEYMIG-03):
  *
  *   POST /v1/auth/approle/login
  *   POST /v1/transit/encrypt/thinx-deploy-keys
  *   POST /v1/transit/decrypt/thinx-deploy-keys
+ *   POST /v1/transit/rewrap/thinx-deploy-keys   re-issues a stored plaintext as
+ *        "vault:v<opts.keyVersion or 1>:" with that key_version
  *
  * The CA and the 127.0.0.1/localhost leaf are minted with node-forge at start
  * (keys from Node's native RSA generator), so no key material is committed. A
@@ -71,7 +73,8 @@ function mintLeaf(ca) {
 const OPS = {
 	"/v1/auth/approle/login": "login",
 	"/v1/transit/encrypt/thinx-deploy-keys": "encrypt",
-	"/v1/transit/decrypt/thinx-deploy-keys": "decrypt"
+	"/v1/transit/decrypt/thinx-deploy-keys": "decrypt",
+	"/v1/transit/rewrap/thinx-deploy-keys": "rewrap"
 };
 
 /**
@@ -81,6 +84,7 @@ const OPS = {
  * @param {string} [opts.ciphertext]     fixed ciphertext encrypt answers with
  * @param {string} [opts.roleId]         when set, login answers 400 on mismatch
  * @param {string} [opts.secretId]       when set, login answers 400 on mismatch
+ * @param {number} [opts.keyVersion]     key_version rewrap answers with (default 1)
  * @returns {Promise<{addr, caFile, otherCaFile, requests, connections, script, close}>}
  */
 async function start(opts) {
@@ -98,7 +102,8 @@ async function start(opts) {
 	const lease = typeof opts.leaseDuration === "number" ? opts.leaseDuration : 1200;
 	const store = new Map();
 	const requests = [];
-	const counters = { login: 0, encrypt: 0, decrypt: 0, other: 0 };
+	const counters = { login: 0, encrypt: 0, decrypt: 0, rewrap: 0, other: 0 };
+	const keyVersion = (typeof opts.keyVersion === "number") ? opts.keyVersion : 1;
 	const sockets = new Set();
 	const state = { connections: 0, scriptFn: null };
 
@@ -115,7 +120,7 @@ async function start(opts) {
 			if (!ok) return { status: 400, body: { errors: ["invalid role or secret ID"] } };
 			return { status: 200, body: { auth: { client_token: token, lease_duration: lease, renewable: true, policies: ["thinx-api"] } } };
 		}
-		if (op === "encrypt" || op === "decrypt") {
+		if (op === "encrypt" || op === "decrypt" || op === "rewrap") {
 			if (req.headers["x-vault-token"] !== token) return { status: 403, body: { errors: ["permission denied"] } };
 		}
 		if (op === "encrypt") {
@@ -128,6 +133,16 @@ async function start(opts) {
 			const pt = json && store.get(json.ciphertext);
 			if (typeof pt !== "string") return { status: 400, body: { errors: ["invalid ciphertext"] } };
 			return { status: 200, body: { data: { plaintext: pt } } };
+		}
+		if (op === "rewrap") {
+			const pt = json && store.get(json.ciphertext);
+			if (typeof pt !== "string") return { status: 400, body: { errors: ["invalid ciphertext"] } };
+			let ct;
+			do {
+				ct = "vault:v" + keyVersion + ":" + crypto.randomBytes(24).toString("base64");
+			} while (store.has(ct));
+			store.set(ct, pt);
+			return { status: 200, body: { data: { ciphertext: ct, key_version: keyVersion } } };
 		}
 		return { status: 404, body: { errors: [] } };
 	}
