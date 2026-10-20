@@ -44,6 +44,23 @@ async function reasonOf(promise) {
 
 const tick = () => new Promise((r) => setImmediate(r));
 
+// OpenBao 2.7.1 keysutil error strings (decrypt / rewrap answer 400 {errors: [...]}).
+const ERR_TOO_OLD = "ciphertext or signature version is disallowed by policy (too old)";
+const ERR_KEY_NOT_FOUND = "encryption key not found";
+
+// The rejection itself, for checks beyond the reason (op, message).
+async function errorOf(promise) {
+	try {
+		await promise;
+	} catch (e) {
+		expect(e).to.be.instanceOf(Transit.TransitError);
+		return e;
+	}
+	throw new Error("expected a rejection");
+}
+
+const answer400 = (op, errors) => (q) => (q.op === op) ? { status: 400, body: (errors === undefined) ? {} : { errors } } : undefined;
+
 describe("Transit client (mocked OpenBao)", function () {
 
 	let mock;
@@ -57,8 +74,10 @@ describe("Transit client (mocked OpenBao)", function () {
 	});
 
 	describe("contract", function () {
-		it("(C1) exposes the seven reason classes and the fixed sentences", function () {
-			expect(Array.from(Transit.REASONS)).to.deep.equal(["not_configured", "unreachable", "tls", "sealed", "denied", "bad_ciphertext", "server_error"]);
+		it("(C1) exposes the nine reason classes and the fixed sentences", function () {
+			expect(Array.from(Transit.REASONS)).to.deep.equal(["not_configured", "unreachable", "tls", "sealed", "denied", "bad_ciphertext", "server_error", "retired_version", "key_missing"]);
+			expect(Transit.unavailableSentence("retired_version")).to.equal("stored key uses a retired key version");
+			expect(Transit.unavailableSentence("key_missing")).to.equal("key service has no deploy-key key");
 			expect(Transit.unavailableSentence("unreachable")).to.equal("key service unreachable");
 			expect(Transit.unavailableSentence("sealed")).to.equal("key service sealed");
 			expect(Transit.unavailableSentence("denied")).to.equal("key service refused the request");
@@ -328,6 +347,106 @@ describe("Transit client (mocked OpenBao)", function () {
 			} finally {
 				process.removeListener("unhandledRejection", onUnhandled);
 			}
+		});
+	});
+
+	describe("D-13 retired_version and key_missing (Phase 41, IN-05)", function () {
+		const RETIRED = /^THiNX OpenBao: API Transit RETIRED_VERSION on unit-host at 2026-10-19T08:00:00\.000Z: a stored deploy key is below min_decryption_version and cannot be decrypted; rewrap it\. One alert per process\.$/;
+
+		it("(D13a) a decrypt 400 carrying exactly ErrTooOld is retired_version after one request, logged by class only", async function () {
+			mock.script(answer400("decrypt", [ERR_TOO_OLD]));
+			const h = harness(mock);
+			const e = await errorOf(h.t.decryptKey("vault:v1:AAAA"));
+			expect(e.reason).to.equal("retired_version");
+			expect(e.status).to.equal(400);
+			expect(e.message).to.equal("transit_retired_version");
+			expect(mock.count("decrypt")).to.equal(1);
+			expect(h.logs).to.include("[transit] decrypt failed: retired_version status=400");
+			for (const line of h.logs.concat([e.message, String(e.stack)])) expect(line.includes("too old")).to.equal(false);
+		});
+
+		it("(D13b) any other decrypt 400 stays bad_ciphertext: another error, ErrTooOld plus text, no errors array", async function () {
+			for (const errors of [["invalid ciphertext"], [ERR_TOO_OLD + " extra"], ["x" + ERR_TOO_OLD], undefined]) {
+				mock.script(answer400("decrypt", errors));
+				const h = harness(mock);
+				expect(await reasonOf(h.t.decryptKey("vault:v1:AAAA"))).to.equal("bad_ciphertext");
+			}
+			mock.script(({ op }) => op === "decrypt" ? { status: 400, body: { errors: ERR_TOO_OLD } } : undefined);
+			expect(await reasonOf(harness(mock).t.decryptKey("vault:v1:AAAA"))).to.equal("bad_ciphertext");
+		});
+
+		it("(D13c) a rewrap 400 with ErrTooOld is retired_version; any other rewrap 400 is bad_ciphertext", async function () {
+			mock.script(answer400("rewrap", [ERR_TOO_OLD]));
+			const h = harness(mock);
+			expect(await reasonOf(h.t.rewrapKey("vault:v1:AAAA"))).to.equal("retired_version");
+			expect(mock.count("rewrap")).to.equal(1);
+			expect(h.logs).to.include("[transit] rewrap failed: retired_version status=400");
+			mock.script(answer400("rewrap", ["invalid ciphertext"]));
+			expect(await reasonOf(harness(mock).t.rewrapKey("vault:v1:AAAA"))).to.equal("bad_ciphertext");
+		});
+
+		it("(D13d) a decrypt or rewrap 400 with 'encryption key not found' is key_missing and opens one incident", async function () {
+			mock.script(answer400("decrypt", [ERR_KEY_NOT_FOUND]));
+			const h = harness(mock);
+			expect(await reasonOf(h.t.decryptKey("vault:v1:AAAA"))).to.equal("key_missing");
+			expect(mock.count("decrypt")).to.equal(1);
+			mock.script(answer400("rewrap", [ERR_KEY_NOT_FOUND]));
+			expect(await reasonOf(h.t.rewrapKey("vault:v1:AAAA"))).to.equal("key_missing");
+			expect(h.sent.length).to.equal(1);
+			expect(h.sent[0].text).to.match(/^THiNX OpenBao: API Transit FAILING on unit-host since 2026-10-19T08:00:00\.000Z: KEY_MISSING\. /);
+			mock.script(null);
+			await h.t.encryptKey(Buffer.from("ok"));
+			expect(h.sent.length).to.equal(2);
+			expect(h.sent[1].text).to.match(/^THiNX OpenBao: API Transit RECOVERED on unit-host; failing since .* \(KEY_MISSING\)\.$/);
+			for (const line of h.logs) expect(line.includes("not found")).to.equal(false);
+		});
+
+		it("(A5) retired_version alerts once per instance, never RECOVERED, and leaves outage alerts intact", async function () {
+			const h = harness(mock);
+			const good = await h.t.encryptKey(Buffer.from("good"));
+			mock.script(answer400("decrypt", [ERR_TOO_OLD]));
+			for (let i = 0; i < 3; i++) expect(await reasonOf(h.t.decryptKey("vault:v1:AAAA"))).to.equal("retired_version");
+			mock.script(null);
+			(await h.t.decryptKey(good)).fill(0);
+			await h.t.encryptKey(Buffer.from("again"));
+			expect(h.sent.length).to.equal(1);
+			expect(h.sent[0].text).to.match(RETIRED);
+			mock.script(({ op }) => op === "encrypt" ? { status: 503, body: {} } : undefined);
+			expect(await reasonOf(h.t.encryptKey(Buffer.from("x")))).to.equal("sealed");
+			expect(h.sent.length).to.equal(2);
+			expect(h.sent[1].text).to.match(/FAILING on unit-host since .*: SEALED\./);
+
+			// A retired key during an open outage incident still posts its own text, once.
+			const o = harness(mock);
+			expect(await reasonOf(o.t.encryptKey(Buffer.from("x")))).to.equal("sealed");
+			mock.script(answer400("decrypt", [ERR_TOO_OLD]));
+			expect(await reasonOf(o.t.decryptKey("vault:v1:AAAA"))).to.equal("retired_version");
+			expect(await reasonOf(o.t.decryptKey("vault:v1:AAAA"))).to.equal("retired_version");
+			expect(o.sent.map((p) => /FAILING/.test(p.text) ? "failing" : (RETIRED.test(p.text) ? "retired" : "other"))).to.deep.equal(["failing", "retired"]);
+		});
+	});
+
+	describe("IN-10: every TransitError carries its op", function () {
+		it("(IN10a) a login 500 is server_error with op login; a decrypt 500 has op decrypt; inputs carry their call's op", async function () {
+			mock.script(({ op }) => op === "login" ? { status: 500, body: {} } : undefined);
+			const login = await errorOf(harness(mock).t.decryptKey("vault:v1:AAAA"));
+			expect(login.reason).to.equal("server_error");
+			expect(login.op).to.equal("login");
+
+			mock.script(({ op }) => op === "decrypt" ? { status: 500, body: {} } : undefined);
+			const dec = await errorOf(harness(mock).t.decryptKey("vault:v1:AAAA"));
+			expect(dec.reason).to.equal("server_error");
+			expect(dec.op).to.equal("decrypt");
+
+			mock.script(({ op }) => op === "login" ? { status: 503, body: {} } : undefined);
+			expect((await errorOf(harness(mock).t.probe())).op).to.equal("probe");
+			mock.script(null);
+
+			const h = harness(mock);
+			expect((await errorOf(h.t.encryptKey(Buffer.alloc(0)))).op).to.equal("encrypt");
+			expect((await errorOf(h.t.decryptKey("garbage"))).op).to.equal("decrypt");
+			expect((await errorOf(h.t.rewrapKey("garbage"))).op).to.equal("rewrap");
+			expect(new Transit.TransitError("sealed", 503).op).to.equal(null);
 		});
 	});
 

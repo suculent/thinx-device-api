@@ -868,6 +868,76 @@ describe("Git", function () {
             expect(transit.calls.decrypt).to.equal(2);
         });
 
+        // IN-10: a server_error from the AppRole login is the service, not the key.
+        it("(G-IN10) a server_error from the login skips the remaining Transit keys; one from decrypt does not", async function () {
+            const login = new FakeTransit({ failReason: "server_error", failOps: ["decrypt"], failOpLabel: "login" });
+            const git = transitGit(login, ["transit-undecryptable", "transit-undecryptable2"]);
+            const lines = captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: "server_error" });
+            expect(login.calls.decrypt).to.equal(1);
+            expect(lines).to.include("[git] key transit-undecryptable2 skipped: deploy key unavailable: server_error");
+
+            const decrypt = new FakeTransit({ failReason: "server_error", failOps: ["decrypt"], failOpLabel: "decrypt" });
+            const r2 = await transitGit(decrypt, ["transit-undecryptable", "transit-undecryptable2"]).fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r2).to.deep.equal({ ok: false, keyUnavailable: "server_error" });
+            expect(decrypt.calls.decrypt).to.equal(2);
+        });
+
+        // D-13: key_missing is service-wide (the Transit key itself is gone);
+        // retired_version is one stored file below min_decryption_version.
+        it("(G-KM) key_missing skips the next Transit key; retired_version is per key", async function () {
+            const missing = new FakeTransit({ failReason: "key_missing", failOps: ["decrypt"] });
+            const lines = captureLog();
+            const r = await transitGit(missing, ["transit-undecryptable", "transit-undecryptable2"]).fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: "key_missing" });
+            expect(missing.calls.decrypt).to.equal(1);
+            expect(lines).to.include("[git] key transit-undecryptable2 skipped: deploy key unavailable: key_missing");
+
+            const retired = new FakeTransit({ minDecryption: 2 }); // both files are vault:v1:
+            const r2 = await transitGit(retired, ["transit-undecryptable", "transit-undecryptable2"]).fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r2).to.deep.equal({ ok: false, keyUnavailable: "retired_version" });
+            expect(retired.calls.decrypt).to.equal(2);
+            expect(lines).to.include("[git] key transit-undecryptable2 skipped: deploy key unavailable: retired_version");
+        });
+
+        // T-40-12: a non-coded error inside the agent callback logs a fixed token.
+        it("(G-T12) a non-coded error thrown inside withAgent logs attempt_error, never its message", async function () {
+            const transit = new FakeTransit();
+            await writeTransitKey(transit, "transit-t12");
+            const git = transitGit(transit, ["transit-t12"]);
+            spyOn(git, "cloneHoldingLock").and.callFake(async () => { throw new Error("secret-ish detail /tmp/x"); });
+            const lines = captureLog();
+            const r = await git.fetchDetailed(OWNER, repoUrl, "main", tmpdir(root, "build"));
+            expect(r).to.deep.equal({ ok: false, keyUnavailable: null });
+            expect(lines).to.include("[git] fetch attempt with key transit-t12 failed: attempt_error");
+            for (const line of lines) expect(line.includes("secret-ish detail")).to.equal(false);
+        }, 20000);
+
+        it("(F) FakeTransit: minDecryption refuses older versions as retired_version; failOpLabel stamps err.op", async function () {
+            const t = new FakeTransit();
+            expect(t.minDecryption).to.equal(1);
+            const old = await t.encryptKey(Buffer.from("old"));
+            t.rotate();
+            t.minDecryption = 2;
+            for (const call of [() => t.decryptKey(old), () => t.rewrapKey(old)]) {
+                let err = null;
+                try { await call(); } catch (e) { err = e; }
+                expect(err).to.be.instanceOf(FakeTransit.TransitError);
+                expect(err.reason).to.equal("retired_version");
+                expect(err.status).to.equal(400);
+            }
+            const fresh = await t.encryptKey(Buffer.from("new"));
+            expect((await t.decryptKey(fresh)).toString()).to.equal("new");
+
+            for (const [opts, op] of [[{}, "decrypt"], [{ failOpLabel: "login" }, "login"]]) {
+                const f = new FakeTransit(Object.assign({ failReason: "server_error", failOps: ["decrypt"] }, opts));
+                let err = null;
+                try { await f.decryptKey("vault:v1:QUJD"); } catch (e) { err = e; }
+                expect(err.op).to.equal(op);
+            }
+        });
+
         it("(T6) an inherited SSH_AUTH_SOCK / SSH_AGENT_PID reaches neither the keyless nor the legacy env (T-40-08)", function () {
             const saved = { sock: process.env.SSH_AUTH_SOCK, pid: process.env.SSH_AGENT_PID };
             process.env.SSH_AUTH_SOCK = "/tmp/spec-inherited-agent.sock";
