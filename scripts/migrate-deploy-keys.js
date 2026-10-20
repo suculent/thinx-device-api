@@ -11,6 +11,15 @@
  * `.<name>.<12 hex>.keymig.tmp` in the key directory (fsync), renamed over the
  * original only when the original still holds the bytes it held when it was read.
  *
+ * Legacy kinds: passphrase PKCS#8 (and Proc-Type PKCS#1) are opened with the
+ * candidates in order (the GIT_KEY_PASSPHRASE secret, then the historic literal);
+ * unencrypted PKCS#1 / PKCS#8 are parsed directly; an unencrypted OpenSSH key is
+ * converted with `ssh-keygen -p -m PKCS8` on a 0600 copy in a 0700 directory under
+ * /dev/shm (tmpfs), removed at once. A file that cannot be converted
+ * (wrong_passphrase, unparseable, unsupported_type, conversion_failed) is
+ * quarantined (D-02): its pair is removed through RSAKey#revokeUserKeys and its
+ * owner gets one audit-log warning naming only the key's creation date (D-03).
+ *
  * Modes (exactly one; none means --report):
  *   --report    Read-only (DEFAULT). Counts files by kind and Transit version.
  *   --dry-run   Converts in memory only. Zero Transit requests, no file changes;
@@ -40,6 +49,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const exec = require('child_process');
 const keyformat = require('../lib/thinx/keyformat.js');
 
 const MODES = ['--report', '--dry-run', '--migrate'];
@@ -203,11 +213,34 @@ function baseReport(mode, scanned) {
 
 // --- conversion ----------------------------------------------------------------
 
-// A legacy file's bytes -> { pem: Buffer (unencrypted PKCS#8), spki: Buffer, via } or
-// { cause }. Never throws, never logs; the caller zeroes `data` and `pem`.
+// File-level causes (D-02): the file itself cannot become a key, so it is quarantined.
+// Any other cause (no_scratch_tmpfs, a Transit class, write_failed) leaves the file.
+const QUARANTINE_CAUSES = new Set(['wrong_passphrase', 'unparseable', 'unsupported_type', 'conversion_failed']);
+
+const SSH_KEYGEN_TIMEOUT_MS = 10000;
+const AUDIT_TIMEOUT_MS = 10000;
+
+// A legacy file's bytes -> { pem: Buffer (unencrypted PKCS#8), spki: Buffer, spkiPem, via }
+// or { cause }. Never throws, never logs; the caller zeroes `data` and `pem`.
+//   ENCRYPTED PRIVATE KEY or a Proc-Type 4,ENCRYPTED header: the candidates in order
+//   OPENSSH PRIVATE KEY: ssh-keygen -p -m PKCS8 on a copy in the scratch tmpfs
+//   anything else PEM: parsed directly (unencrypted PKCS#1 / PKCS#8)
 function convertLegacy(entry, data, env) {
-	if (entry.legacyKind !== 'encrypted_pkcs8') return { cause: 'unsupported_kind' };
+	if (entry.legacyKind === 'openssh') return convertOpenSSH(data, env);
+	const text = data.toString('utf8');
+	const encrypted = entry.legacyKind === 'encrypted_pkcs8' || /^Proc-Type:[ \t]*4,ENCRYPTED[ \t]*\r?$/m.test(text);
+	if (!encrypted) {
+		let keyObject;
+		try {
+			keyObject = crypto.createPrivateKey({ key: data, format: 'pem' });
+		} catch (_e) {
+			return { cause: 'unparseable' };
+		}
+		return exportPkcs8(keyObject, 'unencrypted');
+	}
 	const candidates = Array.isArray(env.candidates) ? env.candidates : [];
+	// Every candidate is tried on any error: a wrong passphrase leaves valid CBC padding
+	// about 1 time in 256, and OpenSSL then reports a decoder error, not BAD_DECRYPT.
 	let sawBadDecrypt = false;
 	for (const candidate of candidates) {
 		let keyObject;
@@ -219,14 +252,169 @@ function convertLegacy(entry, data, env) {
 		}
 		return exportPkcs8(keyObject, candidate.label);
 	}
-	return { cause: sawBadDecrypt || candidates.length === 0 ? 'wrong_passphrase' : 'unparseable' };
+	return { cause: (sawBadDecrypt || candidates.length === 0) ? 'wrong_passphrase' : 'unparseable' };
 }
 
 function exportPkcs8(keyObject, via) {
 	if (keyObject.asymmetricKeyType !== 'rsa') return { cause: 'unsupported_type' };
 	const pem = Buffer.from(keyObject.export({ type: 'pkcs8', format: 'pem' }), 'utf8');
-	const spki = crypto.createPublicKey(keyObject).export({ type: 'spki', format: 'der' });
-	return { pem, spki, via };
+	const publicKey = crypto.createPublicKey(keyObject);
+	return {
+		pem,
+		spki: publicKey.export({ type: 'spki', format: 'der' }),
+		spkiPem: publicKey.export({ type: 'spki', format: 'pem' }),
+		via
+	};
+}
+
+// The key type named in the public half of an openssh-key-v1 blob ("ssh-rsa", ...),
+// or null when the blob is not one. Reads length-prefixed fields only; the private
+// section is never parsed, and the decoded buffer is zeroed.
+function opensshKeyType(data) {
+	const lines = data.toString('utf8').split(/\r?\n/).map((l) => l.trim());
+	const begin = lines.indexOf('-----BEGIN OPENSSH PRIVATE KEY-----');
+	const end = lines.indexOf('-----END OPENSSH PRIVATE KEY-----');
+	if (begin !== 0 || end <= begin) return null;
+	const body = lines.slice(begin + 1, end).join('');
+	if (!/^[A-Za-z0-9+/]+={0,2}$/.test(body)) return null;
+	const blob = Buffer.from(body, 'base64');
+	try {
+		const MAGIC = 'openssh-key-v1\0';
+		if (blob.length < MAGIC.length || blob.toString('latin1', 0, MAGIC.length) !== MAGIC) return null;
+		let off = MAGIC.length;
+		const field = () => {
+			if (off + 4 > blob.length) return null;
+			const n = blob.readUInt32BE(off);
+			if (off + 4 + n > blob.length) return null;
+			const value = blob.subarray(off + 4, off + 4 + n);
+			off += 4 + n;
+			return value;
+		};
+		if (field() === null || field() === null || field() === null) return null; // cipher, kdf, kdf options
+		if (off + 4 > blob.length || blob.readUInt32BE(off) !== 1) return null;    // exactly one key
+		off += 4;
+		const pub = field();
+		if (pub === null || pub.length < 4) return null;
+		const n = pub.readUInt32BE(0);
+		if (4 + n > pub.length) return null;
+		return pub.toString('latin1', 4, 4 + n);
+	} finally {
+		blob.fill(0);
+	}
+}
+
+// Node cannot parse openssh-key-v1, and withAgent needs a key createPublicKey reads
+// (Pitfall 1). The copy lives only in a 0700 mkdtemp directory under the scratch
+// tmpfs (/dev/shm in the container), overwritten and removed in finally.
+function convertOpenSSH(data, env) {
+	const type = opensshKeyType(data);
+	if (type === null) return { cause: 'unparseable' };
+	if (type !== 'ssh-rsa') return { cause: 'unsupported_type' };
+	let scratchOk = false;
+	try { scratchOk = typeof env.scratchDir === 'string' && fs.statSync(env.scratchDir).isDirectory(); } catch (_e) { scratchOk = false; }
+	if (!scratchOk) return { cause: 'no_scratch_tmpfs' };
+	let dir = null;
+	let out = null;
+	try {
+		try {
+			dir = fs.mkdtempSync(path.join(env.scratchDir, 'keymig-'));
+			fs.chmodSync(dir, 0o700);
+		} catch (_e) {
+			return { cause: 'no_scratch_tmpfs' };
+		}
+		const copy = path.join(dir, 'key');
+		const fd = fs.openSync(copy, 'wx', 0o600);
+		try {
+			fs.writeSync(fd, data);
+		} finally {
+			fs.closeSync(fd);
+		}
+		try {
+			exec.execFileSync('ssh-keygen', ['-q', '-p', '-m', 'PKCS8', '-N', '', '-P', '', '-f', copy], {
+				env: { PATH: process.env.PATH || '/usr/bin:/bin' },
+				stdio: 'ignore',
+				timeout: SSH_KEYGEN_TIMEOUT_MS,
+				shell: false
+			});
+		} catch (_e) {
+			return { cause: 'conversion_failed' };
+		}
+		const read = readFileBounded(copy);
+		if (!read.ok) return { cause: 'conversion_failed' };
+		out = read.data;
+		let keyObject;
+		try {
+			keyObject = crypto.createPrivateKey({ key: out, format: 'pem' });
+		} catch (_e) {
+			return { cause: 'conversion_failed' };
+		}
+		return exportPkcs8(keyObject, 'unencrypted');
+	} catch (_e) {
+		return { cause: 'conversion_failed' };
+	} finally {
+		if (out !== null) out.fill(0);
+		if (dir !== null) removeScratch(dir);
+	}
+}
+
+function removeScratch(dir) {
+	try {
+		for (const name of fs.readdirSync(dir)) {
+			const p = path.join(dir, name);
+			try {
+				const size = fs.statSync(p).size;
+				if (size > 0) fs.writeFileSync(p, Buffer.alloc(size));
+			} catch (_e) { /* removed below */ }
+		}
+	} catch (_e) { /* removed below */ }
+	try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_e) { /* best effort */ }
+}
+
+// Information only (never blocks): the .pub next to a key names a different key.
+function pubMismatch(entry, converted) {
+	if (!entry.pubExisted) return false;
+	const read = readFileBounded(entry.pubPath);
+	if (!read.ok) return false;
+	try {
+		const RSAKey = require('../lib/thinx/rsakey.js');
+		const stored = RSAKey.fingerprint(RSAKey.toOpenSSH(read.data, 'x'));
+		const own = RSAKey.fingerprint(RSAKey.toOpenSSH(converted.spkiPem, 'x'));
+		return stored !== null && own !== null && stored !== own;
+	} catch (_e) {
+		return false;
+	} finally {
+		read.data.fill(0);
+	}
+}
+
+// --- quarantine (D-02, D-03) ---------------------------------------------------
+
+function noticeFor(key) {
+	const d = new Date(Number(key));
+	const date = Number.isFinite(d.getTime()) ? d.toISOString().slice(0, 10) : 'on an unknown date';
+	return 'A deploy key created ' + date + ' could not be moved to the key service and was removed. ' +
+		'Create a new deploy key and add it to your repository.';
+}
+
+// Resolves true only when the audit callback answered true within the bound.
+function notifyOwner(env, owner, message) {
+	const timeoutMs = (typeof env.auditTimeoutMs === 'number') ? env.auditTimeoutMs : AUDIT_TIMEOUT_MS;
+	return new Promise((resolve) => {
+		let settled = false;
+		let timer = null;
+		const finish = (value) => {
+			if (settled) return;
+			settled = true;
+			if (timer !== null) clearTimeout(timer);
+			resolve(value);
+		};
+		timer = setTimeout(() => finish(false), timeoutMs);
+		try {
+			env.audit.log(owner, message, 'warning', (result) => finish(result === true));
+		} catch (_e) {
+			finish(false);
+		}
+	});
 }
 
 // --- atomic replace ------------------------------------------------------------
@@ -235,16 +423,19 @@ function tempPathFor(entry, env) {
 	return path.join(env.sshKeysDir, '.' + entry.name + '.' + crypto.randomBytes(6).toString('hex') + '.keymig.tmp');
 }
 
-// True when the target still has the bytes and the .pub state it had at scan time.
-function unchangedSinceScan(entry, env) {
+function sameBytes(entry) {
 	const now = readFileBounded(entry.path);
 	if (!now.ok) return false;
 	now.data.fill(0);
-	if (now.sha256 !== entry.sha256) return false;
-	const pubNow = fs.existsSync(entry.pubPath);
-	if (pubNow !== entry.pubExisted) return false;
-	if (entry.pubExisted) return env.rsakey.keyStillListed(entry.owner, entry.name, entry.pubPath) === true;
-	return true;
+	return now.sha256 === entry.sha256;
+}
+
+// True when the target still is listed, still has the .pub state it had at scan time
+// and still holds the same bytes. The content check runs last, closest to the rename.
+function unchangedSinceScan(entry, env) {
+	if (entry.pubExisted && env.rsakey.keyStillListed(entry.owner, entry.name, entry.pubPath) !== true) return false;
+	if (fs.existsSync(entry.pubPath) !== entry.pubExisted) return false;
+	return sameBytes(entry);
 }
 
 // Writes `line` over entry.path. Resolves 'replaced' | 'changed' | 'write_failed'.
@@ -360,13 +551,37 @@ async function migrate(env, opts) {
 			read.data.fill(0);
 		}
 		if (!converted.pem) {
-			fail(entry, converted.cause);
+			if (!QUARANTINE_CAUSES.has(converted.cause)) {
+				fail(entry, converted.cause);
+				continue;
+			}
+			const item = { owner: entry.owner, key: entry.key, cause: converted.cause };
+			if (dryRun) {
+				rep.predicted.quarantine += 1;
+				rep.quarantine.push(item);
+				continue;
+			}
+			// Remove only what was judged: a file rewritten since the read is left alone.
+			if (!sameBytes(entry)) {
+				rep.changed_during_run += 1;
+				continue;
+			}
+			const revoked = env.rsakey.revokeUserKeys([entry.name], entry.owner);
+			if (!Array.isArray(revoked) || !revoked.includes(entry.name)) {
+				rep.changed_during_run += 1;
+				continue;
+			}
+			rep.quarantined += 1;
+			rep.writes += 1;
+			rep.quarantine.push(item);
+			if (await notifyOwner(env, entry.owner, noticeFor(entry.key))) rep.notified += 1;
 			continue;
 		}
 		const pem = converted.pem;
 		let back = null;
 		try {
 			if (Object.prototype.hasOwnProperty.call(rep.decrypted_with, converted.via)) rep.decrypted_with[converted.via] += 1;
+			if (pubMismatch(entry, converted)) rep.pub_mismatch += 1;
 			if (dryRun) {
 				rep.predicted.migrate += 1;
 				continue;

@@ -11,9 +11,14 @@
  *   const down = new FakeTransit({ failReason: "unreachable" });
  *   const decryptDown = new FakeTransit({ failReason: "sealed", failOps: ["decrypt"] });
  *
- * encryptKey resolves "vault:v1:<base64 of random bytes>", which never contains
- * the plaintext; decryptKey maps it back to an equal, fresh Buffer. A string
- * this instance never issued rejects bad_ciphertext, as OpenBao does.
+ * encryptKey resolves "vault:v<version>:<base64 of random bytes>", which never
+ * contains the plaintext; decryptKey maps it back to an equal, fresh Buffer. A
+ * string this instance never issued rejects bad_ciphertext, as OpenBao does.
+ *
+ * Versions (Phase 41, KEYMIG-03): `version` starts at 1 and rotate() raises it by
+ * one, like transit/keys/<key>/rotate. rewrapKey(ct) re-issues a ciphertext this
+ * instance issued under the current version and resolves {ciphertext, version},
+ * like transit/rewrap; an unknown one rejects bad_ciphertext.
  */
 
 const crypto = require("crypto");
@@ -29,9 +34,25 @@ class FakeTransit {
 	constructor(opts) {
 		opts = opts || {};
 		this.failReason = opts.failReason || null;
-		this.failOps = new Set(opts.failOps || ["encrypt", "decrypt"]);
-		this.calls = { encrypt: 0, decrypt: 0 };
+		this.failOps = new Set(opts.failOps || ["encrypt", "decrypt", "rewrap"]);
+		this.calls = { encrypt: 0, decrypt: 0, rewrap: 0 };
+		this.version = 1;
 		this._store = new Map();
+	}
+
+	// The next key version, as an operator rotate would make it.
+	rotate() {
+		this.version += 1;
+		return this.version;
+	}
+
+	_issue(buf) {
+		let ciphertext;
+		do {
+			ciphertext = "vault:v" + this.version + ":" + crypto.randomBytes(24).toString("base64");
+		} while (this._store.has(ciphertext));
+		this._store.set(ciphertext, Buffer.from(buf)); // a copy: the caller zeroes its own
+		return ciphertext;
 	}
 
 	// Switch failure on (reason) or off (null) at run time.
@@ -50,12 +71,7 @@ class FakeTransit {
 		this.calls.encrypt += 1;
 		this._maybeFail("encrypt");
 		if (!Buffer.isBuffer(buf) || buf.length === 0) throw new TransitError("server_error");
-		let ciphertext;
-		do {
-			ciphertext = "vault:v1:" + crypto.randomBytes(24).toString("base64");
-		} while (this._store.has(ciphertext));
-		this._store.set(ciphertext, Buffer.from(buf)); // a copy: the caller zeroes its own
-		return ciphertext;
+		return this._issue(buf);
 	}
 
 	async decryptKey(ciphertext) {
@@ -64,6 +80,14 @@ class FakeTransit {
 		const ct = (typeof ciphertext === "string") ? ciphertext.trim() : "";
 		if (!this._store.has(ct)) throw new TransitError("bad_ciphertext", 400);
 		return Buffer.from(this._store.get(ct));
+	}
+
+	async rewrapKey(ciphertext) {
+		this.calls.rewrap += 1;
+		this._maybeFail("rewrap");
+		const ct = (typeof ciphertext === "string") ? ciphertext.trim() : "";
+		if (!this._store.has(ct)) throw new TransitError("bad_ciphertext", 400);
+		return { ciphertext: this._issue(this._store.get(ct)), version: this.version };
 	}
 }
 
