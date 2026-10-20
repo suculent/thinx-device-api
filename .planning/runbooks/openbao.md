@@ -127,10 +127,20 @@ once its receipt matches.
 ssh -t micro
 C=$(docker ps -q -f label=com.docker.swarm.service.name=vault_openbao -f status=running)
 docker exec -it "$C" sh          # BAO_ADDR/BAO_CACERT are preset: verified TLS over loopback
-bao login -method=userpass username=operator     # password prompt is hidden; token lives 4 h at most
+[ -z "${BAO_TOKEN+x}${VAULT_TOKEN+x}" ] && echo no-token-env   # must print no-token-env; never print the values
+stty -echo; IFS= read -r P; stty echo                          # type the operator password (not echoed)
+export BAO_TOKEN=$(printf '%s' "$P" | bao write -field=token auth/userpass/login/operator password=-); P=
 # ... work ...
-bao token revoke -self; rm -f ~/.vault-token; exit
+bao token revoke -self; unset BAO_TOKEN; exit
 ```
+
+**Do not use `bao login` inside the container** (found 2026-10-20, Plan 41-06 Task 3). The container filesystem is
+read-only, so `bao login -method=userpass username=operator` cannot write `~/.vault-token` and prints the token to
+the terminal instead. `export BAO_TOKEN=$(bao login -no-store ... -field=token)` also fails: the token is captured
+together with the TTY's carriage return and/or the password prompt, and every request is then refused with 403. The
+recipe above reads the password silently, sends it on stdin to the userpass login path and keeps only the token, in
+a shell variable that dies with the `exec` session. Revoke it before you exit; a token that was printed or lost lives
+until its 4 h `explicit_max_ttl` runs out.
 
 The operator token has `explicit_max_ttl` 14400 s and cannot be renewed past it. The operator policy cannot
 encrypt/decrypt with Transit and is blocked from raw storage, key export/backup and deletion flags. Trust limitation:
@@ -169,8 +179,8 @@ the bootstrap root was revoked (evidence log).
    unset BAO_TOKEN; exit
    ```
 
-   Store the new operator password in the password manager, then prove a fresh `bao login -method=userpass
-   username=operator` (section 6).
+   Store the new operator password in the password manager, then prove a fresh operator login with the
+   section 6 recipe (not `bao login`, which prints the token on the read-only container filesystem).
 4. `rm /etc/openbao/config/zz-emergency-unix.hcl`; `docker service update --force vault_openbao`; prove the socket
    is gone (`docker exec <task> test ! -e /run/openbao/emergency.sock`) and `openbao-install.sh --check` is clean
    (it refuses a leftover fragment: `CONFIG_DIR_UNEXPECTED_FILE`).
@@ -1247,3 +1257,30 @@ host file, and checks printed its mode, line count, shape and version only.
   kept on each node).
 - Next: the operator's single rotate (Task 3, section 6 login). Expected afterwards: latest_version 2,
   min_decryption_version unchanged.
+
+### 2026-10-20 Plan 41-06 Task 3: operator rotation of `thinx-deploy-keys` (D-11, D-12)
+
+The operator rotated the key in their own terminal (section 6 login, `docker exec` into `vault_openbao` on micro). The
+executor did not take part and saw no token or password.
+
+- Operator resume signal, verbatim: `rotated latest_version=2 min_decryption_version=1`
+- Before: latest_version 1 (= L0), min_decryption_version 1. One `bao write -f transit/keys/thinx-deploy-keys/rotate`.
+  After: key versions 1 and 2, latest_version 2, min_decryption_version 1, min_encryption_version 0. Unchanged:
+  exportable false, allow_plaintext_backup false, deletion_allowed false, auto_rotate_period 0s. No trim, no config
+  write, AppRole policy not widened.
+- Token: the token that did the rotate was revoked with `bao token revoke -self` ("Success!").
+- **Login deviation.** The container filesystem is read-only, so `bao login` could not store `~/.vault-token` and
+  printed the first operator token to the operator's own terminal. A second attempt, `export BAO_TOKEN=$(bao login
+  -no-store ... -field=token)`, captured a corrupted value (TTY carriage return and/or prompt) and got 403. The
+  working method was the silent `stty -echo` read plus `bao write -field=token auth/userpass/login/operator
+  password=-`, now the section 6 recipe. Only the final token is confirmed revoked. Up to two earlier operator tokens
+  may stay valid until their 4 h `explicit_max_ttl` expires (issued after 18:40:47Z and before 18:48Z, so gone by 22:48Z at the latest); the operator knows. No token value was
+  recorded anywhere.
+- AppRole confirmation, 18:48:33Z, task `74bunku80wzuf5q63cfxuderj` on micro (version and class lines only):
+  - a fresh `--canary-capture` encrypts at `v2` (only `cut -d: -f2` of the output left micro);
+  - the stored canary `transit-canary-20261020T184027Z.ct` (600 root): `CANARY result=ok version=v1`
+    (min_decryption_version unchanged);
+  - `--report`: private_files 77, transit `{"v1":77}`, legacy_total 0, unknown 0, unreadable 0. Every stored key is
+    still at v1, below latest; the rewrap to v2 is Plan 41-07.
+- Restore limitation 2 (section 9) now applies: `openbao-20261020T184042Z-pre-change` cannot decrypt v2 ciphertext.
+  Plan 41-07 takes a fresh snapshot after the rewrap.
