@@ -20,6 +20,10 @@ STATE_DIR="${STATE_DIR%/}/thinx-openbao-dev"
 CA_FILE="$STATE_DIR/vault-ca.pem"
 ROLE_ID="thinx-ci-bao-role"
 SECRET_ID="thinx-ci-bao-secret"
+# The dev server's throwaway root token (docker-compose.test.yml openbao,
+# AR-40-01), handed to the command as BAO_DEV_ADMIN_TOKEN for the rotate /
+# config calls of TransitRotationSpec. Never BAO_TOKEN, never production.
+DEV_ADMIN_TOKEN="thinx-ci-bao-root"
 
 dc() {
   # The test compose file interpolates many ${VAR}s the dev server does not
@@ -63,7 +67,8 @@ cmd_run() {
   local port rc=0
   port=$(addr_port)
   BAO_ADDR="https://127.0.0.1:${port}" BAO_CACERT="$CA_FILE" \
-    BAO_ROLE_ID="$ROLE_ID" BAO_SECRET_ID="$SECRET_ID" "$@" || rc=$?
+    BAO_ROLE_ID="$ROLE_ID" BAO_SECRET_ID="$SECRET_ID" \
+    BAO_DEV_ADMIN_TOKEN="$DEV_ADMIN_TOKEN" "$@" || rc=$?
   return "$rc"
 }
 

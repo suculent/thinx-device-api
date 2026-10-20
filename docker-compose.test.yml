@@ -180,6 +180,11 @@ services:
       - 'BAO_CACERT=/run/openbao-dev/vault-ca.pem'
       - 'BAO_ROLE_ID=thinx-ci-bao-role'
       - 'BAO_SECRET_ID=thinx-ci-bao-secret'
+      # Phase 41: the dev server's throwaway root token (AR-40-01), for the
+      # rotate / config calls of spec/jasmine/TransitRotationSpec.js only. Never
+      # a production credential, deliberately not named BAO_TOKEN, and never in
+      # thinx.yml or docker-swarm.yml.
+      - 'BAO_DEV_ADMIN_TOKEN=thinx-ci-bao-root'
     ports:
       - '7442:7442'
       - '7443:7443'
