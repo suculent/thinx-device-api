@@ -1444,3 +1444,11 @@ post-change snapshot only. Output: verdict lines, versions and counts.
   - Ports 7442, 1883 and 8883 open from the laptop.
 - Section 12 (the repeatable rotation recipe, rollback, alerts) written from this run.
 - Not pushed: `main` and no tag. This entry is a local docs commit.
+- Human check (keyed build from the Vue console after the raise), operator reply verbatim: `build failed
+  f9a73980-ccbc-11f1-8c6d-297b9876e71d `*** Do not know how to make File target `d1_mini' (/opt/workspace/d1_mini).
+  Stop.` but git fetched correctly. 20/10/2026, 21:32:27 UTC+2` (= 19:32:27Z). Verdict: **passed** for the keyed
+  fetch: the private repository was fetched with a v2 key. The make failure is after checkout and unrelated to the
+  deploy key (a builder/platform target issue for that build, follow-up candidate, not KEYMIG).
+- Logs since 19:30Z (counts only): thinx_api `deploy key unavailable` 0, `retired_version` 0, `[git] key ... skipped`
+  0 (102 lines carry the build id); thinx_worker (task `4ss4vlnluqw67255gxbac09w9`, micro) `deploy key unavailable`
+  0, `retired_version` 0.

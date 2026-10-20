@@ -40,7 +40,7 @@
 
 - [ ] **KEYMIG-01**: An idempotent migration script with `--dry-run` converts every legacy passphrase-encrypted key in `ssh_keys` to Transit ciphertext and reports counts (migrated / already-transit / failed); pre-migration copies go to a backup location that is not on GlusterFS.
 - [x] **KEYMIG-02**: Once migration reports zero legacy keys, the legacy read path and `GIT_KEY_PASSPHRASE` are removed from code, swarm secrets, `thinx.yml`, `docker-swarm.yml`, compose files and the Dockerfile, and leftover `*.sh` askpass files (cleartext passphrase) are purged from `ssh_keys`.
-- [ ] **KEYMIG-03**: Rotating the Transit key followed by a `rewrap` job brings every stored ciphertext to the latest key version, after which `min_decryption_version` is raised.
+- [x] **KEYMIG-03**: Rotating the Transit key followed by a `rewrap` job brings every stored ciphertext to the latest key version, after which `min_decryption_version` is raised.
 
 ## Future Requirements
 
@@ -81,7 +81,7 @@
 | KEYENC-06 | Phase 40 | Complete |
 | KEYMIG-01 | Phase 41 | Pending |
 | KEYMIG-02 | Phase 41 | Complete |
-| KEYMIG-03 | Phase 41 | Pending |
+| KEYMIG-03 | Phase 41 | Complete |
 
 **Coverage:**
 - v1 requirements: 17 total

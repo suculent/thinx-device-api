@@ -5,11 +5,11 @@ milestone_name: Deploy-Key OpenBao Transit
 current_phase: 41
 current_phase_name: Key Migration, Passphrase Retirement & Rotation
 status: executing
-stopped_at: Completed 41-06-PLAN.md
-last_updated: "2026-10-20T18:50:26.752Z"
+stopped_at: Completed 41-07-PLAN.md
+last_updated: "2026-10-20T19:44:36.232Z"
 last_activity: 2026-10-20
 last_activity_desc: Phase 41 execution started
-state_head: c1d5ee467d1540ac5be9aa73d4fceba9a3aca104
+state_head: 78cdd6c613239dc2d7af3af07c7dafa4917d2cba
 progress:
   total_phases: 3
   completed_phases: 2
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-09) and `.planning/workstreams/vault-
 ## Current Position
 
 Phase: 41 (Key Migration, Passphrase Retirement & Rotation) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-10-20 — Phase 41 execution started
 
@@ -70,6 +70,7 @@ Progress: [███████░░░] 67%
 | Phase 41 P04 | 48 min | 3 tasks | 13 files |
 | Phase 41 P05 | 40min | 3 tasks | 6 files |
 | Phase 41 P06 | 31min | 3 tasks | 2 files |
+| Phase 41 P07 | 53min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -139,6 +140,9 @@ Milestone-start decisions (full text in REQUIREMENTS.md, "Decisions taken at mil
 - [Phase 41]: 41-06: GIT_KEY_PASSPHRASE retired from the live swarm (Spec, PreviousSpec, swarm secret, Gluster .env*, askpass); operator removed two .env.bak files
 - [Phase 41]: 41-06: thinx-deploy-keys rotated once by the operator, latest_version 2, min_decryption_version 1; v1 canary and pre-change snapshot stored
 - [Phase 41]: 41-06: operator OpenBao login in the container uses the stdin userpass recipe (runbook section 6); bao login prints the token on the read-only FS
+- [Phase 41]: 41-07: D14_GATE before the raise (rewrap re-run all at v2, keyed fetch ok); operator raised min_decryption_version to 2 = latest
+- [Phase 41]: 41-07: post-change snapshot taken first after the raise to close the no-v2-snapshot window
+- [Phase 41]: 41-07: v1 canary refused as retired_version; rotation recipe is runbook section 12, no cron
 
 ### Pending Todos
 
@@ -163,6 +167,6 @@ None yet.
 
 ## Session Continuity
 
-**Last session:** 2026-10-20T18:50:25.946Z
-**Stopped At:** Completed 41-06-PLAN.md
+**Last session:** 2026-10-20T19:44:35.364Z
+**Stopped At:** Completed 41-07-PLAN.md
 **Resume File:** None
