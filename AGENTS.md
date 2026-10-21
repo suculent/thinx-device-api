@@ -90,6 +90,89 @@ dashboard/API route** (Phase 33, EDGE-API-01/02; operator decision 2026-10-08; t
   `errorpage@swarm does not exist` ERR lines in Traefik). It does not deploy the edge; edge changes stay manual.
 - See `.planning/runbooks/traefik-edge-hardening.md` (gate recipes, mechanism table, stage records, the ordered revert set).
 
+## Standing rules (moved here from session memory, 2026-10-21)
+
+Durable rules from earlier sessions, kept in the repo so they follow you to another computer. The details are in
+`.planning/runbooks/` and `.planning/MILESTONES.md`. This file is public: credentials, incident write-ups and
+operator-specific data stay out of it.
+
+### Branches, releases, deploys
+- Push parent commits to `thinx-staging` only. `main` changes through a PR. A direct push to `main` is not actually
+  blocked ("bypassed rule violations"), so never do it unless asked. `services/console` keeps `main` and
+  `thinx-staging` at the same commit.
+- A `thinx-staging` push **is** the production deploy: CircleCI `api-registry` publishes
+  `registry.thinx.cloud:5000/thinx/api:swarm` and `thinx_api` pulls that. `api-hub` (from `main`) publishes
+  `thinxcloud/api:latest` to Docker Hub for distribution only. If a staging push does not land, check the service's
+  image source first (on 2026-09-20 it was pinned to a Hub digest). Verify a deploy by grepping a new symbol inside the
+  running container, not by trusting a changed digest.
+- Release convention: `chore(release): bump version to <version>` (package.json + lock), PR `thinx-staging` → `main`,
+  tag and GitHub release. `main` requires signed commits; two unsigned commits from 2026-10-09 (`58027c18`,
+  `3152af99`) are still on `thinx-staging`, so release PRs need an admin squash (v1.18.4749 was merged that way).
+  Check with `git log --format='%G? %h' origin/main..HEAD | grep -v '^G'`. CodeQL counts every alert on a line a PR
+  touches, so old alerts can fail the check.
+- DHI base images: bump CVE fixes with `apk policy <pkg>`, `apk add --no-cache '<pkg>>=X'` and `apk list -I` in the
+  built image. The DHI repo can lag upstream Alpine, and the package is `libexpat`, not `expat`. `base/` image labels
+  are `2.0.<parent commit count>`.
+
+### Swarm and edge
+- Service placement floats between the two nodes: query where a task runs, `docker exec` is node-local, and
+  `docker service ls` is unreliable under load.
+- The operator treats the swarm as staging-grade (2026-10-19), so swarm writes need no fresh approval each time. The
+  hard rules still stand: keep 7442 and plain MQTT, never push to `main`, never print secrets, and change the edge with
+  `docker service update` only.
+- Swarm ingress NAT hides client IPs: Traefik and the API see `10.0.0.2` for everyone. Do not propose IP allowlists,
+  rate limits or trust-proxy tuning until publishing is host-mode or PROXY protocol.
+- Probe ports from the public IP, never from micro's loopback (Docker accepts anything there).
+- Pin DHI images (`dhi.io/influxdb`, `dhi.io/couchdb`) by tag, never `@sha256` (operator decision 2026-10-04).
+- A full `restart.sh` / `docker stack deploy thinx` prompts for a new edge basic-auth password and drops live-only
+  secret mounts (for example `INFLUXDB_TOKEN` on `thinx_api`; stats go dormant). For one service use
+  `docker service update --with-registry-auth --image … thinx_<svc>` and edit the yml to match. Read
+  `docker service logs` by the new task ID: the old task's shutdown noise looks like a failure.
+- Traefik v3 skips a service that carries both `traefik.docker.*` and `traefik.swarm.*` labels, so label migrations are
+  single-step.
+- `/mnt/gluster/deployment/swarm` on micro is a git checkout of `thinx-swarm` and micro cannot reach GitHub. Edit in
+  the workstation repo, push to origin, push over ssh into micro's checkout and `git merge --ff-only`; never edit in
+  place. A `master` push to `thinx-swarm` rebuilds the error/downtime images.
+- Production flags on `thinx_api` and in the gluster `thinx.yml`: `CORS_ENFORCE=true` (since 2026-10-03),
+  `CSRF_ENFORCE`, `THINX_MQTT_DEVICE_WRITES=1` (since 2026-10-04). A new console hostname goes into
+  `CORS_ALLOWED_ORIGINS` (console.thinx.cloud, rtm.thinx.cloud); do not drop `CORS_ENFORCE`. To roll MQTT writes back,
+  `--env-rm THINX_MQTT_DEVICE_WRITES` live and remove the yml line.
+- Registry: keep `registry_registry` at 0.25 CPU or more (a 0.05 cap caused TLS-handshake timeouts and a deploy outage
+  on 2026-09-21). `blob unknown to registry` 404s in its log are the normal push-time check. `registry:2` ignores
+  `_FILE` env vars, so its secret is read from `/run/secrets` by a wrapper.
+- After a dockerd bounce (for example unattended-upgrades) a stale overlay entry can make redis unreachable from the
+  other node; `docker service update --force thinx_thinx-redis` fixed the 2026-09-22 outage.
+
+### Logging and secrets
+- Request-derived values in logs go through `lib/thinx/logsafe.js`. Never log tokens, API keys, owner ids, OAuth codes
+  or request bodies. `Util.redactToken` and `Util.redactEmail` return single-line text.
+- Secrets are injected at runtime (compose `environment:` / `env_file`, Docker secrets through `readSecret()`), never
+  baked into an image with `ARG` + `ENV`.
+- `npm run setup:secret-hook` installs `.githooks/pre-commit` (gitleaks on the staged changes, redacted). Configuration
+  is `.gitleaks.toml`; allowlist entries need a comment. GitHub push protection is enabled on the repo.
+- Subagent prompts must forbid commands that dump the environment (`export`, `env`, `set`, `printenv` with no
+  arguments, or scripts whose failure path does so). Test such paths with `env -i` and a scratch `HOME`.
+
+### Consoles
+- Vue console `https://console.thinx.cloud/`, legacy console and API `https://rtm.thinx.cloud/` (see Deployment).
+- The Vue console has no Google Maps (removed 2026-10-21; the demo map was dropped because devices rarely report
+  correct locations). A device map is a planned feature built on reported or IP-inferred locations; IP inference needs
+  real client IPs first (see the ingress NAT rule above). A new map must add its CSP origin on purpose. The legacy
+  console keeps `GOOGLE_MAPS_APIKEY` for its static map image.
+
+### GSD / Claude workflow
+- In auto mode the classifier blocks executor spawns for production ssh writes and denies one Bash call that both
+  commits and pushes. For edge phases ask the operator to switch to default mode, and keep commit and push in separate
+  calls. Do not write `autoMode` rules for yourself (denied as self-modification); have the operator add them through
+  `/permissions`.
+- Pass `--ws <name>` on every gsd call in a workstream, except `audit-open acknowledge --category debug_sessions`,
+  which must run without it. A workstream ROADMAP needs a versioned `## vX.Y — Name` H2 above its phase headings, or
+  `milestone.complete` finds no phases; put inserted decimal phases inside it. Closing a milestone writes the workstream
+  `MILESTONES.md`; add the root `.planning/MILESTONES.md` entry by hand.
+- Run `dispatch-isolation --force-isolation none` as the last gsd-tools call before spawning an executor.
+- Per-session GSD state (`milestone.lock`, `state.json`, workstream `config.json`) is gitignored. Everything else in
+  `.planning/` is tracked, so code comments that cite review or plan IDs resolve on any clone.
+
 ## Local Verification
 - Build command:
   - `npm run build:test`
