@@ -1,0 +1,652 @@
+{
+  "version": 1,
+  "metadata": {
+    "source": "remote",
+    "provider": "gh",
+    "organization": "suculent",
+    "repositoryId": "91696",
+    "repositoryName": "thinx-device-api",
+    "createdAt": "2026-10-05T14:29:08.730Z",
+    "updatedAt": "2026-10-05T14:29:08.730Z",
+    "languages": [
+      "C",
+      "CoffeeScript",
+      "CPP",
+      "CSS",
+      "Dockerfile",
+      "Go",
+      "HTML",
+      "Javascript",
+      "JSON",
+      "LESS",
+      "Lua",
+      "Markdown",
+      "PHP",
+      "Ruby",
+      "SASS",
+      "Shell",
+      "TypeScript",
+      "YAML"
+    ]
+  },
+  "tools": [
+    {
+      "toolId": "RuboCop",
+      "patterns": [
+        {
+          "patternId": "Security_YAMLLoad"
+        },
+        {
+          "patternId": "Security_MarshalLoad"
+        },
+        {
+          "patternId": "Security_Eval"
+        },
+        {
+          "patternId": "Security_JSONLoad"
+        },
+        {
+          "patternId": "Performance_Detect"
+        },
+        {
+          "patternId": "Style_EachWithObject"
+        },
+        {
+          "patternId": "Lint_UselessAssignment"
+        },
+        {
+          "patternId": "Style_ModuleFunction"
+        },
+        {
+          "patternId": "Style_EvenOdd"
+        },
+        {
+          "patternId": "Rails_Date"
+        },
+        {
+          "patternId": "Style_InfiniteLoop"
+        },
+        {
+          "patternId": "Metrics_PerceivedComplexity"
+        },
+        {
+          "patternId": "Style_EmptyElse"
+        },
+        {
+          "patternId": "Style_OneLineConditional"
+        },
+        {
+          "patternId": "Style_NestedTernaryOperator"
+        },
+        {
+          "patternId": "Lint_ElseLayout"
+        },
+        {
+          "patternId": "Style_AutoResourceCleanup"
+        },
+        {
+          "patternId": "Style_MultilineTernaryOperator"
+        },
+        {
+          "patternId": "Lint_ShadowingOuterLocalVariable"
+        },
+        {
+          "patternId": "Style_LambdaCall"
+        },
+        {
+          "patternId": "Lint_EmptyInterpolation"
+        },
+        {
+          "patternId": "Performance_Count"
+        },
+        {
+          "patternId": "Lint_UnreachableCode"
+        },
+        {
+          "patternId": "Style_ArrayJoin"
+        },
+        {
+          "patternId": "Style_NilComparison"
+        },
+        {
+          "patternId": "Style_NegatedIf"
+        },
+        {
+          "patternId": "Lint_EnsureReturn"
+        },
+        {
+          "patternId": "Style_MultilineIfThen"
+        },
+        {
+          "patternId": "Lint_UnusedMethodArgument"
+        },
+        {
+          "patternId": "Lint_AmbiguousRegexpLiteral"
+        },
+        {
+          "patternId": "Style_ColonMethodCall"
+        },
+        {
+          "patternId": "Style_NegatedWhile"
+        },
+        {
+          "patternId": "Lint_Loop"
+        },
+        {
+          "patternId": "Style_Alias"
+        },
+        {
+          "patternId": "Lint_EachWithObjectArgument"
+        },
+        {
+          "patternId": "Performance_Size"
+        },
+        {
+          "patternId": "Lint_UselessAccessModifier"
+        },
+        {
+          "patternId": "Lint_UnusedBlockArgument"
+        },
+        {
+          "patternId": "Lint_EmptyEnsure"
+        },
+        {
+          "patternId": "Style_ClassVars"
+        },
+        {
+          "patternId": "Lint_Debugger"
+        },
+        {
+          "patternId": "Style_DoubleNegation"
+        },
+        {
+          "patternId": "Lint_NestedMethodDefinition"
+        },
+        {
+          "patternId": "Lint_LiteralInInterpolation"
+        },
+        {
+          "patternId": "Lint_UselessElseWithoutRescue"
+        },
+        {
+          "patternId": "Lint_RescueException"
+        },
+        {
+          "patternId": "Style_NonNilCheck"
+        },
+        {
+          "patternId": "Performance_ReverseEach"
+        },
+        {
+          "patternId": "Style_CaseEquality"
+        },
+        {
+          "patternId": "Lint_AmbiguousOperator"
+        },
+        {
+          "patternId": "Lint_UselessSetterCall"
+        },
+        {
+          "patternId": "Style_Lambda"
+        },
+        {
+          "patternId": "Lint_DuplicateMethods"
+        },
+        {
+          "patternId": "Metrics_CyclomaticComplexity"
+        }
+      ]
+    },
+    {
+      "toolId": "PMD",
+      "patterns": []
+    },
+    {
+      "toolId": "Semgrep",
+      "patterns": []
+    },
+    {
+      "toolId": "shellcheck",
+      "patterns": [
+        {
+          "patternId": "shellcheck_SC2025"
+        },
+        {
+          "patternId": "shellcheck_SC2148"
+        },
+        {
+          "patternId": "shellcheck_SC2029"
+        },
+        {
+          "patternId": "shellcheck_SC2006"
+        },
+        {
+          "patternId": "shellcheck_SC2016"
+        },
+        {
+          "patternId": "shellcheck_SC2001"
+        },
+        {
+          "patternId": "shellcheck_SC2024"
+        },
+        {
+          "patternId": "shellcheck_SC2028"
+        },
+        {
+          "patternId": "shellcheck_SC2004"
+        },
+        {
+          "patternId": "shellcheck_SC2002"
+        },
+        {
+          "patternId": "shellcheck_SC2026"
+        },
+        {
+          "patternId": "shellcheck_SC2033"
+        },
+        {
+          "patternId": "shellcheck_SC2015"
+        },
+        {
+          "patternId": "shellcheck_SC2034"
+        },
+        {
+          "patternId": "shellcheck_SC2020"
+        },
+        {
+          "patternId": "shellcheck_SC2027"
+        },
+        {
+          "patternId": "shellcheck_SC2036"
+        },
+        {
+          "patternId": "shellcheck_SC2003"
+        },
+        {
+          "patternId": "shellcheck_SC2031"
+        },
+        {
+          "patternId": "shellcheck_SC2022"
+        }
+      ]
+    },
+    {
+      "toolId": "Agentlinter",
+      "patterns": []
+    },
+    {
+      "toolId": "Lizard",
+      "patterns": []
+    },
+    {
+      "toolId": "flawfinder",
+      "patterns": []
+    },
+    {
+      "toolId": "Trivy",
+      "patterns": []
+    },
+    {
+      "toolId": "jackson",
+      "patterns": [
+        {
+          "patternId": "jackson_duplicate-keys"
+        },
+        {
+          "patternId": "jackson_parse-error"
+        }
+      ]
+    },
+    {
+      "toolId": "Stylelint",
+      "patterns": []
+    },
+    {
+      "toolId": "Checkov",
+      "patterns": []
+    },
+    {
+      "toolId": "ESLint8",
+      "useLocalConfigurationFile": true,
+      "patterns": []
+    },
+    {
+      "toolId": "markdownlint",
+      "patterns": []
+    },
+    {
+      "toolId": "PHPCS",
+      "patterns": []
+    },
+    {
+      "toolId": "Hadolint",
+      "patterns": [
+        {
+          "patternId": "Hadolint_DL4003"
+        },
+        {
+          "patternId": "Hadolint_DL3006"
+        },
+        {
+          "patternId": "Hadolint_DL3007"
+        },
+        {
+          "patternId": "Hadolint_SC1007"
+        },
+        {
+          "patternId": "Hadolint_SC2164"
+        },
+        {
+          "patternId": "Hadolint_SC1035"
+        },
+        {
+          "patternId": "Hadolint_SC1065"
+        },
+        {
+          "patternId": "Hadolint_SC1083"
+        },
+        {
+          "patternId": "Hadolint_SC2140"
+        },
+        {
+          "patternId": "Hadolint_SC1097"
+        },
+        {
+          "patternId": "Hadolint_SC2015"
+        },
+        {
+          "patternId": "Hadolint_SC2035"
+        },
+        {
+          "patternId": "Hadolint_DL3014"
+        },
+        {
+          "patternId": "Hadolint_DL3008"
+        },
+        {
+          "patternId": "Hadolint_DL3010"
+        },
+        {
+          "patternId": "Hadolint_SC1066"
+        },
+        {
+          "patternId": "Hadolint_DL3012"
+        },
+        {
+          "patternId": "Hadolint_DL3002"
+        },
+        {
+          "patternId": "Hadolint_SC2026"
+        },
+        {
+          "patternId": "Hadolint_DL3020"
+        },
+        {
+          "patternId": "Hadolint_SC1045"
+        },
+        {
+          "patternId": "Hadolint_SC1095"
+        },
+        {
+          "patternId": "Hadolint_DL4004"
+        },
+        {
+          "patternId": "Hadolint_SC1081"
+        },
+        {
+          "patternId": "Hadolint_SC2028"
+        },
+        {
+          "patternId": "Hadolint_SC1077"
+        },
+        {
+          "patternId": "Hadolint_SC1087"
+        },
+        {
+          "patternId": "Hadolint_SC1010"
+        },
+        {
+          "patternId": "Hadolint_DL3001"
+        },
+        {
+          "patternId": "Hadolint_DL4001"
+        },
+        {
+          "patternId": "Hadolint_SC1079"
+        },
+        {
+          "patternId": "Hadolint_DL3003"
+        },
+        {
+          "patternId": "Hadolint_SC1001"
+        },
+        {
+          "patternId": "Hadolint_SC2002"
+        },
+        {
+          "patternId": "Hadolint_DL3004"
+        },
+        {
+          "patternId": "Hadolint_SC1099"
+        },
+        {
+          "patternId": "Hadolint_SC1068"
+        },
+        {
+          "patternId": "Hadolint_SC1078"
+        },
+        {
+          "patternId": "Hadolint_DL4000"
+        },
+        {
+          "patternId": "Hadolint_DL3000"
+        },
+        {
+          "patternId": "Hadolint_DL3009"
+        },
+        {
+          "patternId": "Hadolint_DL3011"
+        },
+        {
+          "patternId": "Hadolint_SC1098"
+        },
+        {
+          "patternId": "Hadolint_SC1000"
+        },
+        {
+          "patternId": "Hadolint_DL4005"
+        },
+        {
+          "patternId": "Hadolint_SC2046"
+        },
+        {
+          "patternId": "Hadolint_SC2086"
+        },
+        {
+          "patternId": "Hadolint_SC1086"
+        },
+        {
+          "patternId": "Hadolint_SC2154"
+        },
+        {
+          "patternId": "Hadolint_SC1018"
+        },
+        {
+          "patternId": "Hadolint_DL3013"
+        },
+        {
+          "patternId": "Hadolint_DL3015"
+        }
+      ]
+    }
+  ],
+  "exclude": [
+    "builders/lua-inspect/htmllib/jquery-1.4.2.min.js",
+    "lib/thinx/plugins/sample/plugin.js",
+    "services/traefik/update_all.sh",
+    "services/traefik/update.sh",
+    "spec/coverage/.last_run.json",
+    "spec/coverage/.resultset.json",
+    "spec/empty.json",
+    "spec/_envi.json",
+    "spec/fixtures/cert-probe/generate.sh",
+    "spec/helpers/bootstrap.js",
+    "spec/jasmine/00-AppSpec.js",
+    "spec/jasmine/00-DatabaseSpec.js",
+    "spec/jasmine/02-OwnerSpec.js",
+    "spec/jasmine/03-RsakeySpec.js",
+    "spec/jasmine/ACLSpec.js",
+    "spec/jasmine/AesSpec.js",
+    "spec/jasmine/ApienvSpec.js",
+    "spec/jasmine/ApikeyExactMatchSpec.js",
+    "spec/jasmine/ApikeyExposureSpec.js",
+    "spec/jasmine/ApikeySpec.js",
+    "spec/jasmine/AuditFlagWritersSpec.js",
+    "spec/jasmine/AuditOwnerFetchSpec.js",
+    "spec/jasmine/AuditSpec.js",
+    "spec/jasmine/BearerVerifyStatusSpec.js",
+    "spec/jasmine/BuilderApiKeySpec.js",
+    "spec/jasmine/BuilderPathSpec.js",
+    "spec/jasmine/BuilderRemoteJobSpec.js",
+    "spec/jasmine/BuildLogOwnerSpec.js",
+    "spec/jasmine/BuildlogPagingSpec.js",
+    "spec/jasmine/CheckinCrashHangSpec.js",
+    "spec/jasmine/CheckinLogLeakSpec.js",
+    "spec/jasmine/ClearLeakedCredentialsSpec.js",
+    "spec/jasmine/CookiePolicySpec.js",
+    "spec/jasmine/CsrfRouteInventorySpec.js",
+    "spec/jasmine/CsrfSessionFlowSpec.js",
+    "spec/jasmine/DeploymentSpec.js",
+    "spec/jasmine/DesignUpsertSpec.js",
+    "spec/jasmine/DeviceDocLogLeakSpec.js",
+    "spec/jasmine/DeviceFirmwareOwnerSpec.js",
+    "spec/jasmine/DeviceOttSpec.js",
+    "spec/jasmine/DeviceOwnershipSpec.js",
+    "spec/jasmine/DevicePushOwnerSpec.js",
+    "spec/jasmine/DeviceRegisterOwnerSpec.js",
+    "spec/jasmine/DeviceSpec.js",
+    "spec/jasmine/DevicesSpec.js",
+    "spec/jasmine/DeviceTransformersSpec.js",
+    "spec/jasmine/EventTaxonomySpec.js",
+    "spec/jasmine/FilezSpec.js",
+    "spec/jasmine/FinderSpec.js",
+    "spec/jasmine/FirmwareLookupSpec.js",
+    "spec/jasmine/GDPRSpec.js",
+    "spec/jasmine/GitHubLinkSpec.js",
+    "spec/jasmine/GitHubOAuthIsolationSpec.js",
+    "spec/jasmine/GitHubSpec.js",
+    "spec/jasmine/GitSpec.js",
+    "spec/jasmine/GoogleOAuthStateSpec.js",
+    "spec/jasmine/InfluxRetentionSpec.js",
+    "spec/jasmine/InfluxSpec.js",
+    "spec/jasmine/InfluxStatsProbeSpec.js",
+    "spec/jasmine/InfluxWriteLatchSpec.js",
+    "spec/jasmine/JSON2HSpec.js",
+    "spec/jasmine/JWTLoginSpec.js",
+    "spec/jasmine/LoggerSpec.js",
+    "spec/jasmine/LoggingQualityAuditSpec.js",
+    "spec/jasmine/LogPagingProbeSpec.js",
+    "spec/jasmine/LogPagingSpec.js",
+    "spec/jasmine/LogRetentionSpec.js",
+    "spec/jasmine/LogRouterPagingSpec.js",
+    "spec/jasmine/LogTailOwnerSpec.js",
+    "spec/jasmine/MeshSessionAuthSpec.js",
+    "spec/jasmine/MessengerDeviceWritesSpec.js",
+    "spec/jasmine/MessengerDropLimiterSpec.js",
+    "spec/jasmine/MessengerFailSafeSpec.js",
+    "spec/jasmine/MessengerOwnershipSpec.js",
+    "spec/jasmine/MessengerOwnerSocketSpec.js",
+    "spec/jasmine/MessengerSpec.js",
+    "spec/jasmine/MetricsCoverageSpec.js",
+    "spec/jasmine/NormalizeCommitMsgSpec.js",
+    "spec/jasmine/NotifierSpec.js",
+    "spec/jasmine/OwnerDefaultMqttKeySpec.js",
+    "spec/jasmine/OwnerLogLeakSpec.js",
+    "spec/jasmine/OwnerPurgeSpec.js",
+    "spec/jasmine/PagingMapSpec.js",
+    "spec/jasmine/PlatformSpec.js",
+    "spec/jasmine/PluginSpec.js",
+    "spec/jasmine/PrivacyPolicyConsistencySpec.js",
+    "spec/jasmine/QueueActionSpec.js",
+    "spec/jasmine/QueueSpec.js",
+    "spec/jasmine/RedactSlackSpec.js",
+    "spec/jasmine/RedisHealthSpec.js",
+    "spec/jasmine/RepositorySpec.js",
+    "spec/jasmine/SafePathSpec.js",
+    "spec/jasmine/SanitkaSpec.js",
+    "spec/jasmine/SecretsSpec.js",
+    "spec/jasmine/SecretsSweepSpec.js",
+    "spec/jasmine/SourcesSpec.js",
+    "spec/jasmine/StatisticsV2Spec.js",
+    "spec/jasmine/StatsPrivacySpec.js",
+    "spec/jasmine/TransferApiKeySpec.js",
+    "spec/jasmine/TransferRecipientSpec.js",
+    "spec/jasmine/TransferSpec.js",
+    "spec/jasmine/UtilSpec.js",
+    "spec/jasmine/UtilTimezoneSpec.js",
+    "spec/jasmine/ValidatorSpec.js",
+    "spec/jasmine/XBuilderSpec.js",
+    "spec/jasmine/XBuildlogSpec.js",
+    "spec/jasmine/ZZ-AppSession.js",
+    "spec/jasmine/ZZ-AppSessionUserSpec.js",
+    "spec/jasmine/ZZ-AppSessionUserV2DeleteSpec.js",
+    "spec/jasmine/ZZ-AuditTTLEvictionSpec.js",
+    "spec/jasmine/ZZ-AuditTTLSpec.js",
+    "spec/jasmine/ZZ-CertProbeSpec.js",
+    "spec/jasmine/ZZ-CookieAttributeSpec.js",
+    "spec/jasmine/ZZ-CORSSpec.js",
+    "spec/jasmine/ZZ-CouchCallbackShimSpec.js",
+    "spec/jasmine/ZZ-CSRFEnforceSpec.js",
+    "spec/jasmine/ZZ-CSRFRouteGuardSpec.js",
+    "spec/jasmine/ZZ-CSRFSpec.js",
+    "spec/jasmine/ZZ-DeviceTimezoneMigrationSpec.js",
+    "spec/jasmine/ZZ-LogPagingCouchSpec.js",
+    "spec/jasmine/ZZ-LogTailWebSocketSpec.js",
+    "spec/jasmine/ZZ-OwnerLogRedactionSpec.js",
+    "spec/jasmine/ZZ-RedactionScriptSpec.js",
+    "spec/jasmine/ZZ-roadmap-entropy-spec.js",
+    "spec/jasmine/ZZ-RouterAdminReactivateSpec.js",
+    "spec/jasmine/ZZ-RouterAPIKeySpec.js",
+    "spec/jasmine/ZZ-RouterBuilderSpec.js",
+    "spec/jasmine/ZZ-RouterDeviceAPISpec.js",
+    "spec/jasmine/ZZ-RouterDeviceSpec.js",
+    "spec/jasmine/ZZ-RouterENVVarSpec.js",
+    "spec/jasmine/ZZ-RouterMeshesSpec.js",
+    "spec/jasmine/ZZ-RouterNotificationsSpec.js",
+    "spec/jasmine/ZZ-RouterOAuthSpec.js",
+    "spec/jasmine/ZZ-RouterPasswordResetSpec.js",
+    "spec/jasmine/ZZ-RouterRSAKeySpec.js",
+    "spec/jasmine/ZZ-RouterSourcesSpec.js",
+    "spec/jasmine/ZZ-RouterTransferSpec.js",
+    "spec/jasmine/ZZ-RouterTransformerSpec.js",
+    "spec/jasmine/ZZ-SessionTokenSpec.js",
+    "spec/jasmine/ZZ-WebSocketHandshakeRtmSpec.js",
+    "spec/jasmine/ZZ-WebSocketLifecycleSpec.js",
+    "spec/jasmine/ZZZ-StatisticsSpec.js",
+    "spec/javascripts/support/jasmine_helper.rb",
+    "spec/javascripts/support/jasmine.yml",
+    "spec/mnt/data/conf/config.json",
+    "spec/mnt/data/conf/github-oauth.json",
+    "spec/mnt/data/conf/google-oauth.json",
+    "spec/mnt/data/conf/node-session.json",
+    "spec/mnt/data/ssh_keys/askpass.sh",
+    "spec/mnt/data/ssl/_generate-ca-root-csr-and-sign-cert.sh",
+    "spec/mock-git-response.json",
+    "spec/node/ConsoleHeaderParity.test.js",
+    "spec/node/InstallLogRetentionCron.test.js",
+    "spec/node/StaticCsp.test.js",
+    "spec/node/TestScriptExitCode.test.js",
+    "spec/node/ThinxLogRetentionWrapper.test.js",
+    "spec/redis_test.js",
+    "spec/slack_test.js",
+    "spec/spec_helper.rb",
+    "spec/support/jasmine.json",
+    "spec/test_repositories/arduino/src/src.ino",
+    "spec/test_repositories/arduino/thinx.yml",
+    "spec/test_repositories/get-tests.sh",
+    "node_modules/**",
+    "spec/**",
+    "services/**",
+    "addons/**"
+  ]
+}
