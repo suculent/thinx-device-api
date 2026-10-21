@@ -52,6 +52,7 @@ function stubHttps(method, reply) {
     sent.options = typeof first === "string" ? second : first;
     const req = new EventEmitter();
     req.write = (chunk) => { sent.body += chunk; };
+    req.setTimeout = () => req;
     req.end = () => {
       process.nextTick(() => {
         if (reply.error) req.emit("error", reply.error);
@@ -147,7 +148,8 @@ describe("GitHub.addPublicKey outcome (45-REVIEW WR-01)", function () {
   async function expectOutcome(reply, ok, result) {
     const got = await outcomeOf(reply);
     expect(got.pushed).to.equal(ok);
-    expect(got.outcome).to.deep.equal({ status: reply.status, result: result });
+    expect(got.outcome).to.deep.equal(Object.assign({ status: reply.status, result: result },
+      reply.status === 201 ? { key_id: 7 } : {}));
   }
 
   const inUse = (message) => JSON.stringify({ message: "Validation Failed", errors: [{ resource: "PublicKey", code: "custom", field: "key", message: message }] });
@@ -174,6 +176,43 @@ describe("GitHub.addPublicKey outcome (45-REVIEW WR-01)", function () {
     const got = await outcomeOf({ error: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" }) });
     expect(got.pushed).to.equal(false);
     expect(got.outcome).to.deep.equal({ status: null, result: "error" });
+  });
+});
+
+describe("GitHub.deletePublicKey", function () {
+  for (const status of [204, 404, 401, 403, 500]) {
+    it("reports DELETE status " + status + " without leaking credentials", async function () {
+      const stub = stubHttps("request", { status, body: echoBody() });
+      const out = captureConsole();
+      try {
+        const result = await new Promise((resolve) => GitHub.deletePublicKey(TOKEN, 7, resolve));
+        expect(result).to.equal(status === 204 || status === 404);
+        expect(stub.sent.options.method).to.equal("DELETE");
+        expect(stub.sent.options.path).to.equal("/user/keys/7");
+        expect(stub.sent.options.headers.Authorization).to.equal("Bearer " + TOKEN);
+        expectClean(out.text());
+      } finally { out.restore(); stub.restore(); }
+    });
+  }
+
+  it("reports a transport failure", async function () {
+    const stub = stubHttps("request", { error: Object.assign(new Error("Bearer " + TOKEN), { code: "ECONNRESET" }) });
+    const out = captureConsole();
+    try {
+      const result = await new Promise((resolve) => GitHub.deletePublicKey(TOKEN, 7, resolve));
+      expect(result).to.equal(false);
+      expectClean(out.text());
+    } finally { out.restore(); stub.restore(); }
+  });
+
+  it("refuses an invalid key id without making a request", function () {
+    const request = spyOn(https, "request");
+    for (const id of [undefined, null, 0, -1, "7/other", NaN]) {
+      let result;
+      GitHub.deletePublicKey(TOKEN, id, (ok) => { result = ok; });
+      expect(result).to.equal(false);
+    }
+    expect(request.calls.count()).to.equal(0);
   });
 });
 
