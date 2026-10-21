@@ -116,3 +116,10 @@ settings.json
 # local Codacy run records (the tuned .codacy/codacy.config.json is tracked)
 /.codacy/configure-codacy-summary.json
 /.codacy/codacy.config.baseline.json
+
+# GSD per-session runtime state (pid/session locks, derived state snapshots, run toggles); regenerated per machine
+/.planning/milestone.lock
+/.planning/state.json
+/.planning/workstreams/*/milestone.lock
+/.planning/workstreams/*/state.json
+/.planning/workstreams/*/config.json

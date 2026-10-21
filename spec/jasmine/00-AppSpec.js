@@ -22,7 +22,7 @@ let thx;
 // red). Warming each user view here (with retry) forces the indexes to build BEFORE
 // the first spec queries them. The built indexes persist for the rest of the run, so
 // every later spec benefits too. Pure test-harness change; no product behavior change.
-// See .planning/debug/ci-login-503-couchdb.md for the full diagnosis.
+// See .planning/debug/resolved/ci-login-503-couchdb.md for the full diagnosis.
 async function warmUserViews() {
   const USER_VIEWS = [
     "owners_by_username",
