@@ -1,0 +1,26 @@
+#!/bin/sh
+# pre-commit: refuse to commit secrets (tokens, webhooks, private keys) found in the staged changes.
+# Scans only what is staged, with output redacted, so a blocked secret is never printed.
+# Install with: npm run setup:secret-hook   (see scripts/install-git-hooks.sh)
+# Emergency bypass for a reviewed false positive: git commit --no-verify
+# (prefer adding a narrow, commented entry to .gitleaks.toml instead).
+
+root="$(git rev-parse --show-toplevel)"
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+	echo "pre-commit: gitleaks is not installed, secret scan SKIPPED (brew install gitleaks)" >&2
+	exit 0
+fi
+
+if gitleaks git --staged --redact --no-banner --config "$root/.gitleaks.toml" "$root"; then
+	exit 0
+fi
+
+cat >&2 <<'EOF'
+
+pre-commit: gitleaks found secret-like content in the staged changes (values are redacted above).
+  - Remove it, or load it from the environment / a Docker secret, then stage again.
+  - If it was committed before: rotate it. Deleting it from a later commit does not revoke it.
+  - A reviewed false positive belongs in .gitleaks.toml with a comment saying why.
+EOF
+exit 1

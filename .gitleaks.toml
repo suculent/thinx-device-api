@@ -1,0 +1,34 @@
+# gitleaks configuration for the pre-commit hook (.githooks/pre-commit) and for ad-hoc history scans.
+# Extends the default ruleset; only narrowly scoped allowlists below. Keep every entry commented with why.
+#
+# Syntax note: written for gitleaks 8.24 (per-rule `[rules.allowlist]`). The newer `[[allowlists]]` /
+# `targetRules` form needs 8.25+ and is silently ignored by older versions.
+
+title = "thinx-device-api"
+
+[extend]
+useDefault = true
+
+# .planning and docs quote option names, hashes and example assignments that match the entropy-based
+# generic rule. The specific token rules (GitHub, Slack, AWS, PEM keys, ...) stay enforced there.
+[[rules]]
+id = "generic-api-key"
+[rules.allowlist]
+description = "generic-api-key is noise in planning documents and docs"
+paths = ['''^\.planning/''', '''^docs/''']
+
+# Not keys: the migration tool tests for the PEM header text, and one research note quotes a
+# histogram of the headers found in ssh_keys.
+[[rules]]
+id = "private-key"
+[rules.allowlist]
+description = "PEM header text without key material"
+paths = [
+  '''^scripts/migrate-deploy-keys\.js$''',
+  '''^\.planning/.*/41-key-migration-passphrase-retirement-rotation/41-RESEARCH\.md$''',
+]
+
+# Vendored sample repositories used as build fixtures (not THiNX secrets).
+[allowlist]
+description = "vendored test repositories"
+paths = ['''^spec/test_repositories/''']

@@ -107,3 +107,8 @@ settings.json
 
 # Coveralls token must come from CI env (COVERALLS_REPO_TOKEN), never from a committed file
 .coveralls.yml
+
+# sample/vendored firmware checkouts (contain CI webhook URLs; never commit from here)
+/thinx-firmware-esp32-pio/
+/thinx-firmware-esp8266-ino/
+/thinx-firmware-esp8266-pio/

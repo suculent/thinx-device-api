@@ -1,7 +1,9 @@
 # THiNX Device API Session Notes
 
 ## Deployment
-- Production console URL: `https://rtm.thinx.cloud/`
+- Two consoles, two hosts (do not mix them up):
+  - **Vue console** (the current one): `https://console.thinx.cloud/`
+  - **Legacy AngularJS console** (under deprecation): `https://rtm.thinx.cloud/`; the API is served from the same host (`https://rtm.thinx.cloud/api`)
 - Swarmpit URL used for task monitoring: `https://swarmpit.thinx.cloud/#/tasks`
 - When Codex makes source changes that should be validated in CI, push the commit to the current branch to trigger CircleCI instead of waiting for the user to do it manually.
 - Deployment flow:
