@@ -112,3 +112,7 @@ settings.json
 /thinx-firmware-esp32-pio/
 /thinx-firmware-esp8266-ino/
 /thinx-firmware-esp8266-pio/
+
+# local Codacy run records (the tuned .codacy/codacy.config.json is tracked)
+/.codacy/configure-codacy-summary.json
+/.codacy/codacy.config.baseline.json
