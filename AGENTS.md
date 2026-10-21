@@ -96,6 +96,11 @@ Durable rules from earlier sessions, kept in the repo so they follow you to anot
 `.planning/runbooks/` and `.planning/MILESTONES.md`. This file is public: credentials, incident write-ups and
 operator-specific data stay out of it.
 
+**Private staging deployment details are in the private repo `suculent/thinx-swarm`**, under `docs/ops-notes/`
+(clone at `~/Repositories/thinx-swarm`, index in `docs/ops-notes/README.md`). That is where the node topology,
+allow-lists, backup state, monitoring setup, registry and stack-deploy write-ups, the log-retention job and the ssh
+habits live. Read them before touching the swarm; never copy their contents into this public repo.
+
 ### Branches, releases, deploys
 - Push parent commits to `thinx-staging` only. `main` changes through a PR. A direct push to `main` is not actually
   blocked ("bypassed rule violations"), so never do it unless asked. `services/console` keeps `main` and
