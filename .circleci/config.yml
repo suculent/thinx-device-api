@@ -262,10 +262,11 @@ jobs:
   # unit tests, the build and the Cypress suite of the checked-out
   # services/console submodule. vue-console-registry and vue-console-hub
   # require it, so no Vue image is built in a pipeline whose suite is red.
-  # It needs no context: yarn installs unpinned dependencies with lifecycle
-  # scripts here, so no registry, Hub, Snyk or Slack credential may be in its
-  # environment. The image is public and pulled anonymously. Cypress writes
-  # JUnit files to vue/cypress/results (cy:test:ci), stored as test results.
+  # It needs no context: yarn runs third-party lifecycle scripts here (pinned
+  # by vue/yarn.lock, but still third-party code), so no registry, Hub, Snyk
+  # or Slack credential may be in its environment. The image is public and
+  # pulled anonymously. Cypress writes JUnit files to vue/cypress/results
+  # (cy:test:ci), stored as test results.
   test-vue-console:
     docker:
       - image: thinxcloud/console-build-env:vue
@@ -280,7 +281,7 @@ jobs:
           command: |
             export NODE_OPTIONS=--openssl-legacy-provider
             cd services/console/vue
-            yarn
+            yarn install --frozen-lockfile
             LC_ALL=C yarn test:unit
             LC_ALL=C node ../src/test/deploykey.cjs
             LC_ALL=C node ../src/test/legacy-close-out.cjs
@@ -411,10 +412,6 @@ jobs:
               --environment-name="production" \
               --component-name="thinx-api" \
               --target-version="$CIRCLE_SHA1"
-      - run:
-          name: Clean package-lock
-          command: |
-            rm -rf ./package-lock.json
       # Build only tags locally; no credentials needed, shared by both targets.
       - docker/build:
           image: thinxcloud/api
@@ -736,7 +733,6 @@ jobs:
     - run:
         name: Fetch all submodules and tests
         command: |
-          rm -rf ./package-lock.json
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
           cd spec/test_repositories
           pwd
