@@ -110,10 +110,10 @@ WORKDIR /opt/thinx/thinx-device-api
 RUN apk add openjdk8-jre p7zip
 
 # Install app dependencies
-COPY package.json ./
+COPY package.json package-lock.json ./
 
 RUN npm install -g npm@10.2.3 \
-    && npm install .
+    && npm ci
 
 # Install test globals before COPY . . so these layers are cached by Docker
 # Layer Caching and only rebuilt when package.json changes, not every commit

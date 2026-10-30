@@ -93,8 +93,9 @@ ENV ENTERPRISE=${ENTERPRISE}
 # Create app directory
 WORKDIR /opt/thinx/thinx-device-api
 
-# Install app dependencies
-COPY package.json ./
+# Install app dependencies from the tracked lockfile, so the image ships the
+# versions that were audited instead of whatever the ranges resolve to today.
+COPY package.json package-lock.json ./
 
 # npm is a build-time tool only and is removed in the same layer it was used
 # in — a later `rm` would leave it in the earlier layer and save nothing.
@@ -110,7 +111,7 @@ COPY package.json ./
 # the base image). The ~/.npm cache is the bigger win at ~187 MB versus npm's
 # own ~17 MB.
 RUN npm install -g npm@10.2.3 \
- && npm install --omit=dev . \
+ && npm ci --omit=dev \
  && npm cache clean --force \
  && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
            /usr/lib/node_modules/npm /usr/bin/npm /usr/bin/npx \
