@@ -412,10 +412,6 @@ jobs:
               --environment-name="production" \
               --component-name="thinx-api" \
               --target-version="$CIRCLE_SHA1"
-      - run:
-          name: Clean package-lock
-          command: |
-            rm -rf ./package-lock.json
       # Build only tags locally; no credentials needed, shared by both targets.
       - docker/build:
           image: thinxcloud/api
@@ -737,7 +733,6 @@ jobs:
     - run:
         name: Fetch all submodules and tests
         command: |
-          rm -rf ./package-lock.json
           git submodule foreach --recursive 'git submodule sync' && git submodule update --init --recursive
           cd spec/test_repositories
           pwd
