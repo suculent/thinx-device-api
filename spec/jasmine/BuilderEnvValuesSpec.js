@@ -142,6 +142,64 @@ describe("Owner environment variables in the build header", function () {
         });
     });
 
+    // The console saves per-device values in device.environment (DeviceDetail >
+    // Environment); thinx-autoflood 3.0.2 still shipped blank WiFi after #579 because
+    // only the owner's variables were read.
+    describe("Builder#generate_thinx_json with device.environment", function () {
+
+        const builder = new Builder(fakeRedis);
+        const withEnv = (environment) => Object.assign({}, DEVICE, { environment });
+        const generate = (device, envs) => builder.generate_thinx_json(envs, device, "device-api-key", "4248e52\n", "3.0.2\n", "/tmp/build/thinx-autoflood");
+        const OWNER_WIFI = { THINX_ENV_SSID: "owner-ssid", THINX_ENV_PASS: "owner-pass" };
+
+        it("takes the WiFi credentials from the device environment", function () {
+            const json = generate(withEnv({ THINX_ENV_SSID: "Page42-THiNX", THINX_ENV_PASS: "dev-pass", console: "true" }), {});
+            expect(json.THINX_ENV_SSID).to.equal("Page42-THiNX");
+            expect(json.THINX_ENV_PASS).to.equal("dev-pass");
+        });
+
+        it("prefers the device environment over the owner's values", function () {
+            const json = generate(withEnv({ THINX_ENV_SSID: "device-ssid", THINX_ENV_PASS: "device-pass" }), OWNER_WIFI);
+            expect(json.THINX_ENV_SSID).to.equal("device-ssid");
+            expect(json.THINX_ENV_PASS).to.equal("device-pass");
+        });
+
+        it("falls back to the owner's value per key", function () {
+            const json = generate(withEnv({ THINX_ENV_SSID: "device-ssid" }), OWNER_WIFI);
+            expect(json.THINX_ENV_SSID).to.equal("device-ssid");
+            expect(json.THINX_ENV_PASS).to.equal("owner-pass");
+        });
+
+        it("falls back to the owner's value for an empty or non-string device value", function () {
+            const json = generate(withEnv({ THINX_ENV_SSID: "", THINX_ENV_PASS: 1234 }), OWNER_WIFI);
+            expect(json.THINX_ENV_SSID).to.equal("owner-ssid");
+            expect(json.THINX_ENV_PASS).to.equal("owner-pass");
+        });
+
+        for (const [label, environment] of [["null", null], ["an array", ["THINX_ENV_SSID"]], ["a string", "THINX_ENV_SSID=x"]]) {
+            it("ignores a device environment that is " + label, function () {
+                const json = generate(withEnv(environment), OWNER_WIFI);
+                expect(json.THINX_ENV_SSID).to.equal("owner-ssid");
+            });
+        }
+
+        it("never reads an inherited value", function () {
+            const environment = Object.create({ THINX_ENV_SSID: "inherited" });
+            const json = generate(withEnv(environment), {});
+            expect(json.THINX_ENV_SSID).to.equal("");
+        });
+
+        it("does not copy other device environment keys into the header", function () {
+            expect(generate(withEnv({ THINX_ENV_SSID: "s", console: "true" }), {}).console).to.equal(undefined);
+        });
+
+        it("blanks both keys when neither the device nor the owner set them", function () {
+            const json = generate(withEnv({ console: "true" }), {});
+            expect(json.THINX_ENV_SSID).to.equal("");
+            expect(json.THINX_ENV_PASS).to.equal("");
+        });
+    });
+
     describe("Builder#listEnvs", function () {
 
         it("answers names for the worker and values for the header", async function () {
