@@ -502,6 +502,36 @@ describe("BuilderStatusFramesSpec (Phase 43, NOTIF-03)", function () {
             expect(updates.calls.mostRecent().args.slice(0, 3), "sources.update args").to.deep.equal([OWNER_A, SOURCE, "last_build"]);
         });
 
+        // Production build cfea00b0-d9ea-11f1-805f-ff6b6d709f9e (2026-11-06): the worker sent the OK
+        // result, then a "Failed" fallback for the builder's replayed log. The listeners stay
+        // attached after a success, and the fallback overwrote Success with "error".
+        it("F1g remote: a job-status after the build's result changes nothing (no error state, no second frame)", function () {
+            const { worker, listeners } = recordingWorker();
+            expect(builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE)).to.equal(true);
+
+            listeners["job-status"][0]({ status: "OK", completed: true, build_id: BUILD_X, outfile: "firmware.bin" });
+            listeners["job-status"][0]({ udid: UDID, state: "Failed", build_id: BUILD_X, owner: OWNER_A, completed: true });
+            listeners["job-status"][0]({ udid: UDID, build_id: BUILD_X, state: "Failed", reason: "exit 1" });
+            listeners["job-status"][0]({ status: "OK", completed: true, build_id: BUILD_X });
+
+            expectSingleCompleted(a1, "A1", BUILD_X);
+            expect(frames(a1).filter((f) => f.type === "error").length, "A1 error frames").to.equal(0);
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+            expect(states, "build log states").to.deep.equal(["Success"]);
+        });
+
+        it("F1h remote: a failed result is final too; the later exit failure does not rewrite it", function () {
+            const { worker, listeners } = recordingWorker();
+            expect(builder.runRemoteShell(worker, ["--dry-run"], OWNER_A, BUILD_X, UDID, bound, SOURCE)).to.equal(true);
+
+            listeners["job-status"][0]({ status: "FAILED", completed: true, build_id: BUILD_X });
+            listeners["job-status"][0]({ udid: UDID, build_id: BUILD_X, state: "Failed", reason: "exit 1" });
+
+            expect(bodies(a1)).to.deep.equal(["FAILED"]);
+            const states = BuildLog.prototype.state.calls.allArgs().map((a) => a[3]);
+            expect(states, "build log states").to.deep.equal(["FAILED"]);
+        });
+
         // WR-03: the worker's builder reports a successful dry run as DRY_RUN_OK (notifier.js
         // treats it as success). It is a green Completed, not a red error frame.
         it("F1f (WR-03) a DRY_RUN_OK job-status gives one Completed (success, with build_id) and no error frame; no prune, no last_build", function () {
