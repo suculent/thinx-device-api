@@ -115,8 +115,18 @@ describe("Owner environment variables in the build header", function () {
             expect(json.THINX_ENV_PASS).to.equal("secret-pass");
         });
 
-        it("applies other owner variables", function () {
-            expect(generate({ CUSTOM_FLAG: "on" }).CUSTOM_FLAG).to.equal("on");
+        it("applies other THINX_ENV_ owner variables", function () {
+            expect(generate({ THINX_ENV_CUSTOM_FLAG: "on" }).THINX_ENV_CUSTOM_FLAG).to.equal("on");
+        });
+
+        // Every key becomes a #define in thinx.h; `#define A "A"` broke the
+        // thinx-autoflood 3.0.3 build inside BearSSL and ArduinoJson.
+        it("keeps owner variables without the THINX_ENV_ prefix out of the header", function () {
+            const json = generate({ A: "A", DEBUG: "1", CUSTOM_FLAG: "on", thinx_env_lower: "x", "THINX_ENV_BAD-NAME": "x", THINX_ENV_: "x", THINX_ENV_SSID: "ExampleNet" });
+            for (const name of ["A", "DEBUG", "CUSTOM_FLAG", "thinx_env_lower", "THINX_ENV_BAD-NAME", "THINX_ENV_"]) {
+                expect(Object.prototype.hasOwnProperty.call(json, name), name).to.equal(false);
+            }
+            expect(json.THINX_ENV_SSID).to.equal("ExampleNet");
         });
 
         it("keeps identity and version keys its own", function () {
