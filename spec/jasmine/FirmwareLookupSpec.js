@@ -171,7 +171,12 @@ describe("Firmware lookup (quick 261004-liv)", function () {
             ["thinx-autoflood:1.2.3.4.5", "1.2.12"],
             ["thinx-autoflood:1.2.3.4.5.6", "1.2.3"],
             [2, "2.0.0"],
-            [1.5, "1.5.0"]
+            [1.5, "1.5.0"],
+            // the worker builder's fallback form when thinx_build.json is missing
+            ["thinx-autoflood-3.0.0", "3.0.0"],
+            ["thinx-autoflood-v3.0", "3.0.0"],
+            ["thinx-autoflood-3", "3.0.0"],
+            ["group:thinx-autoflood-2.1.4", "2.1.4"]
         ];
 
         for (const [input, expected] of cases) {
@@ -181,7 +186,8 @@ describe("Firmware lookup (quick 261004-liv)", function () {
         }
 
         const garbage = ["", "thinx-autoflood:", "thinx-autoflood:abc", "abc", "1.x", "1.0-beta",
-            "thinx-autoflood:1..2", "thinx-autoflood:1.2.3.4.x", null, undefined, {}, [], true, NaN];
+            "thinx-autoflood:1..2", "thinx-autoflood:1.2.3.4.x", "1.0-2", "thinx-autoflood-1.0-beta",
+            "thinx-autoflood-", "-1.0", null, undefined, {}, [], true, NaN];
 
         for (const input of garbage) {
             const label = Number.isNaN(input) ? "NaN" : String(JSON.stringify(input));
