@@ -92,7 +92,22 @@ describe("MessengerMasterDeviceWritesSpec", function () {
     withFlag("1", () => {
       client.emit("message", statusTopic(OWNER_A, UDID_A), json({ status: "checked_in", rssi_dbm: -67 }));
     });
-    expect(fx.rec.edits).to.deep.equal([{ udid: UDID_A, status: "checked_in" }]);
+    expect(fx.rec.edits).to.deep.equal([{ rssi: -67, udid: UDID_A, status: "checked_in" }]);
+  });
+
+  it("writes validated rssi and location with the status and drops invalid telemetry", function () {
+    const fx = makeMessenger();
+    const client = fakeClient(0);
+    fx.m.attachDeviceWriteSubscription(client);
+    client.emit("connect");
+    withFlag("1", () => {
+      client.emit("message", statusTopic(OWNER_A, UDID_A), json({ status: "checked_in", rssi_dbm: -71, gnss: { fix: true, lat: 50.088, lon: 14.421 }, owner: "x" }));
+      client.emit("message", statusTopic(OWNER_A, UDID_A), json({ status: "checked_in", rssi_dbm: 400, gnss: { fix: true, lat: 0, lon: 0 } }));
+    });
+    expect(fx.rec.edits).to.deep.equal([
+      { rssi: -71, lat: 50.088, lon: 14.421, udid: UDID_A, status: "checked_in" },
+      { udid: UDID_A, status: "checked_in" }
+    ]);
   });
 
   it("does not let a console client write the same message twice while the master holds the subscription", function () {
