@@ -67,7 +67,7 @@
     "mqtt": "^5.16.0",
     "nano": "^11.0.7",
     "newrelic": "14.5.1",
-    "node-forge": "^1.4.2",
+    "node-forge": "^1.4.3",
     "node-schedule": "^2.1.1",
     "redis": "^5.8.2",
     "rollbar": "^2.26.5",
@@ -97,7 +97,7 @@
     "@babel/core": "^7.29.7",
     "@hapi/wreck": "^18.1.1",
     "form-data": "^4.0.6",
-    "joi": "^17.13.7",
+    "joi": "^17.13.9",
     "istanbul-lib-processinfo": {
       "uuid": "^11.1.1"
     },
