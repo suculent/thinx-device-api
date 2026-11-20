@@ -64,4 +64,30 @@ describe("JSON2H API Key", function() {
       }
   });
 
+  // A value is written inside "..." on one #define line; quotes, backslashes or
+  // line breaks in an owner's value (a WiFi password, say) broke the header.
+  it("should drop line breaks from string values", function () {
+      let result = JSON2H.process({ THINX_ENV_PASS: "line1\r\nline2\n", THINX_AUTO_UPDATE: true }, {});
+      expect(result).to.equal('#define THINX_ENV_PASS "line1line2"\n#define THINX_AUTO_UPDATE true\n');
+  });
+
+  it("should escape double quotes and backslashes", function () {
+      let result = JSON2H.process({ THINX_ENV_PASS: 'a"b\\c\\"' }, {});
+      expect(result).to.equal('#define THINX_ENV_PASS "a\\"b\\\\c\\\\\\""\n');
+  });
+
+  it("should not let a value close the literal and inject code", function () {
+      let result = JSON2H.process({ THINX_ENV_SSID: 'x"\n#include "/etc/passwd' }, {});
+      expect(result.split("\n").filter((l) => l.length > 0).length).to.equal(1);
+      expect(result).to.equal('#define THINX_ENV_SSID "x\\"#include \\"/etc/passwd"\n');
+  });
+
+  it("should escape other control characters as octal", function () {
+      expect(JSON2H.escapeCString("a\tb\x7fc\x01")).to.equal("a\\011b\\177c\\001");
+  });
+
+  it("should leave ordinary values unchanged", function () {
+      expect(JSON2H.escapeCString("ExampleNet 5G-ø%$#@!'")).to.equal("ExampleNet 5G-ø%$#@!'");
+  });
+
 });

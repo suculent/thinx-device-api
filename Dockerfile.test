@@ -2,7 +2,7 @@
 # copy inherited from thinxcloud/base:latest, so this image carries the fixed
 # dependencies even when the base tag has not been republished yet.
 # Keep in sync with base/Dockerfile and services/worker/Dockerfile.
-FROM golang:1.26.8-alpine3.24 AS docker-cli
+FROM golang:1.27.4-alpine3.24 AS docker-cli
 
 RUN apk add --no-cache ca-certificates curl git
 WORKDIR /src/docker-cli

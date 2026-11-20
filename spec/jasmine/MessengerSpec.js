@@ -194,7 +194,9 @@ describe("Messenger", function () {
     const savedDeviceWrites = process.env.THINX_MQTT_DEVICE_WRITES;
     process.env.THINX_MQTT_DEVICE_WRITES = "1";
     try {
-      messenger.messageResponder("/" + foreign + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-foreign" })));
+      // The master client applies device writes once it holds its "/+/+/status" grant (console
+      // clients then skip them), so the ownership gate is exercised on the master path.
+      messenger.masterDeviceWriteResponder("/" + foreign + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-foreign" })));
       await new Promise((resolve) => setTimeout(resolve, 3000));
       expect(calls.edits.indexOf(TEST_DEVICE_6.udid), "edit of the foreign-topic device").to.equal(-1);
       expect(calls.runs.indexOf(TEST_DEVICE_6.udid), "transformer run of the foreign-topic device").to.equal(-1);
@@ -213,7 +215,8 @@ describe("Messenger", function () {
     process.env.THINX_MQTT_DEVICE_WRITES = "1";
     try {
       expect(TEST_DEVICE_6.udid).to.be.a('string');
-      messenger.messageResponder("/" + test_owner + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-own" })));
+      // Master path: applies the status edit with no console client (see the foreign-topic test).
+      messenger.masterDeviceWriteResponder("/" + test_owner + "/" + TEST_DEVICE_6.udid + "/status", Buffer.from(JSON.stringify({ status: "vbg-own" })));
       const deadline = Date.now() + 10000;
       while ((calls.edits.indexOf(TEST_DEVICE_6.udid) === -1) && (Date.now() < deadline)) {
         await new Promise((resolve) => setTimeout(resolve, 100));
